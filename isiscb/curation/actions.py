@@ -6,24 +6,27 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from builtins import zip
 from builtins import object
-from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_to_citation
+from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_to_citation, bulk_change_tenant
 
 from django import forms
 from django.http import QueryDict
 
 from isisdata.models import *
-import isisdata.tasks as dtasks
+import curation.tasks as curatetasks
 import curation.taskslib.citation_tasks as ctasks
 import curation.taskslib.authority_tasks as atasks
+import isisdata.tasks as dtasks
 
 from isisdata.filters import CitationFilter
 import json
+import curation.curation_util as cutil
 # TODO: refactor these actions to use bulk apply methods and then explicitly
 #  trigger search indexing (or whatever other post-save actions are needed).
 
 
 class BaseAction(object):
-    def __init__(self):
+    def __init__(self, user=None):
+        self.user = user
         if hasattr(self, 'default_value_field'):
             self.value_field = self.default_value_field
         if hasattr(self, 'default_value_field_kwargs'):
@@ -242,6 +245,33 @@ class SetTrackingStatus(BaseAction):
         task.save()
         return task.id
 
+class AddTenantToCitation(BaseAction):
+    model = Citation
+    label = u'Add tenant to citation'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {}
+
+    def __init__(self, user=None):
+        self.default_value_field_kwargs = {
+            'label': 'Add tenant to citation',
+            'widget': forms.widgets.Select(attrs={'class': 'action-value'}, choices=[(t.id, t.name) for t in cutil.get_tenants(user)]),
+        }
+        super(AddTenantToCitation, self).__init__(user)
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = bulk_change_tenant.delay(user.id, filter_params_raw, value, task_id=task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_citations', value)
+        task.label = 'Reindexing citations: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
 class ReindexCitation(BaseAction):
     model = Citation
     label = u'Reindex citations'
@@ -311,5 +341,5 @@ class DeleteDuplicateAttributes(BaseAction):
         task.save()
         return task.id
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation, AddTenantToCitation]
 AVAILABLE_ACTIONS_AUTHORITY = [StoreCreationDataToModel, ReindexAuthorities, DeleteDuplicateAttributes]

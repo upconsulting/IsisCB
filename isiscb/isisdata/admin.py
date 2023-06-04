@@ -8,12 +8,16 @@ from django.contrib.contenttypes.forms import BaseGenericInlineFormSet, generic_
 from django import forms
 from django.forms import widgets, formsets, models
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineformset_factory
-from django.utils.html import format_html
+from django.utils.html import format_html, escape
 from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
+from django.contrib.admin.models import LogEntry
+
+
 from isisdata.models import *
+from isisdata import tasks as data_tasks
 from simple_history.admin import SimpleHistoryAdmin
 
 from dal import autocomplete
@@ -56,10 +60,10 @@ class AutocompleteWidget(widgets.TextInput):
     def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
-        if value != '':
+        final_attrs = self.build_attrs(attrs, extra_attrs={type:self.input_type, name:name})
+        #if value != '':
         # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = widgets.force_text(self._format_value(value))
+        #    final_attrs['value'] = widgets.force_text(self._format_value(value))
 
         if 'class' not in final_attrs:
             final_attrs['class'] = ''
@@ -68,7 +72,7 @@ class AutocompleteWidget(widgets.TextInput):
         if self.datatarget:
             final_attrs['datatarget'] = self.datatarget
 
-        return widgets.format_html('<div class="input-group" id="'+ final_attrs['id'] +'_container"><input{} /><span class="autocomplete-status input-group-addon"></span></div>', widgets.flatatt(final_attrs))
+        return widgets.format_html('<div class="input-group" id="'+ final_attrs['id'] +'_container"><input{} /><span class="autocomplete-status input-group-addon"></span></div>', '') #, widgets.flatatt(final_attrs))
 
 
 class AutocompleteField(forms.CharField):
@@ -523,7 +527,7 @@ class CitationAdmin(SimpleHistoryAdmin,
 
     form = CitationForm
     list_display = ('id', 'title', 'type_controlled', 'modified_on',
-                    'modified_by', 'public', 'status_of_record',)
+                    'modified_by', 'public', 'status_of_record')
 
     # Filters in the changelist interfere with the advanced search. We can add
     #  it back, but we will need to find a way to pass the advanced search GET
@@ -579,7 +583,7 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history'),
+                       'record_history', 'owning_tenant'),
            'classes': ('extrapretty', 'collapse'),
         }),
     ]
@@ -623,6 +627,35 @@ class AuthorityAdvancedSearchForm(forms.Form):
     # attribute_type = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
     # attribute_value = forms.CharField(required=False)
 
+def migrate_classification_systems(modeladmin, request, queryset):
+    class_systems = dict([(sys.classification_system, sys) for sys in ClassificationSystem.objects.all()])
+    for authority in queryset:
+        # if the authority has already been migrated to use the new classification system
+        # object or there is no classification system, then skip it 
+        # (we don't want to override changes already made)
+        if authority.classification_system_object or not authority.classification_system:
+            continue
+        if authority.classification_system in class_systems:
+            authority.classification_system_object = class_systems[authority.classification_system]
+            authority.save()
+        else:
+            new_system = ClassificationSystem()
+            new_system.classification_system = authority.classification_system
+            new_system.name = authority.get_classification_system_display()
+            new_system.description = authority.get_classification_system_display()
+            new_system.save()
+            class_systems[new_system.classification_system] = new_system
+        
+migrate_classification_systems.short_description = 'Migrate Classification Systems (Selected Authorities)'
+
+def migrate_all_classification_systems(modeladmin, request, queryset):
+    task = AsyncTask.objects.create()
+    task.value = "Migrate classification systems."
+    task.save()
+    data_tasks.migrate_all_classification_systems.delay(task.id)
+        
+migrate_all_classification_systems.short_description = 'Migrate Classification Systems (selection is disregarded, ALL authorities will be migrated)'
+migrate_all_classification_systems.acts_on_all = True
 
 class AuthorityForm(forms.ModelForm):
     class Meta(object):
@@ -652,7 +685,8 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         ('Classification', {
             'fields': ('classification_system',
                        'classification_code',
-                       'classification_hierarchy'),
+                       'classification_hierarchy',
+                       'classification_system_object'),
             'classes': ('extrapretty', 'collapse'),
         }),
         ('Curation', {
@@ -660,6 +694,8 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                        'redirect_to',
                        'administrator_notes',
                        'record_history',
+                       'belongs_to',
+                       'owning_tenant',
                        'modified_by_fm',
                        'modified_on_fm'),
             'classes': ('extrapretty', 'collapse'),
@@ -698,6 +734,8 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         #     )
         # )
     ])
+
+    actions = [migrate_classification_systems, migrate_all_classification_systems]
 
 
 
@@ -1143,7 +1181,7 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 class DatasetAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'editor']
+    fields = ['name', 'description', 'editor', 'owning_tenant']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -1158,7 +1196,57 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
     def def_crud_rules(self, obj):
         return CRUDRule.objects.filter(role=obj.pk)
 
+class TenantAdmin(admin.ModelAdmin):
+    fields = ['name', 'title', 'description', 
+            'identifier', 'home_page_template', 
+            'use_home_page_template', 'default_dataset']
+    exlude = ('attributes')
 
+
+class ClassificationSystemAdminForm(forms.ModelForm):
+    default_for = forms.MultipleChoiceField(
+        choices = Authority.TYPE_CHOICES,
+        widget  = forms.CheckboxSelectMultiple,
+        required = False
+    )
+
+    class Meta:
+        model = ClassificationSystem
+        fields =['classification_system', 'name', 'description', 'owning_tenant',
+            'subject_search_searchable', 'is_default', 'default_for']
+
+class ClassificationSystemAdmin(admin.ModelAdmin):
+    #fields = ['classification_system', 'name', 'description', 'owning_tenant',
+    #        'subject_search_searchable', 'is_default', 'default_for']
+    form = ClassificationSystemAdminForm
+    list_display = ['name', 'owning_tenant', 'is_default', 'default_for']
+    
+
+class LogEntryAdmin(admin.ModelAdmin):
+    # to have a date-based drilldown navigation in the admin page
+    date_hierarchy = 'action_time'
+
+    # to filter the resultes by users, content types and action flags
+    list_filter = [
+        'user',
+        'content_type',
+        'action_flag'
+    ]
+
+    # when searching the user will be able to search in both object_repr and change_message
+    search_fields = [
+        'object_repr',
+        'change_message'
+    ]
+
+    list_display = [
+        'action_time',
+        'user',
+        'content_type',
+        'action_flag',
+    ]
+
+admin.site.register(LogEntry, LogEntryAdmin)
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
@@ -1172,12 +1260,13 @@ admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Language, LanguageAdmin)
-# Register your models here.
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Tracking, TrackingAdmin)
 admin.site.register(AuthorityTracking, AuthorityTrackingAdmin)
 admin.site.register(CitationCollection, CitationCollectionAdmin)
+admin.site.register(ClassificationSystem, ClassificationSystemAdmin)
 #admin.site.register(IsisCBRole, IsisCBRoleAdmin)
+admin.site.register(Tenant, TenantAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, IsisCBUserAdmin)

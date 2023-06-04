@@ -5,13 +5,13 @@ from dateutil.relativedelta import relativedelta
 
 register = template.Library()
 
-
+# this method also exists in app_filters; need to be consolidated
 @register.filter
-def get_uri(entry):
+def get_uri(entry, tenant=None):
     if to_class_name(entry) == 'Authority':
-        return settings.URI_PREFIX + "authority/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "authority/" + entry.id
     if to_class_name(entry) == 'Citation':
-        return settings.URI_PREFIX + "citation/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "citation/" + entry.id
     return ""
 
 @register.filter
@@ -41,3 +41,8 @@ def field_type(field):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def is_external_tenant(obj, tenant_id):
+    return False if obj and obj.owning_tenant != None and obj.owning_tenant.id is tenant_id else True
+    #return not any([id in obj.tenant_ids for id in tenant_ids])

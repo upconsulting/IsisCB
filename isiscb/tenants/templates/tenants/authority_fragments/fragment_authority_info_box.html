@@ -1,0 +1,296 @@
+{% load app_filters %}
+{% load static %}
+{% load search_filters %}
+{% load authority_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+
+<div class="col-sm-12 col-md-6" style="padding-left: 0">
+  <div style="z-index: 10; position: relative;">
+    <div id="wikiImageContainer" style="display:none; position: relative;  margin: auto;">
+      <h3 id="imageCaption" style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">{{display_type}}:<br/>{{authority.name}}</h3>
+      <img id="wikiImage" style="position: relative; max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none; z-index: -1;" src=''></img>
+    </div>
+  </div>
+  <a id="wikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
+  <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+    <p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{authority.name}}</p>
+  </div>
+  <hr id="wikiImageBorder" style="display:none;">
+
+  <p>
+
+    {% if related_citations_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_id={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+      {{related_citations_count}} citations
+    </a>
+    related to {{authority.name}}
+    <br>
+    {% endif %}
+
+    {% if author_contributor_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_id={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{author_contributor_count}} citations
+    </a>
+    related to {{ authority.name }} as an author
+    <br>
+    {% endif %}
+
+    {% if publisher_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_id={{tenant_id}}&q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{publisher_count}} citations
+    </a>
+    related to {{ authority.name }} as a publisher
+    <br>
+    {% endif %}
+
+    {% if subject_category_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_id={{tenant_id}}&q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{subject_category_count}} citations
+    </a>
+    related to {{authority.name }} as a subject or category
+    <br>
+    {% endif %}
+  </p>
+
+  {% for attribute in authority.attributes.all %}
+  {% if attribute|is_attribute_visible and not attribute|is_bibliographic_essay %}
+  <p><span class="label label-default">{{ attribute.type_controlled.display_name }}</span> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+  {% endif %}
+  {% endfor %}
+
+  <hr>
+
+  <p class="wikiIntro" id="wikiIntro" style="margin-bottom:0;"></p>
+  <a class="readMore btn" id="wikiIntroButton" style="padding-top:0; padding-left:0; display:none;">...More</a>
+  <a id="wikiSynopsisCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
+  <br id="wikiIntroBreak" style="display:none">
+
+  {% if authority.description %}
+    <p><span class="label label-default">Description</span> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:19 }}</span>
+      {% if authority.description|truncatewords:19|length < authority.description|length %}
+        <a href="#" id="desc_more" class="hidden-print">More</a>
+        <span id="desc_full" class="hidden-print" style="display:none">
+          {{ authority.description }}
+          <a href="#" id="desc_hide">Less</a>
+        </span>
+        <span class="visible-print-block">
+          {{ authority.description }}
+        </span>
+      {% endif %}
+    </p>
+    <script>
+      $(function() {
+        $("#desc_more").click(function() {
+          $("#desc_snippet").hide()
+          $("#desc_more").hide()
+          $("#desc_full").show()
+        })
+
+        $("#desc_hide").click(function() {
+          $("#desc_full").hide()
+          $("#desc_snippet").show()
+          $("#desc_more").show()
+        })
+      })
+    </script>
+  {% endif %}
+
+  {% with authority|get_bibliographic_essays as bib_essays %}
+    {% if bib_essays %}
+      {% for bib_essay in bib_essays %}
+      {% if bib_essay.value.cvalue %}
+      <p>
+        <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
+        <!-- todo: list all and link link -->
+        {% if bib_essay.value.cvalue|get_urls %}
+        {% for url in bib_essay.value.cvalue|get_urls %}
+        <br><strong>Link:</strong> {{ url.resource_name }}
+        {% endfor %}
+        {% endif %}
+      </p>
+      {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="panel panel-default">
+    <div class="panel-heading">Permalink</div>
+    <div class="panel-body" style="font-size:.95em;">
+      <span id="uriLink" style="cursor: copy;" title="Click to copy">data.isiscb.org/isis/authority/{{authority.id}} <i class="far fa-copy"></i></span>
+      <textarea style="position: absolute;left: -9999px;" id="hiddenUriLink">{{ authority | get_uri }}</textarea>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 col-md-6" style="padding: 0;">
+  <div class="panel panel-default facet-box">
+    <div class="panel-heading-links panel-heading">
+      <strong>Outside Links</strong>
+    </div>
+    <div class="panel-body panel-body-links">
+      {% with authority.linkeddata_public as linkeddata_public %}
+        {% if linkeddata_public.count > 0 %}
+          {% for entry in linkeddata_public.all %}
+            {% if entry.type_controlled.name == 'VIAF' %}
+              <img src="https://viaf.org/viaf/images/viaf.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>VIAF</a>
+            {% elif entry.type_controlled.name == 'DNB' %}
+            <img src="https://www.dnb.de/SiteGlobals/Frontend/DNBWeb/Images/favicon.png?__blob=normal&v=4" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>DNB</a>
+            {% elif entry.type_controlled.name == 'GeoNames' %}
+            <img src="https://www.geonames.org/geonames.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>GeoNames</a>
+            {% else %}
+              <a href="{{ entry|linkeddata_for_display }}" target="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+            {% endif %}
+            {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+            {% endif %}
+            <br/>
+          {% endfor %}
+          <hr style='margin: 7px 0;'>
+        {% endif %}
+      {% endwith %}
+
+      {% if display_type == 'Author' %}
+        <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
+        <br>
+      {% endif %}
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?q={{authority.name}}+site%3A.edu">Academic sites</a>
+      <br>
+      <img src="https://plato.stanford.edu/symbols/sep-man-red.png" height="14px" width="14px"> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+      <br>
+      <i class="fab fa-wikipedia-w"></i> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+      <br>
+      <img src="https://researchworks.oclc.org/archivegrid/assets/img/archivegrid_logo_home.png" height="14px" width="14px"></img> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+      <br>
+      <img src="https://www.chstm.org/sites/default/files/chstm-logo-header.png" height="14px" width="14px" style="filter: grayscale(100%); filter: invert(1)"></img> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+      <br>
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+      <br>
+      <img src="https://networks.h-net.org/sites/all/themes/custom/hnt/logo.png" height="14px" width="14px"></img> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+      <br>
+      <i class="fab fa-twitter"></i> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+    </div>
+  </div>
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' %}
+  </div>
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_places_facet.html' %}
+  </div>
+</div>
+
+  <script>
+    let textHolder = document.querySelector('.wikiIntro');
+    let btn = document.querySelector('.readMore');
+
+    function toggleText() {
+      textHolder.classList.toggle("truncate");
+    }
+
+    btn.addEventListener('click', toggleText);
+  </script>
+
+<!-- gets wikimedia image and synopsis where possible -->
+<script type="text/javascript">
+//@ sourceURL=wiki.js
+  let wikiImage = "{{ wikiImage|safe }}";
+  let wikiIntro = `{{ wikiIntro }}`;
+  let wikiCredit = "{{ wikiCredit|safe }}";
+  let type = "{{display_type}}";
+
+  //console.log(wikiImage);
+
+  let default_image_map = {
+    "Concept": "{% if tenant.settings.authority_default_image_concept %}{{ tenant.settings.authority_default_image_concept.image.url }}{% else %}{% static 'isisdata/images/concept_default_image.png' %}{% endif %}",
+    "Person": "{% if tenant.settings.authority_default_image_person %}{{ tenant.settings.authority_default_image_person.image.url }}{% else %}{% static 'isisdata/images/person_default_image.jpeg' %}{% endif %}",
+    "Author": "{% if tenant.settings.authority_default_image_author %}{{ tenant.settings.authority_default_image_author.image.url }}{% else %}{% static 'isisdata/images/person_default_image.jpeg' %}{% endif %}",
+    "Geographic Term": "{% if tenant.settings.authority_default_image_geo_term %}{{ tenant.settings.authority_default_image_geo_term.image.url }}{% else %}{% static 'isisdata/images/place_default_image.png' %}{% endif %}",
+    "Institution": "{% if tenant.settings.authority_default_image_institution %}{{ tenant.settings.authority_default_image_institution.image.url }}{% else %}{% static 'isisdata/images/institution_default_image.png' %}{% endif %}",
+    "Publisher": "{% if tenant.settings.authority_default_image_publisher %}{{ tenant.settings.authority_default_image_publisher.image.url }}{% else %}{% static 'isisdata/images/publisher_default_image.jpeg' %}{% endif %}",
+    "Time Period": "{% if tenant.settings.authority_default_image_timeperiod %}{{ tenant.settings.authority_default_image_timeperiod.image.url }}{% else %}{% static 'isisdata/images/time_default_image.jpeg' %}{% endif %}",
+    "Category Division": "{% if tenant.settings.authority_default_class_term %}{{ tenant.settings.authority_default_image_class_term.image.url }}{% else %}{% static 'isisdata/images/category_default_image.png' %}{% endif %}",
+  };
+
+  let default_background_map = {
+    "Concept": "rgb(30, 96, 145, 0.5)",
+    "Person": "rgb(153, 217, 140, 0.5)",
+    "Author": "rgb(153, 217, 140, 0.5)",
+    "Geographic Term": "rgb(22, 138, 173, 0.5)",
+    "Institution": "rgb(52, 160, 164, 0.5)",
+    "Publisher": "rgb(52, 160, 164, 0.5)",
+    "Time Period": "rgb(82, 182, 154, 0.5)",
+    "Category Division": "rgb(30, 96, 145, 0.5)",
+  };
+
+  if (wikiImage !== "") {
+    document.getElementById('wikiImageContainer').style.display = 'block';
+    document.getElementById('wikiImage').src = wikiImage;
+    document.getElementById('wikiImageCredit').style.display = "block";
+    document.getElementById('wikiImageCredit').href = wikiCredit;
+    document.getElementById('wikiImage').style.display = "block";
+  } else if (type !== "Serial Publication" && type !== "Creative Work" && type !== "Cross-reference" && type !== "Bibliographic List"){
+    document.getElementById('wikiImageContainer').style.display = 'block';
+    document.getElementById('wikiImageContainer').style.height = '200px';
+    document.getElementById('wikiImageContainer').style.width = '200px';
+    document.getElementById('imageCaption').style.display = 'block';
+    document.getElementById('wikiImageContainer').style.backgroundColor = default_background_map[type];
+    document.getElementById('wikiImage').src = default_image_map[type];
+    document.getElementById('wikiImage').style.height = "200px";
+    document.getElementById('wikiImage').style.width = "200px";
+    document.getElementById('wikiImage').style.display = "block";
+  } else if (type == "Serial Publication"){
+    let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+    let backgroundColor;
+
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+
+    if (periodicalName.length) {
+        if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[0];
+        } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[1];
+        } else {
+          backgroundColor = backgroundColors[2];
+        }
+    }
+
+    document.getElementById("placeholderImage").style.display = "block";
+    document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
+  }
+
+
+  document.getElementById('wikiImageBorder').style.display = "block";
+
+  if (wikiIntro !== "") {
+    let textHolder = document.querySelector('.wikiIntro');
+
+    textHolder.innerHTML = wikiIntro;
+    document.getElementById('wikiIntroBreak').style.display = "inline-block";
+    document.getElementById('wikiSynopsisCredit').style.display = "block";
+    document.getElementById('wikiSynopsisCredit').href = wikiCredit;
+
+    let other = $(textHolder).clone();
+    $(other).html('a<br>b').hide().appendTo('body');
+    let size = $(other).height() / 2;
+    $(other).remove();
+    let lines = $(textHolder).height() /  size;
+
+    if (lines > 7) {
+      document.getElementById('wikiIntroButton').style.display = "inline-block";
+      toggleText(); //to truncate at first time
+    }
+  }
+
+</script>

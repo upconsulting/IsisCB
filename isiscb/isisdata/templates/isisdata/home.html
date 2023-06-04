@@ -12,9 +12,9 @@
         let citationType = "{{ citation.type_controlled }}";
         let propertiesMap = "{{properties_map}}"
 
-        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
-        // (using a selection from 3 color choices) to use as the citation's featured image. 
-        // Weldon wanted each journal to have the same cover color everytime, 
+        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
+        // (using a selection from 3 color choices) to use as the citation's featured image.
+        // Weldon wanted each journal to have the same cover color everytime,
         // so the journal title's location in the alphabet determines the color.
 
         if (citationType === 'AR') {
@@ -54,7 +54,7 @@
             -webkit-line-clamp: 10;
             -webkit-box-orient: vertical;
             }
-        
+
         .featured-citation p,
         .featured-authority p,
         .featured-tweet p {
@@ -147,7 +147,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
-    
+
                             <div class="row" style="padding-left: 15px; ">
                             {% if citation.get_type_controlled_display == "Book" %}
                                 <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
@@ -161,7 +161,7 @@
                                 <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                             {% endif %}
                             </div>
-                    
+
                             {% url 'citation' citation.id|get_pk as citation_url %}
                             {% if citation.title == 'Title missing' and citation.complete_citation %}
                                 <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
@@ -182,7 +182,7 @@
                                 {{citation|get_pub_year}}
                             {% endif %}
                         </div>
-                    
+
                         <div class="panel-body">
                             <div class="col-sm-12 col-md-12" style="padding: 0;">
                                 <div class="col-sm-12 {% if citation.abstract %}col-md-5{% else %}col-md-12{% endif %}" style="padding: 0;">

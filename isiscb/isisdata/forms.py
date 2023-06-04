@@ -17,7 +17,7 @@ from allauth.account.forms import SignupForm
 
 import time
 from isisdata import helper_methods
-from isisdata.models import Citation, Authority
+from isisdata.models import Citation, Authority, Tenant
 from openurl.models import *
 from isisdata.utils import normalize
 
@@ -41,6 +41,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
+    tenant_id = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
@@ -147,7 +148,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
             self.cleaned_data['q'] = normalize(self.cleaned_data['q'])
 
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
-        
+
         # Removed: query sanitization already occurs (by design) in the
         #  (haystack) Query used by the SearchEngine. We're clobbering wildcards
         #  here.  We can add it back if there is a security issue, but it seems
@@ -183,6 +184,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if sort_order_dir_authority == 'descend':
             sort_order_authority = "-" + sort_order_authority
 
+        print(self.cleaned_data)
+        if self.cleaned_data.get('tenant_id', None):
+            tenant = Tenant.objects.filter(identifier=self.cleaned_data['tenant_id']).first()
+            if tenant:
+                sqs_citation = sqs_citation.filter(tenant_ids=tenant.id)
+                sqs_authority = sqs_authority.filter(tenant_ids=tenant.id)
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 

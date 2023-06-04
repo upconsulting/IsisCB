@@ -74,7 +74,7 @@ $(function() {
   setClassification(currentType);
   setDefaultDataset();
   setPersonName();
-  setAttributeFields();
+  //setAttributeFields();
   setLinkedDataLabel();
 
   $("#typeDropdownDiv>select").change(function() {
@@ -96,12 +96,11 @@ $(function() {
   });
 
   function setClassification(selectedType) {
-    var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
-    if (properNameTypes.includes(selectedType)) {
-      $("#id_authority-classification_system").val("PN");
-    } else {
-      $("#id_authority-classification_system").val("SPWC");
-    }
+    {% autoescape off %}
+    var properNameTypes = {{ class_system_dict | pprint }};
+    {% endautoescape %}
+
+    $("#id_authority-classification_system_object").val(properNameTypes[selectedType]);
   }
 
   function setPersonName() {
@@ -305,7 +304,6 @@ function searchService(url) {
     {% endif %}
 
 {% include "curation/fragment_create_authority_header.html" %}
-
         <div class="form-group row" style="padding-top: 10px;">
           <div class="col-md-4 ">
           {% for error in form.type_controlled.errors %}
@@ -377,7 +375,8 @@ function searchService(url) {
           {% endfor %}
           <div class="no-gutter">
               <label class="col-md-3">Freeform</label>
-              <div class="col-md-9">{{ attribute_form.value_freeform|addcss:"form-control"}}</div>
+              <div class="col-md-9">{{ attribute_form.value_freeform|addcss:"form-control"}}
+              <small class="text-muted">Needs to be filled to create attribute.</small></div>
           </div>
         </div>
 
@@ -390,25 +389,27 @@ function searchService(url) {
             <div class="col-md-{% if nr_of_fields is 1 %}12{% endif %}{% if nr_of_fields is 2 %}6{% endif %}">
             <div class="form-group no-gutter">
                 <label class="col-md-3">{{ field.label }}</label>
-                <div class="col-md-9">
+                <div class="col-md-9" id="value_input_{{ field.label|slugify }}">
                   {{ field|addcss:"form-control" }}
                 </div>
             </div>
             </div>
             {% if field.errors %}
             <script>
-              var errorMsg = "";
-            {% for error in field.errors %}
-              errorMsg += "{{ error }}";
-            {% endfor %}
-            $("#id_value-{{ field.name }}").popover({
-              'content': errorMsg,
-              'title': 'Error',
-              'placement': 'top',
-            });
-            $("#id_value-{{ field.name }}").popover('show');
+              //# sourceURL=errors_{{field.label|slugify}}.js
+                var errorMsg = "";
+                {% for error in field.errors %}
+                  errorMsg += "{{ error }}";
+                {% endfor %}
+                $("#value_input_{{field.label|slugify}} input").popover({
+                  'content': errorMsg,
+                  'title': 'Error',
+                  'placement': 'top',
+                });
+                $("#value_input_{{field.label|slugify}} input").popover('show');
 
-            $(".popover-title").css('background-color', '#ffc6c6');
+                $(".popover-title").css('background-color', '#ffc6c6');
+              
             </script>
             {% endif %}
             {% endfor %}
@@ -454,12 +455,12 @@ function searchService(url) {
 
         <div class="row">
         <div class="col-md-6">
-          {% for error in form.classification_system.errors %}
+          {% for error in form.classification_system_object.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
           <div class="form-group no-gutter">
-              <label>{{ form.classification_system.label }}</label>
-              {{ form.classification_system|addcss:"form-control"}}
+              <label>{{ form.classification_system_object.label }}</label>
+              {{ form.classification_system_object|addcss:"form-control"}}
           </div>
 
           {% for error in form.belongs_to.errors %}
@@ -499,25 +500,13 @@ function searchService(url) {
         <div class="col-md-6">
         <div class="form-group no-gutter">
             <label class="col-md-3">{{ field.label }}</label>
-            <div class="col-md-9" id="value_input_div_{{id}}">
+            <div class="col-md-9" id="value_input_{{field.label|slugify}}_{{id}}">
               {{ field|addcss:"form-control" }}
             </div>
         </div>
         </div>
 
-        {% if field.errors %}
-        <script>
-          var errorMsg = "";
-        {% for error in field.errors %}
-          errorMsg.append({{ error }});
-        {% endfor %}
-        $("#value_input_div_{{id}}").popover({
-          'content': errorMsg;
-          'title': 'Error';
-        });
-        $("#value_input_div_{{id}}").popover('show');
-        </script>
-        {% endif %}
+        
         {% endfor %}
         {% endwith %}
     </div>

@@ -51,7 +51,12 @@ urlpatterns = [
     re_path(r'^captcha/', include('captcha.urls')),
 
     re_path(r'^curation/', include('curation.urls')),
+    re_path(r'^portal/', include('tenants.urls', namespace="tenants")),
     re_path('password/change/', account_views.PasswordChangeView.as_view(), name="account_change_password"),
     re_path('', include('allauth.urls')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

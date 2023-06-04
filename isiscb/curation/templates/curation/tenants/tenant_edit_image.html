@@ -1,0 +1,85 @@
+{% extends "curation/base.html" %}
+
+{% load general_tags %}
+{% load addcss %}
+
+{% block content %}
+
+{% if not image %}
+<form class="form" action="{% url 'curation:tenant_add_image' tenant.id image_type %}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+{% else %}
+<form class="form" action="{% url 'curation:tenant_add_save_image' tenant.id image.id %}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+{% endif %}
+<div class=" form-group col-md-12">
+  <h2>Tenant: {{tenant.name}}</h2>
+  </div>
+  {% csrf_token %}
+
+    {% if image_type == 'authority_default' and not image.id %}
+    <div class="form-group  col-md-12">
+        <label class="col-md-2">Default image type</label>
+        <div class="col-md-10">
+            <select class="form-control" name="default_type" id="default_type">
+                {% for choice in image_choices %}
+                <option value="{{choice.0}}">{{choice.1}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-group  col-md-12">
+        {% for error in form.title.errors %}
+        <div class="alert alert-danger col-md-2">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-2">{{ form.title.label }}</label>
+        <div class="col-md-10">
+        {{ form.title|addcss:"form-control" }}
+        </div>
+    </div>
+
+    {% if image_type == 'about' %}
+    <div class="form-group  col-md-12">
+        {% for error in form.image_index.errors %}
+        <div class="alert alert-danger col-md-2">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-2">{{ form.image_index.label }}</label>
+        <div class="col-md-10">
+        {{ form.image_index|addcss:"form-control" }}
+        </div>
+    </div>
+    {% else %}
+    <input type="hidden" name="image_index" id="id_image_index" value="1" />
+    {% endif %}
+
+    <div class="form-group  col-md-12">
+        {% for error in form.link.errors %}
+        <div class="alert alert-danger col-md-2">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-2">{{ form.link.label }}</label>
+        <div class="col-md-10">
+        {{ form.link|addcss:"form-control" }}
+        </div>
+    </div>
+
+    {% if not image %}
+    <div class="form-group  col-md-12">
+        {% for error in form.image.errors %}
+        <div class="alert alert-danger col-md-2">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-2">{{ form.image.label }}</label>
+        <div class="col-md-10">
+        {{ form.image|addcss:"form-control" }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+        <div class="col-md-12">
+        <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+    </div>
+</div>
+</form>
+
+{% endblock %}

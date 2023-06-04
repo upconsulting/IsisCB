@@ -64,13 +64,14 @@ def get_authors(value):
     return value
 
 
+# this method also exists in general_tags; need to be consolidated
 # QUESTION: what URIs do we use?
 @register.filter
-def get_uri(entry):
+def get_uri(entry, tenant=None):
     if to_class_name(entry) == 'Authority':
-        return settings.URI_PREFIX + "authority/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "authority/" + entry.id
     if to_class_name(entry) == 'Citation':
-        return settings.URI_PREFIX + "citation/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "citation/" + entry.id
     return ""
 
 @register.filter
@@ -290,7 +291,7 @@ def set_bookshelf_page(link, sort_str):
     else:
         new_link = link + "?" if "?" not in link else link + "&"
         return new_link + key + "=" + str(page_number)
-        
+
 
 @register.filter
 def set_index_model(link, model_str):

@@ -129,6 +129,8 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'curation.context_processors.add_tenants',
+                'tenants.context_processors.add_tenants',
             ],
         },
     },
@@ -311,7 +313,9 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
 
 DOMAIN = os.environ.get('DJANGO_DOMAIN','')
-URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
+URI_HOST = os.environ.get('DJANGO_URI_HOST', '')
+URI_ISIS_EP = os.environ.get('DJANGO_URI_ISIS_EP', 'isis/')
+URI_PREFIX = URI_HOST + URI_ISIS_EP
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
@@ -450,6 +454,8 @@ GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
 TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', '')
 TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
+
+API_KEY_STORAGE_KEY = os.environ.get('API_KEY_STORAGE_KEY', '')
 
 # admin timezone
 ADMIN_TIMEZONE = os.environ.get('ADMIN_TIMEZONE', 'US/Central')

@@ -58,6 +58,15 @@
    Add access to Zotero module</button>
     </form>
   </div>
+  {% if not role.tenant_rules %}
+  <div class="btn-group">
+    <a href="{% url 'curation:create_tenant_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
+  </div>
+  {% else %}
+  <div class="btn-group">
+    <a class="btn btn-sm btn-default" disabled title="A role can only give access to one tenant."><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
+  </div>
+  {% endif %}
 </p>
 {% endif %}
 
@@ -127,6 +136,15 @@ It seems like you've granted update, create, or delete access to records but no 
   {% endfor %}
   {% endif %}
 
+  {% if role.tenant_rules %}
+  {% for rule in role.tenant_rules %}
+    <tr>
+      <td>Tenant Access </td>
+      <td>Tenant: {% if rule.allowed_action == 'update' %} <span class="label label-danger">Administrator</span> {% else %}<span class="label label-info">Editor</span>{% endif %} {{ rule.tenant.name }}</td>
+      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  {% endif %}
 
   </tbody>
 </table>

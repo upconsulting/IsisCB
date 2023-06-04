@@ -15,6 +15,7 @@ from isisdata.utils import normalize
 from unidecode import unidecode
 
 from curation.contrib.views import check_rules
+import curation.curation_util as curation_util
 
 from zotero.models import *
 from zotero.filters import *
@@ -131,8 +132,11 @@ def accessions(request):
     Curator should be able to see a list of Zotero ingests, with indication of
     whether all authorities have been resolved for a batch.
     """
-
-    queryset = ImportAccession.objects.all()
+    tenant = curation_util.get_tenant(request.user)
+    if tenant:
+        queryset = ImportAccession.objects.filter(owning_tenant=tenant)
+    elif request.user.is_superuser:
+        queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
     current_page = request.GET.get('page', 1)
@@ -170,16 +174,14 @@ def create_accession(request):
 
     template = 'zotero/create_accession.html'
 
+    tenant = curation_util.get_tenant(request.user)     
     if request.method == 'GET':
-        try:
-            initial = {'ingest_to': Dataset.objects.get(name='Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)')}
-        except Dataset.DoesNotExist:
-            initial = {}
-
-        form = ImportAccessionForm(initial=initial)
+        initial = {'ingest_to': tenant.default_dataset, 'owning_tenant': tenant }
+        
+        form = ImportAccessionForm(tenant, initial=initial)
 
     elif request.method == 'POST':
-        form = ImportAccessionForm(request.POST, request.FILES)
+        form = ImportAccessionForm(tenant, request.POST, request.FILES)
         if form.is_valid():
             instance = form.save()
             instance.imported_by = request.user
@@ -215,7 +217,7 @@ def retrieve_accession(request, accession_id):
     matching_citations = {}
     ldtype_cache = {}
     for dcitation in draftcitations:
-        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, type_cache=ldtype_cache)
+        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, curation_util.get_tenant(request.user), type_cache=ldtype_cache)
 
     context = {
         'curation_section': 'zotero',
@@ -235,7 +237,7 @@ def possible_matching_citations(request, accession_id, draftcitation_id):
     template = 'zotero/show_citation_matches.html'
     accession = get_object_or_404(ImportAccession, pk=accession_id)
     draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
-    matches = _find_citation_matches(draftcitation, False)
+    matches = _find_citation_matches(draftcitation, curation_util.get_tenant(request.user), False)
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
@@ -245,7 +247,7 @@ def possible_matching_citations(request, accession_id, draftcitation_id):
     }
     return render(request, template, context)
 
-def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
+def _find_citation_matches(dcitation, limit_matches, tenant, type_cache = {}):
     matches = []
     linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
     for draft_ld in linkeddata:
@@ -262,7 +264,7 @@ def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     if matches:
         matched_by = { match: ["Linked Data"] for match in matches }
 
-    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title) if dcitation.title else ""), type_controlled=dcitation.type_controlled)
+    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title) if dcitation.title else ""), type_controlled=dcitation.type_controlled, owning_tenant=tenant)
     possible_matches = possible_matches.prefetch_related('related_authorities')
     if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
         series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
@@ -320,6 +322,7 @@ def resolve_authority(request):
     return JsonResponse({'data': {
         'authority_id': authority.id,
         'authority_name': authority.name,
+        'authority_owner': authority.owning_tenant.id if authority.owning_tenant else '',
     }})
 
 @check_rules('has_zotero_access')

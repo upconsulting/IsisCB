@@ -36,6 +36,7 @@ from isisdata import operations
 from isisdata.filters import *
 from isisdata import tasks as data_tasks
 from curation import p3_port_utils
+from curation import curation_util as c_util
 
 
 from curation.tracking import TrackingWorkflow
@@ -176,6 +177,23 @@ def create_authority(request):
 
     value_forms = view_helpers._create_attribute_value_forms()
 
+    # get classification systems
+    classification_systems = c_util.get_classification_systems(request.user)
+    class_system_dict = {}
+    # first we check which classification systems have been selected
+    # as default systems
+    for class_system in classification_systems:
+        if class_system.default_for:
+            for default_sys in class_system.default_for:
+                class_system_dict[default_sys] = class_system.id
+
+    default_system = c_util.get_default_classification_system(classification_systems)
+    # for everything without a system, we'll use the default one
+    if default_system:
+        for type_controlled in Authority.TYPE_CHOICES:
+            if type_controlled[0] not in class_system_dict:
+                class_system_dict[type_controlled[0]] = default_system.id
+
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
         person_form = PersonForm(request.user, authority_id=None, prefix='person')
@@ -184,12 +202,15 @@ def create_authority(request):
                                 exclude=('attribute', 'child_class'))
         linkeddata_form = LinkedDataForm(prefix='linkeddata')
 
+        
+
         context.update({
             'form': form,
             'person_form': person_form,
             'attribute_form': attribute_form,
             'linkeddata_form': linkeddata_form,
             'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
+            'class_system_dict': class_system_dict
         })
     elif request.method == 'POST':
         authority = Authority()
@@ -216,15 +237,19 @@ def create_authority(request):
                 attribute_form.instance.record_status_value = CuratedMixin.ACTIVE
                 value_form_class = value_forms[int(selected_attr_type_controlled)]
                 value_form = value_form_class(request.POST, prefix='value')
-        if form.is_valid() and (person_form is None or person_form.is_valid()) and (linkeddata_form is None or linkeddata_form.is_valid()) and (attribute_form is None or (attribute_form.is_valid() and value_form and value_form.is_valid())):
+        if form.is_valid() and (person_form is None or person_form.is_valid()) and \
+            (linkeddata_form is None or linkeddata_form.is_valid()) and \
+            (attribute_form is None or \
+            (attribute_form.is_valid() and value_form and value_form.is_valid())):
             if person_form:
                 person_form.save()
 
             form.cleaned_data['public'] = False
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
             form.instance.created_by_stored = request.user
+            form.instance.owning_tenant = c_util.get_tenant(request.user)
             authority = form.save()
-
+            
             if linkeddata_form:
                 # we need to make sure the subjec type is authority, or the generic relations don't work
                 linkeddata_form.instance.subject = Authority.objects.get(pk=authority.id)
@@ -249,6 +274,7 @@ def create_authority(request):
         else:
             context.update({
                 'form' : form,
+                'class_system_dict': class_system_dict,
                 'person_form': person_form if person_form else PersonForm(request.user, authority_id=None, prefix='person'),
                 'attribute_form': attribute_form if attribute_form else AttributeForm(prefix="attribute"),
                 'linkeddata_form': linkeddata_form if linkeddata_form else LinkedDataForm(prefix='linkeddata'),
@@ -1132,6 +1158,7 @@ def citation(request, citation_id):
         if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.cleaned_data['owning_tenant_id'] = citation.owning_tenant.id
             form.save()
             if partdetails_form:
                 partdetails_form.save()
@@ -1609,7 +1636,7 @@ def citations(request):
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
-    qs = queryset.select_related('part_details').values(*fields)
+    qs = queryset.select_related('part_details').values(*fields).distinct()
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
@@ -1682,7 +1709,7 @@ def authorities(request):
               'tracking_state', 'modified_on', 'modified_on_fm',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by',
               'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name',
-              'created_on_stored')
+              'created_on_stored', 'owning_tenant', 'belongs_to')
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')
@@ -1905,6 +1932,7 @@ def quick_and_dirty_authority_search(request):
       classification systems)
     * system_blank: allows classification system to be not set (default is 'true')
     * max: maximal number of results (default is 10)
+    * tenant_ids: ids of tenants to be searched or None to search all tenants
     * use_custom_cmp: if set to true, uses a custom compare function for ordering results;
       default is 'false'.
       Custom ordering works as follows:
@@ -1948,7 +1976,13 @@ def quick_and_dirty_authority_search(request):
 
     use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'
 
-    query = Q()
+    if request.GET.get("tenant_ids", ""):
+        query = Q(owning_tenant__in=request.GET.get("tenant_ids", ""))
+    else:
+        query = Q()
+
+    query &= Q(classification_system_object__subject_search_searchable=True)
+    
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
@@ -1999,7 +2033,7 @@ def quick_and_dirty_authority_search(request):
     queryset_sw = queryset_sw.filter(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
     #queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset_exact = queryset_exact.filter(Q(name_for_sort__exact=q.lower()))
-
+    
     # we don't need to duplicate results we've already captured with other queries
     #queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset = queryset.exclude(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
@@ -2082,12 +2116,14 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
-            'related_citations': [s.title() for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
+            'related_citations': [s.title() if s else '' for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
-            'type_controlled': obj.get_type_controlled_display()
+            'type_controlled': obj.get_type_controlled_display(),
+            'tenants': [t.id for t in obj.tenants.all()],
+            'owning_tenant': obj.owning_tenant.id if obj.owning_tenant else '',
         })
 
     return JsonResponse({'results': results})
@@ -2119,7 +2155,8 @@ def _search_collections(request, collection_class):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_zotero_accessions(request):
     q = request.GET.get('query', None)
-    queryset = ImportAccession.objects.filter(name__icontains=q)
+    tenant = c_util.get_tenant(request.user)
+    queryset = ImportAccession.objects.filter(name__icontains=q, owning_tenant=tenant)
     results = [{
         'id': accession.id,
         'label': accession.name,
@@ -2141,7 +2178,8 @@ def search_linked_data_type(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_datasets(request):
     q = request.GET.get('query', None)
-    queryset = Dataset.objects.filter(name__icontains=q)
+    tenant = c_util.get_tenant(request.user)
+    queryset = Dataset.objects.filter(name__icontains=q, owning_tenant=tenant)
     results = [{
         'id': ds.id,
         'label': ds.name,
@@ -2184,10 +2222,18 @@ def quick_and_dirty_citation_search(request):
     # ISISCB-1132: ccr relations do not find titles with hyphens etc
     q = normalize(q)
 
-    queryset = Citation.objects.all()
-    queryset_exact = Citation.objects.all()
-    queryset_sw = Citation.objects.all()
-    queryset_by_id = Citation.objects.all()
+    
+    tenant_ids = request.GET.get("tenant_ids", "")
+    if tenant_ids:
+        queryset = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_exact = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_sw = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_by_id = Citation.objects.filter(owning_tenant__in=tenant_ids)
+    else:
+        queryset = Citation.objects.all()
+        queryset_exact = Citation.objects.all()
+        queryset_sw = Citation.objects.all()
+        queryset_by_id = Citation.objects.all()
 
     queryset_exact = queryset_exact.filter(title_for_sort=q)
     queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)
@@ -2242,62 +2288,6 @@ def quick_and_dirty_citation_search(request):
         })
 
     return JsonResponse({'results': results})
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def change_is_staff(request, user_id):
-
-    if request.method == 'POST':
-        user = get_object_or_404(User, pk=user_id)
-
-        is_staff = request.POST.get('is_staff', False)
-        if is_staff == 'True':
-            user.is_staff = True
-        else:
-            user.is_staff = False
-        user.save()
-
-    return redirect('curation:user', user_id=user_id)
-
-
-@check_rules('is_user_superuser')
-def change_is_superuser(request, user_id):
-
-    if request.method == "POST":
-        user = get_object_or_404(User, pk=user_id)
-
-        is_superuser = request.POST.get('is_superuser', False)
-        if is_superuser == 'True':
-            user.is_superuser = True
-            user.save()
-
-        elif is_superuser == 'False':
-            superusers = User.objects.filter(is_superuser=True)
-
-            if len(superusers) > 1:
-                user.is_superuser = False
-                user.save()
-            else:
-                message = "This is the only admin user in the system. There have to be at least two adminstrators to remove administrator permissions from a user. "
-                messages.add_message(request, messages.ERROR, message)
-
-    return redirect('curation:user', user_id=user_id)
-
-
-@check_rules('can_update_user_module')
-def add_zotero_rule(request, role_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'POST':
-        rule = ZoteroRule.objects.create(role_id=role_id)
-
-    return redirect('curation:role', role_id=role.pk)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -2369,7 +2359,7 @@ def bulk_action(request):
     if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
-    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
+    form_class = bulk_action_form_factory(queryset=queryset, user=request.user, object_type=object_type)
     context = {
         'extra_data': '\n'.join(list(form_class.extra_data.values()))
     }
@@ -2662,7 +2652,7 @@ def featured_authorities(request):
                 # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
                 authority_ids = [authority.id for authority in queryset]
                 FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
-    else:       
+    else:
         # Display the featured authorities configuration form.
         form = FeaturedAuthorityForm()
         form.fields['filters'].initial = filter_params_raw
@@ -2840,356 +2830,4 @@ def add_authority_collection(request):
         })
 
     return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_view_user_module')
-def users(request, user_id=None):
-    from curation.filters import UserFilter
-    context = {
-        'curation_section': 'users',
-    }
-    template = 'curation/users.html'
-    users =  User.objects.all()
-    filterset = UserFilter(request.GET, queryset=users)
-
-    paginator = Paginator(filterset.qs, PAGE_SIZE)
-    current_page = request.GET.get('page', 1)
-    if not current_page:
-        current_page = 1
-    current_page = int(current_page)
-    page = paginator.page(current_page)
-    paginated_objects = list(page)
-
-    context.update({
-        'objects': paginated_objects,
-        'filterset': filterset,
-        'paginator': paginator,
-        'page': page,
-        'current_page': current_page,
-    })
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_view_user_module')
-def user(request, user_id):
-    selected_user = get_object_or_404(User, pk=user_id)
-
-
-    context = {
-        'curation_section': 'users',
-        'selected_user': selected_user,
-    }
-    template = 'curation/user.html'
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_role(request, user_id=None):
-    context = {
-        'curation_section': 'users',
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_role.html'
-        form = RoleForm()
-        context.update({
-            'form': form,
-        })
-    elif request.method == 'POST':
-        form = RoleForm(request.POST)
-
-        if form.is_valid():
-            role = form.save()
-
-            return redirect('curation:roles')
-        else:
-            template = 'curation/add_role.html'
-            context.update({
-                'form': form,
-            })
-    else:
-        return redirect('curation:roles')
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def remove_role(request, user_id, role_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-    user = get_object_or_404(User, pk=user_id)
-
-    if request.method == 'POST':
-        role.users.remove(user)
-
-    return redirect('curation:user', user_id=user.pk)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def delete_role(request, role_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    if request.method == 'POST':
-        if role.users.all():
-            usernames = [user.username for user in role.users.all()]
-            message = "Only roles that are not assigned to any user can be deleted. This role has the following users assigned: " + ", ".join(usernames) + "."
-            messages.add_message(request, messages.ERROR, message)
-        else:
-            role.delete()
-
-    return redirect('curation:roles')
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_view_user_module')
-def role(request, role_id, user_id=None):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    template = 'curation/role.html'
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_view_user_module')
-def roles(request):
-    roles = IsisCBRole.objects.all()
-
-    template = 'curation/roles.html'
-    context = {
-        'curation_section': 'users',
-        'roles': roles,
-    }
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_dataset_rule(request, role_id, user_id=None):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_rule.html'
-        form = DatasetRuleForm(initial = { 'role': role })
-        header_template = get_template('curation/rule_dataset_header.html').render(context)
-        context.update({
-            'form': form,
-            'header': header_template
-        })
-    elif request.method == 'POST':
-        form = DatasetRuleForm(request.POST)
-
-        if form.is_valid():
-            rule = form.save()
-            rule.role = role
-            rule.save()
-
-            return redirect('curation:role', role_id=role.pk)
-        else:
-            template = 'curation/add_rule.html'
-            header_template = get_template('curation/rule_dataset_header.html').render(context)
-
-            context.update({
-                'form': form,
-                'header': header_template,
-            })
-
-        return redirect('curation:role', role_id=role.pk)
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_crud_rule(request, role_id, user_id=None):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_rule.html'
-        header_template = get_template('curation/rule_crud_header.html').render(context)
-
-        form = CRUDRuleForm(initial = { 'role': role })
-        context.update({
-            'form': form,
-            'header': header_template,
-        })
-    elif request.method == 'POST':
-        form = CRUDRuleForm(request.POST)
-
-        if form.is_valid():
-            rule = form.save()
-            rule.role = role
-            rule.save()
-
-            return redirect('curation:role', role_id=role.pk)
-        else:
-            template = 'curation/add_rule.html'
-            header_template = get_template('curation/rule_crud_header.html').render(context)
-
-            context.update({
-                'form': form,
-                'header_template': header_template,
-            })
-
-        return redirect('curation:role', role_id=role.pk)
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATION):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_rule.html'
-        if object_type == AccessRule.CITATION:
-            form = FieldRuleCitationForm(initial = { 'role': role, 'object_type': object_type})
-            header_template = 'curation/rule_field_citation_header.html'
-        else:
-            form = FieldRuleAuthorityForm(initial = { 'role': role, 'object_type': object_type})
-            header_template = 'curation/rule_field_authority_header.html'
-
-        header_template = get_template(header_template).render(context)
-        context.update({
-            'form': form,
-            'header': header_template
-        })
-    elif request.method == 'POST':
-        if object_type == AccessRule.CITATION:
-            form = FieldRuleCitationForm(request.POST)
-            header_template = 'curation/rule_field_citation_header.html'
-        else:
-            form = FieldRuleAuthorityForm(request.POST)
-            header_template = 'curation/rule_field_authority_header.html'
-
-        if form.is_valid():
-            rule = form.save()
-            rule.object_type = object_type
-            rule.role = role
-            rule.save()
-
-            return redirect('curation:role', role_id=role.pk)
-        else:
-            template = 'curation/add_rule.html'
-            header_template = get_template(header_template).render(context)
-
-            context.update({
-                'form': form,
-                'header': header_template,
-            })
-
-        return redirect('curation:role', role_id=role.pk)
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_user_module_rule(request, role_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_rule.html'
-        form = UserModuleRuleForm()
-
-        header_template = get_template('curation/rule_user_module_header.html').render(context)
-        context.update({
-            'form': form,
-            'header': header_template
-        })
-    elif request.method == 'POST':
-        form = UserModuleRuleForm(request.POST)
-
-        if form.is_valid():
-            rule = form.save()
-            rule.role = role
-            rule.save()
-
-            return redirect('curation:role', role_id=role.pk)
-        else:
-            template = 'curation/add_rule.html'
-            header_template = get_template('curation/rule_user_module_header.html').render(context)
-
-            context.update({
-                'form': form,
-                'header_template': header_template,
-            })
-
-        return redirect('curation:role', role_id=role.pk)
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def add_role_to_user(request, user_edit_id, user_id=None):
-    user = get_object_or_404(User, pk=user_edit_id)
-
-    context = {
-        'curation_section': 'users',
-    }
-
-    if request.method == 'GET':
-        template = 'curation/add_role_to_user.html'
-        form = AddRoleForm(initial = { 'users': user })
-        context.update({
-            'form': form,
-        })
-    elif request.method == 'POST':
-        form = AddRoleForm(request.POST)
-
-        if form.is_valid():
-            role_id = form.cleaned_data['role']
-            role = get_object_or_404(IsisCBRole, pk=role_id)
-            role.users.add(user)
-            role.save()
-
-            if request.GET.get('from_user', False):
-                return redirect('curation:user', user.pk)
-
-            return redirect('curation:user_list')
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def remove_rule(request, role_id, rule_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-    rule = get_object_or_404(AccessRule, pk=rule_id)
-
-    if request.method == 'POST':
-        rule.delete()
-
-    return redirect('curation:role', role_id=role.pk)
-
 

@@ -4,8 +4,8 @@
 
 <div class="jumbotron">
   <div class="container">
-    <h1>IsisCB Curation Interface</h1>
-
+    <h1>{% if tenant %} {{ tenant.name }} {% else %} IsisCB {% endif %} Curation Interface</h1>
+    
     <p>
       Use the top menu entry "Datasets" to get to a list of all citations or authorities. You can edit and create records from there. Use the menu entry "Zotero" to add new records to IsisCB using an Zotero RDF export.
     </p>

@@ -4,6 +4,7 @@
 {% load rules %}
 {% load permission_tags %}
 {% load search_filters %}
+{% load general_tags %}
 
 {% block content %}
 
@@ -110,7 +111,7 @@
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
            {% if can_update %}
            <span class="button-group button-group-xs">
                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -130,9 +131,9 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
              {% else %}
-             <span class="text-muted">{{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">
@@ -203,6 +204,9 @@
         </ul>
 
         <div class="text-right">
+          <a href="#" id="searchAllTenants"><i class="fa fa-search" aria-hidden="true"></i> Search all tenants</a>
+        </div>
+        <div class="text-right">
           <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
         </div>
       </div>
@@ -265,6 +269,7 @@ var delete_handler = function() {
 var INITIAL_MAX_RESULTS = 10;
 var max_results = INITIAL_MAX_RESULTS;
 var types = [];
+var search_tenants = true;
 
 var searchTimerSubjects = 0;
 function triggerSearchSubjects(force) {
@@ -274,7 +279,13 @@ function triggerSearchSubjects(force) {
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types 
+    url += "&max=" + max_results + "&force=" + force; 
+    if (search_tenants) {
+      url += "&tenant_ids={{instance.owning_tenant.id}}";
+    }
+    url += "&q=" + $('#subjectSearchQuery').val();
+    $.ajax(url, {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
@@ -285,7 +296,12 @@ function triggerSearchSubjects(force) {
             var publicLink = $('<a></a>');
             publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
             publicLink.attr('target', "_blank");
-            publicLink.html(r.name + ' (' + r.citation_count + ')' );
+
+            var linkText = r.name + ' (' + r.citation_count + ')';
+            if (!r.tenants.some(r=> {{instance.owning_tenant.id}} == r)) {
+              linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+            }
+            publicLink.html(linkText);
             newLi.append(publicLink);
             var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
             suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
@@ -355,11 +371,18 @@ function suggestSubjects(event) {
 $(document).ready(function() {
 
   $("#forceSearch").click(function() {
+    search_tenants = true
+    triggerSearchSubjects(true);
+  });
+
+  $("#searchAllTenants").click(function() {
+    search_tenants = false
     triggerSearchSubjects(true);
   });
 
   $('#subjectSearchQuery').on('keyup', function() {
     max_results = INITIAL_MAX_RESULTS;
+    search_tenants = true
     triggerSearchSubjects(false);
   });
 

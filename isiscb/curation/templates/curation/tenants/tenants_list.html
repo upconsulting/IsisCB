@@ -1,0 +1,25 @@
+{% extends "curation/base.html" %}
+
+{% block content %}
+
+<ul class="list-group">
+  {% for tenant in tenants %}
+
+    {% if tenant.1 == 'update' %}
+    <a href="{% url 'curation:tenant' tenant.0.id %}" class="list-group-item">
+    {% else %}
+    <li class="list-group-item">
+    {% endif %}
+    {% if tenant.1 == 'update' %} <span class="label label-danger">Administrator</span> {% else %}<span class="label label-info">Editor</span>{% endif %}
+    {{ tenant.0.name }}
+    {% if tenant.1 == 'update' %}
+      </a>
+    {% else %}
+      </li>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+
+
+{% endblock %}

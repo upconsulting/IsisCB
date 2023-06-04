@@ -589,13 +589,22 @@ def help(request):
 
     return render(request, 'isisdata/help.html', context={'active': 'help'})
 
-def about(request):
+def about(request, tenant_id=None):
     """
     View for about page
     """
-    return render(request, 'isisdata/about.html', context={'active': 'about'})
+    context={
+        'active': 'about',
+        'tenant_id': tenant_id,
+    }
 
-def playground(request):
+    template = 'isisdata/about.html'
+    if tenant_id:
+        template = 'tenants/about.html'
+    
+    return render(request, template, context)
+
+def playground(request, tenant_id=None):
     """
     View for playground page
     """
@@ -721,7 +730,7 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
         cache.set(cache_name, count, cache_timeout)
     return count
 
-def citation(request, citation_id):
+def citation(request, citation_id, tenant_id=None):
     """
     View for individual citation record.
     """
@@ -772,6 +781,10 @@ def citation(request, citation_id):
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+
     # Similar Citations Generator
     if subjects:
         sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
@@ -783,10 +796,10 @@ def citation(request, citation_id):
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         sqs.query.set_limits(low=0, high=20)
-
         results = sqs.all().exclude(public="false")
+        if tenant:
+            results = results.filter(tenant_ids=tenant.pk)
         similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
-
     elif citation.type_controlled not in ['RE']:
         mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
@@ -797,6 +810,8 @@ def citation(request, citation_id):
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         mlt.query.set_limits(low=0, high=20)
+        if tenant_id:
+            mlt = mlt.filter(tenant_ids=tenant_id)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
     else:
         similar_citations = []
@@ -811,7 +826,9 @@ def citation(request, citation_id):
 
     similar_objects = get_facets_from_similar_citations(similar_citations)
 
-    googleBooksImage = get_google_books_image(citation, False)
+    googleBooksImage = None
+    if tenant and tenant.settings.google_api_key:
+        googleBooksImage = get_google_books_image(citation, False, tenant.settings.google_api_key)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
@@ -929,7 +946,11 @@ def citation(request, citation_id):
         'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
+        'tenant_id': tenant_id,
     }
+
+    if tenant_id:
+        return render(request, 'tenants/citation.html', context)
     return render(request, 'isisdata/citation.html', context)
 
 def get_facets_from_similar_citations(similar_citations):
@@ -963,7 +984,7 @@ def generate_similar_facets(similar_objects):
 
     return similar_objects
 
-def get_google_books_image(citation, featured):
+def get_google_books_image(citation, featured, apiKey):
 
     # Provide image for citation
     if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
@@ -1009,7 +1030,7 @@ def get_google_books_image(citation, featured):
     elif ' ' in contrib:
         contrib = contrib[contrib.find(' '):]
 
-    apiKey = settings.GOOGLE_BOOKS_API_KEY
+    #apiKey = settings.GOOGLE_BOOKS_API_KEY
 
     url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
     url = url.replace(" ", "%20")
@@ -1133,7 +1154,7 @@ class IsisSearchView(FacetedSearchView):
     """
     Provides the search view at /isis/.
     """
-
+    template_name = 'search/search.html'
     results_per_page = 20
 
     def get_form_kwargs(self):
@@ -1243,6 +1264,9 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
+        if self.request.GET.get('tenant_id', None):
+            self.template_name = 'tenants/search/search.html'
+
         return self.render_to_response(context)
 
     def build_page(self):
@@ -1334,6 +1358,7 @@ class IsisSearchView(FacetedSearchView):
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')
+        extra['tenant_id'] = self.request.GET.get('tenant_id', '')
 
         if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0
@@ -1465,7 +1490,7 @@ def unapi_server_root(request):
 
 
 
-def home(request):
+def home(request, template='isisdata/home.html', tenant_id=None):
     """
     The landing view, at /.
     """
@@ -1474,7 +1499,7 @@ def home(request):
     current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
     current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
     featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
-
+    
     sqs = SearchQuerySet().models(Citation)
     sqs.query.set_limits(low=0, high=30)
     # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
@@ -1488,8 +1513,14 @@ def home(request):
         #set default featured citation in case no featured authorities have been selected
         featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
 
+    tenant = None
+    if tenant_id:
+        tenant = get_object_or_404(Tenant, identifier=tenant_id)
+
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
-    featured_citation_image = get_google_books_image(featured_citation, True)
+    featured_citation_image = None
+    if tenant and tenant.settings and tenant.settings.google_api_key:
+        featured_citation_image = get_google_books_image(featured_citation, True, tenant.settings.google_api_key)
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
@@ -1515,7 +1546,11 @@ def home(request):
     wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
 
     #Get featured tweet
-    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
+    recent_tweet_url = '' 
+    recent_tweet_text = ''
+    recent_tweet_image = ''
+    if tenant and tenant.settings and tenant.settings.twitter_api_key:
+        recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet(tenant.settings.twitter_api_key, tenant.settings.twitter_user_name)
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 
@@ -1553,7 +1588,7 @@ def home(request):
         'tweet_url': recent_tweet_url,
         'tweet_image': recent_tweet_image,
     }
-    return render(request, 'isisdata/home.html', context=context)
+    return render(request, template, context=context)
 
 
 def rdf_authority_view(request, authority_id):

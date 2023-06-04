@@ -2,6 +2,10 @@
 {% load render_object %}
 {% load general_tags %}
 
+{% for error in form.non_field_errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+        
 <div class="form-group">
 <div class="row">
   <div class="col-sm-2 text-left">
@@ -239,4 +243,28 @@
     {% endfor %}
     </small>
   </div>
+</div>
+  <div class="row" style="padding-top: 10px;">
+    <div class="col-sm-12 text-left">
+      <table width="100%" style="margin-bottom: 3px;">
+        <tr class="categoryHeader">
+          <td width="100px">
+            <div class="input-xs">Tenants</div>
+          </td>
+
+        </tr>
+      </table>
+    </div>
+    <div class="col-sm-12 form-fields-indented" >
+      {% if instance.owning_tenant %}
+      <small>
+        <div class="panel panel-default tenant-panel">
+          <div class="panel-body">
+            {{instance.owning_tenant}}
+            <input type="hidden" name="owning_tenant" value="{{owning_tenant.id}}" />
+          </div>
+        </div>
+      </small>
+      {% endif %}
+    </div>
 </div>

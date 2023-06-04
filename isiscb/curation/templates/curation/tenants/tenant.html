@@ -1,0 +1,73 @@
+{% extends "curation/base.html" %}
+
+{% load content_tags %}
+
+{% block content %}
+
+<h2>Tenant: {{tenant.name}}</h2>
+
+<div class="row">
+  <div class="col-md-2" style="padding-top:30px">
+    {% include 'curation/tenants/fragment_menu.html' %}
+  </div>
+
+  <div class="col-md-10">
+    <p class="pull-right">
+      <a href="{% url 'curation:tenant_settings' tenant.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+       Edit Settings</a>
+      </p>
+      <table class="table table-striped">
+          <tr>
+            <th width="20%">Title</th>
+            <td>{{tenant.title}}</td>
+          </tr>
+          <tr>
+            <th width="20%">Contact Email</th>
+            <td>{{tenant.contact_email|default_if_none:''}}</td>
+          </tr>
+          <tr>
+            <th width="20%">URL Identifier</th>
+            <td>{{tenant.identifier}} <small>(<span class="fa fa-warning"></span> This value can only be changed by a system administrator.)</small></td>
+          </tr>
+          <tr>
+            <th width="20%">Logo</th>
+            <td>
+              {% if tenant.logo %}
+              <img src="{{ tenant.logo.url }}" />
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th width="20%">Google API Key</th>
+            <td>
+              {% if tenant.settings.google_api_key %}
+              <span class="label label-default">Key Specified</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th width="20%">Twitter API Key</th>
+            <td>
+              {% if tenant.settings.twitter_api_key %}
+              <span class="label label-default">Key Specified</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th width="20%">Twitter User ID</th>
+            <td>{{tenant.settings.twitter_user_name|default_if_none:''}}</td>
+          </tr>
+          <tr>
+            <th>Navigation Color</th>
+            <td><i style="color: {{tenant.settings.navigation_color}}" class="fa fa-square" aria-hidden="true"></i></td>
+          </tr>
+          <tr>
+            <th>Link Color</th>
+            <td><i style="color: {{tenant.settings.link_color}}" class="fa fa-square" aria-hidden="true"></i></td>
+          </tr>
+      </table>
+  </div>
+</div>
+
+
+{% endblock %}

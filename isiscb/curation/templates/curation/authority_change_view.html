@@ -42,6 +42,10 @@
 <div class="row">
     <div class="col-sm-4">
         <div class="h4">Authority Details</div>
+
+        {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
         <div class="row">
             <div class="col-xs-6">
                 {% for error in form.type_controlled.errors %}
@@ -112,6 +116,15 @@
             {{ form.classification_system|addcss:"form-control input-sm"}}
         </div>
 
+        {% for error in form.classification_system_object.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.classification_system_object.label }}</label>
+            {{ form.classification_system_object|addcss:"form-control input-sm"}}
+        </div>
+
+    
         {% for error in form.classification_code.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
@@ -134,6 +147,16 @@
         <div class="form-group">
             <label>{{ form.record_history.label }}</label>
             {{ form.record_history|addcss:"form-control input-sm"}}
+        </div>
+
+        <div class="form-group">
+            <label>Tenants</label>
+            {% if instance.owning_tenant %}
+            <ul class="list-group">
+            <li class="list-group-item">{{instance.owning_tenant}}</li>
+            <input type="hidden" name="authority-owning_tenant" value="{{instance.owning_tenant.id}}" />
+            {% endif %}
+            </ul>
         </div>
     </div>
     <div class="col-sm-8">

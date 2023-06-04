@@ -1,0 +1,49 @@
+{% extends "curation/base.html" %}
+
+{% load general_tags %}
+{% load addcss %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+{% if content_id %}
+<form class="form" action="{% url 'curation:tenant_edit_column_content' tenant.id page_block.id content_id %}" method="POST" class="form-horizontal">
+{% else %}
+<form class="form" action="{% url 'curation:tenant_add_column_content' tenant.id page_block.id %}" method="POST" class="form-horizontal">
+{% endif %}
+  <div class=" form-group col-md-12">
+  <h2>Add Column Content</h2>
+  </div>
+  {% csrf_token %}
+
+  <div class="form-group  col-md-12">
+      {% for error in form.column_index.errors %}
+      <div class="alert alert-danger col-md-2">{{ error }}</div>
+      {% endfor %}
+      <label class="col-md-2">{{ form.column_index.label }}</label>
+      <div class="col-md-10">
+        {{ form.column_index|addcss:"form-control" }}
+      </div>
+  </div>
+
+<div class="form-group  col-md-12">
+  <textarea name="content" id="content-input">{{form.content.value}}</textarea>
+  <script>
+  const easyMDE = new EasyMDE({element: document.getElementById('content-input')});
+  </script>
+</div>
+
+  <div class="form-group">
+    <div class="col-md-12">
+    <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}

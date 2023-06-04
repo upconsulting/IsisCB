@@ -9,9 +9,12 @@ from django.http import QueryDict
 from isisdata.models import *
 from isisdata import export    # This never gets old...
 from isisdata import export_authority
+import isisdata.helpers.api_keys as api_keys
 from curation import actions
 
 import rules
+import itertools
+import curation.curation_util as cutil
 
 
 class CCRelationForm(forms.ModelForm):
@@ -337,7 +340,7 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.none(), label='Dataset', required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
@@ -346,6 +349,9 @@ class CitationForm(forms.ModelForm):
     subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
     stub_record_status = forms.BooleanField(label='Stub', widget=StubCheckboxInput(), required=False)
 
+    owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
+
+
     class Meta(object):
         model = Citation
         fields = [
@@ -353,7 +359,7 @@ class CitationForm(forms.ModelForm):
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to', 'administrator_notes', 'record_history', 'subtype',
-              'complete_citation', 'stub_record_status'
+              'complete_citation', 'stub_record_status', 'owning_tenant'
         ]
         labels = {
             'belongs_to': 'Dataset',
@@ -365,12 +371,20 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
+        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
+        if cutil.get_tenant(self.user):
+            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
+        else:
+            self.fields['belongs_to'].queryset = Dataset.objects.all()
+
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
         # disable fields user doesn't have access to
         if self.instance.pk:
+            self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
+
             self.fields['title'].widget.attrs['placeholder'] = "No title"
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
@@ -403,6 +417,13 @@ class CitationForm(forms.ModelForm):
             self.cleaned_data['stub_record_status'] = Citation.STUB_RECORD
         else:
             self.cleaned_data['stub_record_status'] = None
+        if self.instance.pk and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+            raise ValidationError(
+                "Owning tenant cannot be changed."
+            )
+
+
+
 
     def _get_validation_exclusions(self):
         exclude = super(CitationForm, self)._get_validation_exclusions()
@@ -454,20 +475,24 @@ class AuthorityForm(forms.ModelForm):
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
     redirect_to = forms.CharField(widget=forms.HiddenInput(), required = False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.none(), label='Dataset', required=False)
+
+    owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
+    classification_system_object = forms.ModelChoiceField(label='ClassificationSystem', required=False, queryset=ClassificationSystem.objects.none())
 
     class Meta(object):
         model = Authority
         fields = [
-            'type_controlled', 'name', 'description', 'classification_system',
+            'type_controlled', 'name', 'description', 'classification_system_object',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
-            'administrator_notes', 'record_history', 'belongs_to'
+            'administrator_notes', 'record_history', 'belongs_to', 'owning_tenant'
         ]
 
         labels = {
             'belongs_to': 'Dataset',
             'administrator_notes': 'Staff notes',
+            'classification_system_object': 'Classification System (object)'
         }
 
 
@@ -476,9 +501,20 @@ class AuthorityForm(forms.ModelForm):
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+                self.fields['owning_tenant'].initial = cutil.get_tenant(user)
 
         self.user = user
 
+        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
+        self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
+
+        self.fields['classification_system_object'].queryset = cutil.get_classification_systems(user)
+        
+        if cutil.get_tenant(self.user):
+            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
+        else:
+            self.fields['belongs_to'].queryset = Dataset.objects.all()
+       
         # disable fields user doesn't have access to
         if self.instance.pk:
             for field in self.fields:
@@ -498,6 +534,12 @@ class AuthorityForm(forms.ModelForm):
             self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
         else:
             self.cleaned_data['redirect_to'] = None
+
+        tenants = cutil.get_tenants(self.user)
+        if self.instance.pk and self.instance.owning_tenant and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+            raise ValidationError(
+                "Owning tenant cannot be changed."
+            )
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
@@ -611,6 +653,12 @@ class RoleForm(forms.ModelForm):
             'name', 'description',
         ]
 
+class TenantRuleForm(forms.ModelForm):
+    class Meta(object):
+        model = TenantRule
+        fields = [
+            'tenant', 'allowed_action'
+        ]
 
 class DatasetRuleForm(forms.ModelForm):
     dataset = forms.ChoiceField(required=False)
@@ -647,9 +695,7 @@ class AddRoleForm(forms.Form):
         super(AddRoleForm, self).__init__( *args, **kwargs)
 
         roles = IsisCBRole.objects.all()
-        choices = []
-        for role in roles:
-            choices.append((role.pk, role.name))
+        choices = [(role.pk, role.name) for role in roles]
         self.fields['role'].choices = choices
 
 class CRUDRuleForm(forms.ModelForm):
@@ -759,13 +805,13 @@ class BulkActionForm(forms.Form):
             if extra:
                 extra_data.update(extra)
             # Load and instantiate the corresponding action class.
-            action = getattr(actions, action_name)()    # Object is callable.
+            action = getattr(actions, action_name)(user)    # Object is callable.
             tasks.append(action.apply(user, filter_params_raw, action_value, **extra_data))
         return tasks
 
 
 # Emulates django's modelform_factory
-def bulk_action_form_factory(form=BulkActionForm, **kwargs):
+def bulk_action_form_factory(form=BulkActionForm, user=None, **kwargs):
     attrs = {}    # For the form's Meta inner class.
 
     # For the Media inner class.
@@ -789,7 +835,7 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
 
         if hasattr(action_class, 'get_extra_data'):
             extra_data[action_class.__name__] = action_class.get_extra_data(queryset=queryset)
-        action = action_class()
+        action = action_class(user)
         action_choices.append((action_class.__name__, action.label))
         form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
         extras = action.get_extra_fields()
@@ -872,7 +918,7 @@ class FeaturedAuthorityForm(forms.Form):
     start_date = forms.DateField(required=False, help_text='This date is when the selected authorities will begin being featured. Must be YYYY-MM-DD format.')
     end_date = forms.DateField(required=False, help_text='This date is when the selected authorities will stop being featured. Must be YYYY-MM-DD format.')
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
-    
+
 class BulkChangeCSVForm(forms.Form):
     csvFile = forms.FileField()
     NO_CHOICE = None
@@ -898,3 +944,61 @@ class BulkChangeCSVForm(forms.Form):
         (MERGE_AUTHORITIES, 'Duplicate Authority Merge and Redirect'),
     ]
     action = forms.ChoiceField(choices=CHOICES)
+
+class TenantSettingsForm(forms.ModelForm):
+    navigation_color = forms.CharField(help_text='Background color of the navigation bar.', widget=forms.TextInput(attrs={'type': "color"}))
+    link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
+    title = forms.CharField(help_text='Title of bibliography')
+    logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
+    contact_email = forms.EmailField(help_text='Email address for contacting the bilbiographer.')
+    google_api_key = forms.CharField(help_text='API key for Google', required=False)
+    twitter_api_key = forms.CharField(help_text='API key for Twitter', required=False)
+    twitter_user_name = forms.CharField(help_text='User id for Twitter', required=False)
+
+    class Meta(object):
+        model = TenantSettings
+        fields = [
+            'navigation_color', 'link_color', 'google_api_key', 'twitter_api_key', 'twitter_user_name'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(TenantSettingsForm, self).__init__(*args, **kwargs)
+
+        if kwargs['instance'] and kwargs['instance'].tenant:
+            self.fields['title'].initial = kwargs['instance'].tenant.title
+            self.fields['logo'].initial = kwargs['instance'].tenant.logo
+            self.fields['contact_email'].initial = kwargs['instance'].tenant.contact_email
+            if kwargs['instance'].tenant.settings.google_api_key:
+                self.initial['google_api_key'] = api_keys.decrypt_key(kwargs['instance'].tenant.settings.google_api_key).decode("utf-8")
+            if kwargs['instance'].tenant.settings.twitter_api_key:
+                self.initial['twitter_api_key'] = api_keys.decrypt_key(kwargs['instance'].tenant.settings.twitter_api_key).decode("utf-8")
+
+    def clean(self):
+        if self.cleaned_data['google_api_key']:
+            self.cleaned_data['google_api_key'] = api_keys.encrypt_key(self.cleaned_data['google_api_key']).decode("utf-8") 
+        else:
+            self.cleaned_data['google_api_key'] = None
+
+        if self.cleaned_data['twitter_api_key']:
+            self.cleaned_data['twitter_api_key'] = api_keys.encrypt_key(self.cleaned_data['twitter_api_key']).decode("utf-8") 
+        else:
+            self.cleaned_data['twitter_api_key'] = None
+       
+
+class TenantPageBlockForm(forms.Form):
+    nr_of_columns = forms.IntegerField(help_text="Number of columns in block.")
+    block_index = forms.IntegerField(help_text="Number of columns in block.")
+    title = forms.CharField(help_text="Title for a block on the home page.")
+
+class TenantPageBlockColumnForm(forms.Form):
+    column_index = forms.IntegerField(help_text="Index of column content should be added to.")
+    content = forms.CharField(help_text="Content of column.")
+
+class TenantImageUploadForm(forms.Form):
+    title = forms.CharField(help_text="Title for the image.")
+    image_index = forms.IntegerField(help_text="Index of the image. The index specifies the order images are shown in.")
+    image = forms.ImageField(help_text='Image to upload.', required=True)
+    link = forms.CharField(help_text="Link image to link to.", required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(TenantImageUploadForm, self).__init__(*args, **kwargs)

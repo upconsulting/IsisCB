@@ -561,6 +561,11 @@ class TestIngest(TestCase):
         rf = RequestFactory()
         self.request = rf.get('/hello/')
         self.user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        self.tenant = Tenant.objects.create(default_dataset=self.dataset)
+        self.isiscb_role = IsisCBRole.objects.create()
+        self.isiscb_role.users.add(self.user)
+        self.tenant_rule = TenantRule.objects.create(tenant=self.tenant, role=self.isiscb_role)
+
         self.request.user = self.user
 
         isodate_type = ContentType.objects.get_for_model(ISODateValue)
