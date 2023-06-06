@@ -49,17 +49,31 @@ def is_generic_obj_accessible_by_tenant(user, obj):
     have_authority_attribute = []
     have_citation_attribute = ['ACRelation']
 
+    all_types = [*have_source_attribute,*have_subject_attribute,*have_object_attribute,*have_authority_attribute,*have_citation_attribute]
+    if type(obj).__name__ not in all_types:
+        return False
+
+    if type(obj).__name__ in ['Authority', 'Citation']:
+        return is_accessible_by_tenant(user, obj)
+
+    # some objects have more than one relation that needs to be checked
+    # so if the first check is True, we'll check for other relations
     if type(obj).__name__ in have_source_attribute:
-        return is_accessible_by_tenant(user, getattr(obj, 'source', None))
+        if not is_accessible_by_tenant(user, getattr(obj, 'source', None)):
+            return False
     if type(obj).__name__ in have_subject_attribute:
-        return is_accessible_by_tenant(user, getattr(obj, 'subject', None))
+        if not is_accessible_by_tenant(user, getattr(obj, 'subject', None)):
+            return False
     if type(obj).__name__ in have_object_attribute:
-        return is_accessible_by_tenant(user, getattr(obj, 'object', None))
+        if not is_accessible_by_tenant(user, getattr(obj, 'object', None)):
+            return False
     if type(obj).__name__ in have_authority_attribute:
-        return is_accessible_by_tenant(user, getattr(obj, 'authority', None))
+        if not is_accessible_by_tenant(user, getattr(obj, 'authority', None)):
+            return False
     if type(obj).__name__ in have_citation_attribute:
-        return is_accessible_by_tenant(user, getattr(obj, 'citation', None))
-    return False
+        if not is_accessible_by_tenant(user, getattr(obj, 'citation', None)):
+            return False
+    return True
 
 
 
