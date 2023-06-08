@@ -1201,7 +1201,36 @@ class TenantAdmin(admin.ModelAdmin):
             'identifier', 'home_page_template', 
             'use_home_page_template', 'default_dataset']
     exlude = ('attributes')
+    readonly_fields = ["nr_of_citations", "nr_of_authorities", 
+            "nr_of_class_systems", "unassigned_all_citations", 
+            "unassigned_all_authorities"]
+    list_display = ["name", "identifier", "nr_of_citations", 
+            "nr_of_authorities", "nr_of_class_systems", 
+            "unassigned_all_citations", "unassigned_all_authorities"]
 
+    def nr_of_citations(self, instance):
+        return Citation.objects.filter(owning_tenant=instance).count()
+    nr_of_citations.short_description = "Number of Citations"
+
+    def nr_of_authorities(self, instance):
+         return Authority.objects.filter(owning_tenant=instance).count()
+    nr_of_authorities.short_description = "Number of Authorities"
+
+    def nr_of_class_systems(self, instance):
+        return ClassificationSystem.objects.filter(owning_tenant=instance).count()
+    nr_of_class_systems.short_description = "Number of Class. Systems"
+
+    def unassigned_all_citations(self, instance):
+        unassigned = Citation.objects.filter(owning_tenant__isnull=True).count()
+        all = Citation.objects.count()
+        return f"{unassigned:,} / {all:,}"
+    unassigned_all_citations.short_description = "Unassigned / all Citations"
+
+    def unassigned_all_authorities(self, instance):
+        unassigned = Authority.objects.filter(owning_tenant__isnull=True).count()
+        all = Authority.objects.count()
+        return f"{unassigned:,} / {all:,}"
+    unassigned_all_authorities.short_description = "Unassigned / all Authorities"
 
 class ClassificationSystemAdminForm(forms.ModelForm):
     default_for = forms.MultipleChoiceField(
