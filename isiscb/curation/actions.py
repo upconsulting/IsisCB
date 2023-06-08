@@ -272,6 +272,33 @@ class AddTenantToCitation(BaseAction):
         task.save()
         return task.id
 
+class AddTenantToAuthority(BaseAction):
+    model = Authority
+    label = u'Add tenant to authority'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {}
+
+    def __init__(self, user=None):
+        self.default_value_field_kwargs = {
+            'label': 'Add tenant to authority',
+            'widget': forms.widgets.Select(attrs={'class': 'action-value'}, choices=[(t.id, t.name) for t in cutil.get_tenants(user)]),
+        }
+        super(AddTenantToAuthority, self).__init__(user)
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = bulk_change_tenant.delay(user.id, filter_params_raw, value, task_id=task.id, object_type="AUTHORITY")
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('add_tenant_to_authority', value)
+        task.label = 'Adding tenant to: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
 class ReindexCitation(BaseAction):
     model = Citation
     label = u'Reindex citations'
@@ -342,4 +369,4 @@ class DeleteDuplicateAttributes(BaseAction):
         return task.id
 
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation, AddTenantToCitation]
-AVAILABLE_ACTIONS_AUTHORITY = [StoreCreationDataToModel, ReindexAuthorities, DeleteDuplicateAttributes]
+AVAILABLE_ACTIONS_AUTHORITY = [StoreCreationDataToModel, ReindexAuthorities, DeleteDuplicateAttributes, AddTenantToAuthority]
