@@ -62,6 +62,7 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
+    'tenants',
     'rules.apps.AutodiscoverRulesConfig',
     'django_celery_results',
 )
