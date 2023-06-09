@@ -215,7 +215,7 @@ def tenant_about_page(request, tenant_pk):
     context = {
         'tenant': tenant,
         'selected': 'about',
-        'images': tenant.settings.about_images
+        'images': tenant.settings.about_images if tenant.settings else None
     }
     return render(request, 'curation/tenants/about.html', context=context)
 
