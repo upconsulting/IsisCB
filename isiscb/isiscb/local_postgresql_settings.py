@@ -153,7 +153,7 @@ ROOT_URLCONF = 'isiscb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['isisdata/templates'],
+        'DIRS': ['isisdata/templates', 'tenant/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
