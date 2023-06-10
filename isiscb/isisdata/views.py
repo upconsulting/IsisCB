@@ -1494,11 +1494,15 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     """
     The landing view, at /.
     """
+    tenant = None
+    if tenant_id:
+        tenant = get_object_or_404(Tenant, identifier=tenant_id)
+   
     # Get featured citation and authority
     now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
-    current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now, authority__owning_tenant=tenant).filter(end_date__gt=now)
     current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
-    featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
+    featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids, owning_tenant=tenant).exclude(wikipediadata__intro='')
     
     sqs = SearchQuerySet().models(Citation)
     sqs.query.set_limits(low=0, high=30)
@@ -1513,10 +1517,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
         #set default featured citation in case no featured authorities have been selected
         featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
 
-    tenant = None
-    if tenant_id:
-        tenant = get_object_or_404(Tenant, identifier=tenant_id)
-
+    
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = None
     if tenant and tenant.settings and tenant.settings.google_api_key:
