@@ -4,7 +4,6 @@ register = template.Library()
 
 @register.filter
 def featured_column_width(tweet_url):
-    print("url", tweet_url)
     if tweet_url:
         return 8
     return 12
