@@ -2624,10 +2624,11 @@ def featured_authorities(request):
     timezone = pytz.timezone(settings.ADMIN_TIMEZONE)
     now = datetime.datetime.now(timezone)
     six_months_ago = now - relativedelta(months=6)
-    current_featured = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
-    future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
+    owning_tenant = c_util.get_tenant(request.user)
+    current_featured = FeaturedAuthority.objects.filter(start_date__lt=now, authority__owning_tenant=owning_tenant).filter(end_date__gt=now)
+    future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now, authority__owning_tenant=owning_tenant)
     #display only the most recent 6 months of past featured authorities so that this list doesn't balloon
-    past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago).filter(end_date__lt=now)
+    past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago, authority__owning_tenant=owning_tenant).filter(end_date__lt=now)
 
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
@@ -2651,7 +2652,7 @@ def featured_authorities(request):
             elif request.POST.get('remove'):
                 # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
                 authority_ids = [authority.id for authority in queryset]
-                FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
+                FeaturedAuthority.objects.filter(authority_id__in=authority_ids, authority__owning_tenant=owning_tenant).delete()
     else:
         # Display the featured authorities configuration form.
         form = FeaturedAuthorityForm()

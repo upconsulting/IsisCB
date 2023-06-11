@@ -238,7 +238,7 @@ def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, obje
             task.save()
             print('success:: %s' % str(task_id))
     except Exception as E:
-        logger.error('bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state))
+        logger.error('bulk_change_tracking_state failed for %s' % (filter_params_raw))
         logger.error(E)
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)

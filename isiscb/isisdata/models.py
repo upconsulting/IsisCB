@@ -1154,7 +1154,7 @@ class Citation(ReferencedEntity, CuratedMixin):
             None: None
         }
 
-        self.tracking_state = tracking_mapping[current_state]
+        self.tracking_state = tracking_mapping[current_state] if current_state in tracking_mapping else None
         self.hstm_uploaded = Citation.IS_HSTM_UPLOADED if is_hstm else None
 
     @property
