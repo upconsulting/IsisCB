@@ -945,6 +945,18 @@ class BulkChangeCSVForm(forms.Form):
     ]
     action = forms.ChoiceField(choices=CHOICES)
 
+class AuthorityField(forms.ModelChoiceField):
+    def to_python(self, value):
+        """Normalize data to a list of strings."""
+        # Return an empty list if no input was given.
+        if not value:
+            return None
+        return Authority.objects.filter(id=value).first()
+
+    def validate(self, value):
+        """Check if value consists only of valid emails."""
+        # nothing to do here
+
 class TenantSettingsForm(forms.ModelForm):
     navigation_color = forms.CharField(help_text='Background color of the navigation bar.', widget=forms.TextInput(attrs={'type': "color"}))
     link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
@@ -954,11 +966,13 @@ class TenantSettingsForm(forms.ModelForm):
     google_api_key = forms.CharField(help_text='API key for Google', required=False)
     twitter_api_key = forms.CharField(help_text='API key for Twitter', required=False)
     twitter_user_name = forms.CharField(help_text='User id for Twitter', required=False)
+    default_featured_authority = AuthorityField(widget=forms.HiddenInput(), queryset=Authority.objects.none(), required=False)
 
     class Meta(object):
         model = TenantSettings
         fields = [
-            'navigation_color', 'link_color', 'google_api_key', 'twitter_api_key', 'twitter_user_name'
+            'navigation_color', 'link_color', 'google_api_key', 
+            'twitter_api_key', 'twitter_user_name', 'default_featured_authority'
         ]
 
     def __init__(self, *args, **kwargs):
