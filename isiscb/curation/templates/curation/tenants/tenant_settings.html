@@ -98,7 +98,7 @@
     {% endfor %}
     <label class="col-md-2">{{ form.default_featured_authority.label }}</label>
     <div class="col-md-10">
-      <input id="featured_authority_search" type="text" class="form-control" value="{{form.instance.default_featured_authority.name}}" />
+      <input id="featured_authority_search" type="text" class="form-control" value="{{form.instance.default_featured_authority.name}} ({{form.instance.default_featured_authority.id}})" />
       <ul class="list-group" id="featured_authority_datalist">
       </ul>
       {{ form.default_featured_authority|addcss:"form-control" }}
@@ -134,7 +134,7 @@
     var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&use_custom_cmp=false&"  
     url += "&max=" + max_results + "&force=" + force; 
     if (search_tenants) {
-      url += "&tenant_ids={{instance.owning_tenant.id}}";
+      url += "&tenant_ids={{tenant.id}}";
     }
     url += "&q=" + query;
     $.ajax(url, {
@@ -144,7 +144,7 @@
         result.results.forEach(function(r) {
           var newOption = $('<li class="list-group-item" data-authority-id="' + r.id + '"></li>');
 
-          var linkText = r.name + ' (' + r.citation_count + ')';
+          var linkText = r.name + ' (' + r.citation_count + ') - ' + r.id;
           newOption.html('<a href="#">' + linkText + '</a>')
           newOption.click(function() {
             $("#id_default_featured_authority").val(r.id);

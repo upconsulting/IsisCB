@@ -2011,7 +2011,7 @@ def quick_and_dirty_authority_search(request):
 
     if not show_inactive:   # Don't show inactive records.
         query &= Q(record_status_value=CuratedMixin.ACTIVE)
-
+    
     queryset = Authority.objects.filter(query)
     queryset_sw = Authority.objects.filter(query)       # Starts with...
     queryset_exact = Authority.objects.filter(query)    # Exact match.
