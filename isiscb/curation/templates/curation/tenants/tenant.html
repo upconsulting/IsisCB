@@ -65,6 +65,14 @@
             <th>Link Color</th>
             <td><i style="color: {{tenant.settings.link_color}}" class="fa fa-square" aria-hidden="true"></i></td>
           </tr>
+          <tr>
+            <th>Default Featured Authority</th>
+            <td>{% if tenant.settings.default_featured_authority %}{{tenant.settings.default_featured_authority.name}} ({{tenant.settings.default_featured_authority.id}}) {% endif %}</td>
+          </tr>
+          <tr>
+            <th>Default Featured Citation</th>
+            <td>{% if tenant.settings.default_featured_citation %}{{tenant.settings.default_featured_citation.title}} ({{tenant.settings.default_featured_citation.id}}) {% endif %}</td>
+          </tr>
       </table>
   </div>
 </div>

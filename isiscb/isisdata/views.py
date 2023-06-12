@@ -1513,6 +1513,8 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
         featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
+    elif tenant.settings.default_featured_citation:
+        featured_citation = tenant.settings.default_featured_citation
     else:
         #set default featured citation in case no featured authorities have been selected
         featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
@@ -1525,6 +1527,8 @@ def home(request, template='isisdata/home.html', tenant_id=None):
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+    elif tenant.settings.default_featured_authority:
+        featured_authority = tenant.settings.default_featured_authority
     else:
         #set default featured authorities in case no featured authorities have been selected
         featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
