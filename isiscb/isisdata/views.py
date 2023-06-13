@@ -1513,7 +1513,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
         featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
-    elif tenant.settings.default_featured_citation:
+    elif tenant and tenant.settings and tenant.settings.default_featured_citation:
         featured_citation = tenant.settings.default_featured_citation
     else:
         #set default featured citation in case no featured authorities have been selected
@@ -1527,7 +1527,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
-    elif tenant.settings.default_featured_authority:
+    elif tenant and tenant.settings and tenant.settings.default_featured_authority:
         featured_authority = tenant.settings.default_featured_authority
     else:
         #set default featured authorities in case no featured authorities have been selected
@@ -1558,28 +1558,9 @@ def home(request, template='isisdata/home.html', tenant_id=None):
         recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet(tenant.settings.twitter_api_key, tenant.settings.twitter_user_name)
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
-
-    start_index = 0
-    end_index = 10
-    recent_records =[]
-
-    # unfortunately, citatations freshly created are public=False so we can't filter on that field when retrieving
-    # creation events, we have to test that after we got the real object form the history object
-    while len(recent_records) < 10:
-        recent_citations = Citation.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
-        recent_authorities = Authority.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
-
-        for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
-            try:
-                record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
-                if record.public:
-                    recent_records.append(record)
-            except Exception as e:
-                print(e)
-
+    
     context = {
         'active': 'home',
-        'records_recent': recent_records[:10],
         'comments_recent': Comment.objects.order_by('-modified_on')[:10],
         'citation': featured_citation,
         'featured_citation_authors': featured_citation_authors,

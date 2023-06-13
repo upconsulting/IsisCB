@@ -158,6 +158,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'language__name',
         'belongs_to',
         'belongs_to__name',
+        'owning_tenant__id',
+        'owning_tenant__name',
         'tenants',
         'tenants__name',
         'complete_citation',
@@ -449,10 +451,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data['dataset_typed_names'] = data[0]['belongs_to__name']
 
     def _index_tenants(self, data):
-        if data[0]['tenants']:
-            self.prepared_data['tenant_ids'] = data[0]['tenants']
-        if data[0]['tenants__name']:
-            self.prepared_data['tenant_names'] = data[0]['tenants__name']
+        if data[0]['owning_tenant__id']:
+            self.prepared_data['tenant_ids'] = data[0]['owning_tenant__id']
+        if data[0]['owning_tenant__name']:
+            self.prepared_data['tenant_names'] = data[0]['owning_tenant__name']
 
     def _get_reviewed_book(self, data):
         """
@@ -682,7 +684,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         that make haystack choke.
         """
         self.prepared_data = super(AuthorityIndex, self).prepare(obj)
-
+        
         for k, v in list(self.prepared_data.items()):
             if type(v) is str:
                 self.prepared_data[k] = remove_control_characters(v.strip())
