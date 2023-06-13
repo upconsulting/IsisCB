@@ -57,6 +57,18 @@
           }
         });
         </script>
+
+        {% if tenant and tenant.settings %}
+        <style>
+          .navbar-default {
+              background-color: {{tenant.settings.navigation_color}};
+             
+          }
+          .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
+            color: #111111;
+          }
+        </style>
+        {% endif %}
         {% block extrahead %}
         {% endblock %}
     </head>
@@ -70,7 +82,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url "curation:dashboard" %}">IsisCB Curation</a>
+          <a class="navbar-brand" href="{% url "curation:dashboard" %}">{% if tenant %} {{tenant.title }} {% else %} Explore Superadmin {% endif %}</a>
+          
+        </div>
+        <div style="padding-top:15px; float:left">
+          <div>
+            {% if tenant_access == 'update' %} <span class="label label-danger">Tenant Administrator</span> {% elif tenant_access == 'view' %}<span class="label label-info">Tenant Editor</span>{% endif %}
+            {% if user.is_superuser %} <span class="label label-warning">Superadmin</span> {% endif %}
+            {{ user }}
+          </div>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">

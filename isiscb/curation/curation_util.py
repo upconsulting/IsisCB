@@ -19,6 +19,10 @@ def get_tenant(user):
         return tenant_role.tenant_rules[0].tenant
     return None
 
+def get_tenant_access(user, tenant):
+    tenant_role = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False)).first()
+    return tenant_role.tenant_rules.first().allowed_action
+
 def get_classification_systems(user):
     tenant_query = Q(owning_tenant=get_tenant(user)) | Q(owning_tenant__isnull=True)
     return ClassificationSystem.objects.filter(tenant_query)
