@@ -80,7 +80,13 @@
             {% endif %}
           </a>
           <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
-          <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% if acrelation.authority %}
+            {% if instance.owning_tenant %}
+            <a href="{% url 'tenants:authority' instance.owning_tenant.identifier acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            {% else %}
+            <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            {% endif %}
+          {% endif %}
         </p>
         {% endif %}
     {% endfor %}
@@ -124,7 +130,13 @@
           {% endif %}
         </a>
         <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
-        <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif%}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        {% if acrelation.authority %}
+          {% if instance.owning_tenant %}
+          <a href="{% url 'tenants:authority' instance.owning_tenant.identifier acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% else %}
+          <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% endif %}
+        {% endif %}
         </p>
         {% endif %}
     {% endfor %}
