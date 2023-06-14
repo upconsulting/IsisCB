@@ -298,7 +298,7 @@ function triggerSearchSubjects(force) {
             publicLink.attr('target', "_blank");
 
             var linkText = r.name + ' (' + r.citation_count + ')';
-            if (!r.tenants.some(r=> {{instance.owning_tenant.id}} == r)) {
+            if (!(r.owning_tenant == {{instance.owning_tenant.id}}) ) {
               linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
             }
             publicLink.html(linkText);
