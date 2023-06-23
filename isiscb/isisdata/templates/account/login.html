@@ -21,7 +21,7 @@
 				</a>
 			</div>
 		</div>
-		<form action="{% url 'account_login' %}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
+		<form action="{% url 'account_login' %}?next={{ request.GET.next|urlencode }}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
 
 			<div class="panel-body">
 				{% if form.errors and not form.non_field_errors %}
