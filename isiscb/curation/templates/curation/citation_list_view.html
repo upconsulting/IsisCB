@@ -592,7 +592,8 @@ function toggleLinkRecordsBtn() {
             <div class="form-group form-group-xs clearable has-feedback">
                 <label class="col-lg-2 control-label">Pub date</label>
                 <div class="col-lg-5" style="padding-right:2px">
-                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after" }}
+                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                  <a href="" style="right:0" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
                 <div class="col-lg-5" style="padding-left:2px">
                   {{ objects.form.publication_date_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
@@ -724,10 +725,12 @@ function toggleLinkRecordsBtn() {
           <div class="form-group form-group-xs clearable">
               <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modified</label>
               <div class="col-lg-5" style="padding-right:2px">
-                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after" }}
+                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:0" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
               <div class="col-lg-5" style="padding-left:2px">
-                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before" }}
+                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:10px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
           </div>
 
@@ -789,10 +792,12 @@ function toggleLinkRecordsBtn() {
           <div class="form-group form-group-xs clearable">
               <label class="col-lg-2 control-label">Created</label>
               <div class="col-lg-5" style="padding-right:2px">
-                {{ objects.form.created_on_from|add_popover:"form-control date-input;after" }}
+                {{ objects.form.created_on_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:0px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
               <div class="col-lg-5" style="padding-left:2px">
-                {{ objects.form.created_on_to|add_popover:"form-control date-input;before" }}
+                {{ objects.form.created_on_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:10px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
 
               </div>
           </div>
