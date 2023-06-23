@@ -97,7 +97,7 @@ class CitationFilter(django_filters.FilterSet):
     MARKED_DELETE = 'MD'
 
     print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[(READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint'), (MARKED_DELETE, 'MarkedDelete')], method='filter_print_status')
-    multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
+    #multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
