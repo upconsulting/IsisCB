@@ -23,6 +23,13 @@ def get_iso_date_string(date):
     return date.isoformat()
 
 @register.filter
+def add_css_placeholder(field, css_placeholder):
+    parts = css_placeholder.split(';')
+    placeholder = parts[1] if len(parts) >= 2 else ''
+    css = parts[0]
+    return field.as_widget(attrs={"placeholder": placeholder, "class": css})
+
+@register.filter
 def add_popover(field, css_placeholder_text):
     parts = css_placeholder_text.split(';')
     placeholder = parts[1] if len(parts) >= 2 else ''
