@@ -1182,6 +1182,7 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
 
 class DatasetAdmin(admin.ModelAdmin):
     fields = ['name', 'description', 'editor', 'owning_tenant']
+    list_display = ['name', 'owning_tenant']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')

@@ -746,7 +746,6 @@ function toggleLinkRecordsBtn() {
               <label class="col-lg-2 control-label">Database</label>
               <div class="col-lg-10">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
-                <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
           </div>
 
@@ -869,18 +868,7 @@ $(document).ready(function() {
     }
     $('#zotero_accession_input').val("{{objects.zotero_accession_name}}" + append);
 
-    /* 'belongs to' javascript */
-    $('#belongs_to_input').bootcomplete({
-        url:'{% url 'curation:search-datasets' %}',
-        minLength: 3,
-        idFieldName: 'belongs_to'
-    });
-
-    $('#belongs_to_input').on('input', function() {
-        if ($('#belongs_to_input').val() == '') {
-          $('#id_belongs_to').val('');
-        }
-    });
+    
 
     /* 'creator' javascript */
     $('#creator_input').bootcomplete({

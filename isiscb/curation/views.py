@@ -1588,7 +1588,7 @@ def citations(request):
     #  - ``all_params`` includes the parameters in ``filter_params`` plus any
     #     additional parameters not used by the CitationFilter (e.g. page).
     filter_params, all_params = _citations_get_filter_params(request)
-
+    
     # We use the filter parameters in this form to specify the queryset for
     #  bulk actions.
     if isinstance(filter_params, QueryDict):
@@ -1620,7 +1620,7 @@ def citations(request):
 
     if not active_filters:
         context.update({
-            'objects': CitationFilter(filter_params, queryset=Citation.objects.none()),
+            'objects': CitationFilter(filter_params, queryset=Citation.objects.none(), request=request),
             'current_offset': 0,
         })
         return render(request, template, context)
@@ -1632,12 +1632,12 @@ def citations(request):
               'publication_date', 'title_for_display', 'part_details_id',
               'part_details__page_begin', 'part_details__page_end',
               'part_details__pages_free_text', 'part_details__volume_free_text',
-              'part_details__issue_free_text', 'created_on_fm',
+              'part_details__issue_free_text', 'created_on_fm', 'belongs_to',
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
     qs = queryset.select_related('part_details').values(*fields).distinct()
-    filtered_objects = CitationFilter(filter_params, queryset=qs)
+    filtered_objects = CitationFilter(filter_params, queryset=qs, request=request)
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
     currentPage = all_params.get('page', 1)
@@ -2322,7 +2322,7 @@ def _get_filtered_queryset(request, object_type='CITATION'):
     filter_params_raw = filter_params.urlencode()#.encode('utf-8')
     if object_type == 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
-        queryset = CitationFilter(filter_params, queryset=_qs)
+        queryset = CitationFilter(filter_params, queryset=_qs, request=request)
     else:
         _qs = operations.filter_queryset(request.user, Authority.objects.all())
         queryset = AuthorityFilter(filter_params, queryset=_qs)
@@ -2438,11 +2438,11 @@ def export_authorities_status(request):
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
 
-def _build_filter_label(filter_params_raw, filter_type='CITATION'):
+def _build_filter_label(filter_params_raw, filter_type='CITATION', request=None):
     if filter_type == 'AUTHORITY':
         current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True))
     else:
-        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
+        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True, request=request))
     filter_form = current_filter.form
     filter_data = {}
     if filter_form.is_valid():
@@ -2519,7 +2519,7 @@ def export_citations(request):
             #  to check the return value or task state.
             task.async_uuid = result.id
             task.value = _out_name
-            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw)
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, request=request)
             task.save()
 
             # Send the user to a status view, which will show the export
@@ -2592,7 +2592,7 @@ def export_authorities(request):
             #  to check the return value or task state.
             task.async_uuid = result.id
             task.value = _out_name
-            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, 'AUTHORITY')
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, 'AUTHORITY', request=request)
             task.save()
 
             # Send the user to a status view, which will show the export

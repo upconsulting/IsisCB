@@ -5,6 +5,7 @@ from django_filters.fields import Lookup
 from django.db.models import Q
 from django import forms
 
+from curation import curation_util as c_util
 from isisdata.models import *
 from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
@@ -49,7 +50,7 @@ class CitationFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method='filter_id')
     # title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     title = django_filters.CharFilter(method='filter_title')
-    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
+    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('all', 'All')] + list(Citation.TYPE_CHOICES), method='filter_type_controlled')
     # publication_date_from = django_filters.MethodFilter()
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
@@ -83,7 +84,8 @@ class CitationFilter(django_filters.FilterSet):
     record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
-    belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
+    belongs_to = django_filters.ChoiceFilter(choices=[], method='filter_belongs_to', lookup_expr='isnull',
+        null_label='No dataset') #django_filters.CharFilter(widget=forms.HiddenInput())
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
@@ -130,14 +132,9 @@ class CitationFilter(django_filters.FilterSet):
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
-        dataset = self.data.get('belongs_to', None)
-        if dataset:
-            try:
-                ds = Dataset.objects.get(pk=dataset)
-                if ds:
-                    self.dataset_name = ds.name
-            except Dataset.DoesNotExist:
-                self.dataset_name = "Dataset could not be found."
+        if self.request:
+            tenant = c_util.get_tenant(self.request.user)
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
 
         created_by_native = self.data.get('created_by_native', None)
         if created_by_native:
@@ -208,6 +205,11 @@ class CitationFilter(django_filters.FilterSet):
         for part in value.split():
             queryset = queryset.filter(title_for_sort__icontains=part)
         return queryset
+    
+    def filter_type_controlled(self, queryset, name, value):
+        if not value or value == 'all':
+            return queryset
+        return queryset.filter(type_controlled=value)
 
     def filter_abstract(self, queryset, name, value):
         if not value:
@@ -348,6 +350,13 @@ class CitationFilter(django_filters.FilterSet):
             return queryset.filter(record_status_value=CuratedMixin.DUPLICATE)
 
         return queryset
+    
+    def filter_belongs_to(self, queryset, field, value):
+        if value == 'null':
+            return queryset.filter(belongs_to__isnull=True)
+        if value:
+            return queryset.filter(belongs_to__id=value)
+        return queryset
 
     def filter_in_collections(self, queryset, field, value):
         if not value:
@@ -355,33 +364,6 @@ class CitationFilter(django_filters.FilterSet):
         q = Q()
 
         return queryset.filter(Q(in_collections=value))
-
-    def filter_in_multiple_fields(self, queryset, field, value):
-        if not value:
-            return queryset
-
-        value = normalize(unidecode(value))
-
-        q_title = Q()
-        q_description = Q()
-        q_author = Q()
-        q_abstract = Q()
-        for part in value.split():
-            q_title = q_title & Q(title_for_sort__icontains=part)
-            q_author = q_author & Q(acrelation__authority__name__icontains=part,
-                            acrelation__type_controlled__in=[
-                                        ACRelation.AUTHOR])
-
-        q_description = q_description & Q(description__icontains=value)
-        q_abstract = q_abstract & Q(abstract__icontains=value)
-        q_subject = Q(acrelation__authority__name__icontains=value,
-                               acrelation__type_controlled=ACRelation.SUBJECT)
-        q_category = Q(acrelation__authority__name__icontains=value,
-                                   acrelation__type_controlled=ACRelation.CATEGORY)
-
-
-
-        return queryset.filter(q_title | q_description | q_author | q_abstract | q_subject | q_category)
 
 class AuthorityFilter(django_filters.FilterSet):
 
