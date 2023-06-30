@@ -370,7 +370,7 @@ class AuthorityFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
-    type_controlled = django_filters.ChoiceFilter(choices=[('ALL', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
+    type_controlled = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
     description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
     classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(field_name='classification_code')
@@ -378,29 +378,25 @@ class AuthorityFilter(django_filters.FilterSet):
     # linked_data = django_filters.MethodFilter()
     try:
         linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
-        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('all', 'All')] + linked_data_types)
     except Exception as e:
         print("Can't set linked data.", e)
 
     try:
         attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
-        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('all', 'All')] + attribute_types)
     except Exception as e:
         print("Can't get attributes", e)
 
-    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('all', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
-    try:
-        datasets = Dataset.objects.all()
-        dataset_list = [(ds.pk, ds.name) for ds in datasets]
-        belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
-    except Exception as e:
-        print("Cant get datasets.", e)
-
+    belongs_to = django_filters.ChoiceFilter(choices=[], method='filter_belongs_to', lookup_expr='isnull',
+        null_label='No dataset') #django_filters.CharFilter(widget=forms.HiddenInput())
+    
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
     created_on_from = django_filters.CharFilter(method='filter_created_on_from')
     created_on_to = django_filters.CharFilter(method='filter_created_on_to')
@@ -487,6 +483,11 @@ class AuthorityFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
+        if self.request:
+            tenant = c_util.get_tenant(self.request.user)
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+
+
     def filter_id(self, queryset, name, value):
         if not value:
             return queryset
@@ -496,7 +497,7 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset
 
     def filter_tracking_state(self, queryset, field, value):
-        if not value:
+        if not value or value == 'all':
             return queryset
 
         return queryset.filter(tracking_state=value)
@@ -514,7 +515,7 @@ class AuthorityFilter(django_filters.FilterSet):
         '''
         Filter by linked data types
         '''
-        if not value:
+        if not value or value == 'all':
             return queryset
         authority_ids = LinkedData.objects\
                             .filter(type_controlled_id=value)\
@@ -526,7 +527,7 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset.filter(pk__in=authority_ids)
 
     def filter_attribute_type(self, queryset, name, value):
-        if not value:
+        if not value or value == 'all':
             return queryset
         authority_ids = Attribute.objects\
                             .filter(type_controlled_id=value)\
@@ -573,6 +574,13 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset.filter(modified_on__lte=date)
 
     def filter_type_controlled(self, queryset, name, value):
-        if value != "ALL":
+        if value != "all":
             return queryset.filter(type_controlled=value)
+        return queryset
+
+    def filter_belongs_to(self, queryset, field, value):
+        if value == 'null':
+            return queryset.filter(belongs_to__isnull=True)
+        if value:
+            return queryset.filter(belongs_to__id=value)
         return queryset

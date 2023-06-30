@@ -1717,7 +1717,7 @@ def authorities(request):
 
     if not active_filters:
         context.update({
-            'objects': AuthorityFilter(filter_params, queryset=Authority.objects.none()),
+            'objects': AuthorityFilter(filter_params, queryset=Authority.objects.none(), request=request),
             'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
             'current_offset': 0,
         })
@@ -1726,7 +1726,7 @@ def authorities(request):
     queryset = operations.filter_queryset(request.user,
                                           Authority.objects.select_related('linkeddata_entries').values(*fields))
 
-    filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
+    filtered_objects = AuthorityFilter(filter_params, queryset=queryset, request=request)
     result_count = filtered_objects.qs.count()
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
@@ -2325,7 +2325,7 @@ def _get_filtered_queryset(request, object_type='CITATION'):
         queryset = CitationFilter(filter_params, queryset=_qs, request=request)
     else:
         _qs = operations.filter_queryset(request.user, Authority.objects.all())
-        queryset = AuthorityFilter(filter_params, queryset=_qs)
+        queryset = AuthorityFilter(filter_params, queryset=_qs, request=request)
     return queryset, filter_params_raw
 
 def _get_filtered_queryset_authorities(request):
@@ -2340,7 +2340,7 @@ def _get_filtered_queryset_authorities(request):
     filter_params_raw = filter_params.urlencode()#.encode('utf-8')
 
     _qs = operations.filter_queryset(request.user, Authority.objects.all())
-    queryset = AuthorityFilter(filter_params, queryset=_qs)
+    queryset = AuthorityFilter(filter_params, queryset=_qs, request=request)
 
     return queryset, filter_params_raw
 
@@ -2356,7 +2356,7 @@ def bulk_action(request):
     template = 'curation/bulkaction.html'
     object_type = request.POST.get('object_type', 'CITATION')
     queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter, request=request):
         queryset = queryset.qs
 
     form_class = bulk_action_form_factory(queryset=queryset, user=request.user, object_type=object_type)
@@ -2440,7 +2440,7 @@ def export_authorities_status(request):
 
 def _build_filter_label(filter_params_raw, filter_type='CITATION', request=None):
     if filter_type == 'AUTHORITY':
-        current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True))
+        current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True), request=request)
     else:
         current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True, request=request))
     filter_form = current_filter.form
