@@ -134,8 +134,10 @@ def create_citation(request):
         if form.is_valid() and partdetails_form.is_valid():
             form.cleaned_data['public'] = False
             #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
+            form.instance.owning_tenant = c_util.get_tenant(request.user)
             citation = form.save()
             citation.record_status_value = CuratedMixin.INACTIVE
+            
             citation.save()
 
             if partdetails_form:
