@@ -5,10 +5,6 @@
   <ul class="list-group" id="create-category-results-container">
   <li class="list-group-item" id="create-category-item" style="display: none;"></li>
   </ul>
-
-  <div class="text-right">
-    <a href="#" id="searchAllTenantsCT"><i class="fa fa-search" aria-hidden="true"></i> Search all tenants</a>
-  </div>
   
 </p>
 
@@ -52,7 +48,6 @@ var category_creation_container = $('#create-category-item');
 
 var INITIAL_MAX_RESULTS = 10;
 var max_results_categories = INITIAL_MAX_RESULTS;
-var search_tenants_ct = true;
 
 var searchTimerCategories = 0;
 function triggerSearchCategories() {
@@ -63,7 +58,7 @@ function triggerSearchCategories() {
   var query = $('#categorySearchQuery').val();
   searchTimerCategories = setTimeout(function() {
     var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&type=CT&use_custom_cmp=true&max=" + max_results_categories + "&q=" + query
-    if (search_tenants_ct) {
+    if (!search_all_tenants) {
       url += "&tenant_ids={{instance.owning_tenant.id}}";
     }
     $.ajax(url, {
@@ -80,10 +75,15 @@ function triggerSearchCategories() {
                 choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
                 choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                 choice_elem += '</span>';
-                choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
+                choice_elem += ' <span class="label label-success">' + r.type + '</span> ';
+                if (!(r.owning_tenant == {{instance.owning_tenant.id}}) ) {
+                  choice_elem += '<i class="fas fa-share-alt"></i> ';
+                }
+                choice_elem += ' <strong>' + r.name + '</strong>';
                 if (r.citation_count != null) {
                     choice_elem += ' (' + r.citation_count + ')';
                 }
+                
                 if (r.description != null) {
                     choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                 }

@@ -54,6 +54,7 @@ class TenantSettings(models.Model):
     twitter_user_name = models.CharField(max_length=255, blank=True, null=True)
     default_featured_authority = models.ForeignKey('Authority', on_delete=models.SET_NULL, blank=True, null=True)
     default_featured_citation = models.ForeignKey('Citation', on_delete=models.SET_NULL, blank=True, null=True)
+    subject_searches_all_tenants = models.BooleanField(default=False)
 
     @property
     def home_main_block(self):

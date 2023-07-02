@@ -73,6 +73,10 @@
             <th>Default Featured Citation</th>
             <td>{% if tenant.settings.default_featured_citation %}{{tenant.settings.default_featured_citation.title}} ({{tenant.settings.default_featured_citation.id}}) {% endif %}</td>
           </tr>
+          <tr>
+            <th>Subject and Category Search</th>
+            <td>{% if tenant.settings.subject_searches_all_tenants %} <i class="fa fa-toggle-on" aria-hidden="true"></i> By default all tenants are searched. {% else %} <i class="fa fa-toggle-off" aria-hidden="true"></i> By default only this tenant is searched. {% endif %}</td>
+          </tr>
       </table>
   </div>
 </div>

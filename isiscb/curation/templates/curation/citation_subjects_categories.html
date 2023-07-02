@@ -147,6 +147,17 @@
   <!-- BEGIN add subject/category column -->
   <div class="col-md-4">
     {% if can_update %}
+    <div class="text-right">
+      <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+    </div>
+    <div class="text-right">
+      Search all tenants:
+      <div class="btn-group btn-toggle"> 
+        <button id="searchAllTenantsOff" class="btn btn-xs btn-default {% if not tenant.settings.subject_searches_all_tenants %}btn-primary {% else %} btn-default {% endif %}">Off</button>
+        <button id="searchAllTenantsOn" class="btn btn-xs {% if tenant.settings.subject_searches_all_tenants %}btn-primary  {% else %} btn-default {% endif %}">On</button>
+      </div>
+    </div>
+    
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
       <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
@@ -197,12 +208,7 @@
 
         </ul>
 
-        <div class="text-right">
-          <a href="#" id="searchAllTenants"><i class="fa fa-search" aria-hidden="true"></i> Search all tenants</a>
-        </div>
-        <div class="text-right">
-          <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
-        </div>
+        
       </div>
 
       <!-- Category tab -->
@@ -263,7 +269,7 @@ var delete_handler = function() {
 var INITIAL_MAX_RESULTS = 10;
 var max_results = INITIAL_MAX_RESULTS;
 var types = [];
-var search_tenants = true;
+var search_all_tenants = {% if tenant.settings.subject_searches_all_tenants %}true{%else%}false{%endif%};
 
 var searchTimerSubjects = 0;
 function triggerSearchSubjects(force) {
@@ -275,7 +281,7 @@ function triggerSearchSubjects(force) {
   searchTimerSubjects = setTimeout(function() {
     var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types 
     url += "&max=" + max_results + "&force=" + force; 
-    if (search_tenants) {
+    if (!search_all_tenants) {
       url += "&tenant_ids={{instance.owning_tenant.id}}";
     }
     url += "&q=" + $('#subjectSearchQuery').val();
@@ -365,18 +371,36 @@ function suggestSubjects(event) {
 $(document).ready(function() {
 
   $("#forceSearch").click(function() {
-    search_tenants = true
     triggerSearchSubjects(true);
   });
 
-  $("#searchAllTenants").click(function() {
-    search_tenants = false
-    triggerSearchSubjects(true);
+  $("#searchAllTenantsOff").click(function() {
+    search_all_tenants = false
+    $("#searchAllTenantsOn").removeClass("btn-primary");
+    $("#searchAllTenantsOn").addClass("btn-default");
+    $("#searchAllTenantsOff").removeClass("btn-default");
+    $("#searchAllTenantsOff").addClass("btn-primary");
+    if ($("#subjectsTab").hasClass("active")) {
+      triggerSearchSubjects(true);
+    } else if ($("#categoriesTab").hasClass("active")) {
+      triggerSearchCategories();
+    }
+  });
+  $("#searchAllTenantsOn").click(function() {
+    search_all_tenants = true
+    $("#searchAllTenantsOff").removeClass("btn-primary");
+    $("#searchAllTenantsOff").addClass("btn-default");
+    $("#searchAllTenantsOn").removeClass("btn-default");
+    $("#searchAllTenantsOn").addClass("btn-primary");
+    if ($("#subjectsTab").hasClass("active")) {
+      triggerSearchSubjects(true);
+    } else if ($("#categoriesTab").hasClass("active")) {
+      triggerSearchCategories();
+    }
   });
 
   $('#subjectSearchQuery').on('keyup', function() {
     max_results = INITIAL_MAX_RESULTS;
-    search_tenants = true
     triggerSearchSubjects(false);
   });
 

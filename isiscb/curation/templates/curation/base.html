@@ -124,9 +124,9 @@
                 </ul>
               </li>
               <li{% if curation_section == "tenants" %} class="active"{% endif %}>
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenants <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <li><a href="{% url "curation:tenant_list" %}">Overview</a></li>
+                  <li><a href="{% url 'curation:tenant' tenant.id %}">Settings</a></li>
 
                 </ul>
               </li>
