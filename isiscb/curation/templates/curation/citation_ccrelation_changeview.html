@@ -10,59 +10,69 @@
 </div>
 {% endif %}
 
+<style>
+  .swap-subject-object {
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+</style>
+
 <form id="ccrelation_form" class="form" action="." method="POST">
     {% csrf_token %}
     <input type="hidden" name="search" value="{{ search_key }}">
     <input type="hidden" name="current" value="{{ current_index }}">
 
     <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-5">
-          <div class="row">
-              <div class="col-md-12">
-                <div class="form-group form-inline">
-                  <strong class="text-warning">
-                    {% if form.instance.id %}{{ form.instance.id }}{% else %}New{% endif %}</strong> | <strong>CCR record</strong>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  {{ form.record_status_value|addcss:"form-control input-sm" }}
-                  &nbsp;
-                  {{ form.record_status_explanation|addcss:"form-control input-sm" }}
-                </div>
-                <div class="col-md-12">
-                    {% for error in form.record_status_value.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
-                    {% for error in form.record_status_explanation.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-              </div>
+      <div class="col-md-5">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group form-inline">
+              <strong class="text-warning">
+                {% if form.instance.id %}{{ form.instance.id }}{% else %}New{% endif %}</strong> | <strong>CCR record</strong>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              {{ form.record_status_value|addcss:"form-control input-sm" }}
+              &nbsp;
+              {{ form.record_status_explanation|addcss:"form-control input-sm" }}
+            </div>
+            <div class="col-md-12">
+                {% for error in form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                {% for error in form.record_status_explanation.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
             </div>
           </div>
-        <div class="col-md-3">
-          <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
-     Back to Citation</a>
-        </div>
-        <div class="col-md-4">
-            <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
-                <a href="#" class="btn btn-sm btn-success save-ccrelation" >Save</a>
-                {% if ccrelation.id %}
-                <a href="#"
-                  class="btn btn-danger btn-sm delete-ccrelation"
-                  ccrelation-id="{{ ccrelation.id }}"
-                  ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}">
-                  Delete
-                </a>
-                {% endif %}
-            </div>
         </div>
       </div>
+      <div class="col-md-3">
+        <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+    Back to Citation</a>
+      </div>
+      <div class="col-md-4">
+        <div class="btn-group pull-right">
+          <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+          <a href="#" class="btn btn-sm btn-success save-ccrelation" >Save</a>
+          {% if ccrelation.id %}
+          <a href="#"
+            class="btn btn-danger btn-sm delete-ccrelation"
+            ccrelation-id="{{ ccrelation.id }}"
+            ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}">
+            Delete
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
     {% include "curation/fragment_citation_header.html" %}
 
     <div class="container-fluid form-horizontal">
-        <div class="row">
-            <div class="col-sm-6">
-                {% for error in form.type_controlled.errors %}
+      <div class="row">
+        <!-- type and display order -->
+        <div class="col-md-6">
+          {% for error in form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
@@ -71,8 +81,10 @@
                       {{ form.type_controlled|addcss:"form-control" }}
                     </div>
                 </div>
-
-                {% for error in form.data_display_order.errors %}
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
+          {% for error in form.data_display_order.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
@@ -81,169 +93,165 @@
                       {{ form.data_display_order|addcss:"form-control" }}
                     </div>
                 </div>
-
-                {% for error in form.administrator_notes.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-12">{{ form.administrator_notes.label }}</label>
-                    <div class="col-md-12">
-                      {{ form.administrator_notes|addcss:"form-control" }}
-                    </div>
-                </div>
-
-                {% for error in form.record_history.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-12">{{ form.record_history.label }}</label>
-                    <div class="col-md-12">
-                      {{ form.record_history|addcss:"form-control" }}
-                    </div>
-                </div>
-                <div class="form-group">
-                  <label class="col-md-12">Last updated on <span class="date">{{ form.instance.modified_on|get_iso_date }}</span> by {{ form.instance.modified_by }}.</label>
-                </div>
-
-                {{ form.subject }}
-                {{ form.object }}
-            </div>
-            <div class="col-sm-6">
-
-              <div class="text-right">
-                <a href="{% url 'curation:create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
-              </div>
-
-                {% for error in form.subject.errors %}
-                <div class="col-md-12">
-                  <div class="alert alert-danger">
-                  {{ error }}
-                  </div>
-                </div>
-                {% endfor %}
-
-                <div id="subject_info_container">
-                  <div id="subject_info">
-                    <strong>Citation record: </strong>
-                    {% if form.instance.subject %}
-                    <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                      <a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                    </strong>
-
-                    <p>
-                      <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
-                      <br>
-                      <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
-                      <br>
-                      {% with form.instance.subject|get_authors_editors as authors_editors %}
-                      <span class="show_authors">
-                      {% if authors_editors %}
-                                  {{ authors_editors }}
-                      {% endif %}
-                      </span>
-                      {% endwith %}
-
-                    </p>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <div class="input-group">
-                        <input type="text"
-                            id="citation-search-subject"
-                            class="form-control citation-search"
-                            name="citation-search"
-                            results-target="#subject-results-container"
-                            selected-result-target="#id_ccrelation-subject">
-                        <span class="input-group-btn">
-                            <a
-                                class="btn glyphicon glyphicon-pencil enable-search-input"
-                                data-target="#citation-search-subject">
-                            </a>
-                        </span>
-                    </div>
-                  </div>
-                </div>
-
-
-                <ul class="list-group" id="subject-results-container"></ul>
-
-
-                <div class="text-center">
-                    <div class="button-group">
-                        <span class="btn btn-lg glyphicon glyphicon-refresh"
-                            id="swap-subject-object"></span>
-                    </div>
-                </div>
-
-                {% for error in form.object.errors %}
-                <div class="col-md-12">
-                  <div class="alert alert-danger">
-                  {{ error }}
-                  </div>
-                </div>
-                {% endfor %}
-
-                <div id="object_info_container">
-                <div id="object_info">
-                <strong>Citation record: </strong>
-
-                <strong class="text-warning"><span class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
-                  {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
-                  {% if not form.instance.object %}
-                    <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                  {% endif %}
-                </strong>
-
-                <p>
-                  <span {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
-                  <br>
-                  <em class="show_title">{% if form.instance.object %}{{ form.instance.object|get_citation_title }}{% endif %}</em>
-                  <br>
-                  <span class="show_authors">
-                    {% if form.instance.object %}
-                  {% with form.instance.object|get_authors_editors as authors_editors %}
-
-                  {% if authors_editors %}
-                              {{ authors_editors }}
-                  {% endif %}
-
-                  {% endwith %}
-                  {% endif %}
-                  </span>
-
-
-                </p>
-                </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="col-sm-12">
-                      <div class="input-group">
-                        <input type="text"
-                            id="citation-search-object"
-                            class="form-control citation-search"
-                            name="citation-search"
-                            results-target="#object-results-container"
-                            autocomplete="off"
-                            selected-result-target="#id_ccrelation-object">
-                        <span class="input-group-btn">
-                            <a
-                                class="btn glyphicon glyphicon-pencil enable-search-input"
-                                data-target="#citation-search-object">
-                            </a>
-                        </span>
-                    </div>
-                  </div>
-                </div>
-
-                <ul class="list-group" id="object-results-container"></ul>
-            </div>
         </div>
-    </div>
+        <div class="col-md-1"></div>
+        <!-- end: type and display order -->
 
+        {{ form.subject }}
+        {{ form.object }}
+
+        <!-- subject -->
+        <div class="col-md-6">
+
+          <h2 style="text-align: center; margin-bottom: 30px;">Parent object <br><small>(Book, series intro, podcast series, etc.)</small></h2>
+
+          {% for error in form.subject.errors %}
+          <div class="col-md-12">
+            <div class="alert alert-danger">
+            {{ error }}
+            </div>
+          </div>
+          {% endfor %}
+
+          <div id="subject_info_container">
+            <div id="subject_info">
+              <strong>Citation record: </strong>
+              {% if form.instance.subject %}
+              <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
+                <a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+              </strong>
+
+              <p>
+                <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                <br>
+                <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
+                <br>
+                {% with form.instance.subject|get_authors_editors as authors_editors %}
+                <span class="show_authors">
+                {% if authors_editors %}
+                            {{ authors_editors }}
+                {% endif %}
+                </span>
+                {% endwith %}
+
+              </p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-12">
+              <div class="input-group">
+                  <input type="text"
+                      id="citation-search-subject"
+                      class="form-control citation-search"
+                      name="citation-search"
+                      results-target="#subject-results-container"
+                      selected-result-target="#id_ccrelation-subject">
+                  <span class="input-group-btn">
+                      <a
+                          class="btn glyphicon glyphicon-pencil enable-search-input"
+                          data-target="#citation-search-subject">
+                      </a>
+                  </span>
+              </div>
+            </div>
+          </div>
+
+          <ul class="list-group" id="subject-results-container"></ul>
+        </div>
+
+        <!-- object -->
+        <div class="col-md-6">
+
+          <h2 style="text-align: center; margin-bottom: 30px;">Child object <br><small>(Chapter, review, series article, podcast episode, etc.)</small></h2>
+
+          {% for error in form.object.errors %}
+          <div class="col-md-12">
+            <div class="alert alert-danger">
+            {{ error }}
+            </div>
+          </div>
+          {% endfor %}
+
+          <div id="object_info_container">
+            <div id="object_info">
+              <strong>Citation record: </strong>
+
+              <strong class="text-warning"><span class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
+                {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
+                {% if not form.instance.object %}
+                  <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                {% endif %}
+              </strong>
+
+              <p>
+                <span {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
+                <br>
+                <em class="show_title">{% if form.instance.object %}{{ form.instance.object|get_citation_title }}{% endif %}</em>
+                <br>
+                <span class="show_authors">
+                  {% if form.instance.object %}
+                {% with form.instance.object|get_authors_editors as authors_editors %}
+
+                {% if authors_editors %}
+                            {{ authors_editors }}
+                {% endif %}
+
+                {% endwith %}
+                {% endif %}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group">
+              <div class="col-sm-12">
+                <div class="input-group">
+                  <input type="text"
+                      id="citation-search-object"
+                      class="form-control citation-search"
+                      name="citation-search"
+                      results-target="#object-results-container"
+                      autocomplete="off"
+                      selected-result-target="#id_ccrelation-object">
+                  <span class="input-group-btn">
+                      <a
+                          class="btn glyphicon glyphicon-pencil enable-search-input"
+                          data-target="#citation-search-object">
+                      </a>
+                  </span>
+              </div>
+            </div>
+          </div>
+
+          <ul class="list-group" id="object-results-container"></ul>
+        </div>
+        <!-- end: object -->
+      </div>
+
+      <!-- switch row -->
+      <div class="col-md-5"></div>
+      <div class="col-md-2">
+        <div class="text-center">
+          <div class="button-group">
+              <span class="glyphicon glyphicon-arrow-left swap-subject-object"
+                  i></span> <span class="swap-subject-object">Switch</span> <span class="glyphicon glyphicon-arrow-right swap-subject-object"
+                  ></span
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="col-md-5"></div>
+      <!-- end: switch row -->
+     
+
+      <div class="col-md-12">
+        <div class="form-group">
+          <label class="col-md-12">Last updated on <span class="date">{{ form.instance.modified_on|get_iso_date }}</span> by {{ form.instance.modified_by }}.</label>
+        </div>
+      </div>
+    </div>
 </form>
 
 <div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
@@ -479,7 +487,7 @@ $(document).ready(function() {
       $('#ccrelation_form').submit();
     });
 
-    $('#swap-subject-object').click(swapSubjectObject);
+    $('.swap-subject-object').click(swapSubjectObject);
     $('.citation-search').on('keyup', function() {
       max_results = INITIAL_MAX_RESULT;
       search_input = $(this);
