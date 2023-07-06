@@ -100,7 +100,7 @@
   <!-- END title/abstract column -->
 
   <!-- BEGIN category/subject column -->
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="col-md-12" style="margin-top: 10px;">
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
@@ -145,7 +145,7 @@
   <!-- END category/subject column -->
 
   <!-- BEGIN add subject/category column -->
-  <div class="col-md-4">
+  <div class="col-md-5">
     {% if can_update %}
     <div class="text-right">
       <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
@@ -162,6 +162,7 @@
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
       <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
       <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Eras</a></li>
+      <li id="journalsTab" role="presentation"><a href="#addJournals" aria-controls="addJournals" role="tab" data-toggle="tab">Journals</a></li>
       <li id="suggestTab" role="presentation"><a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggest</a></li>
     </ul>
     <div class="tab-content">
@@ -222,6 +223,10 @@
         {% include "curation/fragment_categories_page_timeperiods.html" %}
       </div>
 
+      <div role="tabpanel" class="tab-pane" id="addJournals">
+        {% include "curation/fragment_categories_page_journals.html" %}
+      </div>
+
       <div role="tabpanel" class="tab-pane" id="suggest">
         {% include "curation/fragment_categories_page_suggest.html" %}
       </div>
@@ -279,7 +284,7 @@ function triggerSearchSubjects(force) {
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types 
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT,SE&show_inactive=false&use_custom_cmp=false&type=" + types 
     url += "&max=" + max_results + "&force=" + force; 
     if (!search_all_tenants) {
       url += "&tenant_ids={{instance.owning_tenant.id}}";
@@ -384,6 +389,8 @@ $(document).ready(function() {
       triggerSearchSubjects(true);
     } else if ($("#categoriesTab").hasClass("active")) {
       triggerSearchCategories();
+    } else if ($("#journalsTab").hasClass("active")) {
+      triggerSearchJournals();
     }
   });
   $("#searchAllTenantsOn").click(function() {
@@ -396,6 +403,8 @@ $(document).ready(function() {
       triggerSearchSubjects(true);
     } else if ($("#categoriesTab").hasClass("active")) {
       triggerSearchCategories();
+    } else if ($("#journalsTab").hasClass("active")) {
+      triggerSearchJournals();
     }
   });
 
