@@ -239,8 +239,9 @@
 
 <script>
 $('#subjectsTab a').click(function (e) {
-  e.preventDefault()
-  $(this).tab('show')
+  e.preventDefault();
+  $(this).tab('show');
+  setSearchAllTenants();
 })
 
 $("#categoriesTab a").click(function(e) {
@@ -250,8 +251,25 @@ $("#categoriesTab a").click(function(e) {
   location.reload();
 })
 
+$('#journalsTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+  setSearchAllTenants();
+})
+
+var search_all_tenants;
+function setSearchAllTenants() {
+  search_all_tenants = {% if tenant.settings.subject_searches_all_tenants %}true{%else%}false{%endif%};
+  {% if tenant.settings.subject_searches_all_tenants %} 
+  turnSearchAllTenantsOn()
+  {% else %} 
+  turnSearchAllTenantsOff()
+  {% endif %}
+}
+
 //@ sourceURL=delete.js
 $(document).ready(function() {
+  setSearchAllTenants();
   $('.delete-category').click(delete_handler);
   if (window.location.hash.includes("#categories")) {
     $("#categoriesTab a").tab('show')
@@ -274,7 +292,6 @@ var delete_handler = function() {
 var INITIAL_MAX_RESULTS = 10;
 var max_results = INITIAL_MAX_RESULTS;
 var types = [];
-var search_all_tenants = {% if tenant.settings.subject_searches_all_tenants %}true{%else%}false{%endif%};
 
 var searchTimerSubjects = 0;
 function triggerSearchSubjects(force) {
@@ -373,6 +390,37 @@ function suggestSubjects(event) {
   $('#suggestTab a').tab("show");
 }
 
+function turnSearchAllTenantsOn() {
+  search_all_tenants = true
+  $("#searchAllTenantsOff").removeClass("btn-primary");
+  $("#searchAllTenantsOff").addClass("btn-default");
+  $("#searchAllTenantsOn").removeClass("btn-default");
+  $("#searchAllTenantsOn").addClass("btn-primary");
+  console.log($("#subjectSearchQuery").val())
+  if ($("#subjectsTab").hasClass("active") && $("#subjectSearchQuery").val()) {
+    triggerSearchSubjects(true);
+  } else if ($("#categoriesTab").hasClass("active")) {
+    triggerSearchCategories();
+  } else if ($("#journalsTab").hasClass("active") && $("#journalsSearchQuery").val()) {
+    triggerSearchJournals();
+  }
+}
+
+function turnSearchAllTenantsOff() {
+  search_all_tenants = false
+  $("#searchAllTenantsOn").removeClass("btn-primary");
+  $("#searchAllTenantsOn").addClass("btn-default");
+  $("#searchAllTenantsOff").removeClass("btn-default");
+  $("#searchAllTenantsOff").addClass("btn-primary");
+  if ($("#subjectsTab").hasClass("active")) {
+    triggerSearchSubjects(true);
+  } else if ($("#categoriesTab").hasClass("active")) {
+    triggerSearchCategories();
+  } else if ($("#journalsTab").hasClass("active")) {
+    triggerSearchJournals();
+  }
+}
+
 $(document).ready(function() {
 
   $("#forceSearch").click(function() {
@@ -380,32 +428,10 @@ $(document).ready(function() {
   });
 
   $("#searchAllTenantsOff").click(function() {
-    search_all_tenants = false
-    $("#searchAllTenantsOn").removeClass("btn-primary");
-    $("#searchAllTenantsOn").addClass("btn-default");
-    $("#searchAllTenantsOff").removeClass("btn-default");
-    $("#searchAllTenantsOff").addClass("btn-primary");
-    if ($("#subjectsTab").hasClass("active")) {
-      triggerSearchSubjects(true);
-    } else if ($("#categoriesTab").hasClass("active")) {
-      triggerSearchCategories();
-    } else if ($("#journalsTab").hasClass("active")) {
-      triggerSearchJournals();
-    }
+    turnSearchAllTenantsOff();
   });
   $("#searchAllTenantsOn").click(function() {
-    search_all_tenants = true
-    $("#searchAllTenantsOff").removeClass("btn-primary");
-    $("#searchAllTenantsOff").addClass("btn-default");
-    $("#searchAllTenantsOn").removeClass("btn-default");
-    $("#searchAllTenantsOn").addClass("btn-primary");
-    if ($("#subjectsTab").hasClass("active")) {
-      triggerSearchSubjects(true);
-    } else if ($("#categoriesTab").hasClass("active")) {
-      triggerSearchCategories();
-    } else if ($("#journalsTab").hasClass("active")) {
-      triggerSearchJournals();
-    }
+    turnSearchAllTenantsOn();
   });
 
   $('#subjectSearchQuery').on('keyup', function() {
