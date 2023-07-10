@@ -1479,7 +1479,7 @@ def _citations_get_filter_params(request):
     search_key = post_or_get.get('search')
 
     all_params = {}
-    additional_params_names = ["page", "zotero_accession", "in_collections",
+    additional_params_names = ["page", "zotero_accession",
                                'collection_only', 'show_filters']
     user_session = request.session
     filter_params = None

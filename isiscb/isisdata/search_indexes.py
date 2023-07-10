@@ -212,7 +212,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         del(self.prepared_data[field.index_fieldname])
                     except KeyError:    # It was never there....
                         pass
-        
+
         return self.prepared_data
 
     def prepare(self, obj):
@@ -427,7 +427,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             self.prepared_data['author_for_sort'] = u""
 
         self.prepared_data.update(multivalue_data)
-        
+
         return self.prepared_data
 
     def _index_belongs_to(self, data):
@@ -583,7 +583,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
-    
+
     def prepare_language(self, data):
         data['language'] = list(dict.fromkeys(data['language']))
         for language in data['language']:

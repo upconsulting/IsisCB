@@ -17,7 +17,7 @@ def remove_control_characters(s):
 
 # TEST: Orig: re.sub(ur"\p{P}+", u" ", text). This worked in my testing but not sure all use cases.
 def strip_punctuation(text):
-    return re.sub(r'[^\w\s]','',text)
+    return re.sub(r'[^\w\s]',' ',text)
 
 
 def strip_tags(s):

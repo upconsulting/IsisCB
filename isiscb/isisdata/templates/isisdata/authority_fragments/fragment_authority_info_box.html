@@ -22,7 +22,7 @@
 
     {% if related_citations_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
-    Show 
+    Show
     <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
       {{related_citations_count}} citations
     </a>
@@ -132,6 +132,12 @@
 </div>
 
 <div class="col-sm-12 col-md-6" style="padding: 0;">
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' %}
+  </div>
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_places_facet.html' %}
+  </div>
   <div class="panel panel-default facet-box">
     <div class="panel-heading-links panel-heading">
       <strong>Outside Links</strong>
@@ -159,7 +165,9 @@
           <hr style='margin: 7px 0;'>
         {% endif %}
       {% endwith %}
-      
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Academia-logo-2021.svg" height="14px" width="11px"> <a target="_blank" href="https://www.academia.edu/search?q={{authority.name}}&tab=2">Academia.edu</a>
+      <br>
+
       {% if display_type == 'Author' %}
         <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
         <br>
@@ -180,12 +188,6 @@
       <br>
       <i class="fab fa-twitter"></i> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
     </div>
-  </div>
-  <div>
-    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' %}
-  </div>
-  <div>
-    {% include 'isisdata/authority_fragments/fragment_authority_places_facet.html' %}
   </div>
 </div>
 
@@ -270,7 +272,7 @@
     document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
   }
 
-  
+
   document.getElementById('wikiImageBorder').style.display = "block";
 
   if (wikiIntro !== "") {
