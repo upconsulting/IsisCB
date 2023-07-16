@@ -126,8 +126,12 @@
               <li{% if curation_section == "tenants" %} class="active"{% endif %}>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>
                 <ul class="dropdown-menu">
+                  {% if tenant %}
                   <li><a href="{% url 'curation:tenant' tenant.id %}">Settings</a></li>
-
+                  {% endif %}
+                  {% if user.is_superuser %}
+                  <li><a href="{% url 'admin:index' %}">Django Admin</a></li>
+                  {% endif %}
                 </ul>
               </li>
 
