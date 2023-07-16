@@ -4,6 +4,21 @@ from django.shortcuts import get_object_or_404, render, redirect, reverse
 
 from django.contrib.admin.views.decorators import user_passes_test
 
+# the following map is used to determine which view should be redirected to
+# after a block or column content has been added or edited.
+redirect_map = {
+    TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
+    TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page',
+    TenantPageBlock.ABOUT: 'curation:tenant_about'
+}
+
+# the following map is used to determine where to redirect to after an image
+# has been added/edited
+image_redirect_map = {
+    TenantImage.ABOUT: 'curation:tenant_about',
+    TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
+}
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def list_tenants(request):
 
@@ -91,12 +106,7 @@ def tenant_edit_page_block(request, tenant_pk, block_id):
         'block_type': type_map.get(block.block_type, 'home')
     }
 
-    type_map = {
-        TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
-        TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page',
-        TenantPageBlock.ABOUT: 'curation:tenant_about'
-    }
-    redirect_view = type_map.get(block.block_type, 'curation:tenant_home_page')
+    redirect_view = redirect_map.get(block.block_type, 'curation:tenant_home_page')
 
     if request.method == 'POST':
         form = TenantPageBlockForm(request.POST)
@@ -121,21 +131,10 @@ def tenant_delete_page_block(request, tenant_pk, page_block_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
 
-    redirect_map = {
-        TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
-        TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page',
-        TenantPageBlock.ABOUT: 'curation:tenant_about'
-    }
     redirect_view = redirect_map.get(page_block.block_type, 'curation:tenant_home_page')
 
     if request.method == 'POST':
         page_block.delete()
-
-    redirect_map = {
-        TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
-        TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page',
-        TenantPageBlock.ABOUT: 'curation:tenant_about'
-    }
 
     return redirect(reverse(redirect_view, kwargs={'tenant_pk':tenant_pk}))
 
@@ -150,6 +149,9 @@ def tenant_add_column_content(request, tenant_pk, page_block_id):
         'form': TenantPageBlockColumnForm()
     }
 
+    redirect_view = redirect_map.get(page_block.block_type, 'curation:tenant_home_page')
+
+
     if request.method == 'POST':
         form = TenantPageBlockColumnForm(request.POST)
         if form.is_valid():
@@ -159,7 +161,7 @@ def tenant_add_column_content(request, tenant_pk, page_block_id):
             column.page_block = page_block
             column.save()
 
-            return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
+            return redirect(reverse(redirect_view, kwargs={'tenant_pk':tenant_pk}))
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
@@ -172,7 +174,8 @@ def tenant_delete_column_content(request, tenant_pk, page_block_id, content_id):
     if request.method == 'POST':
         content.delete()
 
-    return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
+    redirect_view = redirect_map.get(page_block.block_type, 'curation:tenant_home_page')
+    return redirect(reverse(redirect_view, kwargs={'tenant_pk':tenant_pk}))
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
@@ -199,13 +202,7 @@ def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
             content.page_block = page_block
             content.save()
 
-            redirect_view = {
-                TenantPageBlock.ABOUT: 'curation:tenant_about',
-                TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
-                TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page'
-            }
-
-            return redirect(reverse(redirect_view[page_block.block_type], kwargs={'tenant_pk':tenant_pk})) 
+            return redirect(reverse(redirect_map[page_block.block_type], kwargs={'tenant_pk':tenant_pk})) 
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
@@ -227,15 +224,10 @@ def tenant_delete_image(request, tenant_pk, image_id):
         'selected': 'about'
     }
 
-    redirect_map = {
-        TenantImage.ABOUT: 'curation:tenant_about',
-        TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
-    }
-
     redirect_to = 'curation:about'
     if request.method == "POST":
         image =get_object_or_404(TenantImage, pk=image_id)
-        redirect_to = redirect_map[image.image_type]
+        redirect_to = image_redirect_map[image.image_type]
         image.delete()
 
     return redirect(reverse(redirect_to, kwargs={'tenant_pk':tenant_pk}))
@@ -262,12 +254,7 @@ def tenant_edit_image(request, tenant_pk, image_id):
         })
         return render(request, 'curation/tenants/tenant_edit_image.html', context=context)
 
-    redirect_map = {
-        TenantImage.ABOUT: 'curation:tenant_about',
-        TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
-    }
-
-    return redirect(reverse(redirect_map[image.image_type] if image.image_type in redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+    return redirect(reverse(image_redirect_map[image.image_type] if image.image_type in image_redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     
 
 
@@ -308,12 +295,7 @@ def tenant_add_save_image(request, tenant_pk, image_id=None, image_type=None):
             image.link = form.cleaned_data['link']
             image.save()
             
-            redirect_map = {
-                TenantImage.ABOUT: 'curation:tenant_about',
-                TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
-            }
-    
-            return redirect(reverse(redirect_map[image.image_type] if image.image_type in redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+            return redirect(reverse(image_redirect_map[image.image_type] if image.image_type in image_redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     else:
         context.update({
             'form': form,

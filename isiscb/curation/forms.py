@@ -1021,7 +1021,7 @@ class TenantPageBlockForm(forms.Form):
 
 class TenantPageBlockColumnForm(forms.Form):
     column_index = forms.IntegerField(help_text="Index of column content should be added to.")
-    content = forms.CharField(help_text="Content of column.")
+    content = forms.CharField(help_text="Content of column.", empty_value="")
 
 class TenantImageUploadForm(forms.Form):
     title = forms.CharField(help_text="Title for the image.")
