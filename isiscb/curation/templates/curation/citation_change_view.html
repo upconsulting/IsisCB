@@ -106,7 +106,7 @@ $(function() {
               <strong class="text-warning">{{ instance.id }}</strong>
               &nbsp;
               <a
-                  href="{{ instance|get_uri }}"
+                  href="{% if tenant %}{{ instance|get_uri:tenant.identifier }}{% else %}{{ instance|get_uri }}{% endif %}"
                   target="_blank">
                   <span class="glyphicon glyphicon-new-window" ></span>
               </a>
