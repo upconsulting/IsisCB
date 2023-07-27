@@ -53,7 +53,13 @@ function showSuggestions(query, suggestions) {
     var publicLink = $('<a></a>');
     publicLink.attr('href', '{% url 'isis-index' %}authority/' + suggest.id);
     publicLink.attr('target', "_blank");
-    publicLink.html(suggest.name + ' (' + suggest.count + ')' );
+
+    var linkText = suggest.name + ' (' + suggest.count + ')';
+    if (!(suggest.owning_tenant == {{instance.owning_tenant.id}}) ) {
+      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+    }
+    publicLink.html(linkText);
+
     newLi.append(publicLink);
     var suggestLink = $('<a href="#" data-acrid="' + suggest.id + '" data-query="' + suggest.name + '"></a>');
     suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));

@@ -62,7 +62,7 @@ PAGE_SIZE = 40    # TODO: this should be configurable.
 
 
 def _get_datestring_for_authority(authority):
-    return ', '.join([attribute.value.display for attribute in authority.attributes.all()])
+    return ', '.join([attribute.value.display for attribute in authority.attributes.all() if attribute.value])
 
 
 def _get_datestring_for_citation(citation):
@@ -337,6 +337,7 @@ def quick_create_acrelation(request):
                     'id': instance.authority.id,
                     'name': instance.authority.name,
                     'type_controlled': instance.authority.type_controlled,
+                    'owning_tenant': instance.authority.owning_tenant.id if instance.authority.owning_tenant else None,
                 },
                 'citation': {
                     'id': instance.citation.id,
