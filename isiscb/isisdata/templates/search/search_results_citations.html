@@ -8,7 +8,6 @@
 {% block extra_head %}
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
 {% endblock %}
 
 {% if query %}
@@ -158,7 +157,7 @@
     {% include "search/search_results_authorities.html" %}
   </div>
   <div class="col-sm-12 col-md-8 menuContainer">
-    <div class="row" style="margin: 0 0 15px 0; border-radius: 4px; padding: 5px 10px; color: #fff; background-color: #337ab7;">
+    <div class="row" id="citations-column-header" style="margin: 0 0 15px 0; border-radius: 4px; padding: 5px 10px; color: #fff; background-color: #337ab7;">
       <strong>Citations</strong>
       <span class='pull-right'>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }}</span>
     </div>
@@ -194,7 +193,7 @@
                 <a class="test" tabindex="-1" href="#">Add to Playlist <i class="fas fa-caret-right"></i></a>
                 <ul class="dropdown-menu" style="left: 100%; top: -8%;">
                   {% for playlist in user_playlists %}
-                    <li><a class="add-citation-button" data-citation-id="{{result.id}}" data-playlist-id="{{playlist.id}}" href="#">{{playlist.name}}</a></li>
+                    <li><a class="add-citation-button" data-citation-id="{{result.id}}" data-playlist-id="{{playlist.id}}" href="javascript://">{{playlist.name}}</a></li>
                   {% endfor %}
                 </ul>
               </li>
@@ -429,24 +428,22 @@ $(document).ready(function() {
  });
 
 $(document).on("click",".add-citation-button", function () {
+  let citation_ids = [$(this).attr('data-citation-id')];
   let payload = {
     'playlist_id': $(this).attr('data-playlist-id'),
-    'citation_id': $(this).attr('data-citation-id')
+    'citation_ids': citation_ids,
   };
 
   $.ajax({
-    url: "{% url 'add_citation_to_playlist' %}",
+    url: "{% url 'add_citations_to_playlist' %}",
     method: "POST",
     headers: {'X-CSRFToken': '{{ csrf_token }}'},
     data: payload,
     dataType: "json"
   }).done(function(response) {
-    $('#alert-container').empty()
-    let success_alert = `<div class="alert alert-success" id="add-citation-to-playlist-alert" role="alert" style="z-index: 1000; position: absolute; display: none;">Citation Added to <a href="${response.collection_url}">${response.collection_name}</a></div>`;
-    $('#alert-container').append(success_alert);
-    $('#add-citation-to-playlist-alert').show().delay(5000).fadeOut();
   }).fail(function (error) {
       console.log(error);
   });
+
 })
 </script>

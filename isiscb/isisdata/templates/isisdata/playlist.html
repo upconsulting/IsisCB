@@ -10,6 +10,44 @@
         .remove-button:hover {
             color: #FF0000 !important;
         }
+
+        .add-button:hover {
+          color: #4f93ce !important;
+      }
+
+        .list-group-item:hover {
+          background-color: #ffd43b;
+        }
+
+        #recommended-citations-table td {
+          padding: 2px;
+        }
+
+        #recommended-citations-table tr:hover {
+          {% comment %} background-color: #ffd43b; {% endcomment %}
+          background-color: #f5f5f5;
+        }
+
+        #citations-table td {
+          padding: 5px;
+        }
+
+        #citations-table tr:hover {
+          {% comment %} background-color: #ffd43b; {% endcomment %}
+          background-color: #f5f5f5;
+        }
+
+        .action {
+          display: none;
+        }
+        
+        #citations-table tr:hover .action {
+          display: inline;
+        }
+
+        #recommended-citations-table tr:hover .action {
+          display: inline;
+        }
     </style>
 {% endblock %}
 
@@ -18,40 +56,76 @@
     <div class="col-sm-12">
         <div class="col-sm-4">
             <div class="thumbnail">
-                <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="max-height: 300px;">
-                <div class="caption">
-                    <h3>{{collection.name}}</h3>
-                    {% if subjects %}
-                        <p>
-                            {% for subject in subjects %}
-                                <a data-id="{{ subject.id }}" class="label label-primary link-label subject-tag">{{ subject.name }}</a>
-                            {% endfor %}
-                        </p>
-                    {% endif %}
-                    <p>{{collection.description}}</p>
-                    <span style="color: #777">{{collection.citations.all.count}} citation(s)</span>
-                    <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-h"></i> <i class="fas fa-caret-down"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="{% url 'generate_csv_from_playlist' collection.id %}"><i class="fas fa-file-csv"></i> Download CSV of Playlist</a></li>
-                            {% if collection.createdBy.id == user.id %}<li><a href="?edit=true"><i class="fas fa-pencil-alt"></i> Edit Playlist Details</a></li>{% endif %}
-                            {% if collection.createdBy.id == user.id %}<li><a style="color: #FF0000;" href="#"><i class="fas fa-trash"></i> Delete Playlist</a></li>{% endif %}
-                        </ul>
-                    </div>
-                </div>
-              </div>          
+              <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="max-height: 300px;">
+              <div class="caption">
+                  <h3>{{collection.name}}</h3>
+                  {% if subjects %}
+                      <p>
+                          {% for subject in subjects %}
+                              <a data-id="{{ subject.id }}" class="label label-primary link-label subject-tag">{{ subject.name }}</a>
+                          {% endfor %}
+                      </p>
+                  {% endif %}
+                  <p>{{collection.description}}</p>
+                  <span style="color: #777">{{collection.citations.all.count}} citation(s)</span><br/>
+                  <span style="color: #777">created by: <a href="{% url 'user_profile' collection.createdBy.username %}">{{collection.createdBy.username}}</a></span>
+                  <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
+                  <div class="btn-group">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class="fas fa-ellipsis-h"></i> <i class="fas fa-caret-down"></i>
+                      </button>
+                      <ul class="dropdown-menu">
+                          <li><a href="{% url 'generate_csv_from_playlist' collection.id %}"><i class="fas fa-file-csv"></i> Download CSV of Playlist</a></li>
+                          {% if collection.createdBy.id == user.id %}<li><a href="?edit=true"><i class="fas fa-pencil-alt"></i> Edit Playlist Details</a></li>{% endif %}
+                          {% if collection.createdBy.id == user.id %}<li><a style="color: #FF0000;" href="#"><i class="fas fa-trash"></i> Delete Playlist</a></li>{% endif %}
+                      </ul>
+                  </div>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Recommended Citations</h3>
+              </div>
+              <div class="panel-body" style="padding: 15px 5px 15px 5px">
+                  <table id="recommended-citations-table">
+                    {% for citation in recommended_citations %}
+                      <tr class="recommended-citation-table-row" id="{{citation.id}}-recommended-citation">
+                        <td>{% if collection.createdBy.id == user.id %}<a href="javascript://" class="add-button action" id="{{citation.id}}-recommended" data-citation-id="{{citation.id}}-recommended" title="add citation to playlist" style="color: #777; text-align: center; font-size: 1.3em;"><i class="fas fa-plus-circle"></i></a>{% endif %}</td>
+                        <td><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}"></td>
+                        <td><span class="label label-primary">{{citation.get_type_controlled_display}}</span></td>
+                        <td><a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a></td>
+                        {% comment %} <td>{{citation.publication_date.year}}</td> {% endcomment %}
+                        <td>{% if citation.contributors.length > 1 %} <span>{{citation.contributors.0}}</span>, et al.{% else %}<span>{{citation.contributors.0}}</span>{% endif %}</td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td><h3>No results found . . . <i class="fas fa-child"></i></h3></td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+              </div>
+            </div>      
         </div>
         <div class="col-sm-8">
             {% if citations %}
-                <ul class="list-group">
-                    {% for citation in citations %}
-                    <li id="{{citation.id}}-list-item" class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}}) {% if collection.createdBy.id == user.id %}<a href="#" class="pull-right remove-button" id="{{citation.id}}" data-citation-id="{{citation.id}}" title="remove citation from playlist" style="color: #777; text-align: center; display: none;"><i class="fas fa-trash"></i></a>{% endif %}</li>
-                    {% endfor %}
-                </ul>
+              <table id="citations-table">
+                {% for citation in citations %}
+                  <tr class="citations-table-row" id="{{ citation.id }}-citation">
+                    <td><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}"></td>
+                    <td><span class="label label-primary">{{citation.get_type_controlled_display}}</span></td>
+                    <td><a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a></td>
+                    <td>{{citation.publication_date.year}}</td>
+                    <td>{% if citation.contributors.length > 1 %} <a href="{% url 'authority' citation.contributors.0.id %}">{{citation.contributors.0.id}}</a>, et al.{% else %}<a href="{% url 'authority' citation.contributors.0.id %}">{{citation.contributors.0}}</a>{% endif %}</td>
+                    <td>{% if collection.createdBy.id == user.id %}<a href="javascript://" class="pull-right remove-button action" id="{{citation.id}}" data-citation-id="{{citation.id}}" title="remove citation from playlist" style="color: #777; text-align: center; font-size: 1.3em;"><i class="fas fa-trash"></i></a>{% endif %}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td><h3>No results found . . . <i class="fas fa-child"></i></h3></td>
+                  </tr>
+                {% endfor %}
+              </table>
             {% endif %}
+            <hr>
             <div class="row">
                 <div class="col-sm-12 col-md-4">
                     {% if facets.PR %}
@@ -68,7 +142,7 @@
                             {% for facet in facets.PR|slice:"6" %}
                             {% if facet.authority %}
                             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                            {{facet.authority.name}}
+                            {{facet.authority.name}} ({{facet.count}})
                             <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                             <br>
                             {% endif %}
@@ -91,7 +165,7 @@
                             {% for facet in facets.PH|slice:"6" %}
                             {% if facet.authority %}
                             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                            {{facet.authority.name}}
+                            {{facet.authority.name}} ({{facet.count}})
                             <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                             <br>
                             {% endif %}
@@ -114,7 +188,7 @@
                             {% for facet in facets.IH|slice:"6" %}
                             {% if facet.authority %}
                             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                            {{facet.authority.name}}
+                            {{facet.authority.name}} ({{facet.count}})
                             <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                             <br>
                             {% endif %}
@@ -138,7 +212,7 @@
                         {% for facet in facets.CO|slice:"6" %}
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
+                        {{facet.authority.name}} ({{facet.count}})
                         <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
@@ -161,7 +235,7 @@
                         {% for facet in facets.PE|slice:"6" %}
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
+                        {{facet.authority.name}} ({{facet.count}})
                         <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
@@ -185,7 +259,7 @@
                         {% for facet in facets.GE|slice:"6" %}
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
+                        {{facet.authority.name}} ({{facet.count}})
                         <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
@@ -208,7 +282,7 @@
                         {% for facet in facets.TI|slice:"6" %}
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
+                        {{facet.authority.name}} ({{facet.count}})
                         <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
@@ -231,7 +305,7 @@
                         {% for facet in facets.IN|slice:"6" %}
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
+                        {{facet.authority.name}} ({{facet.count}})
                         <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
@@ -246,31 +320,31 @@
 
     <!-- authors modal -->
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Authors & Contributors</h4>
-        </div>
-        <div class="modal-body">
-          <ul class="unselected_facets">
-            {% for facet in facets.PR %}
-            {% if facet.authority %}
-            <li>
-              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
-              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-            </li>
-            {% endif %}
-            {% endfor %}
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Authors & Contributors</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.PR %}
+          {% if facet.authority %}
+          <li>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}} ({{facet.count}})
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+          </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
-  </div><!-- /modal -->
+  </div>
+</div><!-- /modal -->
   <!-- concepts Modal -->
   <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
     <div class="modal-dialog" role="document">
@@ -285,7 +359,7 @@
             {% if facet.authority %}
               <li>
                 <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                {{facet.authority.name}}
+                {{facet.authority.name}} ({{facet.count}})
                 <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
               </li>
             {% endif %}
@@ -312,7 +386,7 @@
           {% if facet.authority %}
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
+              {{facet.authority.name}} ({{facet.count}})
               <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
@@ -340,7 +414,7 @@
             {% if facet.authority %}
               <li>
                 <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                {{facet.authority.name}}
+                {{facet.authority.name}} ({{facet.count}})
                 <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
               </li>
             {% endif %}
@@ -368,7 +442,7 @@
           {% if facet.authority %}
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
+              {{facet.authority.name}} ({{facet.count}})
               <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
@@ -396,7 +470,7 @@
           {% if facet.authority %}
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
+              {{facet.authority.name}} ({{facet.count}})
               <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
@@ -424,7 +498,7 @@
           {% if facet.authority %}
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
+              {{facet.authority.name}} ({{facet.count}})
               <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
@@ -453,7 +527,7 @@
           {% if facet.authority %}
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
+              {{facet.authority.name}} ({{facet.count}})
               <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
@@ -468,12 +542,12 @@
   </div><!-- /modal -->
 
     <script>
-        $('.list-group-item').on("mouseover", function(e) {
+        $('.citations-table-row').on("mouseover", function(e) {
             let citation_id = this.id.substring(0,12);
             $(`#${citation_id}`).css('display', 'inline-block');
         })
     
-        $('.list-group-item').on("mouseleave", function(e) {
+        $('.citations-table-row').on("mouseleave", function(e) {
             let citation_id = this.id.substring(0,12);
             $(`#${citation_id}`).css('display', 'none');
         })
@@ -491,14 +565,33 @@
             data: payload,
             dataType: "json"
             }).done(function(response) {
-                $(`#${response.citation_id}-list-item`).remove();
-                $('#alert-container').empty()
-                let success_alert = `<div class="alert alert-success" id="add-citation-to-playlist-alert" role="alert" style="z-index: 1000; position: absolute; display: none;">${response.citation_title} removed from ${response.collection_name}</div>`;
-                $('#alert-container').append(success_alert);
-                $('#add-citation-to-playlist-alert').show().delay(5000).fadeOut();
+                $(`#${response.citation_id}-citation`).remove();
             }).fail(function (error) {
                 console.log(error);
             });
         })
+
+        $(document).on("click",".add-button", function () {
+          let citation_id = $(this).attr('data-citation-id').substring(0,12);
+          $(`#${citation_id}-recommended-citation`).remove();
+          let payload = {
+            'citation_ids': [citation_id],
+            'playlist_id': "{{collection.id}}",
+          };
+          
+          $.ajax({
+            url: "{% url "add_citations_to_playlist" %}",
+            method: "POST",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            data: payload,
+            dataType: "json"
+          }).done(function(response) {
+              let citation = response.citation;
+              let new_citation_row = `<tr class="citations-table-row" id="${citation.id}-citation"><td><img src="${citation.cover_image.url}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px;"></td><td><span class="label label-primary">${citation.type}</span></td><td><a href="${citation.url}">${citation.title}</a></td><td>${citation.date}</td><td><a href="${citation.contributor.url}">${citation.contributor.name}</a></td><td><a href="javascript://" class="pull-right remove-button action" id="${citation.id}" data-citation-id="${citation.id}" title="remove citation from playlist" style="color: #777; text-align: center; font-size: 1.3em;"><i class="fas fa-trash"></i></a></td></tr>`;
+              $('#citations-table').append(new_citation_row);
+          }).fail(function (error) {
+              console.log(error);
+          });
+      })
     </script>
 {% endblock %}

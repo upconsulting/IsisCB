@@ -811,7 +811,7 @@ def citation(request, citation_id):
     #     word_cloud_results = results
     #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
 
-    similar_objects = get_facets_from_similar_citations(similar_citations)
+    similar_objects = get_facets_from_citations(similar_citations)
 
     googleBooksImage = get_google_books_image(citation, False)
 
@@ -932,16 +932,17 @@ def citation(request, citation_id):
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
     }
+    
     return render(request, 'isisdata/citation.html', context)
 
-def get_facets_from_similar_citations(similar_citations):
+def get_facets_from_citations(citations):
     similar_objects = defaultdict(list)
 
-    if similar_citations:
-        similar_citations_ids = [citation.id for citation in similar_citations]
-        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
-        for acrelation in similar_acrelations:
+    if citations:
+        citations_ids = [citation.id for citation in citations]
+        citations_qs = Citation.objects.all().filter(id__in=citations_ids)
+        acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
+        for acrelation in acrelations:
             if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
                 similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
             if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
@@ -951,6 +952,16 @@ def get_facets_from_similar_citations(similar_citations):
         similar_objects = generate_similar_facets(similar_objects)
 
     return similar_objects
+
+def get_citations_related_authorities(citations):
+    if citations:
+        citations_ids = [citation.id for citation in citations]
+        citations_qs = Citation.objects.all().filter(id__in=citations_ids)
+        acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
+        authorities = [acrelation.authority for acrelation in acrelations]
+        sorted_authorities = Counter(authorities).most_common()
+
+        return sorted_authorities
 
 def generate_similar_facets(similar_objects):
     for key in similar_objects:
@@ -1057,8 +1068,6 @@ def get_google_books_image(citation, featured):
             elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
                 google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
             google_books_data.save()
-
-            
 
     return cover_image
 
@@ -1706,6 +1715,7 @@ def user_profile(request, username):
         'profile': user.profile,
         'usercomments': comments,
         'recent_collections': recent_collections,
+        'subjects': user.profile.subjects.all(),
     }
 
     # User has elected to edit their own profile.
@@ -1749,11 +1759,37 @@ def playlist(request, *args, **kwargs):
     collection = get_object_or_404(CitationCollection, id=collection_id)
     citation_ids = [citation.id for citation in collection.citations.all()]
     citations = Citation.objects.filter(pk__in=citation_ids)
-    facets = get_facets_from_similar_citations(citations)
+    facets = get_facets_from_citations(citations)
     for citation in citations:
+        citation.contributors = [acrelation.authority for acrelation in citation.get_all_contributors]
         citation.cover_image = get_google_books_image(citation, False)
         if not citation.cover_image:
             citation.cover_image = {'url': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Hieroglyphs-temple-Ombos-Egypt.jpg'}
+
+    related_authorities = get_citations_related_authorities(citations)
+    related_authorities_ids = [related_authority[0].id for related_authority in related_authorities if related_authority[1] > 1]
+   
+    # Recommended Citations Generator
+    if related_authorities:
+        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+        sqs.query.set_limits(low=0, high=5)
+
+        results = sqs.all().exclude(public="false")
+        recommended_citations = results.filter(subject_ids__in=related_authorities_ids).exclude(id__in=citation_ids).query.get_results()
+        recommended_citations_pks = [cit.pk for cit in recommended_citations]
+        recommended_citation_objects = Citation.objects.filter(pk__in=recommended_citations_pks)
+        for citation in recommended_citation_objects:
+            citation.contributors = [acrelation.authority for acrelation in citation.get_all_contributors]
+            citation.cover_image = get_google_books_image(citation, False)
+            if not citation.cover_image:
+                citation.cover_image = {'url': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Hieroglyphs-temple-Ombos-Egypt.jpg'}
 
     # Only the owner of the collection can change it. 
     form_error = False
@@ -1774,6 +1810,7 @@ def playlist(request, *args, **kwargs):
         'citations': citations,
         'subjects': collection.subjects.all(),
         'facets': facets,
+        'recommended_citations': recommended_citation_objects,
     }
     # User has elected to edit their playlist details.
     if edit and user.id == request.user.id:
@@ -1809,19 +1846,53 @@ def create_playlist(request):
     return render(request, template, context)
 
 @login_required()
-def add_citation_to_playlist(request):
+def add_citations_to_playlist(request):
     if request.method == 'POST':
         playlist_id = request.POST.get('playlist_id')
-        citation_id = request.POST.get('citation_id')
+        citation_ids = request.POST.getlist('citation_ids[]')
+        print('aaaaaaaaa')
+        print(citation_ids)
         collection = get_object_or_404(CitationCollection, id=playlist_id)
-        if request.user.is_authenticated and collection.createdBy == request.user:
-            collection.citations.add(Citation.objects.get(id=citation_id))
 
-        context = {
-            'collection_name': collection.name,
-            'collection_id': collection.id,
-            'collection_url': reverse('playlist', kwargs={'collection_id': collection.id})
-        }
+        for citation_id in citation_ids:
+            citation = get_object_or_404(Citation, pk=citation_id)
+            citation.contributors = [acrelation.authority for acrelation in citation.get_all_contributors]
+            citation.cover_image = get_google_books_image(citation, False)
+            if not citation.cover_image:
+                citation.cover_image = {'url': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Hieroglyphs-temple-Ombos-Egypt.jpg'}
+        
+        if request.user.is_authenticated and collection.createdBy == request.user:
+            collection.citations.add(Citation.objects.get(id__in=citation_ids))
+
+        if len(citation_ids) <= 1:
+            context = {
+                'collection': {
+                    'collection_name': collection.name,
+                    'collection_id': collection.id,
+                    'collection_url': reverse('playlist', kwargs={'collection_id': collection.id}),
+                },
+                'citation': {
+                    'title': citation.title_for_display,
+                    'contributor': {
+                        'name': citation.contributors[0].name,
+                        'id': citation.contributors[0].id,
+                        'url': reverse('authority', args=[citation.contributors[0].id]),
+                    },
+                    'date': citation.publication_date.year,
+                    'type': citation.get_type_controlled_display(),
+                    'cover_image': citation.cover_image,
+                    'id': citation.id,
+                    'url': reverse('citation', args=[citation.id]),
+                } 
+            }
+        else:
+            context = {
+                'collection': {
+                    'collection_name': collection.name,
+                    'collection_id': collection.id,
+                    'collection_url': reverse('playlist', kwargs={'collection_id': collection.id}),
+                },
+            }
 
         return JsonResponse(context)
 
@@ -2180,6 +2251,37 @@ def quick_delete_aprelation(request):
         playlist = CitationCollection.objects.get(pk=playlist_id)
         authority = Authority.objects.get(pk=authority_id)
         playlist.subjects.remove(authority)
+
+        response_data = {
+            'authority': {
+                'id': authority.id,
+            },
+        }
+        return JsonResponse(response_data)
+    
+def quick_create_aurelation(request, username):
+    if request.method == 'POST':
+        authority_id = request.POST.get('authority_id')
+        user_id = request.user.id
+        user_profile = UserProfile.objects.get(user=user_id)
+        authority = Authority.objects.get(pk=authority_id)
+        user_profile.subjects.add(authority)
+
+        response_data = {
+            'authority': {
+                'id': authority.id,
+                'name': authority.name,
+            },
+        }
+        return JsonResponse(response_data)
+
+def quick_delete_aurelation(request, username):
+    if request.method == 'POST':
+        authority_id = request.POST.get('authority_id')
+        user_id = request.user.id
+        user_profile = UserProfile.objects.get(user=user_id)
+        authority = Authority.objects.get(pk=authority_id)
+        user_profile.subjects.remove(authority)
 
         response_data = {
             'authority': {

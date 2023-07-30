@@ -2561,6 +2561,7 @@ class UserProfile(models.Model):
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     bio = MarkupField(markup_type='markdown', blank=True, null=True)
+    subjects = models.ManyToManyField(Authority, blank=True)
 
     share_email = models.BooleanField(default=False, help_text=help_text("""
     A user can indicate whether or not their email address should be made

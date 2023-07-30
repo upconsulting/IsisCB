@@ -106,6 +106,24 @@
                     </p>
                 </div>
             </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel">
+                <div class="panel-body">
+                  <label>Interests</label>
+                  <div id="subject-list-group" style="padding-bottom: 1em;">
+                    {% if subjects %}
+                      {% for subject in subjects %}
+                        <a data-id="{{ subject.id }}" class="label label-primary link-label subject-tag">{{ subject.name }}</a>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <input type="text" id="subjectSearchQuery" class="form-control input-sm" placeholder="Search to add interests . . .">
+                  </input>
+                  <ul class="list-group" id="subjectSearchResultsContainer">
+                  </ul>
+                </div>
+            </div>
 
             <div class="panel">
                 <div class="panel-heading">
@@ -116,27 +134,185 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <span class="h4">
-                        Recent comments
-                    </span>
-                </div>
-                <ul class="list-group" style="max-height: 400px; overflow-y: scroll;">
-                    {% for comment in usercomments %}
-                    <li class="list-group-item">
-                        <span class="label label-primary">{{ comment.created_on }}</span>&nbsp;<a href="/isis/{{comment.subject.id}}" class="h5">{{ comment.subject }}</a>
-                        <p class="text text-warning">{{ comment.linkified|safe }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
     </div>
     <div class="row">
 
     </div>
 
 </form>
+
+<script>
+    var INITIAL_MAX_RESULTS = 5;
+    var max_results = INITIAL_MAX_RESULTS;
+    var types = [];
+    
+    var searchTimerSubjects = 0;
+    function triggerSearchSubjects(force) {
+      if (searchTimerSubjects) {
+          clearTimeout(searchTimerSubjects);
+      }
+    
+      var query = $('#subjectSearchQuery').val();
+      searchTimerSubjects = setTimeout(function() {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT,SE,IN&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+            success: function(result) {
+              console.log(result);
+              var resultsContainer = $('#subjectSearchResultsContainer');
+              resultsContainer.empty();
+              result.results.forEach(function(r) {
+                var newLi = $("<li></li>");
+                newLi.addClass("list-group-item");
+                newLi.attr('data-acrelation-id', r.name);
+                var publicLink = $('<a></a>');
+                publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+                publicLink.attr('target', "_blank");
+                publicLink.html(r.name + ' (' + r.citation_count + ')' );
+                newLi.append(publicLink);
+                newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+                resultsContainer.append(newLi);
+    
+                var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
+                addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+                addBtn.click(addConcept);
+                newLi.prepend(addBtn);
+              });
+    
+              if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+                var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+                resultsContainer.append(msg);
+              } else if (result.results.length == 0 && !force && query.length < 3) {
+                var msg = $('<p>Your query was too short. </p>');
+                var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
+                forceLink.click(function() {
+                  triggerSearchSubjects(true);
+                });
+                msg.append(forceLink);
+                msg.append(" to force the search.");
+                resultsContainer.append(msg);
+              }
+    
+              if (result.results.length == max_results) {
+                var load_more = `
+                  <li class="list-group-item search-result">
+                    <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+                  </li>
+                `;
+                resultsContainer.append(load_more);
+                $('#load-more-subjects').click(function() {
+                    max_results += 10;
+                    triggerSearchSubjects(force);
+                });
+              }
+            }
+          });
+      }, 500);
+    }
+
+    $(document).ready(function() {
+
+        $("#forceSearch").click(function() {
+          triggerSearchSubjects(true);
+        });
+      
+        $('#subjectSearchQuery').on('keyup', function() {
+          max_results = INITIAL_MAX_RESULTS;
+          triggerSearchSubjects(false);
+        });
+    });
+      
+    // checkbox update display
+    function updateDisplay($checkbox) {
+        var isChecked = $checkbox.is(':checked');
+        var $button = $checkbox.siblings('button')
+        var color = $button.data('color');
+    
+        // Set the button's state
+        $button.data('state', (isChecked) ? "on" : "off");
+    
+        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+        // Set the button's icon
+        $button.find('.state-icon')
+            .removeClass()
+            .addClass('state-icon ' + settings[$button.data('state')].icon);
+    
+        }
+    
+        // Update the button's color
+        if (isChecked) {
+            $button
+                .removeClass('btn-default')
+                .addClass('btn-' + color + ' active');
+        }
+        else {
+            $button
+                .removeClass('btn-' + color + ' active')
+                .addClass('btn-default');
+        }
+    }
+
+    function addConcept(event) {
+        var link = event.target.closest('a');
+        var acRelId = $(link).data('id');
+        var headers = {
+          'X-CSRFToken': '{{ csrf_token }}'
+        };
+        var payload = {
+          'user_id': "{{ user.id }}",
+          'authority_id': acRelId,
+        };
+
+        $.ajax({
+          url: "{% url "quick_create_aurelation" username %}",
+          method: "POST",
+          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+          data: payload,
+          dataType: "json"
+          }).done(function(response) {
+              let div = $('#subject-list-group');
+              let tagId = response.authority.id;
+              let tagName = response.authority.name;
+
+              let newTag = $(`<span data-id="${tagId}" class="label label-primary link-label subject-tag"><span>${tagName}</span></span>`);
+
+              div.append(newTag);
+
+          }).fail(function (error) {
+              console.log(error);
+          });
+    }
+
+    function removeConcept(event) {
+      authorityId = $(event.target).data('id');
+
+      var headers = {
+        'X-CSRFToken': '{{ csrf_token }}'
+      };
+      var payload = {
+        'user_id': "{{ user.id }}",
+        'authority_id': authorityId,
+      };
+
+      $.ajax({
+        url: "{% url "quick_delete_aurelation" username %}",
+        method: "POST",
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        data: payload,
+        dataType: "json"
+        }).done(function(response) {
+
+            $('#subject-list-group').find(`[data-id='${response.authority.id}']`).remove();
+        }).fail(function (error) {
+            console.log(error);
+        });
+    }
+
+    $(document.body).on('mouseenter', '.subject-tag', function(){
+        $(this).css({"background-color": "red"}).append('<span class="delete-icon">&nbsp;<i class="far fa-times-circle"></i></span>');
+    }).on('mouseleave', '.subject-tag', function(){
+        $(this).css({"background-color": "#337ab7"});
+        $(this).find(".delete-icon").remove();
+    });
+
+    $('.subject-tag').click(removeConcept);
+</script>
 {% endblock %}
