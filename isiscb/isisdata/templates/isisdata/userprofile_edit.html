@@ -156,7 +156,6 @@
       searchTimerSubjects = setTimeout(function() {
         $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT,SE,IN&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
             success: function(result) {
-              console.log(result);
               var resultsContainer = $('#subjectSearchResultsContainer');
               resultsContainer.empty();
               result.results.forEach(function(r) {
