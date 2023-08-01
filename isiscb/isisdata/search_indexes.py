@@ -24,10 +24,6 @@ from collections import defaultdict
 class DictMultiValueField(indexes.MultiValueField):
     field_type = 'object'
 
-# class UserIndex(indexes.SearchIndex, indexes.Indexable):
-#     text = indexes.EdgeNgramField(document=True)
-#     username = indexes.CharField(null=True, indexed=False, stored=True)
-
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
     title = indexes.CharField(null=True, indexed=False, stored=True)
