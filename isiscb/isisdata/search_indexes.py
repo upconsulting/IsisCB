@@ -24,6 +24,10 @@ from collections import defaultdict
 class DictMultiValueField(indexes.MultiValueField):
     field_type = 'object'
 
+# class UserIndex(indexes.SearchIndex, indexes.Indexable):
+#     text = indexes.EdgeNgramField(document=True)
+#     username = indexes.CharField(null=True, indexed=False, stored=True)
+
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
     title = indexes.CharField(null=True, indexed=False, stored=True)
@@ -687,3 +691,5 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_citation_count(self, obj):
         return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
+
+
