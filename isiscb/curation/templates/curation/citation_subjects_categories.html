@@ -316,7 +316,7 @@ function triggerSearchSubjects(force) {
             newLi.addClass("list-group-item");
             newLi.attr('data-acrelation-id', r.name);
             var publicLink = $('<a></a>');
-            publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+            publicLink.attr('href', '{% url 'tenants:home' instance.owning_tenant.identifier %}authority/' + r.id);
             publicLink.attr('target', "_blank");
 
             var linkText = r.name + ' (' + r.citation_count + ')';
