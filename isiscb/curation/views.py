@@ -298,7 +298,7 @@ def get_subject_suggestions(request, citation_id):
 
     suggestion_results = suggestion_results.facet_counts()['fields']['subject_ids']
     suggestion_results_ids = [s[0] for s in suggestion_results]
-    authorities = Authority.objects.filter(pk__in=suggestion_results_ids).values('id','name', 'type_controlled')
+    authorities = Authority.objects.filter(pk__in=suggestion_results_ids).values('id','name', 'type_controlled', 'owning_tenant')
     suggestion_results_dict = dict(suggestion_results)
     for authority in authorities:
         authority['count'] = suggestion_results_dict[authority['id']]
@@ -1450,11 +1450,11 @@ def generate_category_suggestions(request, citation_id):
             results = sqs.all().exclude(public="false")
             similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).exclude(publication_date__lt=2014).query.get_results()
             similar_citation_ids = [citation.id for citation in similar_citations]
-            similar_citations_category_ids = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id__in=similar_citation_ids).values_list('authority__name', 'authority__id')
+            similar_citations_category_ids = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id__in=similar_citation_ids).values_list('authority__name', 'authority__id', 'authority__owning_tenant')
             # similar_citations_category_ids = [(acrelation.authority.name, acrelation.authority.id) for acrelation in similar_citations_category_acrelations if acrelation.authority]
             categories = Counter(similar_citations_category_ids).most_common()
             categories = [category for category in categories if category[1] > 1]
-            categories = [{'name': category[0][0], 'id': category[0][1], 'count': category[1], 'percent': round((category[1]/similar_citations_category_ids.count())*100), 'decimal': round(category[1]/similar_citations_category_ids.count(), 2)} for category in categories]
+            categories = [{'name': category[0][0], 'id': category[0][1], 'owning_tenant': category[0][2], 'count': category[1], 'percent': round((category[1]/similar_citations_category_ids.count())*100), 'decimal': round(category[1]/similar_citations_category_ids.count(), 2)} for category in categories]
 
         response_data = {
             'category_guesses': categories,
@@ -2359,7 +2359,7 @@ def bulk_action(request):
     template = 'curation/bulkaction.html'
     object_type = request.POST.get('object_type', 'CITATION')
     queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter, request=request):
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
     form_class = bulk_action_form_factory(queryset=queryset, user=request.user, object_type=object_type)

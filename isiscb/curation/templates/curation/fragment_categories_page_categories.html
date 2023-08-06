@@ -31,7 +31,11 @@ function addCategory(event) {
     var newId = result.acrelation.id;
     var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
 
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
+    var linkText = result.acrelation.authority.name ;
+    if (!(result.acrelation.authority.owning_tenant == {{instance.owning_tenant.id}}) ) {
+      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+    }
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
     ul.append(li);
     {% if can_update %}
     var span = $('<span class="button-group button-group-xs"></span>');
@@ -144,7 +148,11 @@ function generateCategoryGuesses() {
     let categoryGuessesList = '<ul id="category-guesses-list"></ul>';
     $('#category-guesses-container').append(categoryGuessesList);
     categories.map(cat => {
-      let catListItem = `<li class="list-group-item" style="background-color:${colorScale(cat.decimal)}"><span class="button-group button-group-xs"><a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="${cat.id}" data-name="${cat.name}"></a></span> ${cat.name} | ${cat.count} (${cat.percent}%)</li>`;
+      let catText = `${cat.name} | ${cat.count} (${cat.percent}%)`;
+      if (cat.owning_tenant != {{instance.owning_tenant.id}}) {
+        catText = '<i class="fas fa-share-alt"></i> ' + catText;
+      }
+      let catListItem = `<li class="list-group-item" style="background-color:${colorScale(cat.decimal)}"><span class="button-group button-group-xs"><a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="${cat.id}" data-name="${cat.name}"></a></span> ` + catText + `</li>`;
       $('#category-guesses-list').append(catListItem);
     })
     $('.select-citation-categories').click(addCategory);
