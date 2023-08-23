@@ -34,6 +34,7 @@ from isisdata.models import *
 from isisdata.utils import strip_punctuation, normalize
 from isisdata import operations
 from isisdata.filters import *
+from curation.filters import *
 from isisdata import tasks as data_tasks
 from curation import p3_port_utils
 
@@ -2290,7 +2291,9 @@ def _get_filtered_queryset(request, object_type='CITATION'):
     pks = request.POST.getlist('queryset')
 
     filter_params_raw = request.POST.get('filters')
+    
     filter_params = QueryDict(filter_params_raw, mutable=True)
+
     pks = request.POST.getlist('queryset')
     if pks:
         filter_params['id'] = ','.join(pks)
@@ -2304,9 +2307,16 @@ def _get_filtered_queryset(request, object_type='CITATION'):
         if 'collection_only' in filter_params:
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode()#.encode('utf-8')
+
     if object_type == 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)
+    elif object_type == 'COLLECTION':
+        _qs = operations.filter_queryset(request.user, CitationCollection.objects.all())
+        queryset = CitationCollectionFilter(filter_params, queryset=_qs)
+    elif object_type == 'USER':
+        _qs = operations.filter_queryset(request.user, UserProfile.objects.all())
+        queryset = UserFilter(filter_params, queryset=_qs)
     else:
         _qs = operations.filter_queryset(request.user, Authority.objects.all())
         queryset = AuthorityFilter(filter_params, queryset=_qs)
@@ -2325,7 +2335,6 @@ def _get_filtered_queryset_authorities(request):
 
     _qs = operations.filter_queryset(request.user, Authority.objects.all())
     queryset = AuthorityFilter(filter_params, queryset=_qs)
-
     return queryset, filter_params_raw
 
 
@@ -2340,7 +2349,8 @@ def bulk_action(request):
     template = 'curation/bulkaction.html'
     object_type = request.POST.get('object_type', 'CITATION')
     queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
+
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter) or isinstance(queryset, CitationCollectionFilter) or isinstance(queryset, UserFilter):
         queryset = queryset.qs
 
     form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
@@ -2357,11 +2367,12 @@ def bulk_action(request):
         # Perform the selected action.
         form = form_class(request.POST)
         form.fields['filters'].initial = filter_params_raw
+        for field in form:
+            print("Field Error:", field.name,  field.errors)
         if form.is_valid():
             tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
             # task_id = form.apply(queryset.qs, request.user)[0]
             return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
-
     else:
         # Prompt to select an action that will be applied to those records.
         form = form_class()
@@ -2374,10 +2385,6 @@ def bulk_action(request):
         'object_type': object_type,
     })
     return render(request, template, context)
-
-
-
-
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -2657,7 +2664,6 @@ def collections(request):
     """
     List :class:`.Collection` instances.
     """
-    from curation.filters import CitationCollectionFilter
     return _list_collections(request, CitationCollectionFilter, CitationCollection, 'CITATION', 'curation/collection_list.html')
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -2665,13 +2671,11 @@ def authority_collections(request):
     """
     List :class:`.AuthorityCollection` instances.
     """
-    from curation.filters import AuthorityCollectionFilter
     return _list_collections(request, AuthorityCollectionFilter, AuthorityCollection, 'AUTHORITY', 'curation/collection_list.html')
 
 def _list_collections(request, collection_filter_class, collection_class, type, template):
     # ISISCB-1050: reverse sort order of collections (newest first)
     collections = collection_class.objects.all().order_by('-created')
-
     filtered_objects = collection_filter_class(request.GET, queryset=collections)
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
 
@@ -2692,6 +2696,8 @@ def _list_collections(request, collection_filter_class, collection_class, type, 
         'current_offset': (current_page - 1) * PAGE_SIZE,
         'current_page': current_page,
         'objects': filtered_objects,
+        'filter_params': urllibparse.urlencode(filter_params, quote_via=urllibparse.quote_plus),
+        'object_type': 'COLLECTION',
     }
     return render(request, template, context)
 
@@ -2818,7 +2824,6 @@ def add_authority_collection(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def users(request, user_id=None):
-    from curation.filters import UserFilter
     context = {
         'curation_section': 'users',
     }

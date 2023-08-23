@@ -8,6 +8,7 @@ from celery import shared_task
 from django.http import QueryDict
 
 from isisdata.filters import CitationFilter, AuthorityFilter
+from curation.filters import CitationCollectionFilter, UserFilter
 from isisdata.operations import filter_queryset
 from isisdata import export, export_ebsco, export_item_count_csv, export_swp_analysis_csv    # Oh man, so good.
 from isisdata import export_authority
@@ -36,12 +37,20 @@ def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='
 
     if object_type == 'AUTHORITY':
         _qs = Authority.objects.all()
+    elif object_type == 'COLLECTION':
+        _qs = CitationCollection.objects.all()
+    elif object_type == 'USER':
+        _qs = UserProfile.objects.all()
     else:
         _qs = Citation.objects.all()
     if user_id:
         _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
     if object_type == 'AUTHORITY':
         queryset = AuthorityFilter(filter_params, queryset=_qs).qs
+    elif object_type == 'COLLECTION':
+        queryset = CitationCollectionFilter(filter_params, queryset=_qs).qs
+    elif object_type == 'USER':
+        queryset = UserFilter(filter_params, queryset=_qs).qs  
     else:
         queryset = CitationFilter(filter_params, queryset=_qs).qs
     return queryset, filter_params_raw

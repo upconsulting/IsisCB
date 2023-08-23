@@ -15,6 +15,8 @@ from isisdata.models import *
 import isisdata.tasks as dtasks
 import curation.taskslib.citation_tasks as ctasks
 import curation.taskslib.authority_tasks as atasks
+import curation.taskslib.user_tasks as utasks
+import curation.taskslib.collection_tasks as cotasks
 
 from isisdata.filters import CitationFilter
 import json
@@ -105,8 +107,6 @@ class StoreCreationDataToModel(BaseAction):
         task.save()
         return task.id
 
-
-
 class SetRecordStatus(BaseAction):
     model = Citation
     label = u'Set record status'
@@ -142,8 +142,6 @@ class SetRecordStatus(BaseAction):
         task.label = 'Updating set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
-
-
 
 class SetRecordStatusExplanation(BaseAction):
     model = Citation
@@ -184,16 +182,13 @@ def get_tracking_transition_counts(qs):
     transitions[qs.model.NONE] += qs.filter(tracking_state=None).count()
     return transitions
 
-
 def get_allowable_transition_states():
     from curation.tracking import TrackingWorkflow
     return dict([(target, source) for source, target in TrackingWorkflow.transitions])
 
-
 def get_transition_labels():
     from curation.tracking import TrackingWorkflow
     return dict(Tracking.TYPE_CHOICES)
-
 
 class SetTrackingStatus(BaseAction):
     model = Citation
@@ -311,5 +306,53 @@ class DeleteDuplicateAttributes(BaseAction):
         task.save()
         return task.id
 
+class ReindexUsers(BaseAction):
+    model = UserProfile
+    label = u'Reindex users'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Reindex users',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Reindex users'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = utasks.reindex_users.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_users', value)
+        task.label = 'Reindexing users: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+    
+class ReindexCollections(BaseAction):
+    model = CitationCollection
+    label = u'Reindex collections'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Reindex collections',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Reindex collections'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = cotasks.reindex_collections.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_collections', value)
+        task.label = 'Reindexing collections: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]
 AVAILABLE_ACTIONS_AUTHORITY = [StoreCreationDataToModel, ReindexAuthorities, DeleteDuplicateAttributes]
+AVAILABLE_ACTIONS_USER = [ReindexUsers]
+AVAILABLE_ACTIONS_COLLECTION = [ReindexCollections]

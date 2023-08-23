@@ -10,6 +10,13 @@
 <div class="h3">
   {% if type == 'CITATION' %} Citation Collections {% else %} Authority Collections {% endif %}
 </div>
+<form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form" target="_blank">
+    {% csrf_token %}
+    &nbsp;&nbsp;
+    <input type="hidden" value="{{ filter_params }}" name="filters" />
+    <input type="hidden" name="object_type" value="{{ object_type }}">
+    <input class="btn btn-success btn-xs" id="bulk_change_submit" type="submit" value="Bulk change" />
+</form>
 <form action="" method="GET" id="">
     <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ filter_list|length }}</span>
 
@@ -51,6 +58,17 @@
     </table>
 </form>
 
+<script>
+    $('body').ready(function() {
+        var form = $('#bulk-form');
+        $('#bulk_change_submit').click(function(e) {
+            form.attr('action', '{% url "curation:citation-bulk-action" %}');
+            form.attr('target', '_blank');
+            form.submit();
+            e.preventDefault();
+        });
+    }
+</script>
 {% endblock %}
 
 {% block filter_form %}

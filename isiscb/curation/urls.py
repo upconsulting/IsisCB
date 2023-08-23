@@ -173,3 +173,4 @@ urlpatterns = [
     re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', views.change_is_staff, name='change_is_staff'),
     re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', views.change_is_superuser, name='change_is_superuser'),
 ]
+

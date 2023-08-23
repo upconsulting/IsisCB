@@ -2440,6 +2440,20 @@ class CitationCollection(models.Model):
 
     def __str__(self):
         return '%s (%s)' % (self.name, self.createdBy.username)
+    
+    @property
+    def normalized_name(self):
+        """
+        Title stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return strip_hyphen(normalize(self.name))
+
+    @property
+    def normalized_description(self):
+        """
+        Description stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return normalize(self.description)
 
 class AuthorityCollection(models.Model):
     """

@@ -24,6 +24,98 @@ from collections import defaultdict
 class DictMultiValueField(indexes.MultiValueField):
     field_type = 'object'
 
+class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.EdgeNgramField(document=True)
+    username = indexes.CharField(model_attr="user__username", null=True, indexed=False)
+    affiliation = indexes.CharField(model_attr="affiliation", indexed=False, null=True)
+    bio = indexes.CharField(model_attr="bio", indexed=False, null=True)
+    subjects = indexes.MultiValueField(model_attr="subjects", indexed=False)
+
+    def get_model(self):
+        return UserProfile
+
+    def prepare_text(self, obj):
+        document = u' '.join([
+            obj.username,
+            obj.affiliation,
+            obj.bio,
+            obj.subjects
+        ])
+
+        return document
+    
+    def index_queryset(self, using=None):
+        """Used when the entire index for model is updated."""
+        return self.get_model().objects.filter(public=True)
+    
+    def prepare(self, obj):
+        """
+        Coerce all unicode values to ASCII bytestrings, to avoid characters
+        that make haystack choke.
+        """
+        self.prepared_data = super(UserProfileIndex, self).prepare(obj)
+
+        for k, v in list(self.prepared_data.items()):
+            if type(v) is str:
+                self.prepared_data[k] = remove_control_characters(v.strip())
+        return self.prepared_data
+
+class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.EdgeNgramField(document=True)
+    name = indexes.CharField(model_attr="name", null=True, indexed=False)
+    creator = indexes.CharField(model_attr="createdBy", indexed=False)
+    subjects = indexes.MultiValueField(indexed=False)
+    citations = indexes.MultiValueField(indexed=False)
+    description = indexes.CharField(model_attr="description", null=True, indexed=False)
+
+    def get_model(self):
+        return CitationCollection
+
+    def prepare_text(self, obj):
+        document = u' '.join([
+            obj.normalized_name,
+            obj.normalized_description,
+        ] + [authority.name for authority in obj.subjects.all()
+        ] + [citation.normalized_title for citation in obj.citations.all()])
+        return document
+    
+    def index_queryset(self, using=None):
+        """Used when the entire index for model is updated."""
+        return self.get_model().objects.filter(public=True)
+    
+    def prepare_creator(self, obj):
+        creator = u' '.join([
+            obj.createdBy.username,
+            obj.createdBy.first_name,
+            obj.createdBy.last_name])
+        return creator
+    
+    def prepare_subjects(self, obj):
+        return [authority.name for authority in obj.subjects.all()]
+    
+    def prepare_citations(self, obj):
+        return [citation.normalized_title for citation in obj.citations.all()]
+
+    def load_all_queryset(self):
+        """
+        Add pre-loading of related fields using select_related and
+        prefetch_related.
+        """
+        return CitationCollection.objects.all().prefetch_related('subjects', 'citations')
+    
+    def prepare(self, obj):
+        """
+        Coerce all unicode values to ASCII bytestrings, to avoid characters
+        that make haystack choke.
+        """
+        self.prepared_data = super(CollectionIndex, self).prepare(obj)
+
+        for k, v in list(self.prepared_data.items()):
+            if type(v) is str:
+                self.prepared_data[k] = remove_control_characters(v.strip())
+
+        return self.prepared_data
+
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
     title = indexes.CharField(null=True, indexed=False, stored=True)

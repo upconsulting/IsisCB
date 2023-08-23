@@ -782,7 +782,7 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
     action_choices = []
     extra_data = {}
     # hack until we also make tracking status work
-    avail_actions = actions.AVAILABLE_ACTIONS_AUTHORITY if object_type == 'AUTHORITY' else actions.AVAILABLE_ACTIONS
+    avail_actions = actions.AVAILABLE_ACTIONS_AUTHORITY if object_type == 'AUTHORITY' else actions.AVAILABLE_ACTIONS_USER if object_type == 'USER' else actions.AVAILABLE_ACTIONS_COLLECTION if object_type == 'COLLECTION' else actions.AVAILABLE_ACTIONS
     for action_class in avail_actions:
         if hasattr(action_class, 'extra_js'):
             media_attrs['js'] = tuple(list(media_attrs['js']) + [action_class.extra_js])
