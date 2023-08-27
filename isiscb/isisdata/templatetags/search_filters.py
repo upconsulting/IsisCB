@@ -116,3 +116,15 @@ def count_relations(relations, type):
             count += 1
     return count
     
+@register.filter
+def remove_tenant(url):
+    tenant_match = re.search(r"([&?]tenant_id=.*?)(&|$)", url)
+    new_url = url.replace(tenant_match.group(1), "") if tenant_match and tenant_match.groups() else url
+    return new_url
+
+@register.filter
+def add_tenant(url, tenant_id):
+    tenant_match = re.search(r"([&?]tenant_id=.*?)(&|$)", url)
+    new_url = url.replace(tenant_match.group(1), "") if tenant_match and tenant_match.groups() else url
+    return new_url + "&tenant_id=" + tenant_id
+

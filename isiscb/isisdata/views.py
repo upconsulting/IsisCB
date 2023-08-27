@@ -1264,7 +1264,7 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
-        if self.request.GET.get('tenant_id', None):
+        if self.request.GET.get('tenant_portal', None):
             self.template_name = 'tenants/search/search.html'
 
         return self.render_to_response(context)
@@ -1358,7 +1358,7 @@ class IsisSearchView(FacetedSearchView):
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')
-        extra['tenant_id'] = self.request.GET.get('tenant_id', '')
+        extra['tenant_id'] = self.request.GET.get('tenant_portal', '')
 
         if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0

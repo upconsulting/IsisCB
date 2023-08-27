@@ -357,6 +357,12 @@
         </ul>
       </nav>
       {% endif %}
+
+      {% if request.GET.tenant_id %}
+      <a href="{{ request.get_full_path|remove_tenant }}">See citations from all projects...</a>
+      {% else %}
+      <a href="{{ request.get_full_path|add_tenant:tenant_id}}">See only citations from this project...</a>
+      {% endif %}
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}
