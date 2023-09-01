@@ -216,7 +216,8 @@ def filter_abstract(s):
     views. If present, only the text between {AbstractBegin} and {AbstractEnd}
     should be displayed.
     """
-
+    if not s:
+        return ""
     match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', s)
     if match:
         return match.groups()[0].strip()
