@@ -163,7 +163,7 @@
             <div class="col-sm-6">
 
               <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
-                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fas fa-share-square"></i></a>
               </strong>
 
               <p>
@@ -184,8 +184,24 @@
               </div>
               <div class="form-horizontal">
                 <div id="authority_info">
-                  <strong>Authority record: </strong><strong class="text-warning">{% if form.instance.authority %}{{ form.instance.authority.id }}{% endif %}</strong> &nbsp;&nbsp;
-                    <a id="authority_link" href="{% if form.instance.authority %}{% url 'curation:curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+                  <strong>Authority record: </strong>
+                  <strong class="text-warning" id="selected_authority_header">
+                    {% if form.instance.authority %}
+                    {% if form.instance.authority.owning_tenant != tenant %}
+                    <i class="fas fa-share-alt" aria-hidden="true"></i> 
+                    {% endif %}
+                    {{ form.instance.authority.id }}
+                    {% endif %}
+                  </strong> &nbsp;
+                  <a id="authority_link" href="{% if form.instance.authority %}{% if form.instance.authority.owning_tenant == tenant %}{% url 'curation:curate_authority' form.instance.authority.id %}{% else %}{% url 'tenants:authority' tenant.identifier form.instance.authority.id %}{% endif %}{% endif %}">
+                    {% if form.instance.authority %}
+                    {% if form.instance.authority.owning_tenant == tenant %}  
+                    <i class="fas fa-share-square"></i>
+                    {% else %}
+                    <i class="fas fa-globe-americas"></i>
+                    {% endif %}
+                    {% endif %}
+                  </a>
 
 
 
@@ -307,7 +323,8 @@ $(document).ready(function() {
                                               data-type-code="` + suggestion.type_code + `"
                                               data-id="` + suggestion.id + `"
                                               data-name="` + suggestion.name + `"
-                                              data-suggestion="` + suggestion.id + `">
+                                              data-suggestion="` + suggestion.id + `"
+                                              data-tenant="` + suggestion.owning_tenant + `">
                                           </a>
                                       </span>
                                   </div>
@@ -354,6 +371,7 @@ $(document).ready(function() {
                       var selected_name = selected.attr('data-name');
                       var selected_type = selected.attr('data-type');
                       var selected_type_code = selected.attr('data-type-code');
+                      var selected_authority_tenant = selected.attr('data-tenant');
 
                       $('#results-container').empty();
                       authority_search_input.val(selected_name);
@@ -363,6 +381,21 @@ $(document).ready(function() {
                       $('#authority_type_full').attr('data-type-code', selected_type_code);
                       $('#authority_name').text(selected_name);
 
+                      $("#selected_authority_header").empty()
+                      var newLabel = '';
+                      var urlHref = '{% url 'curation:authority-base' %}';
+                      var linkIcon = ' <i class="fas fa-share-square"></i>'
+                      if (selected_authority_tenant != "{{ instance.owning_tenant.id }}") {
+                        newLabel += '<i class="fas fa-share-alt"></i> ';
+                        urlHref = '{% url 'tenants:authority-base' tenant.identifier %}';
+                        linkIcon = '<i class="fas fa-globe-americas"></i>';
+                      }
+                      urlHref += selected_id;
+                      newLabel += selected_id;
+                      $("#selected_authority_header").html(newLabel);
+                      $("#authority_link").attr('href', urlHref);
+                      $("#authority_link").html(linkIcon);
+                     
                       authority_search_input.attr('disabled', true);
                   });
               }
