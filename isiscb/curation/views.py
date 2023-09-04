@@ -1636,8 +1636,8 @@ def citations(request):
               'part_details__page_begin', 'part_details__page_end',
               'part_details__pages_free_text', 'part_details__volume_free_text',
               'part_details__issue_free_text', 'created_on_fm', 'belongs_to',
-              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
-              'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
+              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name', 'created_by_native__username',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by__username', 'modified_by', 'stub_record_status' )
 
     qs = queryset.select_related('part_details').values(*fields).distinct()
     filtered_objects = CitationFilter(filter_params, queryset=qs, request=request)
@@ -1710,8 +1710,8 @@ def authorities(request):
     template = 'curation/authority_list_view.html'
     fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
               'tracking_state', 'modified_on', 'modified_on_fm',
-              'modified_by__first_name', 'modified_by__last_name', 'modified_by',
-              'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by__username', 'modified_by',
+              'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name', 'created_by_stored__username',
               'created_on_stored', 'owning_tenant', 'belongs_to')
 
     # ISISCB-1157: don't show any result if there are no filters set
@@ -2445,7 +2445,7 @@ def _build_filter_label(filter_params_raw, filter_type='CITATION', request=None)
     if filter_type == 'AUTHORITY':
         current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True), request=request)
     else:
-        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True, request=request))
+        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True), request=request)
     filter_form = current_filter.form
     filter_data = {}
     if filter_form.is_valid():

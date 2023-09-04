@@ -219,7 +219,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td>
                   {% if object.modified_by %}
-                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }} ({{object.modified_by__username}})
                   {% endif %}
                 </td>
                 <td>
@@ -233,7 +233,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td>
                   {% if object.created_by_native %}
-                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
+                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }} ({{object.created_by_native__username}})
                   {% endif %}
                 </td>
             </tr>

@@ -383,7 +383,7 @@ $(document).ready(function() {
 
                       $("#selected_authority_header").empty()
                       var newLabel = '';
-                      var urlHref = '{% url 'curation:authority-base' %}';
+                      var urlHref = '{% url 'curation:authority_list' %}';
                       var linkIcon = ' <i class="fas fa-share-square"></i>'
                       if (selected_authority_tenant != "{{ instance.owning_tenant.id }}") {
                         newLabel += '<i class="fas fa-share-alt"></i> ';

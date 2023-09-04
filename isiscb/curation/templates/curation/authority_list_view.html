@@ -176,7 +176,7 @@ $('body').ready(function() {
                 </td>
                 <td>
                   {% if object.modified_by %}
-                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }} ({{object.modified_by__username}})
                   {% endif %}
                 </td>
                 <td>
@@ -190,7 +190,7 @@ $('body').ready(function() {
                 </td>
                 <td>
                   {% if object.created_by_stored %}
-                    {{ object.created_by_stored__first_name }} {{ object.created_by_stored__last_name }}
+                    {{ object.created_by_stored__first_name }} {{ object.created_by_stored__last_name }} ({{object.created_by_stored__username}})
                   {% endif %}
                 </td>
             </tr>
