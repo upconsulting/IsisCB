@@ -105,7 +105,11 @@
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item">
+            <a href="{% if acrel.authority.owning_tenant and acrel.authority|is_external_tenant:instance.owning_tenant.id %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">
+              {% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} 
+              {{ acrel.authority.name }}
+            </a>
            {% if can_update %}
            <span class="button-group button-group-xs">
                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -125,8 +129,8 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
-             {% else %}
+             <a href="{% if acrel.authority.owning_tenant and acrel.authority|is_external_tenant:instance.owning_tenant.id %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             {% else %}}
              <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
@@ -562,6 +566,7 @@ function addConcept(event) {
     var linkText = result.acrelation.authority.name;
     if (result.acrelation.authority.owning_tenant != {{ instance.owning_tenant.id }}) {
       linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+      url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.authority.id;
     }
     var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
     ul.append(li);

@@ -34,6 +34,7 @@ function addCategory(event) {
     var linkText = result.acrelation.authority.name ;
     if (!(result.acrelation.authority.owning_tenant == {{instance.owning_tenant.id}}) ) {
       linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+      url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.acrelation.authority.id;
     }
     var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
     ul.append(li);
