@@ -1,14 +1,14 @@
 amqp==2.5.2
 #asgiref==3.2.7
 attrs==19.3.0
-awsebcli==3.20.2
+awsebcli==3.20.9
 backports.ssl-match-hostname==3.7.0.1
 bcrypt==3.1.7
 billiard==3.6.3.0
 bleach==3.3.0
 blessed==1.17.4
-boto3==1.18.35
-botocore==1.21.36
+boto3==1.28.44
+botocore==1.31.44
 cached-property==1.5.1
 cachetools==4.0.0
 celery==4.4.2
@@ -73,7 +73,7 @@ oauthlib==3.1.0
 olefile==0.46
 packaging==20.3
 paramiko==2.7.1
-pathspec==0.5.9
+pathspec==0.10.1
 pbr==5.4.4
 pefile==2019.4.18
 Pillow==9.0.0
@@ -103,7 +103,7 @@ rules==2.2
 #s3transfer==0.3.3
 #semantic-version==2.5.0
 six==1.11.0
-smart-open==1.10.0
+smart_open==6.4.0
 social-auth-app-django==3.1.0
 social-auth-core==3.3.3
 SPARQLWrapper==1.8.5

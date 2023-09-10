@@ -3114,10 +3114,13 @@ class AsyncTask(models.Model):
     """Use jsonpickle to serialize/deserialize return values."""
 
     def _get_value(self):
-        return jsonpickle.decode(self._value)
+        if self._value:
+            return jsonpickle.decode(self._value)
+        return None
 
     def _set_value(self, value):
-        self._value = jsonpickle.encode(value)
+        if value:
+            self._value = jsonpickle.encode(value)
 
     value = property(_get_value, _set_value)
 
