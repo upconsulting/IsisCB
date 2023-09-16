@@ -150,6 +150,19 @@
                 {% endif %}
               </small>
             </div>
+
+            <div class="col-md-12" style="padding-top: 10px;">
+              <small>
+                {% if request.GET.tenant_id %}
+                <input type="checkbox" name="include_all_projects" >
+                <a href="{{ request.get_full_path|remove_tenant }}">Include all projects</a>
+                {% else %}
+                <input type="checkbox" name="include_all_projects" checked>
+                <a href="{{ request.get_full_path|add_tenant:tenant_id}}">All projects included</a>
+                {% endif %}
+              </small>
+            </div>
+
           </div>
         </div>
       </div>
@@ -357,12 +370,6 @@
         </ul>
       </nav>
       {% endif %}
-
-      {% if request.GET.tenant_id %}
-      <a href="{{ request.get_full_path|remove_tenant }}">See citations from all projects...</a>
-      {% else %}
-      <a href="{{ request.get_full_path|add_tenant:tenant_id}}">See only citations from this project...</a>
-      {% endif %}
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}
@@ -397,6 +404,20 @@ $('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(eve
     window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
   } else {
     window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
+  }
+});
+
+$("input[name='include_all_projects']").bootstrapSwitch({
+  'size':'mini',
+  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+});
+
+$('input[name="include_all_projects"]').on('switchChange.bootstrapSwitch', function(event, includeProjects) {
+  if (!includeProjects) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|add_tenant:tenant_id|safe}}"
+  } else {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|remove_tenant|safe }}"
   }
 });
 </script>
