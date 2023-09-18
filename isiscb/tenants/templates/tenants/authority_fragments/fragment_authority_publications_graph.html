@@ -1,0 +1,314 @@
+{% load app_filters %}
+{% load static %}
+{% load authority_filters %}
+
+<div class="panel-heading-subjects panel panel-default facet-box" id="author-timeline">
+  <div class="panel-heading-subjects panel-heading">
+    <strong>Publications timeline | </strong><span>Click to expand</span>
+  </div>
+
+  <div class="panel-body">
+    <div id="publication_chart_sm" data-toggle="modal" data-target="#timelineModal">
+      <div style="margin-bottom: 10px;" id="spinner_sm"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+      <div id="chart_sm"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Load c3.css -->
+<link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
+
+<!-- Load d3.js and c3.js -->
+<script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
+<script src="{% static "isisdata/c3/c3.min.js" %}"></script>
+
+<div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i></h4>
+      </div>
+      <div class="modal-body">
+        <div id="publication_chart" >
+          <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+          <div id="chart"></div>
+          <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+          <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
+            Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
+            <span id="recalculationSpan"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<script>
+//# sourceURL=chart.js
+var titles;
+var books;
+var theses;
+var chapters;
+var articles;
+var reviews;
+var others;
+var years;
+var showReviews = true;
+
+$(document).ready(function() {
+
+    $('#showReviewsCheckbox').change(function() {
+      showReviews = $(this).is(':checked');
+      renderChart();
+    });
+
+    function buildTitles(d, titles, type) {
+      var TITLE_LENGTH = 10;
+      var trimmed_titles = [];
+      var title_strings = titles[d[type].x][d[type].id];
+      for (var t in title_strings) {
+        var title = title_strings[t];
+        var parts = title.split(' ');
+        if (parts.length < TITLE_LENGTH) {
+          trimmed_titles.push(title);
+        } else {
+          trimmed_titles.push(parts.slice(0,TITLE_LENGTH).join(' ') + "...");
+        }
+      }
+
+      var panel = '';
+      if (d[type].value > 0) {
+        panel += '<strong>' + d[type].name + ' (' + d[type].value + ')</strong>';
+        panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
+      }
+
+      return panel;
+    }
+
+    /*
+     * Hide ticks without numbers
+     */
+    function hideTicks() {
+      $('.c3-axis-y .tick').each(function(idx, element) {
+        var line = $(element).find("line");
+        var text = $(element).find("text>tspan");
+        if (!text.text()) {
+          line.css("display", "none");
+        }
+      });
+    }
+
+    function pollForTimeline() {
+      $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
+        if (data.status == 'done') {
+          $('#spinner').hide();
+          $("#spinner_sm").hide();
+          var genDate = new Date(data.generated_on);
+          $("#timelineDate").text(genDate.toLocaleDateString());
+          $("#timelineTime").text(genDate.toLocaleTimeString());
+
+          if (data.timeline_recalculation == 'running') {
+            $("#recalculationSpan").append('<br><i class="fa fa-clock-o" aria-hidden="true"></i>');
+            $("#recalculationSpan").append(" Timeline is being updated.");
+          }
+          {% if user.is_authenticated %}
+          else if (data.timeline_recalculation == 'none' && data.can_recalculate == true) {
+            var recForm = $('<form method="POST" style="margin-right: -10px;margin-top: -5px;" action="{% url 'recalculate_timeline' authority.id %}">{% csrf_token %}</form>');
+            recForm.append($('<button type="submit" class="btn btn-link" style="font-size: 10px;"><i class="fa fa-clock-o" aria-hidden="true"></i> Update now</button>'))
+            $("#recalculationSpan").append(recForm);
+          }
+          {% endif %}
+          $("#timelineGenDate").show();
+
+          titles = data.titles;
+          books = ['books'].concat(data.books);
+          theses = ['theses'].concat(data.theses);
+          chapters = ['chapters'].concat(data.chapters);
+          articles = ['articles'].concat(data.articles);
+          reviews = ['reviews'].concat(data.reviews);
+          others = ['others'].concat(data.others);
+          years = ['Years'].concat(data.years);
+          renderChart();
+        } else if (data.status == 'generating') {
+          setTimeout(pollForTimeline, 1000)
+        } else {
+          $('#spinner').hide();
+          $('#spinner_sm').hide()
+          $("#chart").append("Timeline could not be loaded. An error occurred.")
+          $("#chart_sm").append("Timeline could not be loaded. An error occurred.")
+        }
+      });
+    }
+
+    pollForTimeline();
+
+    var current_groups;
+    function renderChart() {
+      var cols;
+      var colors;
+      var names;
+      // this is ugly but ah well
+      if (!showReviews) {
+        cols = [books, theses, chapters, articles, others];
+        current_groups = ['articles', 'books', 'chapters', 'others','theses']
+        colors = {
+          articles: '#358ecc',
+          books: '#a0d285',
+          chapters: '#2f7b84',
+          others: '#000108',
+          theses: '#70b5a5',
+        };
+        names = {
+          books: 'Book',
+          theses: 'Thesis',
+          chapters: 'Chapter',
+          articles: 'Article',
+          others: 'Other'
+        };
+      } else {
+        cols = [books, theses, chapters, articles, reviews, others];
+        current_groups = ['articles', 'books', 'chapters', 'others','theses', 'reviews' ]
+        colors = {
+          articles: '#358ecc',
+          books: '#a0d285',
+          chapters: '#2f7b84',
+          others: '#000108',
+          reviews: '#273696',
+          theses: '#70b5a5',
+        };
+        names = {
+          books: 'Book',
+          theses: 'Thesis',
+          chapters: 'Chapter',
+          articles: 'Article',
+          reviews: 'Review',
+          others: 'Other'
+        };
+      }
+
+      var chart_sm = c3.generate({
+        bindto: '#chart_sm',
+        size: {
+            height: 200,
+        },
+        data: {
+          x: 'Years',
+          columns: [years].concat(cols),
+          type: 'bar',
+          groups: [
+            current_groups
+          ],
+          colors: colors,
+          names: names,
+          onclick: function (d, element) {
+            return
+          },
+          order: function (t1, t2) {
+            return t1.id < t2.id;
+          },
+          onclick: function (d, element) {
+            // do nothing
+          },
+        },
+        legend: {
+          show: false
+        },
+        tooltip: {
+          show: false,
+        },
+        axis : {
+          x: {
+            tick: {
+                values: years,
+                format: (d,i) => {if (d==years[1] || d==years[years.length-1]) { return d } },
+            }
+          },
+          y : {
+              tick: {
+                  format: function(x) { return x % 1 === 0 ? x : ''; },
+              }
+          }
+        },
+        padding: {
+            right: 10
+        }
+      })
+
+      var chart = c3.generate({
+        bindto: '#chart',
+        size: {
+            width:810,
+        },
+        data: {
+          x: 'Years',
+          columns: [years].concat(cols),
+          type: 'bar',
+          groups: [
+            current_groups
+          ],
+          colors: colors,
+          names: names,
+          onclick: function (d, element) {
+            var date = d['x']
+            window.location.href = '{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
+          },
+          order: function (t1, t2) {
+            return t1.id < t2.id;
+          }
+        },
+        axis : {
+            y : {
+                tick: {
+                    format: function(x) { return x % 1 === 0 ? x : ''; },
+                }
+            }
+        },
+        legend: {
+          item: {
+            onclick: function (id) {
+              return;
+            }
+          },
+          position: 'bottom',
+          show: true
+        },
+        tooltip: {
+          grouped: true,
+          contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+
+            var panel = '<div class="panel panel-default timeline">';
+            panel += '<div class="panel-heading"><strong>' + d[0].x + '</strong> (click on bar to see all citations)</div>'
+            panel += '<div class="panel-body">';
+            var nrOfTypes = showReviews ? 6 : 5;
+            for (i=0; i<nrOfTypes; i++) {
+              panel += buildTitles(d, titles, i);
+            }
+            panel += '</div>';
+            panel += '</div>';
+
+            return panel;
+          },
+          position: function (data, width, height, element) {
+               var cursorPos = d3.mouse(element)[0];
+               var chartWidth = $('#chart').width();
+               if (chartWidth/2 > cursorPos) {
+                 // put on right side of cursor
+                 // roughly even positioning from the cursor
+                 return {top: 5, left: parseInt(element.getAttribute('x')) + parseInt(element.getAttribute('width')) + 60};
+               } else {
+                 // tooltip on left side of cursor
+                 return {top: 5, left: parseInt(element.getAttribute('x')) - width};
+               }
+           },
+        },
+      });
+
+      hideTicks();
+    }
+
+  });
+</script>

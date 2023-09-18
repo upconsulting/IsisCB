@@ -144,6 +144,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+    owning_tenant = indexes.IntegerField(faceted=True, indexed=True, null=True)
+    owning_tenant_name = indexes.CharField(indexed=False, null=True)
 
     data_fields = [
         'id',
@@ -453,8 +455,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def _index_tenants(self, data):
         if data[0]['owning_tenant__id']:
             self.prepared_data['tenant_ids'] = data[0]['owning_tenant__id']
+            self.prepared_data['owning_tenant'] = data[0]['owning_tenant__id']
         if data[0]['owning_tenant__name']:
             self.prepared_data['tenant_names'] = data[0]['owning_tenant__name']
+            self.prepared_data['owning_tenant_name'] = data[0]['owning_tenant__name']
 
     def _get_reviewed_book(self, data):
         """

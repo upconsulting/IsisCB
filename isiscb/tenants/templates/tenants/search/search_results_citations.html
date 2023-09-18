@@ -153,7 +153,7 @@
 
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
-                {% if request.GET.tenant_id %}
+                {% if request.GET.owning_tenant %}
                 <input type="checkbox" name="include_all_projects" >
                 <a href="{{ request.get_full_path|remove_tenant }}">Include all projects</a>
                 {% else %}

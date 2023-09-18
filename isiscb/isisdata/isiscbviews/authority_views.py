@@ -335,19 +335,35 @@ def authority(request, authority_id, tenant_id=None):
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, related_citations = _get_word_cloud_results(authority.id, tenant_id)
+    sqs, related_citations = _get_word_cloud_results(authority.id)
 
-    related_citations = related_citations.order_by('-publication_date_for_sort')
-
+    def filter_by_tenant(sqs, tenant_id):
+        """ Method that filters records by tenant if there are any and then returns the count"""
+        if tenant_id:
+            tenant = Tenant.objects.filter(identifier=tenant_id).first()
+            sqs = sqs.filter(owning_tenant=tenant.pk)
+        return sqs
+    
+    related_citations = filter_by_tenant(related_citations.order_by('-publication_date_for_sort'), tenant_id)
+    
     related_geographics_facet = related_citations.facet_counts()['fields']['geographic_ids'] if 'fields' in related_citations.facet_counts() else []
     related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
+    
+    # count related citations
+    related_citations_count = filter_by_tenant(related_citations, tenant_id).count()
 
-    related_citations_count = related_citations.count()
-    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
-    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-
-    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).count()
+    # count citations with this authority as subject
+    subject_category_sqs = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id)
+    subject_category_count = filter_by_tenant(subject_category_sqs, tenant_id).count()
+    
+    # count citations with this authority as contributor
+    author_contributor_sqs = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id)
+    author_contributor_count = filter_by_tenant(author_contributor_sqs, tenant_id).count()
+    
+    # count citations with this tenant as publisher
+    publisher_sqs = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id)
+    publisher_count = filter_by_tenant(publisher_sqs, tenant_id).count()
 
     display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
@@ -383,7 +399,7 @@ def authority(request, authority_id, tenant_id=None):
         return render(request, 'tenants/authority.html', context)
     return render(request, 'isisdata/authority.html', context)
 
-def _get_word_cloud_results(authority_id, tenant_id=None):
+def _get_word_cloud_results(authority_id):
     # boxes
     sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
@@ -393,16 +409,14 @@ def _get_word_cloud_results(authority_id, tenant_id=None):
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+   
     word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
-    if tenant_id:
-        tenant = Tenant.objects.filter(identifier=tenant_id).first()
-        word_cloud_results = word_cloud_results.filter(tenant_ids=tenant.pk)
-
+         
     return sqs, word_cloud_results
 
 def _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
