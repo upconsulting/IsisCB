@@ -120,7 +120,7 @@
     {% endfor %}
     <label class="col-md-2">{{ form.default_featured_citation.label }}</label>
     <div class="col-md-9">
-      <input id="featured_citation_search" type="text" class="form-control" value="{% if form.instance.default_featured_citation %} {{form.instance.default_featured_citation.title}} ({{form.instance.default_featured_citation.id}}) {% endif %}" />
+      <input {% if form.instance.default_featured_citation and not form.instance.default_featured_citation.public %}style="background-color:#e4d7ca"{% endif %} id="featured_citation_search" type="text" class="form-control" value="{% if form.instance.default_featured_citation %} {{form.instance.default_featured_citation.title}} ({{form.instance.default_featured_citation.id}}) {% endif %}" />
       <ul class="list-group" id="featured_citation_datalist">
       </ul>
       {{ form.default_featured_citation|addcss:"form-control" }}
@@ -225,6 +225,7 @@
     });
   }
 
+  var NON_PUBLIC_COLOR = "#e4d7ca";
   function triggerCitationSearch(force){
     var query = $('#featured_citation_search').val();
     var url = "{% url "curation:quick_and_dirty_citation_search" %}?show_inactive=false"  
@@ -241,10 +242,18 @@
           var newOption = $('<li class="list-group-item"></li>');
 
           var linkText = r.title + ' - ' + r.id;
-          newOption.html('<a href="#">' + linkText + '</a>')
+          var linkIcon = '';
+          var background_color = "#ffffff";
+          if (!r.public) {
+            linkIcon = '<i class="fas fa-eye-slash"></i> ';
+            newOption.css('background-color', NON_PUBLIC_COLOR);
+            background_color = NON_PUBLIC_COLOR;
+          }
+          newOption.html('<a href="#">' + linkIcon + linkText + '</a>')
           newOption.click(function() {
             $("#id_default_featured_citation").val(r.id);
             $("#featured_citation_search").val(linkText);
+            $("#featured_citation_search").css("background-color", background_color);
             resultsContainer.empty();
           })
           resultsContainer.append(newOption);
