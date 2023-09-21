@@ -214,6 +214,7 @@
                     {% endif %}
                 </div>
                 <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-authority">
+                    {% if featured_authority.public %}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
@@ -234,6 +235,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             {% if tweet_url %}

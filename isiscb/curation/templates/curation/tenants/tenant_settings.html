@@ -98,7 +98,12 @@
     {% endfor %}
     <label class="col-md-2">{{ form.default_featured_authority.label }}</label>
     <div class="col-md-9">
-      <input id="featured_authority_search" type="text" class="form-control" value="{% if form.instance.default_featured_authority %} {{form.instance.default_featured_authority.name}} ({{form.instance.default_featured_authority.id}}) {% endif %}" />
+      <input  
+        {% if form.instance.default_featured_authority and not form.instance.default_featured_authority.public %}style="background-color:#e4d7ca"{% endif %}
+        id="featured_authority_search" 
+        type="text" 
+        class="form-control" 
+        value="{% if form.instance.default_featured_authority %} {{form.instance.default_featured_authority.name}} ({{form.instance.default_featured_authority.id}}) {% endif %}" />
       <ul class="list-group" id="featured_authority_datalist">
       </ul>
       {{ form.default_featured_authority|addcss:"form-control" }}
@@ -120,7 +125,12 @@
     {% endfor %}
     <label class="col-md-2">{{ form.default_featured_citation.label }}</label>
     <div class="col-md-9">
-      <input {% if form.instance.default_featured_citation and not form.instance.default_featured_citation.public %}style="background-color:#e4d7ca"{% endif %} id="featured_citation_search" type="text" class="form-control" value="{% if form.instance.default_featured_citation %} {{form.instance.default_featured_citation.title}} ({{form.instance.default_featured_citation.id}}) {% endif %}" />
+      <input 
+        {% if form.instance.default_featured_citation and not form.instance.default_featured_citation.public %}style="background-color:#e4d7ca"{% endif %} 
+        id="featured_citation_search" 
+        type="text" 
+        class="form-control" 
+        value="{% if form.instance.default_featured_citation %} {{form.instance.default_featured_citation.title}} ({{form.instance.default_featured_citation.id}}) {% endif %}" />
       <ul class="list-group" id="featured_citation_datalist">
       </ul>
       {{ form.default_featured_citation|addcss:"form-control" }}
@@ -169,10 +179,11 @@
   var INITIAL_MAX_RESULTS = 10;
   var max_results = INITIAL_MAX_RESULTS;
   var search_tenants = true;
-    
+  
+  var NON_PUBLIC_COLOR = "#e4d7ca";
   function triggerAuthoritySearch(force){
     var query = $('#featured_authority_search').val();
-    var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&use_custom_cmp=false&"  
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=true&use_custom_cmp=false&"  
     url += "&max=" + max_results + "&force=" + force; 
     if (search_tenants) {
       url += "&tenant_ids={{tenant.id}}";
@@ -186,10 +197,18 @@
           var newOption = $('<li class="list-group-item" data-authority-id="' + r.id + '"></li>');
 
           var linkText = r.name + ' (' + r.citation_count + ') - ' + r.id;
-          newOption.html('<a href="#">' + linkText + '</a>')
+          var linkIcon = '';
+          var background_color = "#ffffff";
+          if (!r.public) {
+            linkIcon = '<i class="fas fa-eye-slash"></i> ';
+            newOption.css('background-color', NON_PUBLIC_COLOR);
+            background_color = NON_PUBLIC_COLOR;
+          }
+          newOption.html('<a href="#">' + linkIcon + linkText + '</a>')
           newOption.click(function() {
             $("#id_default_featured_authority").val(r.id);
             $("#featured_authority_search").val(linkText);
+            $("#featured_authority_search").css("background-color", background_color);
             resultsContainer.empty();
           })
           resultsContainer.append(newOption);
@@ -225,7 +244,7 @@
     });
   }
 
-  var NON_PUBLIC_COLOR = "#e4d7ca";
+  
   function triggerCitationSearch(force){
     var query = $('#featured_citation_search').val();
     var url = "{% url "curation:quick_and_dirty_citation_search" %}?show_inactive=false"  
