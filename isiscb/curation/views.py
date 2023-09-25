@@ -62,8 +62,11 @@ PAGE_SIZE = 40    # TODO: this should be configurable.
 
 
 def _get_datestring_for_authority(authority):
-    return ', '.join([attribute.value.display for attribute in authority.attributes.all() if attribute.value])
-
+    try:
+        return ', '.join([attribute.value.display for attribute in authority.attributes.all() if attribute.value])
+    except Exception as e:
+        print(e)
+        return ''
 
 def _get_datestring_for_citation(citation):
     if citation.publication_date:
@@ -2219,7 +2222,9 @@ def get_citation_by_id(request):
 def quick_and_dirty_citation_search(request):
     q = request.GET.get('q', None)
     N = int(request.GET.get('max', 20))
-    if not q or len(q) < 3:
+    force = request.GET.get('force', 'false') == 'true'
+    
+    if (not q or len(q) < 3) and not force:
         return JsonResponse({'results': []})
 
     # ISISCB-1132: ccr relations do not find titles with hyphens etc
