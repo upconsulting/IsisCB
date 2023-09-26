@@ -134,7 +134,7 @@ def authority_catalog(request, authority_id, tenant_id=None):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, word_cloud_results = _get_word_cloud_results(authority.id, tenant_id)
+    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
 
     related_citations_count = word_cloud_results.count()
 
