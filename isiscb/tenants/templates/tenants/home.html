@@ -92,7 +92,7 @@
             </div>
             <div class="col-sm-12 col-md-6">
                 <div class="search-bar">
-                    <form method="get" action="/portal/{{ tenant_id }}/search">
+                    <form method="get" action="/{{PORTAL_PREFIX}}/{{ tenant_id }}/search">
                         <div class="input-group">
                             <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the {{ tenant.title }}...">
                             <span class="input-group-btn">
@@ -115,7 +115,7 @@
                 <br>
                 <div class="row">
                     <div class="browse-button" style="float: right; padding: 0 15px 0 0;">
-                        <form method="get" action="/portal/{{ tenant_id }}/search">
+                        <form method="get" action="/{{PORTAL_PREFIX}}/{{ tenant_id }}/search">
                             <div class="input-group">
                                 <input id="id_q" name="q" type="hidden" class="form-control" value="*">
                                 <span>

@@ -69,9 +69,9 @@ def get_authors(value):
 @register.filter
 def get_uri(entry, tenant=None):
     if to_class_name(entry) == 'Authority':
-        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "authority/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + settings.PORTAL_PREFIX + '/' + tenant + "/") + "authority/" + entry.id
     if to_class_name(entry) == 'Citation':
-        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "citation/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + settings.PORTAL_PREFIX + '/' + tenant + "/") + "citation/" + entry.id
     return ""
 
 @register.filter

@@ -165,6 +165,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'isisdata.context_processors.portal_prefix',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],
@@ -423,3 +424,4 @@ FEATURED_CITATION_ID = os.environ.get('FEATURED_CITATION_ID', 'CBB000932135')
 FEATURED_AUTHORITY_ID = os.environ.get('FEATURED_AUTHORITY_ID', 'CBA000113752')
 
 DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
+PORTAL_PREFIX = os.environ.get('PORTAL_PREFIX', 'p')
