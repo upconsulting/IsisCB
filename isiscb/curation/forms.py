@@ -981,13 +981,16 @@ class TenantSettingsForm(forms.ModelForm):
     default_featured_authority = AuthorityField(widget=forms.HiddenInput(), queryset=Authority.objects.none(), required=False)
     default_featured_citation = CitationField(widget=forms.HiddenInput(), queryset=Citation.objects.none(), required=False)
     subject_searches_all_tenants = forms.BooleanField(required=False)
+    public_search_all_tenants_default = forms.BooleanField(required=False)
+
 
     class Meta(object):
         model = TenantSettings
         fields = [
             'navigation_color', 'link_color', 'google_api_key', 
             'twitter_api_key', 'twitter_user_name', 'default_featured_authority',
-            'default_featured_citation', 'subject_searches_all_tenants'
+            'default_featured_citation', 'subject_searches_all_tenants', 
+            'public_search_all_tenants_default'
         ]
 
     def __init__(self, *args, **kwargs):

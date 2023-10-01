@@ -89,6 +89,10 @@
             <th>Subject and Category Search</th>
             <td>{% if tenant.settings.subject_searches_all_tenants %} <i class="fa fa-toggle-on" aria-hidden="true"></i> By default all tenants are searched. {% else %} <i class="fa fa-toggle-off" aria-hidden="true"></i> By default only this tenant is searched. {% endif %}</td>
           </tr>
+          <tr>
+            <th>Public Site Includes all Tenants' Data</th>
+            <td>{% if tenant.settings.public_search_all_tenants_default %} <i class="fa fa-toggle-on" aria-hidden="true"></i> By default all tenants's data are included. {% else %} <i class="fa fa-toggle-off" aria-hidden="true"></i> By default only this tenant's data is included. {% endif %}</td>
+          </tr>
       </table>
   </div>
 </div>

@@ -1,0 +1,29 @@
+{% load static %}
+
+<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
+<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
+<script>
+    //@ sourceURL=toggle.js
+    $("input[name='site_include_all_projects']").bootstrapSwitch({
+        'state': includeAllTenants,
+        'size':'mini',
+        'onColor': 'info',
+        'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+        'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+    });
+    if (includeAllTenants) {
+        $("#includeAllTenantsNavItem").attr("title", "The current view shows everything from all bibliographies on the CB Expore system. To view only items from XYZ Bibliography, click [View all off].");
+        $("#includeAllToggleText").text("View all off");
+    } else {
+        $("#includeAllTenantsNavItem").attr("title", "The current view shows only items from XYZ Bibliography. To view everything from all bibliographies on the CB Expore system, click [View all on].");
+        $("#includeAllToggleText").text("View all on");
+    }
+
+    $("#includeAllToggleText").click(function() {
+        setIncludeAllProjects(!includeAllTenants);
+    })
+
+    $('input[name="site_include_all_projects"]').on('switchChange.bootstrapSwitch', function(event, includeProjects) {
+        setIncludeAllProjects(includeProjects);
+    });
+</script>
