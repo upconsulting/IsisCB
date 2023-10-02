@@ -1,4 +1,5 @@
 {% load static %}
+{% load search_filters %}
 
 <link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
 <script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
@@ -13,17 +14,40 @@
     });
     if (includeAllTenants) {
         $("#includeAllTenantsNavItem").attr("title", "The current view shows everything from all bibliographies on the CB Expore system. To view only items from XYZ Bibliography, click [View all off].");
-        $("#includeAllToggleText").text("View all off");
+        $("#includeAllToggleText").text("View all");
     } else {
         $("#includeAllTenantsNavItem").attr("title", "The current view shows only items from XYZ Bibliography. To view everything from all bibliographies on the CB Expore system, click [View all on].");
-        $("#includeAllToggleText").text("View all on");
+        $("#includeAllToggleText").text("View all");
     }
 
     $("#includeAllToggleText").click(function() {
         setIncludeAllProjects(!includeAllTenants);
+        // this is ugly but the easiest at the moment
+        // maybe there should be an extra header for the search
+        if ('{{ request.resolver_match.url_name}}' == 'index') {
+            if (includeAllTenants) {
+                window.location = '{{ request.get_full_path|remove_tenant|safe}}';
+            } else {
+                window.location = '{{ request.get_full_path|add_tenant:tenant_id|safe}}';
+            }
+        } else {
+            location.reload();
+        }
+       
     })
 
     $('input[name="site_include_all_projects"]').on('switchChange.bootstrapSwitch', function(event, includeProjects) {
         setIncludeAllProjects(includeProjects);
+        // this is ugly but the easiest at the moment
+        // maybe there should be an extra header for the search
+        if ('{{ request.resolver_match.url_name}}' == 'index') {
+            if (includeAllTenants) {
+                window.location = '{{ request.get_full_path|remove_tenant|safe}}';
+            } else {
+                window.location = '{{ request.get_full_path|add_tenant:tenant_id|safe}}';
+            }
+        } else {
+            location.reload();
+        }
     });
 </script>

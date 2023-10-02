@@ -39,11 +39,17 @@
             document.getElementById("citationImageCaption").style.display = "none";
             document.getElementById("placeholderImage").style.display = "block";
             document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
-            document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
-            document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            if (document.getElementById("citationImageAdjacent")) {
+                document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+                document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            }
         }
 
         $('#author-timeline strong').html('Related citations | ');
+
+        if(includeAllTenants) {
+            $("input[name='owning_tenant']").remove();
+        }
     });
 </script>
 

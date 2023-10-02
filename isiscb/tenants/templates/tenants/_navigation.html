@@ -104,4 +104,12 @@
     </div>
 
     {% include "tenants/fragment_toggle_switch.html" %}
+
+    <script type="text/javascript">
+        $(function() {
+            if(includeAllTenants) {
+                $("input[name='owning_tenant']").remove();
+            }
+        });
+    </script>
 </nav>
