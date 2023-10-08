@@ -390,7 +390,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
            <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; vertical-align: middle;">
             {% if citation.type_controlled in 'BO,CH,TH' %}
-            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title }}</p>
+            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title|bleach_safe }}</p>
             {% else %}
             {% for prop in properties_map %}
                {% if prop.type_controlled == "PE" %}<p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
@@ -444,6 +444,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <hr style="margin: 10px 0">
              {% endif %}
 
+
              {% if citation.linkeddata_public.all|length > 0 %}
                 {% for entry in citation.linkeddata_public.all %}
                   <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -482,6 +483,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  </div>
                  <hr style="margin: 10px 0">
              {% endif %}
+
+             <div style="font-size: .9em;">Part of: {{ citation.owning_tenant.name }}</div>
+             <hr style="margin: 10px 0">
+
            </div>
            <div class='col-sm-12 col-md-6' style="padding-right: 0;">
              <div class="panel panel-default">

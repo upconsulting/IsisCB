@@ -15,5 +15,4 @@ def google(request):
     return {'GOOGLE_ANALYTICS_ID': settings.GOOGLE_ANALYTICS_ID}
 
 def portal_prefix(request):
-    print("prefix", settings.PORTAL_PREFIX)
     return {'PORTAL_PREFIX': settings.PORTAL_PREFIX}
