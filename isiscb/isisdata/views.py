@@ -53,6 +53,8 @@ from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
 from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
+import isisdata.helpers.isiscb_utils as isiscb_utils
+
 
 from unidecode import unidecode
 import datetime
@@ -994,8 +996,8 @@ class IsisSearchView(FacetedSearchView):
         #  feature in the citation and authority detail views. It is independent
         #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore'))
-
+            #search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore')).decode(errors="ignore")
+            search_key = isiscb_utils.generate_search_key(self.request.get_full_path())
             # make sure we have a session key
             if hasattr(self.request, 'session') and not self.request.session.session_key:
                 self.request.session.save()
@@ -1009,7 +1011,6 @@ class IsisSearchView(FacetedSearchView):
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
-
         context = self.get_context_data(**{
             # self.form_name: form,
         })

@@ -23,7 +23,7 @@ from operator import itemgetter
 from isisdata.models import *
 from isisdata.tasks import *
 import isisdata.views as isisviews
-
+import isisdata.helpers.isiscb_utils as isiscb_utils
 
 def citation(request, citation_id, tenant_id=None):
     """
@@ -132,16 +132,15 @@ def citation(request, citation_id, tenant_id=None):
 
     if query_string:
         query_string = quote(query_string) 
-        search_key = base64.b64encode(bytes(last_query, 'utf-8'))
+        #search_key = base64.b64encode(bytes(last_query, 'utf-8')).decode(errors="ignore")
+        search_key = isiscb_utils.generate_search_key(last_query)
     else:
         search_key = None
 
     user_cache = caches['default']
     search_results = user_cache.get('search_results_citation_' + str(search_key))
     page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
-
     if search_results and fromsearch and page_citation:
-
         search_count = search_results.count()
 
         prev_search_result = None
@@ -183,8 +182,6 @@ def citation(request, citation_id, tenant_id=None):
         search_previous = None
         search_current = None
         search_count = 0
-
-    #last_query = request.session.get('last_query', None)
 
     context.update({
         'citation_id': citation_id,
