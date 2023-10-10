@@ -299,7 +299,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             </div>
             <div class="col-xs-6 text-center">
                 {% if search_current >= 2 and search_previous %}
-                <a href="{% url 'citation' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
+                <a href="{% url 'tenants:citation' tenant_id search_previous|get_pk  %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
                     <div class="btn btn-xs btn-info"><i class="fas fa-angle-double-left"></i> Previous</div>
                 </a>
                 {% endif %}
@@ -307,7 +307,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 Showing result {{ search_current }} of {{ search_results|length }}
 
                 {% if search_index < search_count and search_next %}
-                <a href="{% url 'citation' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
+                <a href="{% url 'tenants:citation' tenant_id search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
                     <div class="btn btn-xs btn-info">Next <i class="fas fa-angle-double-right"></i> </div>
                 </a>
                 {% endif %}

@@ -1,4 +1,4 @@
-{% extends "tenants/__base.html" %}
+{% extends "tenants/authority_base.html" %}
 {% load app_filters %}
 {% load static %}
 {% load search_filters %}
@@ -6,391 +6,200 @@
 {% load facet_filters %}
 {% load metadata_filters %}
 
-{% block extra_head %}
-<script>
-{% if source_instance_id %}
-var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
-{% endif %}
-
-{% if source_content_type %}
-var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
-{% endif %}
-</script>
-<script src="{% static "isisdata/js/comments.js" %}"></script>
-
-<script src="{% static 'isisdata/js/plotly-latest.min.js' %}" type="text/javascript"></script>
-
-<style>
-.panel-default>.panel-heading-relation {
-  background-color: #e0eef5;
-}
-
-.panel-default>.panel-heading-subjects {
-  background-color: #eaeaea;
-}
-
-.panel-default>.panel-heading-links {
-  background-color: #e4cfe2;
-}
-
-.panel-default>.panel-heading-links a {
-  color: #8533b7;
-}
-
-.panel-default>.panel-body-links a {
-  color: #8533b7;
-}
-
-.truncate-subjects {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  display: -webkit-inline-box;
-   -webkit-line-clamp: 1;
-   -webkit-inline-box-orient: vertical;
-}
-
-.truncate {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  display: -webkit-box;
-   -webkit-line-clamp: 7;
-   -webkit-box-orient: vertical;
-}
-
-.subject-more-btn {
-  background-color: #fff;
-  color: #337ab7;
-}
-
-.tab-btn-default {
-  background-color: #fff;
-  color: #337ab7;
-  border-color: #337ab7;
-}
-
-.tab-btn-default.active {
-  border-color: #337ab7;
-  background-color: #337ab7;
-  color: #fff;
-}
-
-.tab-btn-default.active:hover {
-  border-color: #337ab7;
-  background-color: #337ab7;
-  color: #fff;
-}
-
-.tab-btn-default:hover {
-  background-color: #e6e6e6;
-}
-
-</style>
-
-<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 
 
-<meta property="og:url"                content="{{ request.build_absolute_uri }}" />
-<meta property="og:site_name"          content="Isis Current Bibliography" />
-<meta property="og:type"               content="article" />
-<meta property="fb:app_id"             content="{{ facebook_app_id}}" />
-<meta property="og:title"              content="{{ authority.name|strip_tags }}" />
-<meta property="og:description"        content="{{ authority.description|strip_tags }}" />
-<!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
-<meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
+{% block authority_tabs %}
+<div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
+  <a id="bookshelf-tab" href="#" class="btn tab-btn-default active" role="tab" data-toggle="tab" style="border-color:#337ab7">
+    <input type="radio" />Citations
+  </a>
+  <a id="catalog-tab" onclick="location.href='{% url 'tenants:authority_catalog' tenant_id authority_id|upper %}';" class="btn tab-btn-default" role="tab" data-toggle="tab" style="border-color: #337ab7; color: #337ab7;">
+    <input type="radio" />Indexes
+  </a>
+</div>
 {% endblock %}
 
-{#% block title %}Authority{% endblock %#}
-{% block content %}
-<div class="row">
-  <!-- Progress through search results, if arriving from search view. -->
-  {% if search_results|length > 0 and fromsearch and search_current %}
-  <div class="panel panel-default" style="margin-bottom: 5px;">
-    <div class="panel-body" style="padding: 7px; height: 34px;">
-    <div class=" hidden-print" >
-      <div class="row" style="margin-right: 0px; margin-left: 0px;">
-        <div class="col-xs-4">
-          <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
-        </div>
-        <div class="col-xs-2 text-left">
-              {% if search_current >= 2 and search_previous %}{{tenant_id}}
-              <a href="{% url 'tenants:authority' tenant_id search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous">
-                  <span aria-hidden="true" >&laquo;Previous</span>
-              </a>
-              {% endif %}
-        </div>
-        <div class="col-xs-4 text-center">
-            Showing result {{ search_current }} of {{ search_results|length }}
-        </div>
-        <div class="col-xs-2 text-right">
-            {% if search_index < search_count and search_next %}
-            <a href="{% url 'tenants:authority' tenant_id search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" >
-                <span aria-hidden="true" >Next&raquo;</span>
-            </a>
-            {% endif %}
-        </div>
-      </div>
-    </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <script>
-    //# sourceURL=copy.js
-    $(function() {
-      $("#authorityLink").click(function() {
-        var copyTextarea = document.querySelector('#hiddenAuthorityLink');
-        copyTextarea.focus();
-        copyTextarea.select();
-        document.execCommand("copy");
-        $.notify("URL of this record has been copied to your clipboard.", "info", {
-          clickToHide: true,
-          style: 'bootstrap',
-          gap: 5,
-        });
-      })
-
-      $("#uriLink").click(function() {
-        var copyTextarea = document.querySelector('#hiddenUriLink');
-        copyTextarea.focus();
-        copyTextarea.select();
-        document.execCommand("copy");
-        $.notify("URL of this record has been copied to your clipboard.", "info", {
-          clickToHide: true,
-          style: 'bootstrap',
-          gap: 5,
-        });
-      })
-    })
-  </script>
-  <div class="panel panel-default" id="infoPanel" style='margin: 0 15px 20px 15px;'>
+{% block tab_content %}
+<div class="col-sm-12 bookshelf-results">
+  <div class="panel panel-default">
     <div class="panel-heading">
-      <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>
-        <span class="btn-grp pull-right" style="padding-top:5px">
-            <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
-            <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
-            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
-        </span>
-        <br>
-        <hr style="margin-top:5px; margin-bottom:5px;">
-        <strong style="margin-top: 5px; font-size:1.7em;" id="recordName">{{ authority.name }}</strong>
-        {% if redirect_from %}<p class="text-muted text-danger" style="display: inline; float: right"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+      <h4 style="margin: 0;">Related Citations</h4>
     </div>
-    <div class='panel-body'>
-      <div class="col-sm-12 col-md-7" style="padding-right:0;">
-        {% include 'tenants/authority_fragments/fragment_authority_info_box.html' %}
-      </div>
-      <div class="col-sm-12 col-md-5">
-        <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
-          <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
-            <a id="bookshelf-tab" href="#" class="btn tab-btn-default active" role="tab" data-toggle="tab" style="border-color:#337ab7">
-              <input type="radio" />Citations
+    <div class="panel-body">
+      {% for result in page_results %}
+        <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+            <p style="margin-bottom: 20px; font-size: 1.1em;">
+            {% if result.stub_record_status == 'SR' %}
+                <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
+            {% endif %}
+
+            {% if result.type == "Book" %}
+                <i class="fa fa-book"></i>
+            {% elif result.type == "Article" or result.type == "Review" %}
+                <i class="far fa-file-alt"></i>
+            {% elif result.type == "Thesis" %}
+                <i class="fa fa-graduation-cap"></i>
+            {% elif result.type == "Multimedia object" %}
+                <i class="fa fa-photo-video"></i>
+            {% elif result.type == "Chapter" %}
+                <i class="fa fa-book-open"></i>
+            {% else %}
+                <i class="far fa-file-alt"></i>
+            {% endif %}
+
+            <span class="label label-primary">{{ result.type }}</span>
+
+            {% url 'tenants:citation' tenant_id result.id|get_pk as citation_url %}
+            {% if result.title == 'Title missing' and result.complete_citation %}
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{result.complete_citation}}
             </a>
-            <a id="catalog-tab" onclick="location.href='{% url 'tenants:authority_catalog' tenant_id authority_id|upper %}';" class="btn tab-btn-default" role="tab" data-toggle="tab" style="border-color: #337ab7; color: #337ab7;">
-              <input type="radio" />Indexes
-            </a>
-         </div>
+            {% else %}
+                {% if result.authors %}
+                <strong style="font-weight: 500;">{{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}</strong>
+                {% endif %}
+                {% if result.publication_date.0 and result.authors %}
+                ({{ result.publication_date.0 }})
+                <br>
+                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                    {{ result.title|bleach_safe }}.
+                </a>
+                {% elif result.publication_date.0 and not result.authors %}
+                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                    {{ result.title|bleach_safe }}
+                </a>
+                ({{ result.publication_date.0 }}).
+                {% else %}
+                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{ result.title|bleach_safe }}
+                </a>
+                {% endif %}
+
+                <!-- book title and page numbers -->
+                {% if result.book_title %}
+                In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
+                {% endif %}
+                {% if result.periodicals %}
+                <em>{{ result.periodicals.0 }}</em>{% if not result.page_string %}.{% endif %}
+                {% endif %}
+
+                {% if result.page_string %}({{ result.page_string }}).{% endif %}
+
+                {% if result.type in show_publisher_types %}
+                {{ result.publishers | joinby:", "}}
+                {% endif %}
+
+                {% if result.type in show_school_types %}
+                {{ result.schools|joinby:", " }}
+                {% endif %}
+            {% endif %}
+
+
+                <span class="visible-print-inline">({{ citation_url }})</span>
+
+                <!-- Zotero -->
+                <span style="display:none;">
+                <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
+                </span>
+
+
+                <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
+                    <script>
+                    {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
+                    $.ajax("{{ ajax_linkresolve_url }}",
+                        {
+                            success: function(result) {
+                                if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
+                                    var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" target="_blank" href="'+ result.url +'">';
+                                    if (result.icon.length > 0) {
+                                    linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">';
+                                    } else {
+                                    linkElem += '<span class="h6 text-warning">' + result.text + '</span>';
+                                    }
+                                    linkElem += '</a>';
+                                    $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
+                                    console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
+                                } else {
+                                    // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                    $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                                }
+                            },
+                            error: function() {
+                                // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                            },
+                        });
+                    </script>
+                </span>
+
+            </p>
         </div>
-        <div class="row">
-            <div class="col-sm-12 bookshelf-results">
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 style="margin: 0;">Related Citations</h4>
-                </div>
-                <div class="panel-body">
-                  {% for result in page_results %}
-                    <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
-                        <p style="margin-bottom: 20px; font-size: 1.1em;">
-                        {% if result.stub_record_status == 'SR' %}
-                            <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
-                        {% endif %}
+      {% empty %}
+          <h3>No results found . . . <i class="fas fa-child"></i></h3>
+      {% endfor %}
 
-                        {% if result.type == "Book" %}
-                            <i class="fa fa-book"></i>
-                        {% elif result.type == "Article" or result.type == "Review" %}
-                            <i class="far fa-file-alt"></i>
-                        {% elif result.type == "Thesis" %}
-                            <i class="fa fa-graduation-cap"></i>
-                        {% elif result.type == "Multimedia object" %}
-                            <i class="fa fa-photo-video"></i>
-                        {% elif result.type == "Chapter" %}
-                            <i class="fa fa-book-open"></i>
-                        {% else %}
-                            <i class="far fa-file-alt"></i>
-                        {% endif %}
-
-                        <span class="label label-primary">{{ result.type }}</span>
-
-                        {% url 'tenants:citation' tenant_id result.id|get_pk as citation_url %}
-                        {% if result.title == 'Title missing' and result.complete_citation %}
-                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                            {{result.complete_citation}}
-                        </a>
-                        {% else %}
-                            {% if result.authors %}
-                            <strong style="font-weight: 500;">{{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}</strong>
-                            {% endif %}
-                            {% if result.publication_date.0 and result.authors %}
-                            ({{ result.publication_date.0 }})
-                            <br>
-                            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                                {{ result.title|bleach_safe }}.
-                            </a>
-                            {% elif result.publication_date.0 and not result.authors %}
-                            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                                {{ result.title|bleach_safe }}
-                            </a>
-                            ({{ result.publication_date.0 }}).
-                            {% else %}
-                            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                            {{ result.title|bleach_safe }}
-                            </a>
-                            {% endif %}
-
-                            <!-- book title and page numbers -->
-                            {% if result.book_title %}
-                            In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
-                            {% endif %}
-                            {% if result.periodicals %}
-                            <em>{{ result.periodicals.0 }}</em>{% if not result.page_string %}.{% endif %}
-                            {% endif %}
-
-                            {% if result.page_string %}({{ result.page_string }}).{% endif %}
-
-                            {% if result.type in show_publisher_types %}
-                            {{ result.publishers | joinby:", "}}
-                            {% endif %}
-
-                            {% if result.type in show_school_types %}
-                            {{ result.schools|joinby:", " }}
-                            {% endif %}
-                        {% endif %}
-
-
-                            <span class="visible-print-inline">({{ citation_url }})</span>
-
-                            <!-- Zotero -->
-                            <span style="display:none;">
-                            <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
-                            </span>
-
-
-                            <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
-                                <script>
-                                {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
-                                $.ajax("{{ ajax_linkresolve_url }}",
-                                    {
-                                        success: function(result) {
-                                            if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
-                                                var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" target="_blank" href="'+ result.url +'">';
-                                                if (result.icon.length > 0) {
-                                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">';
-                                                } else {
-                                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>';
-                                                }
-                                                linkElem += '</a>';
-                                                $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
-                                                console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
-                                            } else {
-                                                // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                                $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
-                                            }
-                                        },
-                                        error: function() {
-                                            // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                            $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
-                                        },
-                                    });
-                                </script>
-                            </span>
-
-                        </p>
-                    </div>
-                  {% empty %}
-                      <h3>No results found . . . <i class="fas fa-child"></i></h3>
-                  {% endfor %}
+      {% if page_results.has_previous or page_results.has_next %}
+          <nav class="hidden-print">
+              <ul class="pagination">
+                  <li class="disabled"><a>Page:</a></li>
+                  {% if page_results.has_previous %}
+                  <li>
+                      {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                      {% with ppage="page_citation:"|add:pagenr %}
+                      <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                      </a>
+                      {% endwith %}
+                      {% endwith %}
+                  </li>
+                  {% else %}
+                  <li class="disabled">
+                      <span aria-hidden="true">&laquo;</span>
+                  </li>
+                  {% endif %}
 
                   {% if page_results.has_previous or page_results.has_next %}
-                      <nav class="hidden-print">
-                          <ul class="pagination">
-                              <li class="disabled"><a>Page:</a></li>
-                              {% if page_results.has_previous %}
-                              <li>
-                                  {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
-                                  {% with ppage="page_citation:"|add:pagenr %}
-                                  <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Previous">
-                                  <span aria-hidden="true">&laquo;</span>
-                                  </a>
-                                  {% endwith %}
-                                  {% endwith %}
-                              </li>
-                              {% else %}
-                              <li class="disabled">
-                                  <span aria-hidden="true">&laquo;</span>
-                              </li>
-                              {% endif %}
-
-                              {% if page_results.has_previous or page_results.has_next %}
-                              {% for p in page_results.paginator.page_range %}
-                              {% with pagenr=forloop.counter|stringformat:"s" %}
-                              {% with ppage='page_citation:'|add:pagenr %}
-                              {% with page_results.paginator.page_range|last as last %}
-                              {% with page_results.paginator.page_range|first as first %}
-                                  {% if page_results.number >= 4 and p == first %}
-                                  <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ first }}</a></li>
-                                  <li class="disabled"><span>...</span></li>
-                                  {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
-                                  <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ p }}</a></li>
-                                  {% elif p == last %}
-                                  <li class="disabled"><span>...</span></li>
-                                  <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ last }}</a></li>
-                                  {% endif %}
-                              {% endwith %}
-                              {% endwith %}
-                              {% endwith %}
-                              {% endwith %}
-                              {% endfor %}
-                              {% endif %}
-
-                              {% if page_results.has_next %}
-                              <li>
-                                  {% with pagenr=page_results.next_page_number|stringformat:"s" %}
-                                  {% with ppage='page_citation:'|add:pagenr %}
-                                  <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Next">
-                                  <span aria-hidden="true">&raquo;</span>
-                                  </a>
-                                  {% endwith %}
-                                  {% endwith %}
-                              </li>
-                              {% else %}
-                              <li class="disabled">
-                                  <span aria-hidden="true">&raquo;</span>
-                              </li>
-                              {% endif %}
-                          </ul>
-                      </nav>
+                  {% for p in page_results.paginator.page_range %}
+                  {% with pagenr=forloop.counter|stringformat:"s" %}
+                  {% with ppage='page_citation:'|add:pagenr %}
+                  {% with page_results.paginator.page_range|last as last %}
+                  {% with page_results.paginator.page_range|first as first %}
+                      {% if page_results.number >= 4 and p == first %}
+                      <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ first }}</a></li>
+                      <li class="disabled"><span>...</span></li>
+                      {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                      <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ p }}</a></li>
+                      {% elif p == last %}
+                      <li class="disabled"><span>...</span></li>
+                      <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage }}">{{ last }}</a></li>
+                      {% endif %}
+                  {% endwith %}
+                  {% endwith %}
+                  {% endwith %}
+                  {% endwith %}
+                  {% endfor %}
                   {% endif %}
-                </div>
-              </div>
-            </div>
-        </div>
-      </div>
+
+                  {% if page_results.has_next %}
+                  <li>
+                      {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                      {% with ppage='page_citation:'|add:pagenr %}
+                      <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                      </a>
+                      {% endwith %}
+                      {% endwith %}
+                  </li>
+                  {% else %}
+                  <li class="disabled">
+                      <span aria-hidden="true">&raquo;</span>
+                  </li>
+                  {% endif %}
+              </ul>
+          </nav>
+      {% endif %}
     </div>
   </div>
 </div>
-
-<div ng-app="commentsApp">
-    <div class="col-md-12" style="padding-top: 15px">
-      <div class="col-sm-12 main" style="padding-top: 15px">
-        {% include "isisdata/comments.html" %}
-      </div>
-    </div>
-</div>
-
-<script>
-  $(function () {
-    $('[data-toggle="popover"]').popover()
-  })
-</script>
-
 {% endblock %}
+

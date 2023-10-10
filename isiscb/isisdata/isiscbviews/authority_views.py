@@ -18,6 +18,7 @@ from haystack.query import EmptySearchQuerySet, SearchQuerySet
 
 from isisdata.models import *
 from isisdata.tasks import *
+import isisdata.helpers.isiscb_utils as isiscb_utils
 
 import datetime
 import pytz
@@ -43,20 +44,201 @@ def authority_catalog(request, authority_id, tenant_id=None):
     View for individual Authority entries.
     """
 
-    authority = Authority.objects.get(id=authority_id)
+    authority = get_object_or_404(Authority, pk=authority_id)
 
     redirect_from = _get_redirect_from(authority, request)
 
     redirect = _handle_authority_redirects(authority)
     if redirect:
         return redirect
+    
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
 
+    context = _find_related_citations(authority, tenant.id, request.include_all_tenants)
+
+    # Location of authority in REST API
+    api_view = reverse('authority-detail', args=[authority.id], request=request)
+
+    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
+
+    related_citations_count = word_cloud_results.count()
+
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
+
+    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
+    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
+
+    display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+
+    # the following count was used before, but it seems to be off
+    #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
+    #                                                   .values('citation_id').distinct('citation_id')\
+    #                                                   .count()
+
+    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
+
+    # remove current authority from facet results
+    subject_ids_facet = _remove_self_from_facets(subject_ids_facet, authority_id)
+    related_contributors_facet = _remove_self_from_facets(related_contributors_facet, authority_id)
+    related_institutions_facet = _remove_self_from_facets(related_institutions_facet, authority_id)
+    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
+    related_timeperiod_facet = _remove_self_from_facets(related_timeperiod_facet, authority_id)
+    related_categories_facet = _remove_self_from_facets(related_categories_facet, authority_id)
+    related_other_person_facet = _remove_self_from_facets(related_other_person_facet, authority_id)
+    related_publisher_facet = _remove_self_from_facets(related_publisher_facet, authority_id)
+    related_journal_facet = _remove_self_from_facets(related_journal_facet, authority_id)
+    related_subject_concepts_facet = _remove_self_from_facets(related_subject_concepts_facet, authority_id)
+    related_subject_people_facet = _remove_self_from_facets(related_subject_people_facet, authority_id)
+    related_subject_institutions_facet = _remove_self_from_facets(related_subject_institutions_facet, authority_id)
+    related_dataset_facet = _remove_self_from_facets(related_dataset_facet, authority_id)
+
+    # gets featured image and synopsis of authority from wikipedia
+    wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
+    wikiImage = wikipedia_data.img_url if wikipedia_data and wikipedia_data.img_url else ''
+    wikiCredit = wikipedia_data.credit if wikipedia_data and wikipedia_data.credit else ''
+    wikiIntro = wikipedia_data.intro if wikipedia_data and wikipedia_data.intro else ''
+
+    # Provide progression through search results, if present.
+    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
+    query_string = request.GET.get('query_string', None)
+    fromsearch = request.GET.get('fromsearch', False)
+    if query_string:
+        query_string = query_string.encode('ascii','ignore')
+        #search_key = base64.b64encode(query_string)
+        search_key = isiscb_utils.generate_search_key(last_query)
+    else:
+        search_key = None
+    
+    # This is the database cache.
+    user_cache = caches['default']
+    search_results = user_cache.get('search_results_authority_' + str(search_key))
+    
+    # make sure we have a session key
+    if hasattr(request, 'session') and not request.session.session_key:
+        request.session.save()
+        request.session.modified = True
+
+    session_id = request.session.session_key
+    page_authority = user_cache.get(session_id + '_page_authority', None)
+
+    if search_results and fromsearch and page_authority:
+        search_count = search_results.count()
+        prev_search_result = None
+        if (page_authority > 1):
+            prev_search_result = search_results[(page_authority - 1)*20 - 1]
+
+        # if we got to the last result of the previous page we need to count down the page number
+        if prev_search_result == 'isisdata.authority.' + authority_id:
+            page_authority = page_authority - 1
+            user_cache.set(session_id + '_page_authority', page_authority)
+
+        search_results_page = search_results[(page_authority - 1)*20:page_authority*20 + 2]
+
+        try:
+            search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
+            if search_index == 21:
+                user_cache.set(session_id + '_page_authority', page_authority+1)
+
+        except (IndexError, ValueError):
+            search_index = None
+        try:
+            search_next = search_results_page[search_index]
+        except (IndexError, ValueError, TypeError):
+            search_next = None
+        try:
+            search_previous = search_results_page[search_index - 2]
+            if search_index - 2 == -1:
+                search_previous = prev_search_result
+
+        # !! Why are we catching all of these errors?
+        except (IndexError, ValueError, AssertionError, TypeError):
+            search_previous = None
+        if search_index:
+            search_current = search_index + (20* (page_authority - 1))
+        else:
+            search_current = None
+    else:
+        search_index = None
+        search_next = None
+        search_previous = None
+        search_current = None
+        search_count = None
+
+    context.update({
+        'authority_id': authority_id,
+        'authority': authority,
+        'display_type': display_type,
+        'related_citations_count': related_citations_count,
+        'author_contributor_count': author_contributor_count,
+        'publisher_count': publisher_count,
+        'source_instance_id': authority_id,
+        'subject_category_count': subject_category_count,
+        'source_content_type': ContentType.objects.get(model='authority').id,
+        'api_view': api_view,
+        'redirect_from': redirect_from,
+        'search_results': search_results,
+        'search_index': search_index,
+        'search_next': search_next,
+        'search_previous': search_previous,
+        'search_current': search_current,
+        'search_count': search_count,
+        'fromsearch': fromsearch,
+        'last_query': last_query,
+        'query_string': query_string,
+        'subject_ids_facet': subject_ids_facet,
+        'related_contributors_facet': related_contributors_facet,
+        'related_institutions_facet': related_institutions_facet,
+        'related_geographics_facet': related_geographics_facet,
+        'related_timeperiod_facet': related_timeperiod_facet,
+        'related_categories_facet': related_categories_facet,
+        'related_other_person_facet': related_other_person_facet,
+        'related_publisher_facet': related_publisher_facet,
+        'related_journal_facet': related_journal_facet,
+        'related_subject_concepts_facet': related_subject_concepts_facet,
+        'related_subject_people_facet': related_subject_people_facet,
+        'related_subject_institutions_facet': related_subject_institutions_facet,
+        'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
+        'related_dataset_facet': related_dataset_facet,
+        'wikiIntro': wikiIntro,
+        'wikiImage': wikiImage,
+        'wikiCredit': wikiCredit,
+        'tenant_id': tenant_id,
+    })
+
+    if tenant_id:
+        return render(request, 'tenants/authority_catalog.html', context)
+    return render(request, 'isisdata/authority_catalog.html', context)
+
+def _filter_by_tenant(ac_qs, tenant_id, include_all_tenants):
+    if tenant_id and not include_all_tenants:
+        return ac_qs.filter(citation__owning_tenant=tenant_id)
+    return ac_qs
+
+def _find_related_citations(authority, tenant_id, include_all_tenants):
     show_nr = 3
     acrelation_qs = ACRelation.objects.filter(public=True)
-    related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
-                                                  .values('citation_id').distinct('citation_id')\
+    related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)
+    related_citations_author = _filter_by_tenant(related_citations_author, tenant_id, include_all_tenants)
+    related_citations_author = related_citations_author.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)
+    related_citations_author_count = _filter_by_tenant(related_citations_author_count, tenant_id, include_all_tenants)
+    related_citations_author_count = related_citations_author_count.values('citation_id').distinct('citation_id')\
                                                   .count()
 
     related_citations_editor = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
@@ -130,132 +312,8 @@ def authority_catalog(request, authority_id, tenant_id=None):
     related_citations_book_series_count = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
                                                        .values('citation_id').distinct('citation_id')\
                                                        .count()
-
-    # Location of authority in REST API
-    api_view = reverse('authority-detail', args=[authority.id], request=request)
-
-    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
-
-    related_citations_count = word_cloud_results.count()
-
-    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-
-    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
-    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
-
-    display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
-
-    # the following count was used before, but it seems to be off
-    #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
-    #                                                   .values('citation_id').distinct('citation_id')\
-    #                                                   .count()
-
-    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
-
-    # remove current authority from facet results
-    subject_ids_facet = _remove_self_from_facets(subject_ids_facet, authority_id)
-    related_contributors_facet = _remove_self_from_facets(related_contributors_facet, authority_id)
-    related_institutions_facet = _remove_self_from_facets(related_institutions_facet, authority_id)
-    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
-    related_timeperiod_facet = _remove_self_from_facets(related_timeperiod_facet, authority_id)
-    related_categories_facet = _remove_self_from_facets(related_categories_facet, authority_id)
-    related_other_person_facet = _remove_self_from_facets(related_other_person_facet, authority_id)
-    related_publisher_facet = _remove_self_from_facets(related_publisher_facet, authority_id)
-    related_journal_facet = _remove_self_from_facets(related_journal_facet, authority_id)
-    related_subject_concepts_facet = _remove_self_from_facets(related_subject_concepts_facet, authority_id)
-    related_subject_people_facet = _remove_self_from_facets(related_subject_people_facet, authority_id)
-    related_subject_institutions_facet = _remove_self_from_facets(related_subject_institutions_facet, authority_id)
-    related_dataset_facet = _remove_self_from_facets(related_dataset_facet, authority_id)
-
-    # gets featured image and synopsis of authority from wikipedia
-    wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
-    wikiImage = wikipedia_data.img_url if wikipedia_data and wikipedia_data.img_url else ''
-    wikiCredit = wikipedia_data.credit if wikipedia_data and wikipedia_data.credit else ''
-    wikiIntro = wikipedia_data.intro if wikipedia_data and wikipedia_data.intro else ''
-
-    # Provide progression through search results, if present.
-    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None)
-    fromsearch = request.GET.get('fromsearch', False)
-    if query_string:
-        query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(query_string)
-    else:
-        search_key = None
-
-    # This is the database cache.
-    user_cache = caches['default']
-    search_results = user_cache.get('search_results_authority_' + str(search_key))
-
-    # make sure we have a session key
-    if hasattr(request, 'session') and not request.session.session_key:
-        request.session.save()
-        request.session.modified = True
-
-    session_id = request.session.session_key
-    page_authority = user_cache.get(session_id + '_page_authority', None)
-
-    if search_results and fromsearch and page_authority:
-        search_count = search_results.count()
-        prev_search_result = None
-        if (page_authority > 1):
-            prev_search_result = search_results[(page_authority - 1)*20 - 1]
-
-        # if we got to the last result of the previous page we need to count down the page number
-        if prev_search_result == 'isisdata.authority.' + authority_id:
-            page_authority = page_authority - 1
-            user_cache.set(session_id + '_page_authority', page_authority)
-
-        search_results_page = search_results[(page_authority - 1)*20:page_authority*20 + 2]
-
-        try:
-            search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
-            if search_index == 21:
-                user_cache.set(session_id + '_page_authority', page_authority+1)
-
-        except (IndexError, ValueError):
-            search_index = None
-        try:
-            search_next = search_results_page[search_index]
-        except (IndexError, ValueError, TypeError):
-            search_next = None
-        try:
-            search_previous = search_results_page[search_index - 2]
-            if search_index - 2 == -1:
-                search_previous = prev_search_result
-
-        # !! Why are we catching all of these errors?
-        except (IndexError, ValueError, AssertionError, TypeError):
-            search_previous = None
-        if search_index:
-            search_current = search_index + (20* (page_authority - 1))
-        else:
-            search_current = None
-    else:
-        search_index = None
-        search_next = None
-        search_previous = None
-        search_current = None
-        search_count = None
-
-    context = {
-        'authority_id': authority_id,
-        'authority': authority,
-        'display_type': display_type,
-        'related_citations_count': related_citations_count,
+    
+    return {
         'related_citations_author': related_citations_author,
         'related_citations_author_count': related_citations_author_count,
         'related_citations_editor': related_citations_editor,
@@ -282,45 +340,7 @@ def authority_catalog(request, authority_id, tenant_id=None):
         'related_citations_periodical_count': related_citations_periodical_count,
         'related_citations_book_series': related_citations_book_series,
         'related_citations_book_series_count': related_citations_book_series_count,
-        'author_contributor_count': author_contributor_count,
-        'publisher_count': publisher_count,
-        'source_instance_id': authority_id,
-        'subject_category_count': subject_category_count,
-        'source_content_type': ContentType.objects.get(model='authority').id,
-        'api_view': api_view,
-        'redirect_from': redirect_from,
-        'search_results': search_results,
-        'search_index': search_index,
-        'search_next': search_next,
-        'search_previous': search_previous,
-        'search_current': search_current,
-        'search_count': search_count,
-        'fromsearch': fromsearch,
-        'last_query': last_query,
-        'query_string': query_string,
-        'subject_ids_facet': subject_ids_facet,
-        'related_contributors_facet': related_contributors_facet,
-        'related_institutions_facet': related_institutions_facet,
-        'related_geographics_facet': related_geographics_facet,
-        'related_timeperiod_facet': related_timeperiod_facet,
-        'related_categories_facet': related_categories_facet,
-        'related_other_person_facet': related_other_person_facet,
-        'related_publisher_facet': related_publisher_facet,
-        'related_journal_facet': related_journal_facet,
-        'related_subject_concepts_facet': related_subject_concepts_facet,
-        'related_subject_people_facet': related_subject_people_facet,
-        'related_subject_institutions_facet': related_subject_institutions_facet,
-        'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
-        'related_dataset_facet': related_dataset_facet,
-        'wikiIntro': wikiIntro,
-        'wikiImage': wikiImage,
-        'wikiCredit': wikiCredit,
-        'tenant_id': tenant_id,
     }
-
-    if tenant_id:
-        return render(request, 'tenants/authority_catalog.html', context)
-    return render(request, 'isisdata/authority_catalog.html', context)
 
 def authority(request, authority_id, tenant_id=None):
     authority = Authority.objects.get(id=authority_id)
@@ -339,7 +359,7 @@ def authority(request, authority_id, tenant_id=None):
 
     def filter_by_tenant(sqs, tenant_id):
         """ Method that filters records by tenant if there are any and then returns the count"""
-        if tenant_id:
+        if tenant_id and not request.include_all_tenants:
             tenant = Tenant.objects.filter(identifier=tenant_id).first()
             sqs = sqs.filter(owning_tenant=tenant.pk)
         return sqs
