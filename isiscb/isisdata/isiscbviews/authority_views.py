@@ -61,51 +61,23 @@ def authority_catalog(request, authority_id, tenant_id=None):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
+    # get related citations and counts
+    sqs, search_results = _get_word_cloud_results(authority.id, tenant.id, request.include_all_tenants)
+    related_citations_count = search_results.count()
+    
+    author_contributor_qs = sqs.filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id)
+    author_contributor_count = _get_count(author_contributor_qs, authority_id, tenant.id, request.include_all_tenants)
 
-    related_citations_count = word_cloud_results.count()
-
-    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-
-    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
-    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
+    publisher_qs = sqs.filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id)
+    publisher_count = _get_count(publisher_qs,  authority_id, tenant.id, request.include_all_tenants)
+    
+    subject_category_qs = sqs.filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id)
+    subject_category_count = _get_count(subject_category_qs, authority_id, tenant.id, request.include_all_tenants )
 
     display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
-    # the following count was used before, but it seems to be off
-    #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
-    #                                                   .values('citation_id').distinct('citation_id')\
-    #                                                   .count()
-
-    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
-
-    # remove current authority from facet results
-    subject_ids_facet = _remove_self_from_facets(subject_ids_facet, authority_id)
-    related_contributors_facet = _remove_self_from_facets(related_contributors_facet, authority_id)
-    related_institutions_facet = _remove_self_from_facets(related_institutions_facet, authority_id)
-    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
-    related_timeperiod_facet = _remove_self_from_facets(related_timeperiod_facet, authority_id)
-    related_categories_facet = _remove_self_from_facets(related_categories_facet, authority_id)
-    related_other_person_facet = _remove_self_from_facets(related_other_person_facet, authority_id)
-    related_publisher_facet = _remove_self_from_facets(related_publisher_facet, authority_id)
-    related_journal_facet = _remove_self_from_facets(related_journal_facet, authority_id)
-    related_subject_concepts_facet = _remove_self_from_facets(related_subject_concepts_facet, authority_id)
-    related_subject_people_facet = _remove_self_from_facets(related_subject_people_facet, authority_id)
-    related_subject_institutions_facet = _remove_self_from_facets(related_subject_institutions_facet, authority_id)
-    related_dataset_facet = _remove_self_from_facets(related_dataset_facet, authority_id)
+    context.update(_create_facets(search_results, authority_id))
 
     # gets featured image and synopsis of authority from wikipedia
     wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
@@ -200,20 +172,7 @@ def authority_catalog(request, authority_id, tenant_id=None):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-        'subject_ids_facet': subject_ids_facet,
-        'related_contributors_facet': related_contributors_facet,
-        'related_institutions_facet': related_institutions_facet,
-        'related_geographics_facet': related_geographics_facet,
-        'related_timeperiod_facet': related_timeperiod_facet,
-        'related_categories_facet': related_categories_facet,
-        'related_other_person_facet': related_other_person_facet,
-        'related_publisher_facet': related_publisher_facet,
-        'related_journal_facet': related_journal_facet,
-        'related_subject_concepts_facet': related_subject_concepts_facet,
-        'related_subject_people_facet': related_subject_people_facet,
-        'related_subject_institutions_facet': related_subject_institutions_facet,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
-        'related_dataset_facet': related_dataset_facet,
         'wikiIntro': wikiIntro,
         'wikiImage': wikiImage,
         'wikiCredit': wikiCredit,
@@ -224,93 +183,136 @@ def authority_catalog(request, authority_id, tenant_id=None):
         return render(request, 'tenants/authority_catalog.html', context)
     return render(request, 'isisdata/authority_catalog.html', context)
 
-def _filter_by_tenant(ac_qs, tenant_id, include_all_tenants):
+def _get_count(queryset, authority_id, tenant_id, include_all_tenants):
+    queryset = queryset.exclude(public="false")
     if tenant_id and not include_all_tenants:
-        return ac_qs.filter(citation__owning_tenant=tenant_id)
-    return ac_qs
+        queryset = queryset.filter(owning_tenant=tenant_id)
+    return queryset.count()
 
 def _find_related_citations(authority, tenant_id, include_all_tenants):
     show_nr = 3
     acrelation_qs = ACRelation.objects.filter(public=True)
+
+    def _filter_by_tenant(ac_qs):
+        if tenant_id and not include_all_tenants:
+            return ac_qs.filter(citation__owning_tenant=tenant_id)
+        return ac_qs
+
     related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)
-    related_citations_author = _filter_by_tenant(related_citations_author, tenant_id, include_all_tenants)
+    related_citations_author = _filter_by_tenant(related_citations_author)
     related_citations_author = related_citations_author.order_by('-citation__publication_date')[:show_nr]
 
     related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)
-    related_citations_author_count = _filter_by_tenant(related_citations_author_count, tenant_id, include_all_tenants)
+    related_citations_author_count = _filter_by_tenant(related_citations_author_count)
     related_citations_author_count = related_citations_author_count.values('citation_id').distinct('citation_id')\
                                                   .count()
 
-    related_citations_editor = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
-                                            .order_by('-citation__publication_date')[:show_nr]
-    related_citations_editor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
-                                                  .values('citation_id').distinct('citation_id')\
+    related_citations_editor = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)
+    related_citations_editor = _filter_by_tenant(related_citations_editor)
+    related_citations_editor = related_citations_editor .order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_editor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)
+    related_citations_editor_count = _filter_by_tenant(related_citations_editor_count)
+    related_citations_editor_count = related_citations_editor_count.values('citation_id').distinct('citation_id')\
                                                   .count()
 
-    related_citations_advisor = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_advisor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
-                                             .values('citation_id').distinct('citation_id')\
+    related_citations_advisor = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)
+    related_citations_advisor = _filter_by_tenant(related_citations_advisor)
+    related_citations_advisor = related_citations_advisor.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_advisor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)
+    related_citations_advisor_count = _filter_by_tenant(related_citations_advisor_count)
+    related_citations_advisor_count = related_citations_advisor_count.values('citation_id').distinct('citation_id')\
                                              .count()
 
-    related_citations_contributor = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_contributor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
-                                                               .values('citation_id').distinct('citation_id')\
+    related_citations_contributor = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)
+    related_citations_contributor = _filter_by_tenant(related_citations_contributor)
+    related_citations_contributor = related_citations_contributor.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_contributor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)
+    related_citations_contributor_count = _filter_by_tenant(related_citations_contributor_count)
+    related_citations_contributor_count = related_citations_contributor_count.values('citation_id').distinct('citation_id')\
                                                                .count()
 
-    related_citations_translator = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
-                                                .order_by('-citation__publication_date')[:show_nr]
-    related_citations_translator_count = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
-                                                .values('citation_id').distinct('citation_id')\
+    related_citations_translator = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)
+    related_citations_translator = _filter_by_tenant(related_citations_translator)
+    related_citations_translator = related_citations_translator.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_translator_count = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)
+    related_citations_translator_count = _filter_by_tenant(related_citations_translator_count)
+    related_citations_translator_count = related_citations_translator_count.values('citation_id').distinct('citation_id')\
                                                 .count()
 
-    related_citations_subject = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_subject_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
-                                                   .values('citation_id').distinct('citation_id')\
+    related_citations_subject = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)
+    related_citations_subject = _filter_by_tenant(related_citations_subject)
+    related_citations_subject = related_citations_subject.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_subject_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)
+    related_citations_subject_count = _filter_by_tenant(related_citations_subject_count)
+    related_citations_subject_count = related_citations_subject_count.values('citation_id').distinct('citation_id')\
                                                    .count()
 
-    related_citations_category = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
-                                              .order_by('-citation__publication_date')[:show_nr]
-    related_citations_category_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
-                                                    .values('citation_id').distinct('citation_id')\
+    related_citations_category = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)
+    related_citations_category = _filter_by_tenant(related_citations_category)
+    related_citations_category = related_citations_category.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_category_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)
+    related_citations_category_count = _filter_by_tenant(related_citations_category_count)
+    related_citations_category_count = related_citations_category_count.values('citation_id').distinct('citation_id')\
                                                     .count()
 
-    related_citations_publisher = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
-                                               .order_by('-citation__publication_date')[:show_nr]
-    related_citations_publisher_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
-                                                     .values('citation_id').distinct('citation_id')\
+    related_citations_publisher = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)
+    related_citations_publisher = _filter_by_tenant(related_citations_publisher)
+    related_citations_publisher = related_citations_publisher.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_publisher_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)
+    related_citations_publisher_count = _filter_by_tenant(related_citations_publisher_count)
+    related_citations_publisher_count = related_citations_publisher_count.values('citation_id').distinct('citation_id')\
                                                      .count()
 
-    related_citations_school = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
-                                            .order_by('-citation__publication_date')[:show_nr]
-    related_citations_school_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
-                                                  .values('citation_id').distinct('citation_id')\
+    related_citations_school = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)
+    related_citations_school = _filter_by_tenant(related_citations_school)
+    related_citations_school = related_citations_school.order_by('-citation__publication_date')[:show_nr]
+
+    related_citations_school_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)
+    related_citations_school_count = _filter_by_tenant(related_citations_school_count)
+    related_citations_school_count = related_citations_school_count.values('citation_id').distinct('citation_id')\
                                                   .count()
 
-    related_citations_institution = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_institution_count = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
-                                                       .values('citation_id').distinct('citation_id')\
+    related_citations_institution = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)
+    related_citations_institution = _filter_by_tenant(related_citations_institution)
+    related_citations_institution = related_citations_institution.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_institution_count = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)
+    related_citations_institution_count = _filter_by_tenant(related_citations_institution_count)
+    related_citations_institution_count = related_citations_institution_count.values('citation_id').distinct('citation_id')\
                                                        .count()
 
-    related_citations_meeting = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_meeting_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
-                                                   .values('citation_id').distinct('citation_id')\
+    related_citations_meeting = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)
+    related_citations_meeting = _filter_by_tenant(related_citations_meeting)
+    related_citations_meeting = related_citations_meeting.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_meeting_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)
+    related_citations_meeting_count = _filter_by_tenant(related_citations_meeting_count)
+    related_citations_meeting_count = related_citations_meeting_count.values('citation_id').distinct('citation_id')\
                                                    .count()
 
-    related_citations_periodical = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
-                                                .order_by('-citation__publication_date')[:show_nr]
-    related_citations_periodical_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
-                                                      .values('citation_id').distinct('citation_id')\
+    related_citations_periodical = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)
+    related_citations_periodical = _filter_by_tenant(related_citations_periodical)
+    related_citations_periodical = related_citations_periodical.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_periodical_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)
+    related_citations_periodical_count = _filter_by_tenant(related_citations_periodical_count)
+    related_citations_periodical_count = related_citations_periodical_count.values('citation_id').distinct('citation_id')\
                                                       .count()
 
-    related_citations_book_series = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_book_series_count = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
-                                                       .values('citation_id').distinct('citation_id')\
+    related_citations_book_series = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)
+    related_citations_book_series = _filter_by_tenant(related_citations_book_series)
+    related_citations_book_series = related_citations_book_series.order_by('-citation__publication_date')[:show_nr]
+    
+    related_citations_book_series_count = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)
+    related_citations_book_series_count = _filter_by_tenant(related_citations_book_series_count)
+    related_citations_book_series_count = related_citations_book_series_count.values('citation_id').distinct('citation_id')\
                                                        .count()
     
     return {
@@ -342,6 +344,52 @@ def _find_related_citations(authority, tenant_id, include_all_tenants):
         'related_citations_book_series_count': related_citations_book_series_count,
     }
 
+def _create_facets(search_results, authority_id):
+    subject_ids_facet = search_results.facet_counts()['fields']['subject_ids'] if 'fields' in search_results.facet_counts() else []
+    related_contributors_facet = search_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in search_results.facet_counts() else []
+    related_institutions_facet = search_results.facet_counts()['fields']['institution_ids'] if 'fields' in search_results.facet_counts() else []
+    related_geographics_facet = search_results.facet_counts()['fields']['geographic_ids'] if 'fields' in search_results.facet_counts() else []
+    related_timeperiod_facet = search_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in search_results.facet_counts() else []
+    related_categories_facet = search_results.facet_counts()['fields']['category_ids'] if 'fields' in search_results.facet_counts() else []
+    related_other_person_facet = search_results.facet_counts()['fields']['other_person_ids'] if 'fields' in search_results.facet_counts() else []
+    related_publisher_facet = search_results.facet_counts()['fields']['publisher_ids'] if 'fields' in search_results.facet_counts() else []
+    related_journal_facet = search_results.facet_counts()['fields']['periodical_ids'] if 'fields' in search_results.facet_counts() else []
+    related_subject_concepts_facet = search_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+    related_subject_people_facet = search_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+    related_subject_institutions_facet = search_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+    related_dataset_facet = search_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in search_results.facet_counts() else []
+
+    # remove current authority from facet results
+    subject_ids_facet = _remove_self_from_facets(subject_ids_facet, authority_id)
+    related_contributors_facet = _remove_self_from_facets(related_contributors_facet, authority_id)
+    related_institutions_facet = _remove_self_from_facets(related_institutions_facet, authority_id)
+    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
+    related_timeperiod_facet = _remove_self_from_facets(related_timeperiod_facet, authority_id)
+    related_categories_facet = _remove_self_from_facets(related_categories_facet, authority_id)
+    related_other_person_facet = _remove_self_from_facets(related_other_person_facet, authority_id)
+    related_publisher_facet = _remove_self_from_facets(related_publisher_facet, authority_id)
+    related_journal_facet = _remove_self_from_facets(related_journal_facet, authority_id)
+    related_subject_concepts_facet = _remove_self_from_facets(related_subject_concepts_facet, authority_id)
+    related_subject_people_facet = _remove_self_from_facets(related_subject_people_facet, authority_id)
+    related_subject_institutions_facet = _remove_self_from_facets(related_subject_institutions_facet, authority_id)
+    related_dataset_facet = _remove_self_from_facets(related_dataset_facet, authority_id)
+
+    return {
+       'subject_ids_facet': subject_ids_facet,
+        'related_contributors_facet': related_contributors_facet,
+        'related_institutions_facet': related_institutions_facet,
+        'related_geographics_facet': related_geographics_facet,
+        'related_timeperiod_facet': related_timeperiod_facet,
+        'related_categories_facet': related_categories_facet,
+        'related_other_person_facet': related_other_person_facet,
+        'related_publisher_facet': related_publisher_facet,
+        'related_journal_facet': related_journal_facet,
+        'related_subject_concepts_facet': related_subject_concepts_facet,
+        'related_subject_people_facet': related_subject_people_facet,
+        'related_subject_institutions_facet': related_subject_institutions_facet,
+        'related_dataset_facet': related_dataset_facet,
+    }
+
 def authority(request, authority_id, tenant_id=None):
     authority = Authority.objects.get(id=authority_id)
 
@@ -351,11 +399,15 @@ def authority(request, authority_id, tenant_id=None):
 
     if redirect:
         return redirect
+    
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, related_citations = _get_word_cloud_results(authority.id)
+    sqs, related_citations = _get_word_cloud_results(authority.id, tenant.id, request.include_all_tenants)
 
     def filter_by_tenant(sqs, tenant_id):
         """ Method that filters records by tenant if there are any and then returns the count"""
@@ -419,9 +471,9 @@ def authority(request, authority_id, tenant_id=None):
         return render(request, 'tenants/authority.html', context)
     return render(request, 'isisdata/authority.html', context)
 
-def _get_word_cloud_results(authority_id):
+def _get_word_cloud_results(authority_id, tenant_id, include_all_tenants):
     # boxes
-    sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
                 facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
                 facet('category_ids', size=100).facet('other_person_ids', size=100).\
@@ -430,12 +482,18 @@ def _get_word_cloud_results(authority_id):
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
    
-    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+    word_cloud_results = sqs.all()
+    word_cloud_results = word_cloud_results.filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+    word_cloud_results = word_cloud_results.all().exclude(public="false")
+    if tenant_id and not include_all_tenants:
+        word_cloud_results = word_cloud_results.filter(owning_tenant=tenant_id)
+        #sqs = sqs.filter(owning_tenant=tenant_id)
+
          
     return sqs, word_cloud_results
 
@@ -591,6 +649,7 @@ def _handle_authority_redirects(authority):
         return HttpResponseForbidden()
 
 def authority_author_timeline(request, authority_id):
+    print("timeline")
     now = datetime.datetime.now()
 
     cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at')

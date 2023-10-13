@@ -780,7 +780,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
            <div class="panel panel-default">
              <div class="panel-heading"><i class="fas fa-link"></i> Citation URI</div>
              <div class="panel-body">
-               <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation|get_uri:tenant_id }}</span> <i class="far fa-copy"></i></span>
+               <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation|get_uri:tenant_id|cut:"https://"|cut:"http://" }}</span> <i class="far fa-copy"></i></span>
              </div>
            </div>
          </div>

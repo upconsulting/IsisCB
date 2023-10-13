@@ -23,7 +23,7 @@
     {% if related_citations_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
-    <a href="{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
       {{related_citations_count}} citations
     </a>
     related to {{authority.name}}
@@ -33,7 +33,7 @@
     {% if author_contributor_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
-    <a href="{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{author_contributor_count}} citations
     </a>
     related to {{ authority.name }} as an author
@@ -43,7 +43,7 @@
     {% if publisher_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
-    <a href="{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_portal={{tenant_id}}&q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{publisher_count}} citations
     </a>
     related to {{ authority.name }} as a publisher
@@ -53,7 +53,7 @@
     {% if subject_category_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
-    <a href="{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    <a href="{% url 'tenants:index' tenant_id %}?tenant_portal={{tenant_id}}&q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{subject_category_count}} citations
     </a>
     related to {{authority.name }} as a subject or category
