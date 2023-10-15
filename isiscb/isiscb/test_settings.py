@@ -86,6 +86,7 @@ MIDDLEWARE= [
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     #'dj_pagination.middleware.PaginationMiddleware',
+    'tenants.middleware.IncludeAllTenantsMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = (

@@ -34,17 +34,10 @@
             <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
             <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
             <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
+            <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
         {% endblock %}
 
-        <style>
-          a {
-            color: {{tenant.settings.link_color}}
-          }
-
-          .navbar-inverse .navbar-nav> .active>a {
-              background-color: {{tenant.settings.link_color}};
-          }
-        </style>
+        {% include "tenants/fragment_header_tenants.html" %}
 
         {% block extra_head %}{% endblock %}
     </head>

@@ -53,6 +53,8 @@ from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
 from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
+import isisdata.helpers.isiscb_utils as isiscb_utils
+
 
 from unidecode import unidecode
 import datetime
@@ -730,259 +732,9 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
         cache.set(cache_name, count, cache_timeout)
     return count
 
-def citation(request, citation_id, tenant_id=None):
-    """
-    View for individual citation record.
-    """
-    citation = get_object_or_404(Citation, pk=citation_id)
 
-    if not citation.public:
-        return HttpResponseForbidden()
 
-    # Some citations are deleted. These should be hidden from public view.
-    if citation.status_of_record == Citation.DELETE:
-        raise Http404("No such Citation")
 
-    authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
-    author_ids = [author.authority.id for author in authors if author.authority]
-
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True, public=True))
-    subject_ids = [subject.authority.id for subject in subjects if subject.authority]
-
-    persons = citation.acrelation_set.filter(type_broad_controlled__in=[ACRelation.PERSONAL_RESPONS], citation__public=True, public=True)
-    categories = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.CATEGORY]), citation__public=True, public=True)
-
-    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.TIME_PERIOD], citation__public=True))
-    time_periods = citation.acrelation_set.filter(query_time).filter(public=True)
-
-    query_places = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.GEOGRAPHIC_TERM], citation__public=True)
-    places = citation.acrelation_set.filter(query_places).filter(public=True)
-
-    query_concepts = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.CONCEPT], citation__public=True)
-    concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
-
-    query_institutions = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.INSTITUTION], citation__public=True)
-    institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
-
-    query_people = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.PERSON], citation__public=True)
-    people = citation.acrelation_set.filter(query_people).filter(public=True)
-
-    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, object__public=True).filter(public=True)
-    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, subject__public=True).filter(public=True)
-    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, object__public=True).filter(public=True)
-    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, subject__public=True).filter(public=True)
-
-    query = Q(subject_id=citation_id, type_controlled=CCRelation.REVIEW_OF, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, subject__public=True)
-    related_citations_ro = CCRelation.objects.filter(query).filter(public=True)
-
-    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, object__public=True).filter(public=True)
-    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, object__public=True).filter(public=True)
-    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, subject__public=True).filter(public=True)
-    as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
-    related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
-
-    tenant = None
-    if tenant_id:
-        tenant = Tenant.objects.filter(identifier=tenant_id).first()
-
-    # Similar Citations Generator
-    if subjects:
-        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        sqs.query.set_limits(low=0, high=20)
-        results = sqs.all().exclude(public="false")
-        if tenant:
-            results = results.filter(tenant_ids=tenant.pk)
-        similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
-    elif citation.type_controlled not in ['RE']:
-        mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        mlt.query.set_limits(low=0, high=20)
-        if tenant_id:
-            mlt = mlt.filter(tenant_ids=tenant_id)
-        similar_citations = mlt.all().exclude(public="false").query.get_results()
-    else:
-        similar_citations = []
-        word_cloud_results = EmptySearchQuerySet()
-
-    # if authors and len(authors) > 1:
-    #     word_cloud_results = results.filter(all_contributor_ids__in=author_ids)
-    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
-    # else:
-    #     word_cloud_results = results
-    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
-
-    similar_objects = get_facets_from_similar_citations(similar_citations)
-
-    googleBooksImage = None
-    if tenant and tenant.settings.google_api_key:
-        googleBooksImage = get_google_books_image(citation, False, tenant.settings.google_api_key)
-
-    properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
-    properties_map = defaultdict(list)
-    for prop in properties:
-        properties_map[prop.type_controlled] += [prop]
-
-    # Location of citation in REST API
-    api_view = reverse('citation-detail', args=[citation.id], request=request)
-
-    # Provide progression through search results, if present.
-
-    # make sure we have a session key
-    if hasattr(request, 'session') and not request.session.session_key:
-        request.session.save()
-        request.session.modified = True
-
-    session_id = request.session.session_key
-    fromsearch = request.GET.get('fromsearch', False)
-    #search_key = request.session.get('search_key', None)
-    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-
-    query_string = request.GET.get('query_string', None)
-
-    if query_string:
-        query_string = quote(query_string) #query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(bytes(last_query, 'utf-8'))
-        # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
-    else:
-        search_key = None
-
-    user_cache = caches['default']
-    search_results = user_cache.get('search_results_citation_' + str(search_key))
-    page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
-
-    if search_results and fromsearch and page_citation:
-
-        search_count = search_results.count()
-
-        prev_search_result = None
-        # Only display the "previous" link if we are on page 2+.
-        if page_citation > 1:
-            prev_search_result = search_results[(page_citation - 1)*20 - 1]
-
-        # If we got to the last result of the previous page we need to count
-        #  down the page number.
-        if prev_search_result == 'isisdata.citation.' + citation_id:
-            page_citation = page_citation - 1
-            user_cache.set(session_id + '_page_citation', page_citation)
-        search_results_page = search_results[(page_citation - 1)*20:page_citation*20 + 2]
-        try:
-            search_index = search_results_page.index(citation_id) + 1   # +1 for display.
-            if search_index == 21:
-                user_cache.set(session_id + '_page_citation', page_citation+1)
-
-        except (IndexError, ValueError):
-            search_index = None
-        try:
-            search_next = search_results_page[search_index]
-        except (IndexError, ValueError, TypeError):
-            search_next = None
-        try:
-            search_previous = search_results_page[search_index - 2]
-            if search_index - 2 == -1:
-                search_previous = prev_search_result
-
-        except (IndexError, ValueError, AssertionError, TypeError):
-            search_previous = None
-        if search_index:
-            search_current = search_index + (20* (page_citation - 1))
-        else:
-            search_current = None
-    else:
-        search_index = None
-        search_next = None
-        search_previous = None
-        search_current = None
-        search_count = 0
-
-    #last_query = request.session.get('last_query', None)
-
-    context = {
-        'citation_id': citation_id,
-        'citation': citation,
-        'authors': authors,
-        'properties_map': properties,
-        'subjects': subjects,
-        'concepts': concepts,
-        'persons': persons,
-        'categories': categories,
-        'people': people,
-        'time_periods': time_periods,
-        'places': places,
-        'institutions': institutions,
-        'source_instance_id': citation_id,
-        'source_content_type': ContentType.objects.get(model='citation').id,
-        'related_citations_ic': related_citations_ic,
-        'related_citations_inv_ic': related_citations_inv_ic,
-        'related_citations_rb': related_citations_rb,
-        'related_citations_isa': related_citations_isa,
-        'related_citations_inv_isa': related_citations_inv_isa,
-        'related_citations_ro': related_citations_ro,
-        'related_citations_re': related_citations_re,
-        'related_citations_inv_re': related_citations_inv_re,
-        'related_citations_as': related_citations_as,
-        'api_view': api_view,
-        'search_results': search_results,
-        'search_index': search_index,
-        'search_next': search_next,
-        'search_previous': search_previous,
-        'search_current': search_current,
-        'search_count': search_count,
-        'fromsearch': fromsearch,
-        'last_query': last_query,
-        'query_string': query_string,
-        'similar_citations': similar_citations,
-        'cover_image': googleBooksImage,
-        'similar_objects': similar_objects,
-        'tenant_id': tenant_id,
-    }
-
-    if tenant_id:
-        return render(request, 'tenants/citation.html', context)
-    return render(request, 'isisdata/citation.html', context)
-
-def get_facets_from_similar_citations(similar_citations):
-    similar_objects = defaultdict(list)
-
-    if similar_citations:
-        similar_citations_ids = [citation.id for citation in similar_citations]
-        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
-        for acrelation in similar_acrelations:
-            if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
-                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
-            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
-                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
-
-    if similar_objects:
-        similar_objects = generate_similar_facets(similar_objects)
-
-    return similar_objects
-
-def generate_similar_facets(similar_objects):
-    for key in similar_objects:
-        authorities_count = Counter(similar_objects[key])
-        similar_facets = []
-
-        for authority in authorities_count:
-            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
-        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
-
-        similar_objects[key] = similar_facets
-
-    return similar_objects
 
 def get_google_books_image(citation, featured, apiKey):
 
@@ -1244,8 +996,8 @@ class IsisSearchView(FacetedSearchView):
         #  feature in the citation and authority detail views. It is independent
         #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore'))
-
+            #search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore')).decode(errors="ignore")
+            search_key = isiscb_utils.generate_search_key(self.request.get_full_path())
             # make sure we have a session key
             if hasattr(self.request, 'session') and not self.request.session.session_key:
                 self.request.session.save()
@@ -1259,7 +1011,6 @@ class IsisSearchView(FacetedSearchView):
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
-
         context = self.get_context_data(**{
             # self.form_name: form,
         })

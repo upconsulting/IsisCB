@@ -39,11 +39,17 @@
             document.getElementById("citationImageCaption").style.display = "none";
             document.getElementById("placeholderImage").style.display = "block";
             document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
-            document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
-            document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            if (document.getElementById("citationImageAdjacent")) {
+                document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+                document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            }
         }
 
         $('#author-timeline strong').html('Related citations | ');
+
+        if(includeAllTenants) {
+            $("input[name='owning_tenant']").remove();
+        }
     });
 </script>
 
@@ -99,7 +105,8 @@
                             <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
-                            <input name="tenant_id" type="hidden" value="{{ tenant_id }}" />
+                            <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
+                            <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
                         </div>
                     </form>
                 </div>
@@ -121,7 +128,8 @@
                                 <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
                                 <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
                                 <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
-                                <input name="tenant_id" type="hidden" value="{{ tenant_id }}" />
+                                <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
+                                <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
                             </div>
                         </form>
                     </div>

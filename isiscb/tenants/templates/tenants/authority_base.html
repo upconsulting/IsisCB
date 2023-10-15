@@ -1,0 +1,209 @@
+{% extends "tenants/__base.html" %}
+{% load app_filters %}
+{% load static %}
+{% load search_filters %}
+{% load authority_filters %}
+{% load facet_filters %}
+{% load metadata_filters %}
+
+{% block extra_head %}
+<script>
+{% if source_instance_id %}
+var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
+{% endif %}
+
+{% if source_content_type %}
+var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
+{% endif %}
+</script>
+<script src="{% static "isisdata/js/comments.js" %}"></script>
+
+<script src="{% static 'isisdata/js/plotly-latest.min.js' %}" type="text/javascript"></script>
+
+<style>
+.panel-default>.panel-heading-relation {
+  background-color: #e0eef5;
+}
+
+.panel-default>.panel-heading-subjects {
+  background-color: #eaeaea;
+}
+
+.panel-default>.panel-heading-links {
+  background-color: #e4cfe2;
+}
+
+.panel-default>.panel-heading-links a {
+  color: #8533b7;
+}
+
+.panel-default>.panel-body-links a {
+  color: #8533b7;
+}
+
+.truncate-subjects {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-inline-box;
+   -webkit-line-clamp: 1;
+   -webkit-inline-box-orient: vertical;
+}
+
+.truncate {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-box;
+   -webkit-line-clamp: 7;
+   -webkit-box-orient: vertical;
+}
+
+.subject-more-btn {
+  background-color: #fff;
+  color: #337ab7;
+}
+
+.tab-btn-default {
+  background-color: #fff;
+  color: #337ab7;
+  border-color: #337ab7;
+}
+
+.tab-btn-default.active {
+  border-color: #337ab7;
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.tab-btn-default.active:hover {
+  border-color: #337ab7;
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.tab-btn-default:hover {
+  background-color: #e6e6e6;
+}
+
+</style>
+
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
+
+
+<meta property="og:url"                content="{{ request.build_absolute_uri }}" />
+<meta property="og:site_name"          content="Isis Current Bibliography" />
+<meta property="og:type"               content="article" />
+<meta property="fb:app_id"             content="{{ facebook_app_id}}" />
+<meta property="og:title"              content="{{ authority.name|strip_tags }}" />
+<meta property="og:description"        content="{{ authority.description|strip_tags }}" />
+<!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
+<meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
+{% endblock %}
+
+{#% block title %}Authority{% endblock %#}
+{% block content %}
+<div class="row">
+  <!-- Progress through search results, if arriving from search view. -->
+  {% if search_results|length > 0 and fromsearch and search_current %}
+  <div class="panel panel-default" style="margin-bottom: 5px;">
+    <div class="panel-body" style="padding: 7px; height: 34px;">
+    <div class=" hidden-print" >
+      <div class="row" style="margin-right: 0px; margin-left: 0px;">
+        <div class="col-xs-4">
+          <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
+        </div>
+        <div class="col-xs-2 text-left">
+              {% if search_current >= 2 and search_previous %}{{tenant_id}}
+              <a href="{% url 'tenants:authority' tenant_id search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous">
+                  <span aria-hidden="true" >&laquo;Previous</span>
+              </a>
+              {% endif %}
+        </div>
+        <div class="col-xs-4 text-center">
+            Showing result {{ search_current }} of {{ search_results|length }}
+        </div>
+        <div class="col-xs-2 text-right">
+            {% if search_index < search_count and search_next %}
+            <a href="{% url 'tenants:authority' tenant_id search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" >
+                <span aria-hidden="true" >Next&raquo;</span>
+            </a>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <script>
+    //# sourceURL=copy.js
+    $(function() {
+      $("#authorityLink").click(function() {
+        var copyTextarea = document.querySelector('#hiddenAuthorityLink');
+        copyTextarea.focus();
+        copyTextarea.select();
+        document.execCommand("copy");
+        $.notify("URL of this record has been copied to your clipboard.", "info", {
+          clickToHide: true,
+          style: 'bootstrap',
+          gap: 5,
+        });
+      })
+
+      $("#uriLink").click(function() {
+        var copyTextarea = document.querySelector('#hiddenUriLink');
+        copyTextarea.focus();
+        copyTextarea.select();
+        document.execCommand("copy");
+        $.notify("URL of this record has been copied to your clipboard.", "info", {
+          clickToHide: true,
+          style: 'bootstrap',
+          gap: 5,
+        });
+      })
+    })
+  </script>
+  <div class="panel panel-default" id="infoPanel" style='margin: 0 15px 20px 15px;'>
+    <div class="panel-heading">
+      <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>
+        <span class="btn-grp pull-right" style="padding-top:5px">
+            <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
+            <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority|get_uri:tenant_id }}</textarea>
+            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+            {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
+        </span>
+        <br>
+        <hr style="margin-top:5px; margin-bottom:5px;">
+        <strong style="margin-top: 5px; font-size:1.7em;" id="recordName">{{ authority.name }}</strong>
+        {% if redirect_from %}<p class="text-muted text-danger" style="display: inline; float: right"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+    </div>
+    <div class='panel-body'>
+      <div class="col-sm-12 col-md-7" style="padding-right:0;">
+        {% include 'tenants/authority_fragments/fragment_authority_info_box.html' %}
+      </div>
+      <div class="col-sm-12 col-md-5">
+        <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
+            {% block authority_tabs %}{% endblock %}
+        </div>
+        <div class="row">
+            {% block tab_content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div ng-app="commentsApp">
+    <div class="col-md-12" style="padding-top: 15px">
+      <div class="col-sm-12 main" style="padding-top: 15px">
+        {% include "isisdata/comments.html" %}
+      </div>
+    </div>
+</div>
+
+<script>
+  $(function () {
+    $('[data-toggle="popover"]').popover()
+  })
+</script>
+
+{% endblock %}

@@ -8,7 +8,7 @@ from haystack.query import SearchQuerySet
 
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
-from isisdata.isiscbviews import publicsite_views, authority_views
+from isisdata.isiscbviews import publicsite_views, authority_views, citation_views
 
 from . import views
 from django.conf import settings
@@ -65,7 +65,7 @@ urlpatterns = [
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
     url(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
-    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
+    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
     url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),

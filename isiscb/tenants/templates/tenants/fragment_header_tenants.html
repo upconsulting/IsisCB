@@ -1,0 +1,22 @@
+<style>
+    a {
+      color: {{tenant.settings.link_color}}
+    }
+
+    .navbar-inverse .navbar-nav> .active>a {
+        background-color: {{tenant.settings.link_color}};
+    }
+  </style>
+
+  <script type="text/javascript">
+      //@ sourceURL=cookies.js
+      var includeAllTenants = Cookies.get('cbexplore-{{tenant_id}}-include-all-tenants') == "true";
+      if (includeAllTenants == undefined) {
+          setIncludeAllProjects({% if tenant.settings.public_search_all_tenants_default %} true {% else %} false {% endif %});
+      }
+
+      function setIncludeAllProjects(include) {
+          includeAllTenants = include;
+          Cookies.set('cbexplore-{{tenant_id}}-include-all-tenants', includeAllTenants );
+      }
+</script>

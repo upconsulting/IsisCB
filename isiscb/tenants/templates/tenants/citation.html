@@ -299,7 +299,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             </div>
             <div class="col-xs-6 text-center">
                 {% if search_current >= 2 and search_previous %}
-                <a href="{% url 'citation' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
+                <a href="{% url 'tenants:citation' tenant_id search_previous|get_pk  %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
                     <div class="btn btn-xs btn-info"><i class="fas fa-angle-double-left"></i> Previous</div>
                 </a>
                 {% endif %}
@@ -307,7 +307,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 Showing result {{ search_current }} of {{ search_results|length }}
 
                 {% if search_index < search_count and search_next %}
-                <a href="{% url 'citation' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
+                <a href="{% url 'tenants:citation' tenant_id search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
                     <div class="btn btn-xs btn-info">Next <i class="fas fa-angle-double-right"></i> </div>
                 </a>
                 {% endif %}
@@ -390,7 +390,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
            <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; vertical-align: middle;">
             {% if citation.type_controlled in 'BO,CH,TH' %}
-            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title }}</p>
+            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title|bleach_safe }}</p>
             {% else %}
             {% for prop in properties_map %}
                {% if prop.type_controlled == "PE" %}<p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
@@ -444,6 +444,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <hr style="margin: 10px 0">
              {% endif %}
 
+
              {% if citation.linkeddata_public.all|length > 0 %}
                 {% for entry in citation.linkeddata_public.all %}
                   <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
@@ -482,6 +483,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  </div>
                  <hr style="margin: 10px 0">
              {% endif %}
+
+             <div style="font-size: .9em;">Part of: {{ citation.owning_tenant.name }}</div>
+             <hr style="margin: 10px 0">
+
            </div>
            <div class='col-sm-12 col-md-6' style="padding-right: 0;">
              <div class="panel panel-default">
@@ -775,7 +780,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
            <div class="panel panel-default">
              <div class="panel-heading"><i class="fas fa-link"></i> Citation URI</div>
              <div class="panel-body">
-               <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation|get_uri:tenant_id }}</span> <i class="far fa-copy"></i></span>
+               <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation|get_uri:tenant_id|cut:"https://"|cut:"http://" }}</span> <i class="far fa-copy"></i></span>
              </div>
            </div>
          </div>
