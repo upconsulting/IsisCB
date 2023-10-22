@@ -231,12 +231,15 @@ def _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, e
         task.save()
 
 @shared_task
-def create_timeline(authority_id, timeline_id):
+def create_timeline(authority_id, timeline_id, tenant_id_to_filter):
     now = datetime.datetime.now()
 
     acrelations = ACRelation.objects.all().filter(
         authority__id=authority_id, public=True, citation__public=True,
-        citation__attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE).order_by('-citation__publication_date')
+        citation__attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE)
+    if tenant_id_to_filter:
+        acrelations = acrelations.filter(citation__owning_tenant=tenant_id_to_filter)
+    acrelations = acrelations.order_by('-citation__publication_date')
 
     SHOWN_TITLES_COUNT = 3
 
@@ -291,7 +294,10 @@ def create_timeline(authority_id, timeline_id):
     timeline_cache.save()
 
     # delete previous timelines
-    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()
+    if tenant_id_to_filter:
+        CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant_id_to_filter).exclude(pk=timeline_id).delete()
+    else:
+        CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()
 
 @shared_task
 def migrate_all_classification_systems(task_id):

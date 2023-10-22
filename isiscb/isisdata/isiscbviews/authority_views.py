@@ -648,11 +648,20 @@ def _handle_authority_redirects(authority):
     if not authority.public:
         return HttpResponseForbidden()
 
-def authority_author_timeline(request, authority_id):
-    print("timeline")
+def authority_author_timeline(request, authority_id, tenant_id=None):
     now = datetime.datetime.now()
 
-    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at')
+    include_all_tenants = request.include_all_tenants if request.include_all_tenants else False
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+
+    tenant_id_to_filter = None
+    if tenant and not include_all_tenants:
+        tenant_id_to_filter = tenant.id
+        cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant_id_to_filter).order_by('-created_at')
+    else:
+        cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant__isnull=True).order_by('-created_at')
     cached_timeline = cached_timelines[0] if cached_timelines else None
     timeline_to_display = cached_timeline
 
@@ -667,11 +676,12 @@ def authority_author_timeline(request, authority_id):
     # FIXME: there seems to be a bug here. for some reason sometimes this is not true when it should
     timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
     if not cached_timeline or timeline_is_outdated:
-        print("Refreshing timeline for " + authority_id)
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
+        if tenant_id_to_filter:
+            timeline.owning_tenant = tenant_id_to_filter
         timeline.save()
-        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
+        create_timeline.apply_async(args=[authority_id, timeline.id, tenant_id_to_filter], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
 
         data.update({
             'status': 'generating',

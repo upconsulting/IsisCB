@@ -57,7 +57,7 @@ urlpatterns = [
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/$', views.home, name='authority-base'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
-
+    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/help', isiscbviews.help, name='help'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/about', isiscbviews.about, name='about'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/playground', isiscbviews.playground, name="playground"),

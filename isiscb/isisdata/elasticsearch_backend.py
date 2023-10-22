@@ -27,8 +27,11 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
                 word = word.replace(char, '\\%s' % char)
 
             cleaned_words.append(word)
-
+        
         return ' '.join(cleaned_words)
+    
+    def build_query(self):
+        return super().build_query()
 
 
 class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):

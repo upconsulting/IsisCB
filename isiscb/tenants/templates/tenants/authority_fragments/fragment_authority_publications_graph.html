@@ -103,7 +103,7 @@ $(document).ready(function() {
     }
 
     function pollForTimeline() {
-      $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
+      $.get( "{% url 'tenants:authority_author_timeline' tenant_id authority.id %}", function( data ) {
         if (data.status == 'done') {
           $('#spinner').hide();
           $("#spinner_sm").hide();
