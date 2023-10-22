@@ -401,13 +401,15 @@ def authority(request, authority_id, tenant_id=None):
         return redirect
     
     tenant = None
+    tenant_id_to_filter = None
     if tenant_id:
         tenant = Tenant.objects.filter(identifier=tenant_id).first()
+        tenant_id_to_filter = tenant.id
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, related_citations = _get_word_cloud_results(authority.id, tenant.id, request.include_all_tenants)
+    sqs, related_citations = _get_word_cloud_results(authority.id, tenant_id_to_filter, request.include_all_tenants)
 
     def filter_by_tenant(sqs, tenant_id):
         """ Method that filters records by tenant if there are any and then returns the count"""
@@ -557,16 +559,24 @@ def _get_wikipedia_image_synopsis(authority, author_contributor_count, related_c
 
     return wikiImage, wikiIntro, wikiCredit
 
-def get_place_map_data(request, authority_id):
+def get_place_map_data(request, authority_id, tenant_id=None):
+    include_all_tenants = request.include_all_tenants if request.include_all_tenants else False
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+
     sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)
-    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+    map_search_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
-    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    geocodes = word_cloud_results.facet_counts()['fields']['geocodes'] if 'fields' in word_cloud_results.facet_counts() else []
+    if tenant_id and not include_all_tenants:
+        map_search_results = map_search_results.filter(owning_tenant=tenant_id)
+
+    related_geographics_facet = map_search_results.facet_counts()['fields']['geographic_ids'] if 'fields' in map_search_results.facet_counts() else []
+    geocodes = map_search_results.facet_counts()['fields']['geocodes'] if 'fields' in map_search_results.facet_counts() else []
     citation_count = _get_citation_count_per_country(geocodes)
     country_map_data, country_name_map, is_mapped_map = _get_authority_places_map_data(related_geographics_facet)
 
@@ -648,11 +658,20 @@ def _handle_authority_redirects(authority):
     if not authority.public:
         return HttpResponseForbidden()
 
-def authority_author_timeline(request, authority_id):
-    print("timeline")
+def authority_author_timeline(request, authority_id, tenant_id=None):
     now = datetime.datetime.now()
 
-    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at')
+    include_all_tenants = request.include_all_tenants if request.include_all_tenants else False
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+
+    tenant_id_to_filter = None
+    if tenant and not include_all_tenants:
+        tenant_id_to_filter = tenant.id
+        cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant_id_to_filter).order_by('-created_at')
+    else:
+        cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant__isnull=True).order_by('-created_at')
     cached_timeline = cached_timelines[0] if cached_timelines else None
     timeline_to_display = cached_timeline
 
@@ -667,11 +686,12 @@ def authority_author_timeline(request, authority_id):
     # FIXME: there seems to be a bug here. for some reason sometimes this is not true when it should
     timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
     if not cached_timeline or timeline_is_outdated:
-        print("Refreshing timeline for " + authority_id)
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
+        if tenant_id_to_filter:
+            timeline.owning_tenant = tenant_id_to_filter
         timeline.save()
-        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
+        create_timeline.apply_async(args=[authority_id, timeline.id, tenant_id_to_filter], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
 
         data.update({
             'status': 'generating',
@@ -755,13 +775,18 @@ def authority_author_timeline(request, authority_id):
     return JsonResponse(data)
 
 @user_passes_test(lambda u: u.is_authenticated)
-def timeline_recalculate(request, authority_id):
+def timeline_recalculate(request, authority_id, tenant_id=None):
     if (request.method == 'POST'):
-        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
-
+        if tenant_id and not request.include_all_tenants:
+            tenant = get_object_or_404(Tenant, identifier=tenant_id)
+            cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant.id).order_by('-created_at').first()
+        else:
+            cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant__isnull=True).order_by('-created_at').first()
         refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT
         if cached_timeline and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc):
             cached_timeline.recalculate = True
             cached_timeline.save()
 
+    if tenant_id:
+        return HttpResponseRedirect(reverse('tenants:authority', args=[tenant_id, authority_id]))    
     return HttpResponseRedirect(reverse('authority', args=[authority_id]))

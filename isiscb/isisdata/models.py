@@ -2901,6 +2901,7 @@ class CachedTimeline(models.Model):
     """
     created_at = models.DateTimeField(auto_now_add=True)
     authority_id = models.CharField(max_length=255, blank=True, null=True)
+    owning_tenant = models.CharField(max_length=255, blank=True, null=True)
     complete = models.BooleanField(default=False)
     recalculate = models.BooleanField(default=False)
 

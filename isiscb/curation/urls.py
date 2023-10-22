@@ -57,6 +57,7 @@ urlpatterns = [
     re_path(r'^api/citation$', views.get_citation_by_id, name='api_citation'),
 
     re_path(r'^timelines$', bulk_change_csv_views.timeline_tasks, name='timeline_tasks'),
+    re_path(r'^timelines/(?P<authority_id>[A-Z0-9]+)/(?P<tenant_id>[0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
     re_path(r'^timelines/(?P<authority_id>[A-Z0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
 
     re_path(r'^citation/add$', views.create_citation, name="create_citation"),

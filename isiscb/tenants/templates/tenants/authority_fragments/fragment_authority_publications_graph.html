@@ -103,7 +103,7 @@ $(document).ready(function() {
     }
 
     function pollForTimeline() {
-      $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
+      $.get( "{% url 'tenants:authority_author_timeline' tenant_id authority.id %}", function( data ) {
         if (data.status == 'done') {
           $('#spinner').hide();
           $("#spinner_sm").hide();
@@ -117,7 +117,11 @@ $(document).ready(function() {
           }
           {% if user.is_authenticated %}
           else if (data.timeline_recalculation == 'none' && data.can_recalculate == true) {
+            {% if tenant_id %}
+            var recForm = $('<form method="POST" style="margin-right: -10px;margin-top: -5px;" action="{% url 'tenants:recalculate_timeline' tenant_id authority.id %}">{% csrf_token %}</form>');
+            {% else %}
             var recForm = $('<form method="POST" style="margin-right: -10px;margin-top: -5px;" action="{% url 'recalculate_timeline' authority.id %}">{% csrf_token %}</form>');
+            {% endif %}
             recForm.append($('<button type="submit" class="btn btn-link" style="font-size: 10px;"><i class="fa fa-clock-o" aria-hidden="true"></i> Update now</button>'))
             $("#recalculationSpan").append(recForm);
           }
@@ -254,7 +258,7 @@ $(document).ready(function() {
           names: names,
           onclick: function (d, element) {
             var date = d['x']
-            window.location.href = '{% url 'tenants:index' tenant_id %}?owning_tenant={{tenant_id}}&tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
+            window.location.href = '{% url 'tenants:index' tenant_id %}?tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
           },
           order: function (t1, t2) {
             return t1.id < t2.id;
