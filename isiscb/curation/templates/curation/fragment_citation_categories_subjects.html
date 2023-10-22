@@ -29,10 +29,10 @@
     </div>
       <table>
           <tr>
-          <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" ">
+          <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" >
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'CA' %}
-                      <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
+                      <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'tenants:authority' tenant.identifier acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
                         {% if not acrelation.public %}
                         <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                         {% endif %}
@@ -54,7 +54,7 @@
           <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'SU' %}
-                      <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
+                      <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'tenants:authority' tenant.identifier acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
                         {% if not acrelation.public %}
                         <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                         {% endif %}
