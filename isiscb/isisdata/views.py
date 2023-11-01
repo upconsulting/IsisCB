@@ -1491,7 +1491,7 @@ def user_profile(request, username):
     return render(request, template, context)
 
 @ensure_csrf_cookie
-def graph_explorer(request):
+def graph_explorer(request, tenant_id=None):
     context = {}
 
     if request.method == 'POST':
@@ -1550,7 +1550,7 @@ def graph_explorer(request):
     return render(request, 'isisdata/graph_explorer.html', context)
 
 @ensure_csrf_cookie
-def term_explorer(request):
+def term_explorer(request, tenant_id=None):
     leftSelected = rightSelected = []
 
     selected = {
@@ -1686,7 +1686,7 @@ def remove_self_from_facets(facet, authority_ids):
     return [x for x in facet if x[0].upper() not in authority_ids]
 
 @ensure_csrf_cookie
-def ngram_explorer(request):
+def ngram_explorer(request, tenant_id=None):
 
     context = {
     }
