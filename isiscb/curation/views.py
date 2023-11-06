@@ -1164,7 +1164,7 @@ def citation(request, citation_id):
         if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
-            form.cleaned_data['owning_tenant_id'] = citation.owning_tenant.id
+            form.cleaned_data['owning_tenant_id'] = citation.owning_tenant.id if citation.owning_tenant else None
             form.save()
             if partdetails_form:
                 partdetails_form.save()

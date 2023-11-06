@@ -417,7 +417,7 @@ class CitationForm(forms.ModelForm):
             self.cleaned_data['stub_record_status'] = Citation.STUB_RECORD
         else:
             self.cleaned_data['stub_record_status'] = None
-        if self.instance.pk and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+        if self.instance.pk and not (self.cleaned_data['owning_tenant'] is self.instance.owning_tenant):
             raise ValidationError(
                 "Owning tenant cannot be changed."
             )
