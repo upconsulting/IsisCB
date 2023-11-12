@@ -1,4 +1,4 @@
-{% extends "isisdata/__base.html" %}
+{% extends "isisdata/__base_user.html" %}
 {% load app_filters %}
 {% load static %}
 {% load metadata_filters %}
@@ -32,6 +32,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <tr>
                 <td>Query</td>
                 <td>Type</td>
+                <td>Tenant</td>
                 <td>Facets</td>
                 <td>Performed On</td>
                 <td>Results</td>
@@ -47,13 +48,22 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {{ searchquery.search_models }}
             </td>
             <td>
+                {% if searchquery.tenant_portal %} {{ searchquery.tenant_portal }}{% endif %}
+            </td>
+            <td>
                 {{ searchquery.selected_facets }}
             </td>
             <td>{{ searchquery.created_on }}</td>
             <td>
+                {% if searchquery.tenant_portal %}
+                <a href="{% url 'tenants:index' searchquery.tenant_portal %}?log=False&tenant_portal={{searchquery.tenant_portal}}&owning_tenant={{searchquery.owning_tenant_id}}&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                </a>
+                {% else %}
                 <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </a>
+                {% endif %}
             </td>
             <td>
                 <a href="{% url 'search_saved' %}?save={{ searchquery.id }}">

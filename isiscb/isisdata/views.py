@@ -868,6 +868,7 @@ def search_saved(request):
 
     context = {
         'searchqueries': searchqueries,
+        'tenants': Tenant.objects.all()
     }
     return render(request, 'isisdata/search_saved.html', context)
 
@@ -898,6 +899,7 @@ def search_history(request):
 
     context = {
         'searchqueries': searchqueries,
+        'tenants': Tenant.objects.all()
     }
     return render(request, 'isisdata/search_history.html', context)
 
@@ -946,6 +948,9 @@ class IsisSearchView(FacetedSearchView):
         if q:
             form.cleaned_data['q'] = unidecode(q)
 
+        owning_tenant = form.cleaned_data.get('owning_tenant', None)
+        tenant_portal = self.request.GET.get('tenant_portal', None)
+        
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
         excluded_facets = self.request.GET.get('excluded_facets', None)
@@ -958,11 +963,14 @@ class IsisSearchView(FacetedSearchView):
         # If the user is logged in, attempt to save the search in their
         #  search history.
         if log and parameters and self.request.user.id and self.request.user.id > 0:
+            print("saving serach")
             searchquery = SearchQuery(
                 user = self.request.user._wrapped,
                 parameters = parameters,
                 search_models = search_models,
                 selected_facets = selected_facets,
+                owning_tenant_id = owning_tenant,
+                tenant_portal = tenant_portal
             )
             searchquery.save()
             # make sure we have a session key
@@ -1465,6 +1473,7 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
+        'tenants': Tenant.objects.all()
     }
 
     # User has elected to edit their own profile.

@@ -2858,6 +2858,11 @@ class SearchQuery(models.Model):
                             help_text=help_text("""
     Provide a memorable name so that you can find this search later.
     """))
+    # tenant id if search was limited to a tenant
+    owning_tenant_id = models.CharField(max_length=500, null=True, blank=True)
+    # tenant in which search was run
+    tenant_portal = models.CharField(max_length=500, null=True, blank=True)
+
 
     saved = models.BooleanField(default=False)
 
