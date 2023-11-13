@@ -445,6 +445,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <br/>
                {% endif %}
 
+               {% with citation|get_pub_year as pub_year %}
+               {% if pub_year %}
+               <span>Publication date: </span> {{ pub_year }}
+               <br/>
+               {% endif %}
+               {% endwith %}
+
+               {% if citation.language.all|length > 0 %}
+                  <span>Language: </span> {% for language in citation.language.all %}{{ language.name }}{% endfor %}
+                  <br>
+                {% endif %}
+
                <hr style="margin: 10px 0">
              {% endif %}
 
@@ -457,8 +469,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {% endfor %}
              {% endif %}
 
-             {% if citation.attributes|length > 0 or citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language|length > 0 %}
-                 <hr style="margin: 10px 0">
+             <hr style="margin: 10px 0">                
+             {% if citation.attributes|length > 0 or citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language|length > 0 or citation.extent %}
                  <div style="font-size: .9em;">
                    {% for attribute in citation.attributes.all %}
                      <span>{{ attribute.type_controlled.display_name }}: </span> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}
@@ -477,11 +489,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
                    {% if citation.extent %}
                      <span>Extent: </span> {% if citation.extent %}{{ citation.extent|bleach_safe }}{% endif %}
-                     <br>
-                   {% endif %}
-
-                   {% if citation.language.all|length > 0 %}
-                     <span>Language: </span> {% for language in citation.language.all %}{{ language.name }}{% endfor %}
                      <br>
                    {% endif %}
                  </div>
