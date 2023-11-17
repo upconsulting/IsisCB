@@ -13,10 +13,10 @@
         'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
     });
     if (includeAllTenants) {
-        $("#includeAllTenantsNavItem").attr("title", "The current view shows everything from all bibliographies on the CB Expore system. To view only items from XYZ Bibliography, click [View all off].");
+        $("#includeAllTenantsNavItem").attr("title", "The current view shows everything from all bibliographies on the CB Expore system. To view only items from {{tenant.title}} Bibliography, click [View all off].");
         $("#includeAllToggleText").text("View all");
     } else {
-        $("#includeAllTenantsNavItem").attr("title", "The current view shows only items from XYZ Bibliography. To view everything from all bibliographies on the CB Expore system, click [View all on].");
+        $("#includeAllTenantsNavItem").attr("title", "The current view shows only items from {{tenant.title}} Bibliography. To view everything from all bibliographies on the CB Expore system, click [View all on].");
         $("#includeAllToggleText").text("View all");
     }
 
