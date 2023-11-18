@@ -1251,6 +1251,13 @@ class ClassificationSystemAdmin(admin.ModelAdmin):
     form = ClassificationSystemAdminForm
     list_display = ['name', 'owning_tenant', 'is_default', 'default_for']
     
+class SystemNotificationAdmin(admin.ModelAdmin):
+    date_hierarchy = 'created_on'
+    list_display = ['active', 'title', 'level', 'created_on', 'modified_on']
+    fields =['title', 'text', 'active', 'level']
+
+
+        
 
 class LogEntryAdmin(admin.ModelAdmin):
     # to have a date-based drilldown navigation in the admin page
@@ -1303,3 +1310,4 @@ admin.site.register(User, IsisCBUserAdmin)
 
 admin.site.register(CitationSubtype, CitationSubtypeAdmin)
 admin.site.register(Dataset, DatasetAdmin)
+admin.site.register(SystemNotification, SystemNotificationAdmin)

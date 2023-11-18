@@ -19,6 +19,8 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse as core_reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.utils import timezone
+
 import jsonpickle
 from datetime import date
 
@@ -3135,9 +3137,34 @@ class AsyncTask(models.Model):
     def progress(self):
         if self.max_value and self.max_value > 0:
             return 100.*self.current_value/self.max_value
-        return 0.
+        return 0
 
     def save(self, *args, **kwargs):
         if not self.id:
             self.created_on = datetime.datetime.utcnow()
         return super(AsyncTask, self).save(*args, **kwargs)
+
+class SystemNotification(models.Model):
+    """ Class to store and show systemwide messages"""
+    title = models.CharField(max_length=255, blank=True, null=True, help_text="""
+                             Title of notification (cannot be longer than 255 characters)""")
+    text = models.TextField(default="", help_text="Notification message")
+    created_on = models.DateTimeField(null=False) 
+    modified_on = models.DateTimeField(null=True) 
+    active = models.BooleanField(default=False, help_text="Indicates if message should be shown.")
+    
+    INFO = 'INFO'
+    WARNING = 'WARN'
+    DANGER = 'DANG'
+    CHOICES = (
+        (INFO, 'Info'),
+        (WARNING, 'Warning'),
+        (DANGER, 'Danger')
+    )
+    level = models.CharField(max_length=4, null=False, blank=False, choices=CHOICES)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_on = timezone.now()
+        self.modified_on = timezone.now()
+        return super(SystemNotification, self).save(*args, **kwargs)

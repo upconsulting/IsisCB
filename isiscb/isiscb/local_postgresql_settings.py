@@ -167,6 +167,7 @@ TEMPLATES = [
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
                 'isisdata.context_processors.portal_prefix',
+                'isisdata.context_processors.notifications',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],

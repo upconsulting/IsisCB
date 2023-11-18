@@ -1,4 +1,5 @@
 {% load static %}
+{% load addcss %}
 
 <nav class="navbar navbar-inverse navbar-home" style="background-color:{{tenant.settings.navigation_color}}">
     <div class="container-fluid">
@@ -7,7 +8,27 @@
             {% if tenant.logo %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
             {% endif %}
-            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><div style="line-height:50px; font-size: 22px; color: white">{{ tenant.title }}</div> </a>
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}">
+                <div style="line-height:50px; font-size: 22px; color: white">
+                    {{ tenant.title }}
+                </div> 
+            </a>
+            {% if notifications %}
+            <div class="navbar-brand" style="margin-left: 0px; color: #f3c11d; padding-top: 5px;">
+            <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
+            <script>
+                $(function() {
+                    $("#notifications-icon").click(function() {
+                        $("#notifications-panel").show();
+                    });
+                   
+                    $("#notifications-close-btn").click(function() {
+                        $("#notifications-panel").hide();
+                    })
+                });
+            </script>
+            </div>
+            {% endif %}
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -102,6 +123,26 @@
 
         </div>
     </div>
+
+    {% if notifications %}
+    <div class="col-sm-12">
+        <div id="notifications-panel" class="panel panel-default" style="display:none; margin-top: 10px">
+            <div class="panel-heading">
+              <h3 class="panel-title">
+                <button id="notifications-close-btn" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                System Notifications
+              </h3>
+            </div>
+            <div class="panel-body">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% include "tenants/fragment_toggle_switch.html" %}
 

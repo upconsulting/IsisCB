@@ -7,6 +7,7 @@
 {% load static %}
 {% load content_tags %}
 {% load tenanttags %}
+{% load addcss %}
 
 {% block extra_head%}
 <script type="text/javascript">
@@ -84,6 +85,16 @@
 <div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat; margin-bottom: 0;">
     <div class="container" style='margin: 0px; width: 100%;'>
         <div class="row">
+            {% if notifications %}
+            <div class="col-sm-12">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            
+            {% endfor %}
+            </div>
+            {% endif %}
             <div class="col-sm-12 col-md-6">
                 {% if tenant.settings.home_main_block.title %}
                 <h2 style="font-weight: 400; margin-bottom: 50px">{{ tenant.settings.home_main_block.title }}</h2>
