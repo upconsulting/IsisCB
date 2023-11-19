@@ -228,6 +228,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
         Fetches and adds/alters data before indexing.
         """
+        print("Indexing citation", obj.id)
         if type(obj) is Citation:
             identifier = obj.id
             data = Citation.objects.filter(pk=obj.id).values(*self.data_fields)
@@ -592,7 +593,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         If Citation.publication_data is not pre-filled, retrieve it from the
         formal Attribute (if possible).
         """
-
         if data['publication_date']:
             return data['publication_date']
 
@@ -687,6 +687,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         Coerce all unicode values to ASCII bytestrings, to avoid characters
         that make haystack choke.
         """
+        print("Indexing authority", obj.id)
         self.prepared_data = super(AuthorityIndex, self).prepare(obj)
         
         for k, v in list(self.prepared_data.items()):

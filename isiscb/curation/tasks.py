@@ -220,18 +220,9 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
 def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, object_type='CITATION'):
     queryset, _ = _get_filtered_record_queryset(filter_params_raw, user_id, type=object_type)
     try:
-        # update tenant
-        if task_id:
-            task = AsyncTask.objects.get(pk=task_id)
+        print("Changing tenants of # records:", queryset.count())
         tenant = Tenant.objects.filter(pk=tenant_id).first()
-        for i, citation in enumerate(queryset):
-            if task_id:
-                task.current_value += 1
-                task.save()
-
-            citation.owning_tenant = tenant
-            citation.save()
-
+        queryset.update(owning_tenant=tenant)
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)
             task.state = 'SUCCESS'
