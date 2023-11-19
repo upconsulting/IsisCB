@@ -42,6 +42,7 @@ urlpatterns = [
     re_path(r'^rest/auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^zotero/', include('zotero.urls')),
+    re_path(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     re_path(r'^history/', views.search_history, name='search_history'),
     re_path(r'^history/saved/', views.search_saved, name='search_saved'),
     re_path(r'^$', views.home, name='home'),
