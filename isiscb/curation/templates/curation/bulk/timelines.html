@@ -14,6 +14,7 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
 <table class="table table-hover table-curation">
   <tr>
     <th>Task ID</th>
+    <th>Tenant</th>
     <th>For Authority</th>
     <th>Authority Name</th>
     <th>Created on</th>
@@ -28,6 +29,9 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
       <i class="fa fa-clock-o" aria-hidden="true" title="Timeline is marked for recalculation."></i>
       {% endif %}
       {{ timeline.id }}
+    </td>
+    <td>
+      {{ timeline.owning_tenant|get_tenant }}
     </td>
     <td><a href="{% url 'authority' timeline.authority_id %}" target="_blank">{{ timeline.authority_id }}</a></td>
     <td>
