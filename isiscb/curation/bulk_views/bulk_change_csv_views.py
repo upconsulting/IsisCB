@@ -34,8 +34,13 @@ ACTION_DICT = {
 def timeline_tasks(request):
     tenant = c_util.get_tenant(request.user)
 
-    tenant_query = Q(owning_tenant=tenant.id) | Q(owning_tenant__isnull=True)
-    timelines_qs = CachedTimeline.objects.filter(tenant_query)
+    # superadmins don't have a tenant
+    if tenant:
+        tenant_query = Q(owning_tenant=tenant.id) | Q(owning_tenant__isnull=True)
+        timelines_qs = CachedTimeline.objects.filter(tenant_query)
+    else:
+        timelines_qs = CachedTimeline.objects.all()
+
     if request.GET.get('find_authority', None):
         timelines = timelines_qs.filter(authority_id=request.GET.get('find_authority', None))[:50]
     else:
