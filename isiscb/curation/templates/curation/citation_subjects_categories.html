@@ -106,7 +106,7 @@
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
            <li id="category-entry-{{ acrel.id }}" class="list-group-item">
-            <a href="{% if acrel.authority.owning_tenant and acrel.authority|is_external_tenant:instance.owning_tenant.id %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">
+            <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">
               {% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} 
               {{ acrel.authority.name }}
             </a>
@@ -129,7 +129,7 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% if acrel.authority.owning_tenant and acrel.authority|is_external_tenant:instance.owning_tenant.id %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
              {% else %}}
              <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}

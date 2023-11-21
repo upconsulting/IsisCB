@@ -50,8 +50,11 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
-def is_external_tenant(obj, tenant_id):
-    return False if obj and obj.owning_tenant != None and obj.owning_tenant.id is tenant_id else True
+def is_external_tenant(record, tenant):
+    if (not record.owning_tenant and tenant) or (record.owning_tenant and not tenant):
+        return True    
+
+    return False if record.owning_tenant.id is tenant.id else True
     #return not any([id in obj.tenant_ids for id in tenant_ids])
 
 @register.filter
