@@ -220,6 +220,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
 def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, object_type='CITATION'):
     queryset, _ = _get_filtered_record_queryset(filter_params_raw, user_id, type=object_type)
     try:
+        print("filters", filter_params_raw)
         print("Changing tenants of # records:", queryset.count())
         tenant = Tenant.objects.filter(pk=tenant_id).first()
         queryset.update(owning_tenant=tenant)
@@ -227,7 +228,7 @@ def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, obje
             task = AsyncTask.objects.get(pk=task_id)
             task.state = 'SUCCESS'
             task.save()
-            print('success:: %s' % str(task_id))
+            print('success of task:: %s' % str(task_id))
     except Exception as E:
         logger.error('bulk_change_tracking_state failed for %s' % (filter_params_raw))
         logger.error(E)

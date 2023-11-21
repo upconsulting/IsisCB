@@ -106,6 +106,8 @@ class CitationFilter(django_filters.FilterSet):
             in_coll = params.get('in_collections')
             params = QueryDict('', mutable=True)
             params['in_collections'] = in_coll
+            if 'belongs_to' in params and params.get('belongs_to', []):
+                params['belongs_to'] = params.get('belongs_to', [])
 
         super(CitationFilter, self).__init__(params, **kwargs)
 
@@ -120,8 +122,7 @@ class CitationFilter(django_filters.FilterSet):
 
             if self.data.get('collection_only', False):
                 self.data = {'in_collections': in_coll}
-            return
-
+            
         zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
@@ -135,6 +136,8 @@ class CitationFilter(django_filters.FilterSet):
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+        else:
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
         created_by_native = self.data.get('created_by_native', None)
         if created_by_native:
@@ -453,8 +456,7 @@ class AuthorityFilter(django_filters.FilterSet):
 
             if self.data.get('collection_only', False):
                 self.data = {'in_collections': in_coll}
-            return
-
+            
         zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
@@ -486,7 +488,8 @@ class AuthorityFilter(django_filters.FilterSet):
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
-
+        else:
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
     def filter_id(self, queryset, name, value):
         if not value:
