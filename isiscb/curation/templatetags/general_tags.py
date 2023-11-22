@@ -55,7 +55,6 @@ def is_external_tenant(record, tenant):
         return True    
 
     return False if record.owning_tenant.id is tenant.id else True
-    #return not any([id in obj.tenant_ids for id in tenant_ids])
 
 @register.filter
 def get_tenant(id):
