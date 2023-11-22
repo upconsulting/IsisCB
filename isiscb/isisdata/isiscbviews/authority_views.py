@@ -404,7 +404,8 @@ def authority(request, authority_id, tenant_id=None):
     tenant_id_to_filter = None
     if tenant_id:
         tenant = Tenant.objects.filter(identifier=tenant_id).first()
-        tenant_id_to_filter = tenant.id
+        if tenant:
+            tenant_id_to_filter = tenant.id
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
