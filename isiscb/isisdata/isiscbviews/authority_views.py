@@ -403,7 +403,7 @@ def authority(request, authority_id, tenant_id=None):
     tenant = None
     tenant_id_to_filter = None
     if tenant_id:
-        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+        tenant = get_object_or_404(Tenant, identifier=tenant_id)
         if tenant:
             tenant_id_to_filter = tenant.id
 
