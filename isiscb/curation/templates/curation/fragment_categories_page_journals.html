@@ -32,7 +32,12 @@
       var newId = result.acrelation.id;
       var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
   
-      var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
+      var linkText = result.acrelation.authority.name;
+      if (result.acrelation.authority.owning_tenant != {{ instance.owning_tenant.id }}) {
+        linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+        url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.acrelation.authority.id;
+      }
+      var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
       ul.append(li);
       {% if can_update %}
       var span = $('<span class="button-group button-group-xs"></span>');
