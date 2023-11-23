@@ -495,7 +495,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  <hr style="margin: 10px 0">
              {% endif %}
 
-             <div style="font-size: .9em;">Part of: {{ citation.owning_tenant.name }}</div>
+             <div style="font-size: .9em;">Part of: <a href="{% url 'tenants:home' citation.owning_tenant.identifier %}">{{ citation.owning_tenant.name }}</a></div>
              <hr style="margin: 10px 0">
 
            </div>
