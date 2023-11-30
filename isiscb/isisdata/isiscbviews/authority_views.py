@@ -53,27 +53,29 @@ def authority_catalog(request, authority_id, tenant_id=None):
         return redirect
     
     tenant = None
+    tenant_pk = None
     if tenant_id:
         tenant = Tenant.objects.filter(identifier=tenant_id).first()
+        tenant_pk = tenant.id
 
-    context = _find_related_citations(authority, tenant.id, request.include_all_tenants)
+    context = _find_related_citations(authority, tenant_pk, request.include_all_tenants)
 
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
     # get related citations and counts
-    sqs, search_results = _get_word_cloud_results(authority.id, tenant.id, request.include_all_tenants)
+    sqs, search_results = _get_word_cloud_results(authority.id, tenant_pk, request.include_all_tenants)
     related_citations_count = search_results.count()
     
     author_contributor_qs = sqs.filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id)
-    author_contributor_count = _get_count(author_contributor_qs, authority_id, tenant.id, request.include_all_tenants)
+    author_contributor_count = _get_count(author_contributor_qs, authority_id, tenant_pk, request.include_all_tenants)
 
     publisher_qs = sqs.filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id)
-    publisher_count = _get_count(publisher_qs,  authority_id, tenant.id, request.include_all_tenants)
+    publisher_count = _get_count(publisher_qs,  authority_id, tenant_pk, request.include_all_tenants)
     
     subject_category_qs = sqs.filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id)
-    subject_category_count = _get_count(subject_category_qs, authority_id, tenant.id, request.include_all_tenants )
+    subject_category_count = _get_count(subject_category_qs, authority_id, tenant_pk, request.include_all_tenants )
 
     display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
