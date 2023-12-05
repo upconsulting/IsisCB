@@ -32,11 +32,7 @@ $(function() {
   }
 
   function setDefaultDataset() {
-    $("#id_authority-belongs_to option").each(function() {
-       if ($(this).text() == 'Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)') {
-         $("#id_authority-belongs_to").val($(this).val());
-       }
-    });
+    $("#id_authority-belongs_to").val({{default_dataset.pk}}); 
   }
 
   $(".personInput").hide();

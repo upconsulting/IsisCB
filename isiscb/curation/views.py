@@ -198,6 +198,12 @@ def create_authority(request):
         for type_controlled in Authority.TYPE_CHOICES:
             if type_controlled[0] not in class_system_dict:
                 class_system_dict[type_controlled[0]] = default_system.id
+    
+    tenant = c_util.get_tenant(request.user)
+    if tenant:
+        context.update({
+            'default_dataset': tenant.default_dataset
+        })
 
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
@@ -206,7 +212,6 @@ def create_authority(request):
         daterange_form = modelform_factory(ISODateRangeValue,
                                 exclude=('attribute', 'child_class'))
         linkeddata_form = LinkedDataForm(prefix='linkeddata')
-
         
 
         context.update({
