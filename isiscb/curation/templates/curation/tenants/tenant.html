@@ -12,10 +12,19 @@
   </div>
 
   <div class="col-md-10">
-    <p class="pull-right">
+    
+     {% if tenant.status == 'INA' %}
+      <div class="alert alert-warning" role="alert">This tenant is currently inactive. Records of this tenant will not be 
+        visible to users of other projects on the public site. You can change the status of this tenant to "Active" when 
+        you click on "Edit Settings".
+      </div>
+      {% endif %}
+      <p class="pull-right">
       <a href="{% url 'curation:tenant_settings' tenant.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-       Edit Settings</a>
+        Edit Settings
+      </a>
       </p>
+       
       <table class="table table-striped">
           <tr>
             <th width="20%">Title</th>

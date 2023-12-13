@@ -1473,7 +1473,7 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
-        'tenants': Tenant.objects.all()
+        'tenants': Tenant.objects.filter(status=Tenant.ACTIVE)
     }
 
     # User has elected to edit their own profile.

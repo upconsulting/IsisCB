@@ -10,7 +10,8 @@ def add_tenants(request):
             'tenant': get_object_or_404(Tenant, identifier=tenant_id) if tenant_id else None
         }) 
     context.update({
-        'include_all_tenants': request.include_all_tenants
+        'include_all_tenants': request.include_all_tenants,
+        'all_tenants': Tenant.objects.filter(status=Tenant.ACTIVE)
     })
 
     return context

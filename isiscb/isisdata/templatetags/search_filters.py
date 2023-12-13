@@ -128,3 +128,9 @@ def add_tenant(url, tenant_id):
     new_url = url.replace(tenant_match.group(1), "") if tenant_match and tenant_match.groups() else url
     return new_url + "&owning_tenant=" + tenant_id
 
+@register.filter
+def add_tenants(url, tenants):
+    tenant_match = re.search(r"(&?owning_tenant=.*?)(&|$)", url)
+    new_url = url.replace(tenant_match.group(1), "") if tenant_match and tenant_match.groups() else url
+    return new_url + "&owning_tenant=" + ",".join([t.identifier for t in tenants])
+

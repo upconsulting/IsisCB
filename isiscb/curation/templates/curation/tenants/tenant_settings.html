@@ -22,6 +22,16 @@
       </div>
   </div>
 
+  <div class="form-group col-md-12">
+    {% for error in form.status.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">Tenant Status:</label>
+    <div class="col-md-10">
+      {{ form.status|addcss:"form-control" }}
+    </div>
+  </div>
+
   <div class="form-group  col-md-12">
     {% for error in form.contact_email.errors %}
     <div class="alert alert-danger col-md-2">{{ error }}</div>

@@ -155,7 +155,7 @@
               <small>
                 {% if request.GET.owning_tenant %}
                 <input type="checkbox" name="include_all_projects" >
-                <a href="{{ request.get_full_path|remove_tenant }}">Include all projects</a>
+                <a href="{{ request.get_full_path|remove_tenant|add_tenants:all_tenants }}">Include all projects</a>
                 {% else %}
                 <input type="checkbox" name="include_all_projects" checked>
                 <a href="{{ request.get_full_path|add_tenant:tenant_id}}">All projects included</a>
