@@ -984,6 +984,7 @@ class TenantSettingsForm(forms.ModelForm):
     default_featured_citation = CitationField(widget=forms.HiddenInput(), queryset=Citation.objects.none(), required=False)
     subject_searches_all_tenants = forms.BooleanField(required=False)
     public_search_all_tenants_default = forms.BooleanField(required=False)
+    status = forms.ChoiceField(choices=Tenant.STATUS_CHOICES)
 
 
     class Meta(object):
@@ -1000,6 +1001,7 @@ class TenantSettingsForm(forms.ModelForm):
 
         if kwargs['instance'] and kwargs['instance'].tenant:
             self.fields['title'].initial = kwargs['instance'].tenant.title
+            self.fields['status'].initial = kwargs['instance'].tenant.status
             self.fields['logo'].initial = kwargs['instance'].tenant.logo
             self.fields['contact_email'].initial = kwargs['instance'].tenant.contact_email
             if kwargs['instance'].tenant.settings.google_api_key:

@@ -21,9 +21,9 @@
                 <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "tenants:about" tenant_id %}">About</a></li>
                 <li><a href="http://isiscb.org" target="_blank">Blog</a></li>
                 <li><a href="mailto:{{tenant.contact_email}}" target="_blank">Contact</a></li>
-                <li><a id="includeAllTenantsNavItem" title="" href="#">
+                <!--<li><a id="includeAllTenantsNavItem" title="" href="#">
                     <input style="padding-top: 20px;" type="checkbox" name="site_include_all_projects" checked> <span id="includeAllToggleText">View all off</span>
-                </a></li>
+                </a></li>-->
                     
                 {% if user.is_authenticated %}
                 <li class="{% if active == 'user' %}active{% endif %}">

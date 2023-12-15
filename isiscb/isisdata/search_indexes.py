@@ -146,6 +146,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
     owning_tenant = indexes.IntegerField(faceted=True, indexed=True, null=True)
     owning_tenant_name = indexes.CharField(indexed=False, null=True)
+    owning_tenant_status = indexes.CharField(indexed=False, null=True)
 
     data_fields = [
         'id',
@@ -162,8 +163,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'belongs_to__name',
         'owning_tenant__id',
         'owning_tenant__name',
+        'owning_tenant__status',
         'tenants',
         'tenants__name',
+        'tenants__status',
         'complete_citation',
         'stub_record_status',
         'attributes__id',
@@ -460,6 +463,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if data[0]['owning_tenant__name']:
             self.prepared_data['tenant_names'] = data[0]['owning_tenant__name']
             self.prepared_data['owning_tenant_name'] = data[0]['owning_tenant__name']
+        if data[0]['owning_tenant__status']:
+            self.prepared_data['tenant_status'] = data[0]['owning_tenant__status']
+            self.prepared_data['owning_tenant_status'] = data[0]['owning_tenant__status']
 
     def _get_reviewed_book(self, data):
         """
@@ -655,6 +661,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     #citation_nr = indexes.CharField(indexed=False)
     tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+    tenant_status = indexes.MultiValueField(faceted=True, indexed=True, null=True)
 
 
     def get_model(self):
@@ -720,4 +727,9 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_tenant_ids(self, obj):
         if obj.owning_tenant:
             return [obj.owning_tenant.id]
+        return []
+    
+    def prepare_tenant_status(self, obj):
+        if obj.owning_tenant:
+            return [obj.owning_tenant.status]
         return []

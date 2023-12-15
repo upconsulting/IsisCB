@@ -236,6 +236,22 @@ class Tenant(models.Model):
 
     default_dataset = models.OneToOneField('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
 
+    ACTIVE = 'ACT'
+    INACTIVE = 'INA'
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (INACTIVE, 'Inactive'),
+    )
+    status = models.CharField(choices=STATUS_CHOICES,
+                                           max_length=4,
+                                           null=False,
+                                           default=ACTIVE,
+                                           db_index=True, 
+                                           help_text="""
+             Mark a tenant as active to include it in the searches of other tenants when 
+             "all projects" are searched, and in the seachbar on the user profile pages.
+             """)
+
 
     def __str__(self):
         return u'{0}'.format(self.name)

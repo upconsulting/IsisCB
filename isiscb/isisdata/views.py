@@ -950,6 +950,12 @@ class IsisSearchView(FacetedSearchView):
 
         owning_tenant = form.cleaned_data.get('owning_tenant', None)
         tenant_portal = self.request.GET.get('tenant_portal', None)
+        # if we are searching within a tenant portal, we want only
+        # active projects to be included if user checks "search all projects"
+        # if user searches from old site (no tenant_portal given)
+        # then we want to see everything
+        if not owning_tenant and tenant_portal:
+            owning_tenant = ",".join(Tenant.objects.filter(status=Tenant.ACTIVE).values_list("identifier", flat=True))
         
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
@@ -963,7 +969,6 @@ class IsisSearchView(FacetedSearchView):
         # If the user is logged in, attempt to save the search in their
         #  search history.
         if log and parameters and self.request.user.id and self.request.user.id > 0:
-            print("saving serach")
             searchquery = SearchQuery(
                 user = self.request.user._wrapped,
                 parameters = parameters,
@@ -1473,7 +1478,7 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
-        'tenants': Tenant.objects.all()
+        'tenants': Tenant.objects.filter(status=Tenant.ACTIVE)
     }
 
     # User has elected to edit their own profile.
