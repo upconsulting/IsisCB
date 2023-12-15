@@ -57,6 +57,7 @@
                                         e.preventDefault();
                                         var chosen_tenant = $("#owning_tenant_field").val();
                                         $("#search_tenant_portal").val(chosen_tenant);
+                                        $("#search_owning_tenant").val(chosen_tenant);
                                         $("#search-form").attr("action", "/p/"+chosen_tenant+"/search");
                                         $("#search-form").submit();
                                     });
@@ -72,6 +73,7 @@
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
                             <input id="search_tenant_portal" name="tenant_portal" type="hidden" value="" />
+                            <input id="search_owning_tenant" name="owning_tenant" type="hidden" value="" />
                     </form>
                     </div>
                     <div class="col-md-2" >
@@ -85,6 +87,7 @@
                                         e.preventDefault();
                                         var chosen_tenant = $("#owning_tenant_field").val();
                                         $("#browse_tenant_portal").val(chosen_tenant);
+                                        $("#browse_owning_tenant").val(chosen_tenant);
                                         $("#browse-form").attr("action", "/p/"+chosen_tenant+"/search");
                                         $("#browse-form").submit();
                                     });
@@ -100,6 +103,7 @@
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
                             <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
                             <input id="browse_tenant_portal" name="tenant_portal" type="hidden" value="" />
+                            <input id="browse_owning_tenant" name="owning_tenant" type="hidden" value="" />
                         </div>
                     </form>
                     </div>
