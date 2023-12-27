@@ -8,6 +8,7 @@ from builtins import object
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser
@@ -18,7 +19,10 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse as core_reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.utils import timezone
+
 import jsonpickle
+from datetime import date
 
 
 from markupfield.fields import MarkupField
@@ -38,6 +42,219 @@ from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
+class TenantSettings(models.Model):
+    """
+    Settings for a tenant. This class is used to define things like navigation bar color,
+    logo, or link color.
+    """
+
+    navigation_color = models.CharField(max_length=255, blank=True, null=True)
+    link_color = models.CharField(max_length=255, blank=True, null=True)
+    citations_external_links_color = models.CharField(max_length=255, blank=True, null=True)
+    google_api_key = models.CharField(max_length=255, blank=True, null=True)
+    twitter_api_key = models.CharField(max_length=255, blank=True, null=True)
+    twitter_user_name = models.CharField(max_length=255, blank=True, null=True)
+    default_featured_authority = models.ForeignKey('Authority', on_delete=models.SET_NULL, blank=True, null=True)
+    default_featured_citation = models.ForeignKey('Citation', on_delete=models.SET_NULL, blank=True, null=True)
+    subject_searches_all_tenants = models.BooleanField(default=False)
+    public_search_all_tenants_default = models.BooleanField(default=False)
+
+    @property
+    def home_main_block(self):
+        return self.page_blocks.filter(block_type='HM').first()
+
+    @property
+    def home_other_blocks(self):
+        return self.page_blocks.filter(block_type='HO')
+
+    @property
+    def about_blocks(self):
+        return self.page_blocks.filter(block_type='AB')
+
+    @property
+    def about_images(self):
+        return self.images.filter(image_type='AB')
+
+    @property
+    def authority_default_images(self):
+        return self.images.filter(image_type__in=['DAU', 'DPE', 'DCO', 'DIN', 'DGE', 'DPU', 'DTI', 'DCL'])
+   
+    @property
+    def authority_default_image_author(self):
+        return self.images.filter(image_type='DAU').first()
+
+    @property
+    def authority_default_image_person(self):
+        return self.images.filter(image_type='DPE').first()
+
+    @property
+    def authority_default_image_concept(self):
+        return self.images.filter(image_type='DCO').first()
+
+    @property
+    def authority_default_image_institution(self):
+        return self.images.filter(image_type='DIN').first()
+
+    @property
+    def authority_default_image_geo_term(self):
+        return self.images.filter(image_type='DGE').first()
+
+    @property
+    def authority_default_image_publisher(self):
+        return self.images.filter(image_type='DPU').first()
+
+    @property
+    def authority_default_image_timeperiod(self):
+        return self.images.filter(image_type='DTI').first()
+
+    @property
+    def authority_default_image_class_term(self):
+        return self.images.filter(image_type='DCL').first()
+
+class TenantImage(models.Model):
+    title = models.TextField(blank=True, null=True)
+    image_index = models.IntegerField()
+    tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="images")
+    link = models.CharField(max_length=255, blank=True, null=True)
+
+    link_color = models.CharField(max_length=255, blank=True, null=True)
+    def upload_path(instance, filename):
+        return 'tenant_images/{0}/{1}-{2}'.format(instance.tenant_settings.tenant.id, date.today().strftime("%m-%d-%y"), filename) 
+    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+
+    AUTHORITY_DEFAULT_IMAGE_AUTHOR = 'DAU'
+    AUTHORITY_DEFAULT_IMAGE_PERSON = 'DPE'
+    AUTHORITY_DEFAULT_IMAGE_CONCEPT = 'DCO'
+    AUTHORITY_DEFAULT_IMAGE_INSTITUTION = 'DIN'
+    AUTHORITY_DEFAULT_IMAGE_GEO_TERM = 'DGE'
+    AUTHORITY_DEFAULT_IMAGE_PUBLISHER = 'DPU'
+    AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD = 'DTI'
+    AUTHORITY_DEFAULT_IMAGE_CLASS_TERM = 'DCL'
+    ABOUT = 'AB'
+    TYPE_CHOICES = (
+        (AUTHORITY_DEFAULT_IMAGE_AUTHOR, 'Authority Default Image Author'),
+        (AUTHORITY_DEFAULT_IMAGE_PERSON, 'Authority Default Image Person'),
+        (AUTHORITY_DEFAULT_IMAGE_CONCEPT, 'Authority Default Image Concept'),
+        (AUTHORITY_DEFAULT_IMAGE_INSTITUTION, 'Authority Default Image Institution'),
+        (AUTHORITY_DEFAULT_IMAGE_GEO_TERM, 'Authority Default Image Geographic Term'),
+        (AUTHORITY_DEFAULT_IMAGE_PUBLISHER, 'Authority Default Image Publisher'),
+        (AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD, 'Authority Default Image Timeperiod'),
+        (AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, 'Authority Default Image Category Division'),
+        (ABOUT, 'About page image'),
+    )
+    image_type = models.CharField(choices=TYPE_CHOICES,
+                                           max_length=255,
+                                           blank=True,
+                                           null=True,
+                                           default=ABOUT,
+                                           db_index=True)
+
+    class Meta:
+        ordering = ['image_index',]
+
+
+class TenantPageBlock(models.Model):
+    """
+    Blocks to be configured on home page.
+    """
+    block_index = models.IntegerField()
+    nr_of_columns = models.IntegerField()
+    title = models.TextField(blank=True, null=True)
+
+    HOME_MAIN = 'HM'
+    HOME_OTHER = 'HO'
+    ABOUT = 'AB'
+    TYPE_CHOICES = (
+        (HOME_MAIN, 'Main home block'),
+        (HOME_OTHER, 'Main other blocks'),
+        (ABOUT, 'About page blocks'),
+    )
+    block_type = models.CharField(choices=TYPE_CHOICES,
+                                           max_length=255,
+                                           blank=True,
+                                           null=True,
+                                           default=HOME_OTHER,
+                                           db_index=True)
+    
+    tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="page_blocks")
+
+    class Meta:
+        ordering = ['block_index',]
+
+class TenantPageBlockColumn(models.Model):
+    """
+    One column in a page block on the homepage.
+    """
+    column_index = models.IntegerField()
+    content = models.TextField()
+
+    page_block = models.ForeignKey('TenantPageBlock', on_delete=models.CASCADE, related_name="block_columns")
+
+    class Meta:
+        ordering = ['column_index',]
+
+class Tenant(models.Model):
+    """
+    A tenant is a partition of the system for specific projects. A tenant has
+    its own entry portal and a separate dataset.
+    """
+    """
+    The name is how the tenant is represented in the curation system.
+    """
+    name = models.CharField(max_length=255, blank=False, null=False)
+    """
+    The title is used on the public portal.
+    """
+    title = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(null=True, blank=True)
+    """
+    The string that will be used for the path to the public page of the tenant.
+    Should be valid to be used in URLs (e.g. no spaces).
+    """
+    identifier = models.CharField(max_length=255, blank=False, null=False)
+    """
+    The logo of a tenant project.
+    """
+    logo = models.ImageField(upload_to='tenant_logos', blank=True, null=True)
+
+    contact_email = models.CharField(max_length=255, blank=True, null=True)
+
+    users = models.ManyToManyField(User, related_name="tenants")
+
+    settings = models.OneToOneField(TenantSettings, null=True, on_delete=models.CASCADE, related_name="tenant")
+
+    home_page_template = models.CharField(max_length=255, blank=True, null=True, help_text=help_text("""
+    If there is a customized template that should be used instead of the configurable page block,
+    the path to the template needs to go here. Do not change this value unless you really know what
+    your are doing. A developer of IsisCB Explore will need to create the template.
+    """))
+
+    use_home_page_template = models.BooleanField(default=False, help_text=help_text("""
+    Set this value to True if the template specified via 'home page template' should be used
+    instead of the configurable page blocks. A template path needs to be specified for this
+    to work. Do not change this value unless you know what you are doing."""))
+
+    default_dataset = models.OneToOneField('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
+
+    ACTIVE = 'ACT'
+    INACTIVE = 'INA'
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (INACTIVE, 'Inactive'),
+    )
+    status = models.CharField(choices=STATUS_CHOICES,
+                                           max_length=4,
+                                           null=False,
+                                           default=ACTIVE,
+                                           db_index=True, 
+                                           help_text="""
+             Mark a tenant as active to include it in the searches of other tenants when 
+             "all projects" are searched, and in the seachbar on the user profile pages.
+             """)
+
+
+    def __str__(self):
+        return u'{0}'.format(self.name)
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -857,6 +1074,15 @@ class Citation(ReferencedEntity, CuratedMixin):
     complete_citation =  models.TextField(blank=True, null=True,
                                          help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
 
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_citations",
+        null=True
+    )
+
+    tenants = models.ManyToManyField(Tenant)
+
     STUB_RECORD = 'SR'
     REGULAR_RECORD = 'RR'
     RECORD_STATUS_CHOICES = (
@@ -950,7 +1176,7 @@ class Citation(ReferencedEntity, CuratedMixin):
             None: None
         }
 
-        self.tracking_state = tracking_mapping[current_state]
+        self.tracking_state = tracking_mapping[current_state] if current_state in tracking_mapping else None
         self.hstm_uploaded = Citation.IS_HSTM_UPLOADED if is_hstm else None
 
     @property
@@ -983,10 +1209,19 @@ class Citation(ReferencedEntity, CuratedMixin):
         no_tags = mark_safe(bleach.clean(self.abstract, tags=SAFE_TAGS, # Whitelist
                                       attributes=SAFE_ATTRS,
                                       strip=True))
+        if not self.abstract:
+            return ""
         match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', self.abstract)
         if match:
             return match.groups()[0].strip()
         return self.abstract
+
+    @property
+    def tenant_ids(self):
+        tenant_ids = [t.id for t in self.tenants.all()]
+        if self.owning_tenant:
+            tenant_ids.append(self.owning_tenant.id)
+        return tenant_ids
 
     @property
     def label(self):
@@ -1226,8 +1461,8 @@ class CitationSubtype(models.Model):
     description = models.TextField(blank=True, null=True,
                                    help_text=help_text("""
     A brief description that will be displayed to help identify the authority.
-    Such as, brief bio or a scope note. For classification terms will be text
-    like 'Classification term from the XXX classification schema.'
+    Such as, brief bio or a scope note. For Category Division will be text
+    like 'Category Division from the XXX classification schema.'
     """))
 
     related_citation_type = models.CharField(max_length=2, null=True, blank=True,
@@ -1256,6 +1491,77 @@ class GoogleBooksData(models.Model):
 
     last_modified = models.DateTimeField(auto_now=True)
 
+class ClassificationSystem(models.Model):
+    SPWT = 'SPWT'
+    SPWC = 'SPWC'
+    NEU = 'NEU'
+    MW = 'MW'
+    SHOT = 'SHOT'
+    SEARCH = 'SAC'
+    PROPER_NAME = 'PN'
+    GUE = 'GUE'
+    FHSA = 'FHSA'
+    NEW = 'NEW'
+    CLASS_SYSTEM_CHOICES = (
+        (SPWT, 'Weldon Thesaurus Terms (2002-present)'),
+        (SPWC, 'Weldon Classification System (2002-present)'),
+        (GUE, 'Guerlac Committee Classification System (1953-2001)'),
+        (NEU, 'Neu'),
+        (MW, 'Whitrow Classification System (1913-1999)'),
+        (SHOT, 'SHOT Thesaurus Terms'),
+        (FHSA, 'Forum for the History of Science in America'),
+        (SEARCH, 'Search App Concept'),
+        (PROPER_NAME, 'Proper name'),
+        (NEW, "Tenant Classification System")
+    )
+    classification_system = models.CharField(max_length=4, blank=True,
+                                             null=True, default=SPWC,
+                                             choices=CLASS_SYSTEM_CHOICES,
+                                             db_index=True,
+                                             help_text=help_text("""
+    This field is for legacy purposes only. For systems migrated from the previous
+    version of IsisCB when a simple database field was used for classification systems.
+    All new classification systems should be set to "Tenant Classification System".
+    """))
+
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Name of the classification system.
+    """))
+
+    description = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Description of the classification system.
+    """))
+
+    is_default = models.BooleanField(default=False, help_text=help_text("""
+    Marks a classification system as the default for authorities that are not assigned another system.
+    """))
+
+    subject_search_searchable = models.BooleanField(default=True, help_text=help_text("""
+    Marks a classification system as being included in the subject search.
+    """))
+
+    available_to_all = models.BooleanField(default=False, help_text=help_text("""
+    Marks a classification system as available to all tenants.
+    """))
+
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_classification_systems",
+        null=True, blank=True
+    )
+
+    # if we ever swtich away from PostgreSQL this needs to be changed
+    # it's PostgreSQL specific
+    default_for = ArrayField(
+        models.CharField(max_length=2, blank=True, null=True),
+        null=True, blank=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
 
@@ -1278,6 +1584,13 @@ class Authority(ReferencedEntity, CuratedMixin):
                                     help_text=help_text("""
     The user who created this object."""), related_name="creator_of_object", on_delete=models.SET_NULL)
 
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_authorities",
+        null=True
+    )
+    tenants = models.ManyToManyField(Tenant)
 
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
@@ -1305,14 +1618,21 @@ class Authority(ReferencedEntity, CuratedMixin):
         return normalize(self.description)
 
     @property
+    def tenant_ids(self):
+        tenant_ids = [t.id for t in self.tenants.all()]
+        if self.owning_tenant:
+            tenant_ids.append(self.owning_tenant.id)
+        return tenant_ids
+
+    @property
     def label(self):
         return self.name
 
     description = models.TextField(blank=True, null=True,
                                    help_text=help_text("""
     A brief description that will be displayed to help identify the authority.
-    Such as, brief bio or a scope note. For classification terms will be text
-    like 'Classification term from the XXX classification schema.'
+    Such as, brief bio or a scope note. For Category Division will be text
+    like 'Category Division from the XXX classification schema.'
     """))
 
     PERSON = 'PE'
@@ -1332,7 +1652,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (TIME_PERIOD, 'Time Period'),
         (GEOGRAPHIC_TERM, 'Geographic Term'),
         (SERIAL_PUBLICATION, 'Serial Publication'),
-        (CLASSIFICATION_TERM, 'Classification Term'),
+        (CLASSIFICATION_TERM, 'Category Division'), # as part of IEXP-389, classification term was renamed to Category Division
         (CONCEPT, 'Concept'),
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
@@ -1393,16 +1713,27 @@ class Authority(ReferencedEntity, CuratedMixin):
                                              choices=CLASS_SYSTEM_CHOICES,
                                              db_index=True,
                                              help_text=help_text("""
-    Specifies the classification system that is the source of the authority.
+    DEPRECATED! Use classification_system_object instead! Specifies the classification system that is the source of the authority.
     Used to group resources by the Classification system. The system used
     currently is the Weldon System. All the other ones are for reference or
     archival purposes only.
     """))
 
+    classification_system_object = models.ForeignKey('ClassificationSystem', 
+                                            blank=True, 
+                                            null=True, 
+                                            on_delete=models.SET_NULL,
+                                            help_text=help_text("""
+    Specifies the classification system that is the source of the authority.
+    Used to group resources by the Classification system. The system used
+    currently is the Weldon System. All the other ones are for reference or
+    archival purposes only."""))
+
+
     classification_code = models.CharField(max_length=255, blank=True,
                                            null=True, help_text=help_text("""
     alphanumeric code used in previous classification systems to describe
-    classification terms. Primarily of historical interest only. Used primarily
+    Category Divisions. Primarily of historical interest only. Used primarily
     for Codes for the classificationTerms. however, can be used for other
     kinds of terms as appropriate.
     """), db_index=True)
@@ -1410,7 +1741,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification_hierarchy = models.CharField(max_length=255, blank=True,
                                                 null=True,
                                                 help_text=help_text("""
-    Used for Classification Terms to describe where they fall in the
+    Used for Category Divisions to describe where they fall in the
     hierarchy.
     """), db_index=True)
 
@@ -1540,7 +1871,7 @@ class FeaturedAuthority(models.Model):
 
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    
+
 class ACRelation(ReferencedEntity, CuratedMixin):
     """
     A relation between a :class:`.Authority` and a :class:`.Citaton`\.
@@ -2545,6 +2876,11 @@ class SearchQuery(models.Model):
                             help_text=help_text("""
     Provide a memorable name so that you can find this search later.
     """))
+    # tenant id if search was limited to a tenant
+    owning_tenant_id = models.CharField(max_length=500, null=True, blank=True)
+    # tenant in which search was run
+    tenant_portal = models.CharField(max_length=500, null=True, blank=True)
+
 
     saved = models.BooleanField(default=False)
 
@@ -2588,6 +2924,7 @@ class CachedTimeline(models.Model):
     """
     created_at = models.DateTimeField(auto_now_add=True)
     authority_id = models.CharField(max_length=255, blank=True, null=True)
+    owning_tenant = models.CharField(max_length=255, blank=True, null=True)
     complete = models.BooleanField(default=False)
     recalculate = models.BooleanField(default=False)
 
@@ -2627,7 +2964,6 @@ class CachedTimelineTitle(models.Model):
 
 # ---------------------- Curation models ----------------------------
 
-
 class IsisCBRole(models.Model):
     """
     Supports permission mechanism for IsisCB
@@ -2635,7 +2971,7 @@ class IsisCBRole(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(null=True, blank=True)
 
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, related_name="isiscb_roles")
 
     @property
     def dataset_rules(self):
@@ -2656,6 +2992,10 @@ class IsisCBRole(models.Model):
     @property
     def zotero_rules(self):
         return ZoteroRule.objects.filter(role=self.pk)
+
+    @property
+    def tenant_rules(self):
+        return TenantRule.objects.filter(role=self.pk)
 
     def __unicode__(self):
         return self.name
@@ -2747,11 +3087,30 @@ class ZoteroRule(AccessRule):
     """
     # so far no properties
 
+class TenantRule(AccessRule):
+    """
+    This rule allows a user access to a specific tenant.
+    """
+    VIEW = 'view'
+    UPDATE = 'update'
+    FIELD_CHOICES = (
+        (VIEW, 'Editor'),
+        (UPDATE, 'Administrator'),
+    )
+    allowed_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
+    tenant = models.ForeignKey(Tenant, null=True, blank=True,
+                             help_text=help_text("""The tenant this rule allows access to."""), on_delete=models.SET_NULL)
+
+
 
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
     editor = models.CharField(max_length=255, null=True)
+    owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
+                             help_text=help_text("""The tenant this dataset belongs to."""), on_delete=models.SET_NULL)
+
 
     def __unicode__(self):
         return u'{0}'.format(self.name)
@@ -2780,10 +3139,13 @@ class AsyncTask(models.Model):
     """Use jsonpickle to serialize/deserialize return values."""
 
     def _get_value(self):
-        return jsonpickle.decode(self._value)
+        if self._value:
+            return jsonpickle.decode(self._value)
+        return None
 
     def _set_value(self, value):
-        self._value = jsonpickle.encode(value)
+        if value:
+            self._value = jsonpickle.encode(value)
 
     value = property(_get_value, _set_value)
 
@@ -2791,9 +3153,34 @@ class AsyncTask(models.Model):
     def progress(self):
         if self.max_value and self.max_value > 0:
             return 100.*self.current_value/self.max_value
-        return 0.
+        return 0
 
     def save(self, *args, **kwargs):
         if not self.id:
             self.created_on = datetime.datetime.utcnow()
         return super(AsyncTask, self).save(*args, **kwargs)
+
+class SystemNotification(models.Model):
+    """ Class to store and show systemwide messages"""
+    title = models.CharField(max_length=255, blank=True, null=True, help_text="""
+                             Title of notification (cannot be longer than 255 characters)""")
+    text = models.TextField(default="", help_text="Notification message")
+    created_on = models.DateTimeField(null=False) 
+    modified_on = models.DateTimeField(null=True) 
+    active = models.BooleanField(default=False, help_text="Indicates if message should be shown.")
+    
+    INFO = 'INFO'
+    WARNING = 'WARN'
+    DANGER = 'DANG'
+    CHOICES = (
+        (INFO, 'Info'),
+        (WARNING, 'Warning'),
+        (DANGER, 'Danger')
+    )
+    level = models.CharField(max_length=4, null=False, blank=False, choices=CHOICES)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_on = timezone.now()
+        self.modified_on = timezone.now()
+        return super(SystemNotification, self).save(*args, **kwargs)

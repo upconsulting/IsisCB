@@ -11,6 +11,7 @@ from isisdata.models import *
 from isisdata import tasks as data_tasks
 
 from curation.forms import *
+from curation import curation_util as c_util
 
 from curation.taskslib import authority_tasks, creation_tasks
 
@@ -31,10 +32,19 @@ ACTION_DICT = {
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def timeline_tasks(request):
-    if request.GET.get('find_authority', None):
-        timelines = CachedTimeline.objects.filter(authority_id=request.GET.get('find_authority', None))[:50]
+    tenant = c_util.get_tenant(request.user)
+
+    # superadmins don't have a tenant
+    if tenant:
+        tenant_query = Q(owning_tenant=tenant.id) | Q(owning_tenant__isnull=True)
+        timelines_qs = CachedTimeline.objects.filter(tenant_query)
     else:
-        timelines = CachedTimeline.objects.order_by('-created_at')[:50]
+        timelines_qs = CachedTimeline.objects.all()
+
+    if request.GET.get('find_authority', None):
+        timelines = timelines_qs.filter(authority_id=request.GET.get('find_authority', None))[:50]
+    else:
+        timelines = timelines_qs.order_by('-created_at')[:50]
 
     authority_ids = [timeline.authority_id for timeline in timelines]
     authorities = Authority.objects.filter(id__in=authority_ids).values('id', 'name')
@@ -48,9 +58,9 @@ def timeline_tasks(request):
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def timeline_delete(request, authority_id):
+def timeline_delete(request, authority_id, tenant_id=None):
     if (request.method == 'POST'):
-        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant_id).order_by('-created_at').first()
         if cached_timeline:
             cached_timeline.recalculate = True
             cached_timeline.save()

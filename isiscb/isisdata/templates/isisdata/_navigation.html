@@ -1,4 +1,5 @@
 {% load static %}
+{% load addcss %}
 
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
@@ -7,6 +8,22 @@
             <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
             <div style="padding-top: 5px; left: -6px;">
                 <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
+                {% if notifications %}
+                <div class="navbar-brand" style="color: #f3c11d; padding-top: 5px; padding-left: 15px;">
+                <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
+                <script>
+                    $(function() {
+                        $("#notifications-icon").click(function() {
+                            $("#notifications-panel").show();
+                        });
+                    
+                        $("#notifications-close-btn").click(function() {
+                            $("#notifications-panel").hide();
+                        })
+                    });
+                </script>
+                </div>
+                {% endif %}
             </div>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
@@ -81,7 +98,13 @@
                             <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                             <li><a href="{% url 'search_history' %}">My Search History</a></li>
                             <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
-                            <li><a id="logout" href="{% url 'account_logout' %}">Logout</a></li>
+                            <li>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}"/>
+                                    <button type="submit" class="btn btn-li">Log out</button>
+                                  </form>
+                            </li>
                         </ul>
                     </li>
                     {% else %}
@@ -95,4 +118,25 @@
 
         </div>
     </div>
+
+    {% if notifications %}
+    <div class="col-sm-12">
+        <div id="notifications-panel" class="panel panel-default" style="display:none; margin-top: 10px">
+            <div class="panel-heading">
+              <h3 class="panel-title">
+                <button id="notifications-close-btn" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                System Notifications
+              </h3>
+            </div>
+            <div class="panel-body">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+    {% endif %}
+
 </nav>

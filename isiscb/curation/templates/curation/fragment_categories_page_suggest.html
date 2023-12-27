@@ -51,9 +51,15 @@ function showSuggestions(query, suggestions) {
     newLi.attr('data-acrelation-id', suggest.id);
     newLi.attr('data-type-controlled', suggest.type_controlled);
     var publicLink = $('<a></a>');
-    publicLink.attr('href', '{% url 'isis-index' %}authority/' + suggest.id);
+    publicLink.attr('href', '{% url 'tenants:home' instance.owning_tenant.identifier  %}authority/' + suggest.id);
     publicLink.attr('target', "_blank");
-    publicLink.html(suggest.name + ' (' + suggest.count + ')' );
+
+    var linkText = suggest.name + ' (' + suggest.count + ')';
+    if (!(suggest.owning_tenant == {{instance.owning_tenant.id}}) ) {
+      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+    }
+    publicLink.html(linkText);
+
     newLi.append(publicLink);
     var suggestLink = $('<a href="#" data-acrid="' + suggest.id + '" data-query="' + suggest.name + '"></a>');
     suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));

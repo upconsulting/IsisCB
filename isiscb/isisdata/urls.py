@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from django.conf.urls import url, include
+from django.conf.urls.static import static
 from django.views.decorators.cache import cache_page
 from haystack.forms import FacetedSearchForm
 from haystack.views import FacetedSearchView
@@ -7,7 +8,7 @@ from haystack.query import SearchQuerySet
 
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
-from isisdata.isiscbviews import publicsite_views, authority_views
+from isisdata.isiscbviews import publicsite_views, authority_views, citation_views
 
 from . import views
 from django.conf import settings
@@ -63,8 +64,7 @@ urlpatterns = [
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
-    url(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
-    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
+    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
     url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
@@ -76,12 +76,16 @@ urlpatterns = [
     url(r'^statistics', views.statistics, name='statistics'),
     url(r'^api', views.api_documentation, name='api'),
     url(r'^(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
-    url(r'^curation/', include('curation.urls', namespace="curation")),
     url(r'^playground', views.playground, name="playground"),
     url(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
     url(r'^termexplorer', views.term_explorer, name="term_explorer"),
     url(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
+    url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 #if settings.DEBUG:
 #    import debug_toolbar

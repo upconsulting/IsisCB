@@ -7,7 +7,7 @@ from unidecode import unidecode
 
 class UserFilter(django_filters.FilterSet):
     username = django_filters.CharFilter(lookup_expr='icontains')
-    roles = django_filters.ModelChoiceFilter(field_name='isiscbrole', queryset=IsisCBRole.objects.all())
+    roles = django_filters.ModelChoiceFilter(field_name='isiscb_roles', queryset=IsisCBRole.objects.all())
 
     class Meta(object):
         model = User
@@ -19,7 +19,7 @@ class UserFilter(django_filters.FilterSet):
         fields=(
             ('username', 'username'),
             ('email', 'email'),
-            ('isiscbrole', 'role'),
+            ('isiscb_roles', 'role'),
         ),
 
         # labels do not need to retain order

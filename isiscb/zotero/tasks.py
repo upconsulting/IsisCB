@@ -11,6 +11,7 @@ from django.db.models import Q
 
 from isisdata.models import *
 from zotero.models import *
+import curation.curation_util as curation_util
 
 import iso8601
 
@@ -90,6 +91,12 @@ def ingest_citation(request, accession, draftcitation):
                     continue
             citation_data[pfield] = value
 
+    tenant = curation_util.get_tenant(request.user)
+    if tenant:
+        citation_data.update({
+            'owning_tenant': tenant
+        })
+
     # Records are inactive/non-public by default. The record_history message
     #  provides information about the Zotero accession.
     citation_data.update({
@@ -98,7 +105,7 @@ def ingest_citation(request, accession, draftcitation):
         'record_status_value': CuratedMixin.INACTIVE,
         'record_status_explanation': u'Inactive by default',
         'record_history': _record_history_message(request, accession),
-        'belongs_to': accession.ingest_to,
+        'belongs_to': tenant.default_dataset if tenant else None,
         'zotero_accession': accession,
     })
 

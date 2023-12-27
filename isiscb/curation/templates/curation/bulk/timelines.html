@@ -14,6 +14,7 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
 <table class="table table-hover table-curation">
   <tr>
     <th>Task ID</th>
+    <th>Tenant</th>
     <th>For Authority</th>
     <th>Authority Name</th>
     <th>Created on</th>
@@ -29,13 +30,25 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
       {% endif %}
       {{ timeline.id }}
     </td>
+    <td>
+      {{ timeline.owning_tenant|get_tenant }}
+    </td>
     <td><a href="{% url 'authority' timeline.authority_id %}" target="_blank">{{ timeline.authority_id }}</a></td>
-    <td>{{ authority_names|get_item:timeline.authority_id|truncatechars:40 }}</td>
+    <td>
+      {{ authority_names|get_item:timeline.authority_id|truncatechars:40 }}
+      {% if not timeline.owning_tenant %}
+      <i class="fas fa-share-alt" aria-hidden="true" title="Including all tenant data" />
+      {% endif %}
+    </td>
     <td><span class="date">{{ timeline.created_at|get_iso_date_string }}</span></td>
     <td>{% if timeline.complete %}Done {% else %} Incomplete {% endif %}</td>
     <td>{{ timeline.years.count }}</td>
     <td>
+      {% if timeline.owning_tenant %}
+      <form style="display: inline;" method='POST' action="{% url 'curation:delete_timeline' timeline.authority_id timeline.owning_tenant %}">
+      {% else %}
       <form style="display: inline;" method='POST' action="{% url 'curation:delete_timeline' timeline.authority_id %}">
+      {% endif %}
         {% csrf_token %}
         <button  style="padding: 0 5px 0 0; font-size: 12px; margin-top: -5px" type="submit" class="btn btn-link">
           <i class="fa fa-clock-o" aria-hidden="true" ></i> Recalculate

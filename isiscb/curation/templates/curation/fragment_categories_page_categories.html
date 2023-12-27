@@ -5,6 +5,7 @@
   <ul class="list-group" id="create-category-results-container">
   <li class="list-group-item" id="create-category-item" style="display: none;"></li>
   </ul>
+  
 </p>
 
 
@@ -30,7 +31,12 @@ function addCategory(event) {
     var newId = result.acrelation.id;
     var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
 
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
+    var linkText = result.acrelation.authority.name ;
+    if (!(result.acrelation.authority.owning_tenant == {{instance.owning_tenant.id}}) ) {
+      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+      url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.acrelation.authority.id;
+    }
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
     ul.append(li);
     {% if can_update %}
     var span = $('<span class="button-group button-group-xs"></span>');
@@ -56,7 +62,11 @@ function triggerSearchCategories() {
 
   var query = $('#categorySearchQuery').val();
   searchTimerCategories = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&system=SPWC&type=CT&use_custom_cmp=true&max=" + max_results_categories + "&q=" + query, {
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&type=CT&use_custom_cmp=true&max=" + max_results_categories + "&q=" + query
+    if (!search_all_tenants) {
+      url += "&tenant_ids={{instance.owning_tenant.id}}";
+    }
+    $.ajax(url, {
         success: function(result) {
             var results_container = $('#create-category-results-container');
             results_container.empty();
@@ -70,10 +80,15 @@ function triggerSearchCategories() {
                 choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
                 choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                 choice_elem += '</span>';
-                choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
+                choice_elem += ' <span class="label label-success">' + r.type + '</span> ';
+                if (!(r.owning_tenant == {{instance.owning_tenant.id}}) ) {
+                  choice_elem += '<i class="fas fa-share-alt"></i> ';
+                }
+                choice_elem += ' <strong>' + r.name + '</strong>';
                 if (r.citation_count != null) {
                     choice_elem += ' (' + r.citation_count + ')';
                 }
+                
                 if (r.description != null) {
                     choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                 }
@@ -115,6 +130,12 @@ $(document).ready(function() {
 
   $('#categorySearchQuery').on('keyup', function(e) {
     max_results_categories = INITIAL_MAX_RESULTS;
+    search_tenants_ct = true;
+    triggerSearchCategories();
+  });
+
+  $("#searchAllTenantsCT").click(function() {
+    search_tenants_ct = false;
     triggerSearchCategories();
   });
 });
@@ -128,7 +149,11 @@ function generateCategoryGuesses() {
     let categoryGuessesList = '<ul id="category-guesses-list"></ul>';
     $('#category-guesses-container').append(categoryGuessesList);
     categories.map(cat => {
-      let catListItem = `<li class="list-group-item" style="background-color:${colorScale(cat.decimal)}"><span class="button-group button-group-xs"><a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="${cat.id}" data-name="${cat.name}"></a></span> ${cat.name} | ${cat.count} (${cat.percent}%)</li>`;
+      let catText = `${cat.name} | ${cat.count} (${cat.percent}%)`;
+      if (cat.owning_tenant != {{instance.owning_tenant.id}}) {
+        catText = '<i class="fas fa-share-alt"></i> ' + catText;
+      }
+      let catListItem = `<li class="list-group-item" style="background-color:${colorScale(cat.decimal)}"><span class="button-group button-group-xs"><a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="${cat.id}" data-name="${cat.name}"></a></span> ` + catText + `</li>`;
       $('#category-guesses-list').append(catListItem);
     })
     $('.select-citation-categories').click(addCategory);

@@ -2,6 +2,10 @@
 {% load render_object %}
 {% load general_tags %}
 
+{% for error in form.non_field_errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+        
 <div class="form-group">
 <div class="row">
   <div class="col-sm-2 text-left">
@@ -76,7 +80,13 @@
             {% endif %}
           </a>
           <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
-          <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% if acrelation.authority %}
+            {% if instance.owning_tenant %}
+            <a href="{% url 'tenants:authority' instance.owning_tenant.identifier acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            {% else %}
+            <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            {% endif %}
+          {% endif %}
         </p>
         {% endif %}
     {% endfor %}
@@ -120,7 +130,13 @@
           {% endif %}
         </a>
         <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
-        <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif%}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        {% if acrelation.authority %}
+          {% if instance.owning_tenant %}
+          <a href="{% url 'tenants:authority' instance.owning_tenant.identifier acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% else %}
+          <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          {% endif %}
+        {% endif %}
         </p>
         {% endif %}
     {% endfor %}
@@ -239,4 +255,28 @@
     {% endfor %}
     </small>
   </div>
+</div>
+  <div class="row" style="padding-top: 10px;">
+    <div class="col-sm-12 text-left">
+      <table width="100%" style="margin-bottom: 3px;">
+        <tr class="categoryHeader">
+          <td width="100px">
+            <div class="input-xs">Tenants</div>
+          </td>
+
+        </tr>
+      </table>
+    </div>
+    <div class="col-sm-12 form-fields-indented" >
+      {% if instance.owning_tenant %}
+      <small>
+        <div class="panel panel-default tenant-panel">
+          <div class="panel-body">
+            {{instance.owning_tenant}}
+            <input type="hidden" name="owning_tenant" value="{{instance.owning_tenant.id}}" />
+          </div>
+        </div>
+      </small>
+      {% endif %}
+    </div>
 </div>

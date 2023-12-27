@@ -11,3 +11,14 @@ def addcss(field, css):
     css = parts[0]
 
     return field.as_widget(attrs={"class": css, "placeholder": placeholder})
+
+@register.filter
+def get_alert_class(level):
+    alert_classes = {
+        'INFO': 'info',
+        'WARN': 'warning',
+        'DANGER': 'danger'
+    }
+    if level in alert_classes:
+        return alert_classes[level]
+    return 'info'

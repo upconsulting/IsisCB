@@ -1,0 +1,178 @@
+{% load static %}
+{% load addcss %}
+
+<nav class="navbar navbar-inverse navbar-home">
+    <div class="container-fluid">
+
+        <div class="navbar-header col-md-3" style="padding-top: 5px;"><!--  width: 250px;"-->
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
+            <div style="padding-top: 5px; left: -6px;">
+                <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
+                {% if notifications %}
+                <div class="navbar-brand" style="color: #f3c11d; padding-top: 5px; padding-left: 15px;">
+                <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
+                <script>
+                    $(function() {
+                        $("#notifications-icon").click(function() {
+                            $("#notifications-panel").show();
+                        });
+                    
+                        $("#notifications-close-btn").click(function() {
+                            $("#notifications-panel").hide();
+                        })
+                    });
+                </script>
+                </div>
+                {% endif %}
+                
+            </div>
+        
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="col-md-5" style='padding: 0;'>
+            <div>
+                <div class='form-inline' class="navbar-center" id="search-bar" style="padding-top:14px; margin-left: 20px;">
+                    <div class="col-md-10" style="margin-right:0; padding-right:0">
+                    <form id="search-form" class='form-inline' method="get" action="" >
+                        <div class="input-group" >
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                        </div>
+                        <div class="form-group">
+                            <select id="owning_tenant_field" name="owning_tenant" class="form-control">
+                                {% for tenant in tenants %}
+                                <option value="{{tenant.identifier}}">{{tenant.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <span style='width: 20px;'>
+                                <button id="submit-search" class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+                                <script>
+                                    $("#submit-search").click(function(e) {
+                                        e.preventDefault();
+                                        var chosen_tenant = $("#owning_tenant_field").val();
+                                        $("#search_tenant_portal").val(chosen_tenant);
+                                        $("#search_owning_tenant").val(chosen_tenant);
+                                        $("#search-form").attr("action", "/p/"+chosen_tenant+"/search");
+                                        $("#search-form").submit();
+                                    });
+                                </script>
+                            </span>
+                        </div>
+                        
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input id="search_tenant_portal" name="tenant_portal" type="hidden" value="" />
+                            <input id="search_owning_tenant" name="owning_tenant" type="hidden" value="" />
+                    </form>
+                    </div>
+                    <div class="col-md-2" >
+                    <form id="browse-form" class='form-inline' method="get" action="/isis/">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                            <span>
+                                <button id="submit-browse" class="btn btn-default" type="submit">Browse</button>
+                                <script>
+                                    $("#submit-browse").click(function(e) {
+                                        e.preventDefault();
+                                        var chosen_tenant = $("#owning_tenant_field").val();
+                                        $("#browse_tenant_portal").val(chosen_tenant);
+                                        $("#browse_owning_tenant").val(chosen_tenant);
+                                        $("#browse-form").attr("action", "/p/"+chosen_tenant+"/search");
+                                        $("#browse-form").submit();
+                                    });
+                                </script>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input id="browse_tenant_portal" name="tenant_portal" type="hidden" value="" />
+                            <input id="browse_owning_tenant" name="owning_tenant" type="hidden" value="" />
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" style="padding-right: 0;">
+            <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
+                <ul class="nav navbar-nav navbar-nav-home">
+                    <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
+                    <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                    <li><a href="https://isiscb.org" target="_blank">Blog</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="feedback">Submit Feedback</a></li>
+                            <li><a href="#" id="submitCitation">Submit Citation</a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="{% if active == 'user' %}active{% endif %}">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
+                            <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                            <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
+                            <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                            <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                            <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                            <li>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}"/>
+                                    <button type="submit" class="btn btn-li">Log out</button>
+                                  </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    {% if notifications %}
+    <div class="col-sm-12">
+        <div id="notifications-panel" class="panel panel-default" style="display:none; margin-top: 10px">
+            <div class="panel-heading">
+              <h3 class="panel-title">
+                <button id="notifications-close-btn" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                System Notifications
+              </h3>
+            </div>
+            <div class="panel-body">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+    {% endif %}
+
+</nav>

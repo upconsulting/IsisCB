@@ -22,22 +22,22 @@
     {% if selected_user.is_superuser %}
     <form action="{% url 'curation:change_is_superuser' selected_user.pk %}" method="POST">
       {% csrf_token %}
-      <span class="label label-danger">Administrator</span> This user is an <strong>administrator</strong> and can do anything in the system.
+      <span class="label label-danger">System Admin</span> This user is an <strong>system admin</strong> and can do anything in the system.
       <br>
       {% if superuser %}
       <input type="hidden" name="is_superuser" value="False">
-      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Remove administrator permissions.</small></button>
+      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Remove system admin permissions.</small></button>
       {% endif %}
     </form>
     {% endif %}
     {% if not selected_user.is_superuser %}
     <form action="{% url 'curation:change_is_superuser' selected_user.pk %}" method="POST">
       {% csrf_token %}
-      <span class="label label-default">Administrator</span> This user <strong>is not</strong> an administrator.
+      <span class="label label-default">System Admin</span> This user <strong>is not</strong> an system admin.
       <br>
       {% if superuser %}
       <input type="hidden" name="is_superuser" value="True">
-      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Make user administrator.</small></button>
+      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Make user system admin.</small></button>
       {% endif %}
     </form>
     {% endif %}

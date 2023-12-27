@@ -155,16 +155,21 @@ But for now the list is stored as string :-p
                                       </a>
                                       {% elif authority_resolution and authority.processed%}
                                       <span class="text-info">
-                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
-                                      {{ authority_resolution.name }} ({{authority_resolution.id}})
-                                      <div class="pull-right">
-                                      <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
-                                      </div>
+                                      <span class="label label-primary">
+                                        {{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}
+                                      </span> 
+                                      <span class="resolved">
+                                        &nbsp;{{ authority.name }} 
+                                        <span class="glyphicon glyphicon-chevron-right"></span>
+                                        {{authority_resolution.to_instance.name}} {% if tenant_id is not authority_resolution.to_instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} ({{authority_resolution.to_instance.id}})
+                                        <div class="pull-right">
+                                        <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
+                                        </div>
                                       </span>
                                       </span>
                                       {% else %}
                                       <span class="text-info">
-                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }}
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} {% if authority.owning_tenant and tenant_id is not authority.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %}
                                         <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>
                                       <div class="pull-right">
                                         <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
@@ -237,6 +242,9 @@ But for now the list is stored as string :-p
                                                 id="authority-search"
                                                 placeholder="Search for an authority record..." />
                                         </div>
+                                        <div class="form-group">
+                                            <input id="search-all-tenants" type="checkbox"> Search all tenants
+                                        </div>
                                     </div>
                                     <div class="col-xs-6">
                                         <div class="form-group">
@@ -247,7 +255,7 @@ But for now the list is stored as string :-p
                                             <option value="TI">Time Period</option>
                                             <option value="GE">Geographic Term</option>
                                             <option value="SE">Serial Publication</option>
-                                            <option value="CT">Classification Term</option>
+                                            <option value="CT">Category Division</option>
                                             <option value="CO">Concept</option>
                                             <option value="CW">Creative Work</option>
                                             <option value="EV">Event</option>
@@ -329,7 +337,13 @@ $(document).ready(function() {
     var lastSearch = $.now();
     var waiting = false;
     var hasSearched = false;
+    var searchAll = false;
     bindModal();
+
+    $("#search-all-tenants").change(function(e) {
+        searchAll = $("#search-all-tenants").is(':checked');
+        $('#authority-search').trigger('keyup');
+    });
 
     $('#authority-search-filter-type').change(function(e) {
         $('#authority-search').trigger('keyup');
@@ -344,6 +358,9 @@ $(document).ready(function() {
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
         var search_endpoint = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&max=" + String(max_results) + "&q=" + query;
+        if (!searchAll) {
+            search_endpoint += "&tenant_ids=" + {{tenant_id}};
+        }
         if (filter_type != "") {
             search_endpoint += "&type=" + filter_type;
         }
@@ -392,7 +409,14 @@ $(document).ready(function() {
                                             data-container="body"
                                             data-html="true"
                                             data-placement="left"
-                                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
+                                            data-title="` + format_citations(suggestion.related_citations) + `">` 
+                                            if (suggestion.owning_tenant != {{tenant_id}}) {
+                                                choice_elem += '<i class="fas fa-share-alt"></i> '
+                                            }
+                                            choice_elem += suggestion.name 
+                                            + ` (` 
+                                            + suggestion.citation_count 
+                                            + `)</a>
                                     </div>
                                     <div>
                                         <span class="h5 text-danger">
@@ -469,11 +493,11 @@ $(document).ready(function() {
     });
 
     {% if draft_authority_id and resolved_authority_id %}
-    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}");
+    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}", false);
     {% endif %}
 });
 
-function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, created_authority_name) {
+function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, created_authority_name, is_owner) {
   triggerResolveAuthority(draftauthority_id, created_authority_id);
   getSimilarAuthorities(draftauthority_id, function(count, ids) {
 
@@ -484,14 +508,14 @@ function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, cr
       });
   });
 
-  cleanupResolvedAuthority(draftauthority_id, created_authority_id, created_authority_name);
+  cleanupResolvedAuthority(draftauthority_id, created_authority_id, created_authority_name, is_owner);
 }
 
 var selectNextAuthority = function() {
     $('.draftauthority').first().trigger('click');
 }
 
-var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name) {
+var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name, is_owned) {
     if (authority_id != null && authority_id != "") {
       $("#authority-" + draftauthority_id).addClass("disabled");
     } else {
@@ -507,7 +531,11 @@ var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authori
     var textSpan = $('<span class="resolved"></span>')
     var textContent = " " + drafAuthorityName;
     if (authority_id != null && authority_id != "") {
-      textContent += ' <span class="glyphicon glyphicon-chevron-right"></span> ' + authority_name + ' (' + authority_id + ')';
+      textContent += ' <span class="glyphicon glyphicon-chevron-right"></span> ' + authority_name 
+      if (!is_owned) {
+        textContent += ' <i class="fas fa-share-alt"></i>'
+      }
+      textContent += ' (' + authority_id + ')';
     } else {
       textContent += ' <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>';
     }
@@ -579,7 +607,7 @@ var confirmResolveModal = function() {
     $('#bulkapply').val(false);
 }
 
-function resolveConfirmedAuthority(draftauthority_id, suggestion_id) {
+function resolveConfirmedAuthority(draftauthority_id, suggestion_id, authority_tenant) {
   triggerResolveAuthority(draftauthority_id, suggestion_id);
   getSimilarAuthorities(draftauthority_id, function(count, ids) {
       ids.forEach(function(di) {
@@ -595,12 +623,12 @@ var confirmSkipModal = function() {
         getSimilarAuthorities(draftauthority_id, function(count, ids) {
             ids.forEach(function(di) {
                 triggerSkipAuthority(di, function() {
-                    cleanupResolvedAuthority(di, '', '')
+                    cleanupResolvedAuthority(di, '', '', true)
                 });
             });
         });
 
-        cleanupResolvedAuthority(draftauthority_id, '', '');
+        cleanupResolvedAuthority(draftauthority_id, '', '', true);
     });
 
 }
@@ -619,12 +647,12 @@ var bindSkip = function() {
           getSimilarAuthorities(draftauthority_id, function(count, ids) {
               ids.forEach(function(di) {
                   triggerSkipAuthority(di, function() {
-                      cleanupResolvedAuthority(di, '', '')
+                      cleanupResolvedAuthority(di, '', '', true)
                   });
               });
           });
 
-          cleanupResolvedAuthority(draftauthority_id, '', '');
+          cleanupResolvedAuthority(draftauthority_id, '', '', true);
       });
     });
 }
@@ -643,7 +671,7 @@ var triggerSkipAuthority = function(draftauthority_id, callback) {
 
 var triggerResolveAuthority = function(draftauthority_id, authority_id) {
     $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
-        cleanupResolvedAuthority(draftauthority_id,result['data']['authority_id'], result['data']['authority_name']);
+        cleanupResolvedAuthority(draftauthority_id,result['data']['authority_id'], result['data']['authority_name'], result['data']['authority_owner'] == {{ tenant_id }});
     })
 }
 

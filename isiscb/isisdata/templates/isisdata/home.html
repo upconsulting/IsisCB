@@ -5,6 +5,8 @@
 {% load metadata_filters %}
 {% load search_filters %}
 {% load static %}
+{% load tenanttags %}
+{% load addcss %}
 
 {% block extra_head%}
 <script type="text/javascript">
@@ -12,9 +14,9 @@
         let citationType = "{{ citation.type_controlled }}";
         let propertiesMap = "{{properties_map}}"
 
-        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
-        // (using a selection from 3 color choices) to use as the citation's featured image. 
-        // Weldon wanted each journal to have the same cover color everytime, 
+        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
+        // (using a selection from 3 color choices) to use as the citation's featured image.
+        // Weldon wanted each journal to have the same cover color everytime,
         // so the journal title's location in the alphabet determines the color.
 
         if (citationType === 'AR') {
@@ -54,7 +56,7 @@
             -webkit-line-clamp: 10;
             -webkit-box-orient: vertical;
             }
-        
+
         .featured-citation p,
         .featured-authority p,
         .featured-tweet p {
@@ -76,6 +78,15 @@
 <div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat; margin-bottom: 0;">
     <div class="container" style='margin: 0px; width: 100%;'>
         <div class="row">
+            {% if notifications %}
+            <div class="col-sm-12">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
             <div class="col-sm-12 col-md-6">
                 <h2> An open access discovery service for the history of science.</h2>
                 <p>Built on 50-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
@@ -143,11 +154,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 featured-citation">
+                {% if citation.public %}
+                <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-citation">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
-    
+
                             <div class="row" style="padding-left: 15px; ">
                             {% if citation.get_type_controlled_display == "Book" %}
                                 <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
@@ -161,7 +173,7 @@
                                 <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                             {% endif %}
                             </div>
-                    
+
                             {% url 'citation' citation.id|get_pk as citation_url %}
                             {% if citation.title == 'Title missing' and citation.complete_citation %}
                                 <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
@@ -182,7 +194,7 @@
                                 {{citation|get_pub_year}}
                             {% endif %}
                         </div>
-                    
+
                         <div class="panel-body">
                             <div class="col-sm-12 col-md-12" style="padding: 0;">
                                 <div class="col-sm-12 {% if citation.abstract %}col-md-5{% else %}col-md-12{% endif %}" style="padding: 0;">
@@ -212,7 +224,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6 featured-authority">
+                {% endif %}
+                {% if featured_authority.public %}
+                <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-authority">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
@@ -234,6 +248,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
             <div class="col-sm-12 col-md-4 featured-tweet">
                 <div class="panel panel-default" style="margin-top: 63px;">

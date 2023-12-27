@@ -259,6 +259,11 @@ input.input-sm, textarea.input-sm {
 
 }
 
+.tenant-panel {
+  line-height: 0.2;
+  margin-left: -30px;
+  width:100%;
+}
 
 .table-curation {
     font-size: 9pt;

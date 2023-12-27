@@ -219,7 +219,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td>
                   {% if object.modified_by %}
-                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }} ({{object.modified_by__username}})
                   {% endif %}
                 </td>
                 <td>
@@ -233,7 +233,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td>
                   {% if object.created_by_native %}
-                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
+                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }} ({{object.created_by_native__username}})
                   {% endif %}
                 </td>
             </tr>
@@ -542,16 +542,6 @@ function toggleLinkRecordsBtn() {
 <form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
         <div class="col-sm-4">
-            {% for error in objects.form.multi_field_filter.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <label class="col-lg-2 control-label">Combined</label>
-                <div class="col-lg-10">
-                  {{ objects.form.multi_field_filter|addcss:"form-control;Title, Author, Description, Abstract, Subject, Category" }}
-                </div>
-            </div>
-
             {% for error in objects.form.title.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
@@ -602,7 +592,8 @@ function toggleLinkRecordsBtn() {
             <div class="form-group form-group-xs clearable has-feedback">
                 <label class="col-lg-2 control-label">Pub date</label>
                 <div class="col-lg-5" style="padding-right:2px">
-                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after" }}
+                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                  <a href="" style="right:0" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
                 <div class="col-lg-5" style="padding-left:2px">
                   {{ objects.form.publication_date_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
@@ -611,7 +602,16 @@ function toggleLinkRecordsBtn() {
             </div>
             <div class="row">
                 <div class="col-xs-12">
-
+                  {% for error in objects.form.publication_date_contains.errors %}
+                  <div class="alert alert-warning">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group form-group-xs clearable">
+                      <label class="col-lg-3 control-label" style="padding-left:5px; margin-right:0px;">Pub. date free</label>
+                      <div class="col-lg-9" style="padding-left: 0px">
+                        {{ objects.form.publication_date_contains|add_popover:"form-control;Freetext publication date contains;Enter 'null' to search for an empty freetext publication date.;bottom" }}
+                        <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info" style="margin-right: 10px"></a>
+                      </div>
+                  </div>
                 </div>
             </div>
         </div>
@@ -666,18 +666,12 @@ function toggleLinkRecordsBtn() {
               </div>
           </div>
 
-          {% for error in objects.form.publication_date_contains.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-4 control-label" style="padding-left:5px; margin-right:0px;">Pub. date free</label>
-              <div class="col-lg-8" style="padding-left: 0px">
-                {{ objects.form.publication_date_contains|add_popover:"form-control;Freetext publication date contains;Enter 'null' to search for an empty freetext publication date.;bottom" }}
-                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info" style="margin-right: 10px"></a>
-              </div>
+          <div class="pull-right">
+            <div class="btn-group">
+              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
           </div>
-
-
         </div>
 
         <div class="col-sm-2">
@@ -731,19 +725,16 @@ function toggleLinkRecordsBtn() {
           <div class="form-group form-group-xs clearable">
               <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modified</label>
               <div class="col-lg-5" style="padding-right:2px">
-                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after" }}
+                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:0" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
               <div class="col-lg-5" style="padding-left:2px">
-                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before" }}
+                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:10px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
           </div>
 
-          <div class="pull-left">
-            <div class="btn-group">
-              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
-              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-            </div>
-          </div>
+          
         </div>
 
         <div class="col-sm-3">
@@ -755,7 +746,6 @@ function toggleLinkRecordsBtn() {
               <label class="col-lg-2 control-label">Database</label>
               <div class="col-lg-10">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
-                <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
           </div>
 
@@ -801,10 +791,12 @@ function toggleLinkRecordsBtn() {
           <div class="form-group form-group-xs clearable">
               <label class="col-lg-2 control-label">Created</label>
               <div class="col-lg-5" style="padding-right:2px">
-                {{ objects.form.created_on_from|add_popover:"form-control date-input;after" }}
+                {{ objects.form.created_on_from|add_popover:"form-control date-input;after;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:0px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
               </div>
               <div class="col-lg-5" style="padding-left:2px">
-                {{ objects.form.created_on_to|add_popover:"form-control date-input;before" }}
+                {{ objects.form.created_on_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
+                <a href="" style="right:10px" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
 
               </div>
           </div>
@@ -876,18 +868,7 @@ $(document).ready(function() {
     }
     $('#zotero_accession_input').val("{{objects.zotero_accession_name}}" + append);
 
-    /* 'belongs to' javascript */
-    $('#belongs_to_input').bootcomplete({
-        url:'{% url 'curation:search-datasets' %}',
-        minLength: 3,
-        idFieldName: 'belongs_to'
-    });
-
-    $('#belongs_to_input').on('input', function() {
-        if ($('#belongs_to_input').val() == '') {
-          $('#id_belongs_to').val('');
-        }
-    });
+    
 
     /* 'creator' javascript */
     $('#creator_input').bootcomplete({

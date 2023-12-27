@@ -8,6 +8,9 @@ from curation.bulk_views import citation_views
 from curation.authority_views import relation_views as authority_relation_views
 from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
+from curation.other_views import user_views
+from curation.tenant_views import settings_views
+
 import rules
 from .rules import *
 from django.urls import re_path
@@ -29,13 +32,15 @@ rules.add_rule('is_user_superuser', is_user_superuser)
 rules.add_rule('can_view_user_module', can_view_user_module)
 rules.add_rule('can_update_user_module', can_update_user_module)
 
-can_access_and_view = is_accessible_by_dataset & can_view_record
+can_access_and_view = is_accessible_by_dataset & can_view_record & is_accessible_by_tenant
 rules.add_rule('can_access_and_view', can_access_and_view)
 
-can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
+can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record & is_accessible_by_tenant
 rules.add_rule('can_access_view_edit', can_access_view_edit)
 
 rules.add_rule('has_zotero_access', has_zotero_access)
+rules.add_rule('is_accessible_by_tenant', is_accessible_by_tenant)
+rules.add_rule('is_generic_obj_accessible_by_tenant', is_generic_obj_accessible_by_tenant)
 
 app_name = "curation"
 urlpatterns = [
@@ -52,6 +57,7 @@ urlpatterns = [
     re_path(r'^api/citation$', views.get_citation_by_id, name='api_citation'),
 
     re_path(r'^timelines$', bulk_change_csv_views.timeline_tasks, name='timeline_tasks'),
+    re_path(r'^timelines/(?P<authority_id>[A-Z0-9]+)/(?P<tenant_id>[0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
     re_path(r'^timelines/(?P<authority_id>[A-Z0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
 
     re_path(r'^citation/add$', views.create_citation, name="create_citation"),
@@ -153,24 +159,44 @@ urlpatterns = [
     re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type$', aarset_views.change_aartype, name='create_aartype'),
     re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type/(?P<aartype_id>[A-Z0-9]+)$', aarset_views.change_aartype, name='edit_aartype'),
 
-    re_path(r'^users/$', views.users, name='user_list'),
-    re_path(r'^users/(?P<user_id>[0-9]+)$', views.user, name='user'),
-    re_path(r'^users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', views.remove_role, name='remove_role'),
-    re_path(r'^users/addrole/(?P<user_edit_id>[0-9]+)/$', views.add_role_to_user, name='add_role_to_user'),
+    re_path(r'^users/$', user_views.users, name='user_list'),
+    re_path(r'^users/(?P<user_id>[0-9]+)$', user_views.user, name='user'),
+    re_path(r'^users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', user_views.remove_role, name='remove_role'),
+    re_path(r'^users/addrole/(?P<user_edit_id>[0-9]+)/$', user_views.add_role_to_user, name='add_role_to_user'),
     re_path(r'^qdsearch/authority/$', views.quick_and_dirty_authority_search, name='quick_and_dirty_authority_search'),
     re_path(r'^qdsearch/citation/$', views.quick_and_dirty_citation_search, name='quick_and_dirty_citation_search'),
     re_path(r'^qdsearch/language/$', views.quick_and_dirty_language_search, name='quick_and_dirty_language_search'),
 
-    re_path(r'^users/role/$', views.add_role, name='create_role'),
-    re_path(r'^users/roles/$', views.roles, name='roles'),
-    re_path(r'^users/role/delete/(?P<role_id>[0-9]+)/$', views.delete_role, name='delete_role'),
-    re_path(r'^users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
-    re_path(r'^users/rule/dataset/(?P<role_id>[0-9]+)/$', views.add_dataset_rule, name='create_rule_dataset'),
-    re_path(r'^users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),
-    re_path(r'^users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', views.add_field_rule, name='create_rule_citation_field'),
-    re_path(r'^users/rule/user_module/(?P<role_id>[0-9]+)/$', views.add_user_module_rule, name='create_user_module_rule'),
-    re_path(r'^users/rule/zotero/(?P<role_id>[0-9]+)/$', views.add_zotero_rule, name='add_zotero_rule'),
-    re_path(r'^users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', views.remove_rule, name='remove_rule'),
-    re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', views.change_is_staff, name='change_is_staff'),
-    re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', views.change_is_superuser, name='change_is_superuser'),
+    re_path(r'^users/role/$', user_views.add_role, name='create_role'),
+    re_path(r'^users/roles/$', user_views.roles, name='roles'),
+    re_path(r'^users/role/delete/(?P<role_id>[0-9]+)/$', user_views.delete_role, name='delete_role'),
+    re_path(r'^users/role/(?P<role_id>[0-9]+)/$', user_views.role, name='role'),
+    re_path(r'^users/rule/dataset/(?P<role_id>[0-9]+)/$', user_views.add_dataset_rule, name='create_rule_dataset'),
+    re_path(r'^users/rule/crud/(?P<role_id>[0-9]+)/$', user_views.add_crud_rule, name='create_rule_crud'),
+    re_path(r'^users/rule/tenant/(?P<role_id>[0-9]+)/$', user_views.add_tenant_rule, name='create_tenant_rule'),
+    re_path(r'^users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', user_views.add_field_rule, name='create_rule_citation_field'),
+    re_path(r'^users/rule/user_module/(?P<role_id>[0-9]+)/$', user_views.add_user_module_rule, name='create_user_module_rule'),
+    re_path(r'^users/rule/zotero/(?P<role_id>[0-9]+)/$', user_views.add_zotero_rule, name='add_zotero_rule'),
+    re_path(r'^users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', user_views.remove_rule, name='remove_rule'),
+    re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', user_views.change_is_staff, name='change_is_staff'),
+    re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', user_views.change_is_superuser, name='change_is_superuser'),
+
+    re_path(r'^tenants$', settings_views.list_tenants, name='tenant_list'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)$', settings_views.tenant, name='tenant'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/settings/home$', settings_views.tenant_home_page, name='tenant_home_page'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/add$', settings_views.tenant_add_page_block, name='tenant_add_page_block'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<block_type>[a-z]+)/add$', settings_views.tenant_add_page_block, name='tenant_add_page_block_type'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<block_id>[0-9]+)/edit$', settings_views.tenant_edit_page_block, name='tenant_edit_page_block'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/delete$', settings_views.tenant_delete_page_block, name='tenant_delete_page_block'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/add$', settings_views.tenant_add_column_content, name='tenant_add_column_content'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/(?P<content_id>[0-9]+)/delete$', settings_views.tenant_delete_column_content, name='tenant_delete_column_content'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/(?P<content_id>[0-9]+)/edit$', settings_views.tenant_edit_column_content, name='tenant_edit_column_content'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/settings$', settings_views.tenant_settings, name='tenant_settings'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/about$', settings_views.tenant_about_page, name='tenant_about'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/image/(?P<image_type>[a-z_]+?)$', settings_views.tenant_add_save_image, name='tenant_add_image'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/about/image/(?P<image_id>[0-9]+?)/delete$', settings_views.tenant_delete_image, name='tenant_delete_image'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/about/image/(?P<image_id>[0-9]+?)/edit$', settings_views.tenant_edit_image, name='tenant_edit_image'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/image/(?P<image_id>[0-9]+?)/save$', settings_views.tenant_add_save_image, name='tenant_add_save_image'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/content$', settings_views.tenant_content_page, name='tenant_content_page'),
+    
 ]

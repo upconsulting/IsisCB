@@ -57,11 +57,23 @@
           }
         });
         </script>
+
+        {% if tenant and tenant.settings %}
+        <style>
+          .navbar-default {
+              background-color: {{tenant.settings.navigation_color}};
+             
+          }
+          .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
+            color: #e7e7e7;
+          }
+        </style>
+        {% endif %}
         {% block extrahead %}
         {% endblock %}
     </head>
     <body>
-      <nav class="navbar navbar-default navbar-fixed-top">
+      <nav class="navbar navbar-default navbar-fixed-top" style="position:sticky">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -70,10 +82,19 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url "curation:dashboard" %}">IsisCB Curation</a>
+          <a class="navbar-brand" href="{% url "curation:dashboard" %}">{% if tenant %} {{tenant.title }} {% else %} Explore Superadmin {% endif %}</a>
+          
+        </div>
+        <div style="padding-top:15px; float:left">
+          <div>
+            {% if tenant_access == 'update' %} <span class="label label-danger">Tenant Administrator</span> {% elif tenant_access == 'view' %}<span class="label label-info">Tenant Editor</span>{% endif %}
+            {% if user.is_superuser %} <span class="label label-warning">Superadmin</span> {% endif %}
+            {{ user }}
+          </div>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
+              {% if tenant %}<li><a href="{% url 'tenants:home' tenant.identifier %}">Public Site</a></li>{% endif %}
               <li{% if curation_section == "dashboard" %} class="active"{% endif %}><a href="{% url "curation:dashboard" %}">Dashboard</a></li>
               {% if view_user_module %}<li{% if curation_section == "users" %} class="active"{% endif %}><a href="{% url "curation:user_list" %}">Users</a></li>{% endif %}
               <li{% if curation_section == "datasets" %} class="active"{% endif %}>
@@ -102,13 +123,24 @@
                   <li><a href="{% url "curation:timeline_tasks" %}">Timelines</a></li>
                 </ul>
               </li>
+              <li{% if curation_section == "tenants" %} class="active"{% endif %}>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  {% if tenant %}
+                  <li><a href="{% url 'curation:tenant' tenant.id %}">Settings</a></li>
+                  {% endif %}
+                  {% if user.is_superuser %}
+                  <li><a href="{% url 'admin:index' %}">Django Admin</a></li>
+                  {% endif %}
+                </ul>
+              </li>
 
           </ul>
         </div>
       </div>
     </nav>
 
-    <div class="container-fluid" style="margin-top: 60px;">
+    <div class="container-fluid" >
       <div class="row">
         <div class="col-sm-12">
         {% block content %}

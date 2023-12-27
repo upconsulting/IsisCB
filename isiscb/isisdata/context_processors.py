@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import json
 from django.conf import settings
+from isisdata.models import SystemNotification
 
 
 def user(request):
@@ -13,3 +14,12 @@ def social(request):
 
 def google(request):
     return {'GOOGLE_ANALYTICS_ID': settings.GOOGLE_ANALYTICS_ID}
+
+def portal_prefix(request):
+    return {'PORTAL_PREFIX': settings.PORTAL_PREFIX}
+
+def notifications(request):
+    active_messages = SystemNotification.objects.filter(active=True)
+    if active_messages:
+        return {'notifications': active_messages }
+    return {}

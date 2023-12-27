@@ -5,6 +5,7 @@ from django_filters.fields import Lookup
 from django.db.models import Q
 from django import forms
 
+from curation import curation_util as c_util
 from isisdata.models import *
 from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
@@ -49,7 +50,7 @@ class CitationFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method='filter_id')
     # title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     title = django_filters.CharFilter(method='filter_title')
-    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
+    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('all', 'All')] + list(Citation.TYPE_CHOICES), method='filter_type_controlled')
     # publication_date_from = django_filters.MethodFilter()
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
@@ -83,7 +84,8 @@ class CitationFilter(django_filters.FilterSet):
     record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
-    belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
+    belongs_to = django_filters.ChoiceFilter(choices=[], method='filter_belongs_to', lookup_expr='isnull',
+        null_label='No dataset') #django_filters.CharFilter(widget=forms.HiddenInput())
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
@@ -97,13 +99,15 @@ class CitationFilter(django_filters.FilterSet):
     MARKED_DELETE = 'MD'
 
     print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[(READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint'), (MARKED_DELETE, 'MarkedDelete')], method='filter_print_status')
-    multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
+    #multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
             in_coll = params.get('in_collections')
             params = QueryDict('', mutable=True)
             params['in_collections'] = in_coll
+            if 'belongs_to' in params and params.get('belongs_to', []):
+                params['belongs_to'] = params.get('belongs_to', [])
 
         super(CitationFilter, self).__init__(params, **kwargs)
 
@@ -118,8 +122,7 @@ class CitationFilter(django_filters.FilterSet):
 
             if self.data.get('collection_only', False):
                 self.data = {'in_collections': in_coll}
-            return
-
+            
         zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
@@ -130,14 +133,11 @@ class CitationFilter(django_filters.FilterSet):
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
-        dataset = self.data.get('belongs_to', None)
-        if dataset:
-            try:
-                ds = Dataset.objects.get(pk=dataset)
-                if ds:
-                    self.dataset_name = ds.name
-            except Dataset.DoesNotExist:
-                self.dataset_name = "Dataset could not be found."
+        if self.request:
+            tenant = c_util.get_tenant(self.request.user)
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+        else:
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
         created_by_native = self.data.get('created_by_native', None)
         if created_by_native:
@@ -208,6 +208,11 @@ class CitationFilter(django_filters.FilterSet):
         for part in value.split():
             queryset = queryset.filter(title_for_sort__icontains=part)
         return queryset
+    
+    def filter_type_controlled(self, queryset, name, value):
+        if not value or value == 'all':
+            return queryset
+        return queryset.filter(type_controlled=value)
 
     def filter_abstract(self, queryset, name, value):
         if not value:
@@ -348,6 +353,13 @@ class CitationFilter(django_filters.FilterSet):
             return queryset.filter(record_status_value=CuratedMixin.DUPLICATE)
 
         return queryset
+    
+    def filter_belongs_to(self, queryset, field, value):
+        if value == 'null':
+            return queryset.filter(belongs_to__isnull=True)
+        if value:
+            return queryset.filter(belongs_to__id=value)
+        return queryset
 
     def filter_in_collections(self, queryset, field, value):
         if not value:
@@ -356,39 +368,12 @@ class CitationFilter(django_filters.FilterSet):
 
         return queryset.filter(Q(in_collections=value))
 
-    def filter_in_multiple_fields(self, queryset, field, value):
-        if not value:
-            return queryset
-
-        value = normalize(unidecode(value))
-
-        q_title = Q()
-        q_description = Q()
-        q_author = Q()
-        q_abstract = Q()
-        for part in value.split():
-            q_title = q_title & Q(title_for_sort__icontains=part)
-            q_author = q_author & Q(acrelation__authority__name__icontains=part,
-                            acrelation__type_controlled__in=[
-                                        ACRelation.AUTHOR])
-
-        q_description = q_description & Q(description__icontains=value)
-        q_abstract = q_abstract & Q(abstract__icontains=value)
-        q_subject = Q(acrelation__authority__name__icontains=value,
-                               acrelation__type_controlled=ACRelation.SUBJECT)
-        q_category = Q(acrelation__authority__name__icontains=value,
-                                   acrelation__type_controlled=ACRelation.CATEGORY)
-
-
-
-        return queryset.filter(q_title | q_description | q_author | q_abstract | q_subject | q_category)
-
 class AuthorityFilter(django_filters.FilterSet):
 
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
-    type_controlled = django_filters.ChoiceFilter(choices=[('ALL', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
+    type_controlled = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
     description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
     classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(field_name='classification_code')
@@ -396,29 +381,25 @@ class AuthorityFilter(django_filters.FilterSet):
     # linked_data = django_filters.MethodFilter()
     try:
         linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
-        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('all', 'All')] + linked_data_types)
     except Exception as e:
         print("Can't set linked data.", e)
 
     try:
         attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
-        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('all', 'All')] + attribute_types)
     except Exception as e:
         print("Can't get attributes", e)
 
-    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('all', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
-    try:
-        datasets = Dataset.objects.all()
-        dataset_list = [(ds.pk, ds.name) for ds in datasets]
-        belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
-    except Exception as e:
-        print("Cant get datasets.", e)
-
+    belongs_to = django_filters.ChoiceFilter(choices=[], method='filter_belongs_to', lookup_expr='isnull',
+        null_label='No dataset') #django_filters.CharFilter(widget=forms.HiddenInput())
+    
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
     created_on_from = django_filters.CharFilter(method='filter_created_on_from')
     created_on_to = django_filters.CharFilter(method='filter_created_on_to')
@@ -475,8 +456,7 @@ class AuthorityFilter(django_filters.FilterSet):
 
             if self.data.get('collection_only', False):
                 self.data = {'in_collections': in_coll}
-            return
-
+            
         zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
@@ -505,6 +485,12 @@ class AuthorityFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
+        if self.request:
+            tenant = c_util.get_tenant(self.request.user)
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+        else:
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
+
     def filter_id(self, queryset, name, value):
         if not value:
             return queryset
@@ -514,7 +500,7 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset
 
     def filter_tracking_state(self, queryset, field, value):
-        if not value:
+        if not value or value == 'all':
             return queryset
 
         return queryset.filter(tracking_state=value)
@@ -532,7 +518,7 @@ class AuthorityFilter(django_filters.FilterSet):
         '''
         Filter by linked data types
         '''
-        if not value:
+        if not value or value == 'all':
             return queryset
         authority_ids = LinkedData.objects\
                             .filter(type_controlled_id=value)\
@@ -544,7 +530,7 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset.filter(pk__in=authority_ids)
 
     def filter_attribute_type(self, queryset, name, value):
-        if not value:
+        if not value or value == 'all':
             return queryset
         authority_ids = Attribute.objects\
                             .filter(type_controlled_id=value)\
@@ -591,6 +577,13 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset.filter(modified_on__lte=date)
 
     def filter_type_controlled(self, queryset, name, value):
-        if value != "ALL":
+        if value != "all":
             return queryset.filter(type_controlled=value)
+        return queryset
+
+    def filter_belongs_to(self, queryset, field, value):
+        if value == 'null':
+            return queryset.filter(belongs_to__isnull=True)
+        if value:
+            return queryset.filter(belongs_to__id=value)
         return queryset

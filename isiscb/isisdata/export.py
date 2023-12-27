@@ -246,7 +246,7 @@ def _advisor(obj, extra, config={}):
 
 def _category_numbers(obj, extra, config={}):
     """
-    "Classification code" for the linked Classification Term
+    "Classification code" for the linked Category Division
     """
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
@@ -548,8 +548,8 @@ stub_record_status = Column(u"Stub Record Status", lambda obj, extra, config={}:
 # metadata columns
 created_on = Column(u"Created Date", _created_on)
 modified_on = Column(u"Modified Date", lambda obj, extra, config={}: obj._history_date)
-creator = Column(u"Creator", lambda obj, extra, config={}: obj.created_by_native)
-modifier = Column(u"Modifier", lambda obj, extra, config={}: obj.modified_by)
+creator = Column(u"Creator", lambda obj, extra, config={}: obj.created_by_native.first_name + " " + obj.created_by_native.last_name + " (" + obj.created_by_native.username + ")")
+modifier = Column(u"Modifier", lambda obj, extra, config={}: obj.modified_by.first_name + " " + obj.modified_by.last_name + " (" + obj.modified_by.username + ")")
 
 CITATION_COLUMNS = [
     object_id,

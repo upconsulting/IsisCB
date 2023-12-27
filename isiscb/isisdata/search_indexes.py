@@ -142,6 +142,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
+    tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+    owning_tenant = indexes.IntegerField(faceted=True, indexed=True, null=True)
+    owning_tenant_name = indexes.CharField(indexed=False, null=True)
+    owning_tenant_status = indexes.CharField(indexed=False, null=True)
+
     data_fields = [
         'id',
         'title',
@@ -155,6 +161,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'language__name',
         'belongs_to',
         'belongs_to__name',
+        'owning_tenant__id',
+        'owning_tenant__name',
+        'owning_tenant__status',
+        'tenants',
+        'tenants__name',
+        'tenants__status',
         'complete_citation',
         'stub_record_status',
         'attributes__id',
@@ -219,6 +231,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
         Fetches and adds/alters data before indexing.
         """
+        print("Indexing citation", obj.id)
         if type(obj) is Citation:
             identifier = obj.id
             data = Citation.objects.filter(pk=obj.id).values(*self.data_fields)
@@ -272,6 +285,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
         data_organized['ccrelations'] = list({v['id']:v for v in data_organized['ccrelations']}.values())
         self._index_belongs_to(data)
+        self._index_tenants(data)
 
         start = time.time()
         for field_name, field in list(self.fields.items()):
@@ -439,6 +453,19 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_ISISCB_NAME_DISPLAY
             elif data[0]['belongs_to__name'].startswith(settings.DATASET_SHOT_NAME_PREFIX):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_SHOT_NAME_DISPLAY
+            else:
+                self.prepared_data['dataset_typed_names'] = data[0]['belongs_to__name']
+
+    def _index_tenants(self, data):
+        if data[0]['owning_tenant__id']:
+            self.prepared_data['tenant_ids'] = data[0]['owning_tenant__id']
+            self.prepared_data['owning_tenant'] = data[0]['owning_tenant__id']
+        if data[0]['owning_tenant__name']:
+            self.prepared_data['tenant_names'] = data[0]['owning_tenant__name']
+            self.prepared_data['owning_tenant_name'] = data[0]['owning_tenant__name']
+        if data[0]['owning_tenant__status']:
+            self.prepared_data['tenant_status'] = data[0]['owning_tenant__status']
+            self.prepared_data['owning_tenant_status'] = data[0]['owning_tenant__status']
 
     def _get_reviewed_book(self, data):
         """
@@ -572,7 +599,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         If Citation.publication_data is not pre-filled, retrieve it from the
         formal Attribute (if possible).
         """
-
         if data['publication_date']:
             return data['publication_date']
 
@@ -633,6 +659,10 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     dates = indexes.MultiValueField(indexed=False)
     citation_count = indexes.IntegerField(indexed=False)
     #citation_nr = indexes.CharField(indexed=False)
+    tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+    tenant_status = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+
 
     def get_model(self):
         return Authority
@@ -664,8 +694,9 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         Coerce all unicode values to ASCII bytestrings, to avoid characters
         that make haystack choke.
         """
+        print("Indexing authority", obj.id)
         self.prepared_data = super(AuthorityIndex, self).prepare(obj)
-
+        
         for k, v in list(self.prepared_data.items()):
             if type(v) is str:
                 self.prepared_data[k] = remove_control_characters(v.strip())
@@ -687,3 +718,18 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_citation_count(self, obj):
         return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
+
+    def prepare_tenant_names(self, obj):
+        if obj.owning_tenant:
+            return [obj.owning_tenant.name]
+        return []
+
+    def prepare_tenant_ids(self, obj):
+        if obj.owning_tenant:
+            return [obj.owning_tenant.id]
+        return []
+    
+    def prepare_tenant_status(self, obj):
+        if obj.owning_tenant:
+            return [obj.owning_tenant.status]
+        return []

@@ -33,7 +33,7 @@
   </div>
 </div>
 
-<div class="collapse{% if filters_active %} in{% endif %}" id="filters">
+<div class="collapse" id="filters">
     {% block filter_form %}
     <form id="filter_form" class="form-horizontal clearfix">
       {% csrf_token %}
@@ -64,10 +64,26 @@ var showFilters = '{{ show_filters }}';
 
 $(document).ready(function() {
 
+    var collapseFilters = localStorage.getItem("citationFiltersHidden");
+    if (collapseFilters == "true") {
+      $("#filters").removeClass("in");
+    } else {
+      $("#filters").addClass("in");
+    }
+
+    $('#filters').on('hidden.bs.collapse', function () {
+      localStorage.setItem("citationFiltersHidden", true);
+    })
+
+    $('#filters').on('shown.bs.collapse', function () {
+      localStorage.setItem("citationFiltersHidden", false);
+    })
+
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
         highlightFilters();
+        localStorage.setItem("citationFiltersHidden", false);
         submitSearchForm();
     });
 
@@ -87,17 +103,7 @@ $(document).ready(function() {
       }
     });
 
-    $('#filters').on('hide.bs.collapse', function () {
-      showFilters = 'False';
-    });
-
-    $('#filters').on('show.bs.collapse', function () {
-      showFilters = 'True';
-    });
-
-    if (showFilters == 'True') {
-      $('#filters').collapse();
-    }
+    
 });
 
 function submitSearchForm() {

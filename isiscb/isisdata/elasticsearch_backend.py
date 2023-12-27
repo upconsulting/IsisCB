@@ -27,8 +27,11 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
                 word = word.replace(char, '\\%s' % char)
 
             cleaned_words.append(word)
-
+        
         return ' '.join(cleaned_words)
+    
+    def build_query(self):
+        return super().build_query()
 
 
 class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
@@ -99,6 +102,11 @@ class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
 
         return (content_field_name, mapping)
 
+    def _get_doc_type_option(self):
+        return {
+            "doc_type": "modelresult",
+        }
+        
     def more_like_this(
         self,
         model_instance,

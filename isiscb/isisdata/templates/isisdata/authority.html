@@ -204,7 +204,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if result.stub_record_status == 'SR' %}
                             <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
                         {% endif %}
-    
+
                         {% if result.type == "Book" %}
                             <i class="fa fa-book"></i>
                         {% elif result.type == "Article" or result.type == "Review" %}
@@ -218,9 +218,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% else %}
                             <i class="far fa-file-alt"></i>
                         {% endif %}
-    
+
                         <span class="label label-primary">{{ result.type }}</span>
-    
+
                         {% url 'citation' result.id|get_pk as citation_url %}
                         {% if result.title == 'Title missing' and result.complete_citation %}
                         <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
@@ -246,7 +246,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                             {{ result.title|bleach_safe }}
                             </a>
                             {% endif %}
-    
+
                             <!-- book title and page numbers -->
                             {% if result.book_title %}
                             In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
@@ -254,27 +254,27 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                             {% if result.periodicals %}
                             <em>{{ result.periodicals.0 }}</em>{% if not result.page_string %}.{% endif %}
                             {% endif %}
-    
+
                             {% if result.page_string %}({{ result.page_string }}).{% endif %}
-    
+
                             {% if result.type in show_publisher_types %}
                             {{ result.publishers | joinby:", "}}
                             {% endif %}
-    
+
                             {% if result.type in show_school_types %}
                             {{ result.schools|joinby:", " }}
                             {% endif %}
                         {% endif %}
-    
-    
+
+
                             <span class="visible-print-inline">({{ citation_url }})</span>
-    
+
                             <!-- Zotero -->
                             <span style="display:none;">
                             <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
                             </span>
-    
-    
+
+
                             <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
                                 <script>
                                 {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
@@ -283,10 +283,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                                         success: function(result) {
                                             if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
                                                 var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" target="_blank" href="'+ result.url +'">';
-                                                if (result.icon.length > 0) { 
-                                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
-                                                } else { 
-                                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; 
+                                                if (result.icon.length > 0) {
+                                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">';
+                                                } else {
+                                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>';
                                                 }
                                                 linkElem += '</a>';
                                                 $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
@@ -303,13 +303,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                                     });
                                 </script>
                             </span>
-    
+
                         </p>
                     </div>
                   {% empty %}
                       <h3>No results found . . . <i class="fas fa-child"></i></h3>
                   {% endfor %}
-    
+
                   {% if page_results.has_previous or page_results.has_next %}
                       <nav class="hidden-print">
                           <ul class="pagination">
@@ -329,7 +329,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                                   <span aria-hidden="true">&laquo;</span>
                               </li>
                               {% endif %}
-    
+
                               {% if page_results.has_previous or page_results.has_next %}
                               {% for p in page_results.paginator.page_range %}
                               {% with pagenr=forloop.counter|stringformat:"s" %}
@@ -351,7 +351,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                               {% endwith %}
                               {% endfor %}
                               {% endif %}
-    
+
                               {% if page_results.has_next %}
                               <li>
                                   {% with pagenr=page_results.next_page_number|stringformat:"s" %}

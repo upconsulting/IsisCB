@@ -1,0 +1,34 @@
+{% extends "tenants/__base.html" %}
+{% load static %}
+{% load content_tags %}
+
+{% block content %}
+
+<div class="row">
+
+
+  <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-7 main">
+    {% for block in tenant.settings.about_blocks %}
+    {% for column in block.block_columns.all %}
+    <div class="col-md-{{12|divide:block.nr_of_columns}}">
+      {{ column.content|markdown|safe }}
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+
+<div class="col-md-3 col-xs-offset-1 col-sm-offset-1 col-md-offset-0 col-sm-10">
+  {% for image in tenant.settings.about_images %}
+  <div style="margin-top: 20px;">
+    {% if image.link %}
+    <a href="{{ image.link }}" target="_blank"><img title="{{ image.title|default:'Logo' }}" width="350px"src="{{ image.image.url }}"></a>
+    {% else %}
+    <img title="{{ image.title|default:'Logo' }}" width="350px"src="{{ image.image.url }}">
+    {% endif %}
+  </div>
+  {% endfor %}
+
+
+</div>
+
+{% endblock %}

@@ -18,15 +18,73 @@ def is_accessible_by_dataset(user, obj):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
+    
+    roles = user.isiscb_roles.all()
 
-    roles = user.isiscbrole_set.all()
+    # if user is tenant admin, they have access to all datasets
+    # we don't need to check if the tenant is the right one, as a user can only have
+    # access to one tenant, and that will be checked by the tenant rule
+    tenant_roles = roles.filter(accessrule__tenantrule__tenant__isnull=False)
+    if tenant_roles:
+        if tenant_roles.first().tenant_rules[0].allowed_action == TenantRule.UPDATE:
+            return True
+
+
     dataset = getattr(obj, 'belongs_to', None)
+    
     if dataset:
-        roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
+        roles = roles.filter(Q(accessrule__datasetrule__dataset=dataset.id)\
+                            | Q(accessrule__tenantrule__tenant__default_dataset__id=dataset.id))
     else:
         roles = roles.filter((Q(accessrule__datasetrule__dataset__isnull=True)\
                               | Q(accessrule__datasetrule__dataset=''))\
                              & Q(accessrule__datasetrule__isnull=False))
+    return roles.count() > 0
+
+@predicate
+def is_generic_obj_accessible_by_tenant(user, obj):
+    have_source_attribute = ['Attribute']
+    have_subject_attribute = ['LinkedData', 'CCRelation']
+    have_object_attribute = ['CCRelation']
+    have_authority_attribute = []
+    have_citation_attribute = ['ACRelation']
+
+    if type(obj).__name__ in have_source_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'source', None))
+    if type(obj).__name__ in have_subject_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'subject', None))
+    if type(obj).__name__ in have_object_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'object', None))
+    if type(obj).__name__ in have_authority_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'authority', None))
+    if type(obj).__name__ in have_citation_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'citation', None))
+    return False
+
+
+
+@predicate
+def is_accessible_by_tenant(user, obj):
+    """
+    Checks if the user has a role that has a tenant rule that applies to
+    ``obj``.
+    """
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
+    roles = user.isiscb_roles.all()
+    tenants = getattr(obj, 'tenants', None)
+    owner = getattr(obj, 'owning_tenant', None)
+    all_tenants = list(tenants.all())
+    if owner:
+        all_tenants.append(owner)
+    if tenants:
+        roles = roles.filter(accessrule__tenantrule__tenant__in=[t.id for t in all_tenants])
+    else:
+        roles = roles.filter((Q(accessrule__tenantrule__tenant__isnull=True)\
+                              | Q(accessrule__tenantrule__tenant=''))\
+                             & Q(accessrule__tenantrule__isnull=False))
     return roles.count() > 0
 
 
@@ -169,18 +227,27 @@ def is_action_allowed(user, obj, action):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
-
-    roles = user.isiscbrole_set.all()
+    roles = user.isiscb_roles.all()
     dataset = getattr(obj, 'belongs_to', None)
 
+    relevant_roles = roles
+    query = (Q(accessrule__datasetrule__dataset__isnull=True) \
+         | Q(accessrule__datasetrule__dataset='')) \
+         & Q(accessrule__datasetrule__isnull=False)
     if dataset:
-        relevant_roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
-    else:
-        relevant_roles = roles.filter(
-            (Q(accessrule__datasetrule__dataset__isnull=True)
-             | Q(accessrule__datasetrule__dataset=''))
-            & Q(accessrule__datasetrule__isnull=False)
-        )
+        query = Q(accessrule__datasetrule__dataset=dataset.id) \
+                | Q(accessrule__tenantrule__tenant__default_dataset__id=dataset.id)
+
+    tenants = getattr(obj, 'tenants', None)
+    owner = getattr(obj, 'owning_tenant', None)
+    all_tenants = list(tenants.all())
+    if owner:
+        all_tenants.append(owner)
+    
+    if all_tenants:
+        query = query | Q(accessrule__tenantrule__tenant__in=[t.id for t in all_tenants])
+
+    relevant_roles = roles.filter(query)
 
     grant_roles = roles.filter(pk__in=relevant_roles.values_list('id', flat=True))
     if grant_roles.count() > 0:

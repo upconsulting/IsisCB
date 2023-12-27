@@ -64,6 +64,7 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
+    'tenants',
     'rules.apps.AutodiscoverRulesConfig',
     #'dj_pagination',
     #'debug_toolbar',
@@ -85,6 +86,7 @@ MIDDLEWARE= [
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     #'dj_pagination.middleware.PaginationMiddleware',
+    'tenants.middleware.IncludeAllTenantsMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -151,7 +153,7 @@ ROOT_URLCONF = 'isiscb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['isisdata/templates'],
+        'DIRS': ['isisdata/templates', 'tenant/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -163,6 +165,8 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'isisdata.context_processors.portal_prefix',
+                'tenants.context_processors.add_tenants',
             ],
         },
     },
@@ -289,7 +293,9 @@ AWS_HEADERS = {
 AWS_IMPORT_BUCKET_NAME = os.environ.get('AWS_IMPORT_BUCKET_NAME')
 
 DOMAIN = 'data.isiscb.org'
-URI_PREFIX = 'http://localhost:8000/isis/'
+URI_HOST = 'http://localhost:8000/'
+URI_ISIS_EP = "isis/"
+URI_PREFIX = URI_HOST + URI_ISIS_EP
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', False)
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
@@ -401,6 +407,8 @@ TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', '')
 TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
 
+API_KEY_STORAGE_KEY = os.environ.get('API_KEY_STORAGE_KEY', 'gdum8BGh4ahQCZGWX630H7LpzkxzMFEMGqaYJ25iFaA=')
+
 # admin timezone
 ADMIN_TIMEZONE = os.environ.get('ADMIN_TIMEZONE', 'US/Central')
 
@@ -409,3 +417,4 @@ FEATURED_CITATION_ID = os.environ.get('FEATURED_CITATION_ID', 'CBB000932135')
 FEATURED_AUTHORITY_ID = os.environ.get('FEATURED_AUTHORITY_ID', 'CBA000113752')
 
 DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
+PORTAL_PREFIX = os.environ.get('PORTAL_PREFIX', 'p')

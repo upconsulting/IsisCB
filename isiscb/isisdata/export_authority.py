@@ -135,7 +135,7 @@ attributes = export.Column(u"Attributes", _attributes)
 linked_data = export.Column(u"Linked Data", _linked_data)
 related_citations = export.Column(u"Related Citations", _related_citations)
 related_citations_count = export.Column(u"Related Citations Count", _related_citations_count)
-creator = export.Column(u"Creator", lambda obj, extra, config={}: obj.created_by_stored)
+creator = export.Column(u"Creator", lambda obj, extra, config={}: obj.created_by_stored.first_name + " " + obj.created_by_stored.last_name + " (" + obj.created_by_stored.username + ")")
 
 
 AUTHORITY_COLUMNS = [

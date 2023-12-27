@@ -1,0 +1,295 @@
+{% extends "tenants/__base_home.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load metadata_filters %}
+{% load search_filters %}
+{% load static %}
+{% load content_tags %}
+{% load tenanttags %}
+{% load addcss %}
+
+{% block extra_head%}
+<script type="text/javascript">
+    window.addEventListener('DOMContentLoaded', (event) => {
+        let citationType = "{{ citation.type_controlled }}";
+        let propertiesMap = "{{properties_map}}"
+
+        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
+        // (using a selection from 3 color choices) to use as the citation's featured image.
+        // Weldon wanted each journal to have the same cover color everytime,
+        // so the journal title's location in the alphabet determines the color.
+
+        if (citationType === 'AR') {
+            let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+            let backgroundColor;
+
+            let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+            let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+
+            if (periodicalName.length) {
+                if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+                backgroundColor = backgroundColors[0];
+                } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+                backgroundColor = backgroundColors[1];
+                } else {
+                backgroundColor = backgroundColors[2];
+                }
+            }
+            document.getElementById("citationImage").style.display = "none";
+            document.getElementById("citationImageCaption").style.display = "none";
+            document.getElementById("placeholderImage").style.display = "block";
+            document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
+            if (document.getElementById("citationImageAdjacent")) {
+                document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+                document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            }
+        }
+
+        $('#author-timeline strong').html('Related citations | ');
+
+        if(includeAllTenants) {
+            $("input[name='owning_tenant']").remove();
+        }
+    });
+</script>
+
+    <style>
+        .truncate {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 10;
+            -webkit-box-orient: vertical;
+            }
+
+        .featured-citation p,
+        .featured-authority p,
+        .featured-tweet p {
+            font-size: 14px;
+        }
+
+        #about-text p {
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+
+        .content-container {
+            padding: 15px 50px 50px 50px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat; margin-bottom: 0;">
+    <div class="container" style='margin: 0px; width: 100%;'>
+        <div class="row">
+            {% if notifications %}
+            <div class="col-sm-12">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="col-sm-12 col-md-6">
+                {% if tenant.settings.home_main_block.title %}
+                <h2 style="font-weight: 400; margin-bottom: 50px">{{ tenant.settings.home_main_block.title }}</h2>
+                {% endif %}
+                
+                
+                {% for column in tenant.settings.home_main_block.block_columns.all %}
+                <div style="padding-left: 0px" class="col-md-{{12|divide:tenant.settings.home_main_block.nr_of_columns}}">
+                {{ column.content|markdown|safe }}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="search-bar">
+                    <form method="get" action="/{{PORTAL_PREFIX}}/{{ tenant_id }}/search">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the {{ tenant.title }}...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default btn-lg" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
+                            <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="browse-button" style="float: right; padding: 0 15px 0 0;">
+                        <form method="get" action="/{{PORTAL_PREFIX}}/{{ tenant_id }}/search">
+                            <div class="input-group">
+                                <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                                <span>
+                                    <button class="btn btn-primary btn-lg" style="background-color: #fff; border-color: #ccc; color: #333;" type="submit">Browse</button>
+                                </span>
+                            </div>
+                            <div>
+                                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                                <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                                <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
+                                <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
+                            </div>
+                        </form>
+                    </div>
+                    <span style="float: right; font-size: 20px; margin-right: 15px; padding-top: 9px;">Explore the entire database</span>
+                </div>
+            </div>
+        </div>
+        <hr style="border-color: #999; margin: 5px 0 25px 0;">
+        <div class="row">
+            <div class="col-sm-12 col-md-{{tweet_url|featured_column_width}}" style="padding: 0;">
+                <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-citation">
+                    {% if citation.public %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
+
+                            <div class="row" style="padding-left: 15px; ">
+                            {% if citation.get_type_controlled_display == "Book" %}
+                                <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Thesis" %}
+                                <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Multimedia Object" %}
+                                <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Chapter" %}
+                                <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% else %}
+                                <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% endif %}
+                            </div>
+
+                            {% url 'tenants:citation' tenant_id citation.id|get_pk as citation_url %}
+                            {% if citation.title == 'Title missing' and citation.complete_citation %}
+                                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                {{citation.complete_citation}}
+                                </a>
+                            {% else %}
+                                <h4 style="margin: 5px 0px">
+                                    <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                    {{ citation.title|bleach_safe }}
+                                    </a>
+                                </h4>
+                            {% endif %}
+                            <hr style="margin: 5px 0">
+                            {% if featured_citation_authors|length > 0 %}
+                                {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a>{% if acrelation != citation.get_all_contributors|last %},{% else %}<br>{% endif %}{% endif %}{% endfor %}
+                            {% endif %}
+                            {% if citation and citation|get_pub_year %}
+                                {{citation|get_pub_year}}
+                            {% endif %}
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="col-sm-12 col-md-12" style="padding: 0;">
+                                <div class="col-sm-12 {% if citation.abstract %}col-md-5{% else %}col-md-12{% endif %}" style="padding: 0;">
+                                    <div id="placeholderImage" style="height: 250px; width: 100%; display: none; padding: 5% 7% 10% 7%; vertical-align: middle;">
+                                        {% for prop in properties_map %}
+                                            {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+                                        {% endfor %}
+                                        {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                                        <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
+                                            {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+                                                <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
+                                            {% endif %}
+                                            {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                                                <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        <div style="width: 0; height: 0; border-style: solid; border-width: 0 0 30px 30px; border-color: white white white #ccc; position: absolute; right: 0; bottom: 20px"></div>
+                                    </div>
+                                    <img id="citationImage" src={{ featured_citation_image.url|safe }}><br>
+                                    <span id="citationImageCaption" style="color: gray; text-align: center; font-size: .9em;">source: Google Books</span>
+                                </div>
+                                <div class="col-sm-12 {% if citation.abstract %}col-md-7{% else %}col-md-0{% endif %}" style="padding: 0 0 0 10px;">
+                                    <p class="itemAbstract truncate" style="margin-bottom: 0">{{ citation.abstract|filter_abstract|bleach_safe }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-authority">
+                    {% if featured_authority.public %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
+                            <span class="label label-default">{{featured_authority.get_type_controlled_display}}</span><br>
+                            <a href="{% url 'tenants:authority' tenant_id featured_authority.id %}"><h4 style="margin: 5px 0px">{{ featured_authority.name }}</h4></a>
+                        </div>
+                        <div class="panel-body">
+                            <div class="{% if wikiImage%}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikiImage%}height: 0;{% endif%}">
+                                <img src="{{ wikiImage|safe }}" href="{{ wikiCredit }}" style="width: 100%">
+                            </div>
+                            <div class="col-sm-12 {% if wikiImage%}col-md-7{% endif%}">
+                                <p class="truncate" style="margin-bottom: 0">{{ wikiIntro }}</p>
+                            </div>
+                            <div class='row'>
+                                <div class="col-sm-12" style="margin-top: 10px;">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if tweet_url %}
+            <div class="col-sm-12 col-md-4 featured-tweet">
+                <div class="panel panel-default" style="margin-top: 63px;">
+                    <div class="panel-heading">
+                        <span class="btn-grp pull-right" style="color: #555"><i class="fab fa-twitter"></i></span>
+                        <h4><a href={{tweet_url}}>Recent Tweet</a></h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            {{tweet_text|safe}}
+                        </p>
+                        {% if tweet_image %}
+                            <img src={{tweet_image}} style="max-height: 350px; max-width: 100%;">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- page blocks-->
+{% for block in tenant.settings.home_other_blocks %}
+<div class='row content-container new-container' style="width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: {% if block.block_index|divisibleby:'2' %} #eee {% else %} #fff {% endif %};">
+{% if block.title %}
+<h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">{{ block.title }}</h2>
+
+{% endif %}
+
+{% for column in block.block_columns.all %}
+  <div class="col-md-{{12|divide:block.nr_of_columns}}">
+  {{ column.content|markdown|safe }}
+  </div>
+{% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

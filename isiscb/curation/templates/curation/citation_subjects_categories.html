@@ -4,6 +4,7 @@
 {% load rules %}
 {% load permission_tags %}
 {% load search_filters %}
+{% load general_tags %}
 
 {% block content %}
 
@@ -26,31 +27,25 @@
 
 <div id="subjectsCategoriesView" class="row">
   <div class="col-md-12">
-    <div class="col-md-2">
+    <div class="col-md-2"></div>
+    <div class="col-md-4">
+      <a class="text-info" href="{% url 'curation:citation_list' %}?page={{ current_page}}&search={{ search_key }}" id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>
+        Back to List (Use carefully. May not work.) </a>
+    </div>
+    <div class="col-md-5">
       <p>
+       
         <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
    Back to Citation</a>
       </p>
     </div>
-    <div class="col-md-8">
-      <div class="text-center">
-        {% if previous %}
-        <a href="{% url 'curation:subjects_and_categories' previous %}?search={{ search_key }}&current={{ previous_index}}" id="citation_previous"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
-        {% endif %}
-        &nbsp; &nbsp; &nbsp;
-
-        <a href="{% url 'curation:citation_list' %}?page={{ current_page}}&search={{ search_key }}" id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>
-  Back to List </a>
-        &nbsp; &nbsp; &nbsp;
-        {% if next %}
-        <a href="{% url 'curation:subjects_and_categories' next %}?search={{ search_key }}&current={{ next_index}}" id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
-        {% endif %}
-      </div>
+    
     </div>
-    <div class="col-md-2">
-      Record {{ index }} of {{ total }}
+    <div class="col-md-3">
+     
     </div>
   </div>
+  <div class="col-md-12">&nbsp;</div>
 
   <!-- BEGIN title/abstract column -->
   <div class="col-md-4">
@@ -105,12 +100,16 @@
   <!-- END title/abstract column -->
 
   <!-- BEGIN category/subject column -->
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="col-md-12" style="margin-top: 10px;">
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item">
+            <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">
+              {% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} 
+              {{ acrel.authority.name }}
+            </a>
            {% if can_update %}
            <span class="button-group button-group-xs">
                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -130,9 +129,9 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
-             {% else %}
-             <span class="text-muted">{{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             {% else %}}
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">
@@ -150,12 +149,24 @@
   <!-- END category/subject column -->
 
   <!-- BEGIN add subject/category column -->
-  <div class="col-md-4">
+  <div class="col-md-5">
     {% if can_update %}
+    <div class="text-right">
+      <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+    </div>
+    <div class="text-right">
+      Search all tenants:
+      <div class="btn-group btn-toggle"> 
+        <button id="searchAllTenantsOff" class="btn btn-xs btn-default {% if not tenant.settings.subject_searches_all_tenants %}btn-primary {% else %} btn-default {% endif %}">Off</button>
+        <button id="searchAllTenantsOn" class="btn btn-xs {% if tenant.settings.subject_searches_all_tenants %}btn-primary  {% else %} btn-default {% endif %}">On</button>
+      </div>
+    </div>
+    
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
       <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
       <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Eras</a></li>
+      <li id="journalsTab" role="presentation"><a href="#addJournals" aria-controls="addJournals" role="tab" data-toggle="tab">Journals</a></li>
       <li id="suggestTab" role="presentation"><a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggest</a></li>
     </ul>
     <div class="tab-content">
@@ -202,9 +213,7 @@
 
         </ul>
 
-        <div class="text-right">
-          <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
-        </div>
+        
       </div>
 
       <!-- Category tab -->
@@ -216,6 +225,10 @@
 
       <div role="tabpanel" class="tab-pane" id="addTimePeriods">
         {% include "curation/fragment_categories_page_timeperiods.html" %}
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="addJournals">
+        {% include "curation/fragment_categories_page_journals.html" %}
       </div>
 
       <div role="tabpanel" class="tab-pane" id="suggest">
@@ -230,8 +243,9 @@
 
 <script>
 $('#subjectsTab a').click(function (e) {
-  e.preventDefault()
-  $(this).tab('show')
+  e.preventDefault();
+  $(this).tab('show');
+  setSearchAllTenants();
 })
 
 $("#categoriesTab a").click(function(e) {
@@ -241,8 +255,25 @@ $("#categoriesTab a").click(function(e) {
   location.reload();
 })
 
+$('#journalsTab a').click(function (e) {
+  e.preventDefault();
+  $(this).tab('show');
+  setSearchAllTenants();
+})
+
+var search_all_tenants;
+function setSearchAllTenants() {
+  search_all_tenants = {% if tenant.settings.subject_searches_all_tenants %}true{%else%}false{%endif%};
+  {% if tenant.settings.subject_searches_all_tenants %} 
+  turnSearchAllTenantsOn()
+  {% else %} 
+  turnSearchAllTenantsOff()
+  {% endif %}
+}
+
 //@ sourceURL=delete.js
 $(document).ready(function() {
+  setSearchAllTenants();
   $('.delete-category').click(delete_handler);
   if (window.location.hash.includes("#categories")) {
     $("#categoriesTab a").tab('show')
@@ -274,7 +305,13 @@ function triggerSearchSubjects(force) {
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT,SE&show_inactive=false&use_custom_cmp=false&type=" + types 
+    url += "&max=" + max_results + "&force=" + force; 
+    if (!search_all_tenants) {
+      url += "&tenant_ids={{instance.owning_tenant.id}}";
+    }
+    url += "&q=" + $('#subjectSearchQuery').val();
+    $.ajax(url, {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
@@ -283,9 +320,14 @@ function triggerSearchSubjects(force) {
             newLi.addClass("list-group-item");
             newLi.attr('data-acrelation-id', r.name);
             var publicLink = $('<a></a>');
-            publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+            publicLink.attr('href', '{% url 'tenants:home' instance.owning_tenant.identifier %}authority/' + r.id);
             publicLink.attr('target', "_blank");
-            publicLink.html(r.name + ' (' + r.citation_count + ')' );
+
+            var linkText = r.name + ' (' + r.citation_count + ')';
+            if (!(r.owning_tenant == {{instance.owning_tenant.id}}) ) {
+              linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+            }
+            publicLink.html(linkText);
             newLi.append(publicLink);
             var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
             suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
@@ -352,10 +394,48 @@ function suggestSubjects(event) {
   $('#suggestTab a').tab("show");
 }
 
+function turnSearchAllTenantsOn() {
+  search_all_tenants = true
+  $("#searchAllTenantsOff").removeClass("btn-primary");
+  $("#searchAllTenantsOff").addClass("btn-default");
+  $("#searchAllTenantsOn").removeClass("btn-default");
+  $("#searchAllTenantsOn").addClass("btn-primary");
+  console.log($("#subjectSearchQuery").val())
+  if ($("#subjectsTab").hasClass("active") && $("#subjectSearchQuery").val()) {
+    triggerSearchSubjects(true);
+  } else if ($("#categoriesTab").hasClass("active")) {
+    triggerSearchCategories();
+  } else if ($("#journalsTab").hasClass("active") && $("#journalsSearchQuery").val()) {
+    triggerSearchJournals();
+  }
+}
+
+function turnSearchAllTenantsOff() {
+  search_all_tenants = false
+  $("#searchAllTenantsOn").removeClass("btn-primary");
+  $("#searchAllTenantsOn").addClass("btn-default");
+  $("#searchAllTenantsOff").removeClass("btn-default");
+  $("#searchAllTenantsOff").addClass("btn-primary");
+  if ($("#subjectsTab").hasClass("active")) {
+    triggerSearchSubjects(true);
+  } else if ($("#categoriesTab").hasClass("active")) {
+    triggerSearchCategories();
+  } else if ($("#journalsTab").hasClass("active")) {
+    triggerSearchJournals();
+  }
+}
+
 $(document).ready(function() {
 
   $("#forceSearch").click(function() {
     triggerSearchSubjects(true);
+  });
+
+  $("#searchAllTenantsOff").click(function() {
+    turnSearchAllTenantsOff();
+  });
+  $("#searchAllTenantsOn").click(function() {
+    turnSearchAllTenantsOn();
   });
 
   $('#subjectSearchQuery').on('keyup', function() {
@@ -483,7 +563,12 @@ function addConcept(event) {
     var newId = result.acrelation.id;
     var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
 
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
+    var linkText = result.acrelation.authority.name;
+    if (result.acrelation.authority.owning_tenant != {{ instance.owning_tenant.id }}) {
+      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
+      url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.acrelation.authority.id;
+    }
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
     ul.append(li);
     {% if can_update %}
     var span = $('<span class="button-group button-group-xs"></span>');

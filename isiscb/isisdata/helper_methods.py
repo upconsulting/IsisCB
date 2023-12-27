@@ -41,4 +41,6 @@ def normalize(s):
 
 
 def filter_abstract(s):
+    if not s:
+        return s
     return re.match("{AbstractBegin}(.*){AbstractEnd}", s).group(1)

@@ -1,0 +1,247 @@
+{% extends "curation/base.html" %}
+
+{% load general_tags %}
+{% load addcss %}
+{% load static %}
+
+{% block content %}
+
+
+<form class="form" action="{% url 'curation:tenant_settings' tenant.id %}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+  <div class=" form-group col-md-12">
+  <h2>Tenant: {{tenant.name}}</h2>
+  </div>
+  {% csrf_token %}
+  <div class="form-group  col-md-12">
+      {% for error in form.title.errors %}
+      <div class="alert alert-danger col-md-2">{{ error }}</div>
+      {% endfor %}
+      <label class="col-md-2">{{ form.title.label }}</label>
+      <div class="col-md-10">
+        {{ form.title|addcss:"form-control" }}
+      </div>
+  </div>
+
+  <div class="form-group col-md-12">
+    {% for error in form.status.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">Tenant Status:</label>
+    <div class="col-md-10">
+      {{ form.status|addcss:"form-control" }}
+    </div>
+  </div>
+
+  <div class="form-group  col-md-12">
+    {% for error in form.contact_email.errors %}
+    <div class="alert alert-danger col-md-2">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.contact_email.label }}</label>
+    <div class="col-md-10">
+      {{ form.contact_email|addcss:"form-control" }}
+    </div>
+</div>
+
+
+  <div class="form-group  col-md-12">
+    {% for error in form.logo.errors %}
+    <div class="alert alert-danger col-md-2">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.logo.label }}</label>
+    <div class="col-md-10">
+      {{ form.logo|addcss:"form-control" }}
+    </div>
+  </div>
+
+  <div class="form-group col-md-12">
+    {% for error in form.google_api_key.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.google_api_key.label }}</label>
+    <div class="col-md-10">
+      {{ form.google_api_key|addcss:"form-control" }}
+    </div>
+  </div>
+
+  <div class="form-group col-md-12">
+    {% for error in form.twitter_api_key.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.twitter_api_key.label }}</label>
+    <div class="col-md-10">
+      {{ form.twitter_api_key|addcss:"form-control" }}
+    </div>
+  </div>
+
+  <div class="form-group col-md-12">
+    {% for error in form.twitter_user_name.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.twitter_user_name.label }}</label>
+    <div class="col-md-10">
+      {{ form.twitter_user_name|addcss:"form-control" }}
+    </div>
+  </div>
+
+  <div class="form-group col-md-12">
+      {% for error in form.navigation_color.errors %}
+      <div class="alert alert-danger col-md-12">{{ error }}</div>
+      {% endfor %}
+      <label class="col-md-2">{{ form.navigation_color.label }}</label>
+      <div class="col-md-1">
+        {{ form.navigation_color|addcss:"form-control" }}
+      </div>
+  </div>
+
+  <div class="form-group  col-md-12">
+      {% for error in form.link_color.errors %}
+      <div class="alert alert-danger col-md-12">{{ error }}</div>
+      {% endfor %}
+      <label class="col-md-2">{{ form.link_color.label }}</label>
+      <div class="col-md-1">
+        {{ form.link_color|addcss:"form-control" }}
+      </div>
+  </div>
+
+  <div class="form-group  col-md-12">
+    {% for error in form.default_featured_authority.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.default_featured_authority.label }}</label>
+    <div class="col-md-9">
+      <input  
+        {% if form.instance.default_featured_authority and not form.instance.default_featured_authority.public %}style="background-color:#e4d7ca"{% endif %}
+        id="default_featured_authority_search" 
+        type="text" 
+        class="form-control" 
+        value="{% if form.instance.default_featured_authority %} {{form.instance.default_featured_authority.name}} ({{form.instance.default_featured_authority.id}}) {% endif %}" />
+      <ul class="list-group" id="default_featured_authority_datalist">
+      </ul>
+      {{ form.default_featured_authority|addcss:"form-control" }}
+    </div>
+    <div style="padding-top: 10px;"  class="col-md-1"><a id="deleteAuthority" href="#"><i class="fa fa-trash-o"></i></a></div>
+    <script>
+      $(function() {
+        $("#deleteAuthority").click(function() {
+          $("#id_default_featured_authority").val('');
+          $("#default_featured_authority_search").val("");
+        })
+      });
+    </script>
+  </div>
+
+  <div class="form-group  col-md-12">
+    {% for error in form.default_featured_citation.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">{{ form.default_featured_citation.label }}</label>
+    <div class="col-md-9">
+      <input 
+        {% if form.instance.default_featured_citation and not form.instance.default_featured_citation.public %}style="background-color:#e4d7ca"{% endif %} 
+        id="default_featured_citation_search" 
+        type="text" 
+        class="form-control" 
+        value="{% if form.instance.default_featured_citation %} {{form.instance.default_featured_citation.title}} ({{form.instance.default_featured_citation.id}}) {% endif %}" />
+      <ul class="list-group" id="default_featured_citation_datalist">
+      </ul>
+      {{ form.default_featured_citation|addcss:"form-control" }}
+    </div>
+    <div style="padding-top: 10px;"  class="col-md-1"><a id="deleteCitation" href="#"><i class="fa fa-trash-o"></i></a></div>
+    <script>
+      $(function() {
+        $("#deleteCitation").click(function() {
+          $("#id_default_featured_citation").val('');
+          $("#default_featured_citation_search").val("");
+        })
+      });
+    </script>
+  </div>
+
+  <div class="form-group  col-md-12">
+    {% for error in form.subject_searches_all_tenants.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">Subject and Category Search</label>
+    <div class="col-md-10">
+      {{ form.subject_searches_all_tenants }} By default all tenants should be searched.
+    </div>
+  </div>
+
+  <div class="form-group  col-md-12">
+    {% for error in form.public_search_all_tenants_default.errors %}
+    <div class="alert alert-danger col-md-12">{{ error }}</div>
+    {% endfor %}
+    <label class="col-md-2">Public Site Includes all Tenants' Data</label>
+    <div class="col-md-10">
+      {{ form.public_search_all_tenants_default }} By default the data of all tenants is included in the public site.
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-md-12">
+    <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+  </div>
+</form>
+
+<script src="{% static "curation/js/quicksearch.js" %}" type="text/javascript"></script>
+<script>
+  //@ sourceURL=search.js
+  function delay(callback, ms) {
+    var timer = 0;
+    return function() {
+      var context = this, args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        callback.apply(context, args);
+      }, ms || 0);
+    };
+  }
+
+   
+  /* set up quick and dirty search fields */
+  var SEARCH_TENANTS = true;
+  
+  const authoritySearch = new QuickSearch("{% url "curation:quick_and_dirty_authority_search" %}", "{{tenant_id}}", "default_featured_authority", false);
+  function triggerAuthoritySearch(force, maxResults){
+    authoritySearch.search(
+      $('#default_featured_authority_search').val(), 
+      SEARCH_TENANTS, 
+      maxResults, 
+      force, 
+      triggerAuthoritySearch,
+      (r) => r.name + ' (' + r.citation_count + ') - ' + r.id
+    );
+  }
+
+  const citationSearch = new QuickSearch("{% url "curation:quick_and_dirty_citation_search" %}", 
+      "{{tenant_id}}",
+      "default_featured_citation",
+  )
+  function triggerCitationSearch(force, maxResults){
+    citationSearch.search(
+      $('#default_featured_citation_search').val(), 
+      SEARCH_TENANTS, 
+      maxResults, 
+      force, 
+      triggerCitationSearch, 
+      (r) => r.title + ' - ' + r.id
+    );
+  }
+
+  var INITIAL_MAX_RESULTS = 10;
+  $(document).ready(function() {
+
+    $("#default_featured_authority_search").keyup(delay(function (e) {
+        triggerAuthoritySearch(false, INITIAL_MAX_RESULTS)
+      }, 
+    500));
+
+    $("#default_featured_citation_search").keyup(delay(function (e) {
+        triggerCitationSearch(false, INITIAL_MAX_RESULTS)
+      }, 
+    500));
+  });
+</script>
+
+{% endblock %}

@@ -231,20 +231,21 @@ def _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, e
         task.save()
 
 @shared_task
-def create_timeline(authority_id, timeline_id):
+def create_timeline(authority_id, timeline_id, tenant_id_to_filter):
     now = datetime.datetime.now()
 
     acrelations = ACRelation.objects.all().filter(
         authority__id=authority_id, public=True, citation__public=True,
-        citation__attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE).order_by('-citation__publication_date')
+        citation__attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE)
+    if tenant_id_to_filter:
+        acrelations = acrelations.filter(citation__owning_tenant=tenant_id_to_filter)
+    acrelations = acrelations.order_by('-citation__publication_date')
 
     SHOWN_TITLES_COUNT = 3
 
     counted_citations = []
     timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
     cached_years = {}
-    print("ACrelations: ")
-    print(acrelations.count())
     for acrel in acrelations:
         if acrel.citation.id in counted_citations or not acrel.citation.publication_date:
             continue
@@ -293,4 +294,40 @@ def create_timeline(authority_id, timeline_id):
     timeline_cache.save()
 
     # delete previous timelines
-    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()
+    if tenant_id_to_filter:
+        CachedTimeline.objects.filter(authority_id=authority_id, owning_tenant=tenant_id_to_filter).exclude(pk=timeline_id).delete()
+    else:
+        CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()
+
+@shared_task
+def migrate_all_classification_systems(task_id):
+         
+    task = AsyncTask.objects.get(pk=task_id)
+    task.max_value = Authority.objects.count()
+    task.save()
+
+    class_systems = dict([(sys.classification_system, sys) for sys in ClassificationSystem.objects.all()]) 
+    for authority in Authority.objects.all():
+        # if the authority has already been migrated to use the new classification system
+        # object or there is no classification system, then skip it 
+        # (we don't want to override changes already made)
+        if authority.classification_system_object or not authority.classification_system:
+            task.current_value += 1
+            task.save()
+            continue
+        if authority.classification_system in class_systems:
+            authority.classification_system_object = class_systems[authority.classification_system]
+            authority.save()
+        else:
+            new_system = ClassificationSystem()
+            new_system.classification_system = authority.classification_system
+            new_system.name = authority.get_classification_system_display()
+            new_system.description = authority.get_classification_system_display()
+            new_system.save()
+            class_systems[new_system.classification_system] = new_system
+        task.current_value += 1
+        task.save()    
+
+    task.state = 'SUCCESS'
+    task.save()
+    print('success:: %s' % str(task_id))
