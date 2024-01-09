@@ -228,6 +228,19 @@ label {
   border-radius: 1px;
 }
 
+.btn-nav-li {
+    display: block;
+    padding: 15px 15px;
+    clear: both;
+    margin: 0px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    white-space: nowrap;
+    background-color: transparent;
+    color: #e7e7e7;
+ }
+
+
 .form-group {
     margin-bottom: 10px;
 }

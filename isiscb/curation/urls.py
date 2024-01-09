@@ -11,36 +11,7 @@ from curation.citation_views import tracking_views
 from curation.other_views import user_views
 from curation.tenant_views import settings_views
 
-import rules
-from .rules import *
 from django.urls import re_path
-
-rules.add_rule('is_accessible_by_dataset',is_accessible_by_dataset)
-rules.add_rule('can_view_record', can_view_record)
-rules.add_rule('can_edit_record', can_edit_record)
-rules.add_rule('can_create_record', can_create_record)
-rules.add_rule('can_delete_record', can_delete_record)
-
-rules.add_rule('can_view_citation_field', can_view_citation_field & can_view_citation_record_using_id)
-rules.add_rule('can_update_citation_field', can_update_citation_field & can_edit_citation_record_using_id)
-
-rules.add_rule('can_view_authority_field', can_view_authority_field & can_view_authority_record_using_id)
-rules.add_rule('can_update_authority_field', can_update_authority_field & can_edit_authority_record_using_id)
-
-rules.add_rule('is_user_staff', is_user_staff)
-rules.add_rule('is_user_superuser', is_user_superuser)
-rules.add_rule('can_view_user_module', can_view_user_module)
-rules.add_rule('can_update_user_module', can_update_user_module)
-
-can_access_and_view = is_accessible_by_dataset & can_view_record & is_accessible_by_tenant
-rules.add_rule('can_access_and_view', can_access_and_view)
-
-can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record & is_accessible_by_tenant
-rules.add_rule('can_access_view_edit', can_access_view_edit)
-
-rules.add_rule('has_zotero_access', has_zotero_access)
-rules.add_rule('is_accessible_by_tenant', is_accessible_by_tenant)
-rules.add_rule('is_generic_obj_accessible_by_tenant', is_generic_obj_accessible_by_tenant)
 
 app_name = "curation"
 urlpatterns = [
