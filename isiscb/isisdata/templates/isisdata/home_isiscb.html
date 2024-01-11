@@ -5,6 +5,7 @@
 {% load metadata_filters %}
 {% load search_filters %}
 {% load static %}
+{% load addcss %}
 {% load tenanttags %}
 
 {% block extra_head%}
@@ -83,6 +84,15 @@
 <div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat; margin-bottom: 0;">
     <div class="container" style='margin: 0px; width: 100%;'>
         <div class="row">
+            {% if notifications %}
+            <div class="col-sm-12">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text|bleach_safe}}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
             <div class="col-sm-12 col-md-6">
                 <h2> An open access discovery service for the history of science.</h2>
                 <p>Built on 50-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
