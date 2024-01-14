@@ -985,6 +985,7 @@ class TenantSettingsForm(forms.ModelForm):
     subject_searches_all_tenants = forms.BooleanField(required=False)
     public_search_all_tenants_default = forms.BooleanField(required=False)
     status = forms.ChoiceField(choices=Tenant.STATUS_CHOICES)
+    hide_title_in_navbar = forms.BooleanField(required=False)
 
 
     class Meta(object):
@@ -993,7 +994,7 @@ class TenantSettingsForm(forms.ModelForm):
             'navigation_color', 'link_color', 'google_api_key', 
             'twitter_api_key', 'twitter_user_name', 'default_featured_authority',
             'default_featured_citation', 'subject_searches_all_tenants', 
-            'public_search_all_tenants_default'
+            'public_search_all_tenants_default', 'hide_title_in_navbar'
         ]
 
     def __init__(self, *args, **kwargs):
