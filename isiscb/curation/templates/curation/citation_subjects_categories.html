@@ -130,7 +130,7 @@
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
              <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
-             {% else %}}
+             {% else %}
              <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
