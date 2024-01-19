@@ -28,7 +28,12 @@
       <table class="table table-striped">
           <tr>
             <th width="20%">Title</th>
-            <td>{{tenant.title}}</td>
+            <td>{{tenant.title}}
+            {% if tenant.settings.hide_title_in_navbar %}
+            <br>
+            <small class="text-info"><span class="fa fa-warning"></span> Title is hidden in navigation bar.</small>
+            {% endif %}
+            </td>
           </tr>
           <tr>
             <th width="20%">Contact Email</th>

@@ -123,10 +123,11 @@
                   <li><a href="{% url "curation:timeline_tasks" %}">Timelines</a></li>
                 </ul>
               </li>
+              {% if tenant_access == 'update' or user.is_superuser %}
               <li{% if curation_section == "tenants" %} class="active"{% endif %}>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  {% if tenant %}
+                  {% if tenant%}
                   <li><a href="{% url 'curation:tenant' tenant.id %}">Settings</a></li>
                   {% endif %}
                   {% if user.is_superuser %}
@@ -134,6 +135,14 @@
                   {% endif %}
                 </ul>
               </li>
+              {% endif %}
+              <li>
+                <form style="margin: 0px;" method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% if tenant %}{% url 'tenants:home' tenant.identifier %}{% else %}{% url 'index' %}{% endif %}"/>
+                    <button type="submit" class="btn btn-nav-li">Log out</button>
+                  </form>
+            </li>
 
           </ul>
         </div>

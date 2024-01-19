@@ -1,8 +1,11 @@
 from isisdata.models import *
 from curation.forms import TenantSettingsForm, TenantPageBlockForm, TenantPageBlockColumnForm, TenantImageUploadForm
-from django.shortcuts import get_object_or_404, render, redirect, reverse
+from django.shortcuts import get_object_or_404, render, redirect, reverse, resolve_url
+from urllib.parse import urlparse
 
 from django.contrib.admin.views.decorators import user_passes_test
+from curation.decorators import is_tenant_admin
+import curation.curation_util as c_util
 
 # the following map is used to determine which view should be redirected to
 # after a block or column content has been added or edited.
@@ -19,7 +22,7 @@ image_redirect_map = {
     TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
 }
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def list_tenants(request):
 
     roles = request.user.isiscb_roles.filter(accessrule__tenantrule__tenant__isnull=False)
@@ -32,7 +35,7 @@ def list_tenants(request):
     }
     return render(request, 'curation/tenants/tenants_list.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -41,7 +44,7 @@ def tenant(request, tenant_pk):
     }
     return render(request, 'curation/tenants/tenant.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_home_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -50,7 +53,7 @@ def tenant_home_page(request, tenant_pk):
     }
     return render(request, 'curation/tenants/tenant_home_page.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_add_page_block(request, tenant_pk, block_type=None):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -90,7 +93,7 @@ def tenant_add_page_block(request, tenant_pk, block_type=None):
         })
     return render(request, 'curation/tenants/add_page_block.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_edit_page_block(request, tenant_pk, block_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     block = get_object_or_404(TenantPageBlock, pk=block_id)
@@ -126,7 +129,7 @@ def tenant_edit_page_block(request, tenant_pk, block_id):
         })
     return render(request, 'curation/tenants/add_page_block.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_delete_page_block(request, tenant_pk, page_block_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
@@ -139,7 +142,7 @@ def tenant_delete_page_block(request, tenant_pk, page_block_id):
     return redirect(reverse(redirect_view, kwargs={'tenant_pk':tenant_pk}))
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_add_column_content(request, tenant_pk, page_block_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
@@ -165,7 +168,7 @@ def tenant_add_column_content(request, tenant_pk, page_block_id):
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_delete_column_content(request, tenant_pk, page_block_id, content_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
@@ -177,7 +180,7 @@ def tenant_delete_column_content(request, tenant_pk, page_block_id, content_id):
     redirect_view = redirect_map.get(page_block.block_type, 'curation:tenant_home_page')
     return redirect(reverse(redirect_view, kwargs={'tenant_pk':tenant_pk}))
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
@@ -206,7 +209,7 @@ def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_about_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -216,7 +219,7 @@ def tenant_about_page(request, tenant_pk):
     }
     return render(request, 'curation/tenants/about.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_delete_image(request, tenant_pk, image_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -232,7 +235,7 @@ def tenant_delete_image(request, tenant_pk, image_id):
 
     return redirect(reverse(redirect_to, kwargs={'tenant_pk':tenant_pk}))
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_edit_image(request, tenant_pk, image_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     image = get_object_or_404(TenantImage, pk=image_id)
@@ -259,7 +262,7 @@ def tenant_edit_image(request, tenant_pk, image_id):
 
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_add_save_image(request, tenant_pk, image_id=None, image_type=None):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
 
@@ -313,7 +316,7 @@ def tenant_add_save_image(request, tenant_pk, image_id=None, image_type=None):
     
     return render(request, 'curation/tenants/tenant_edit_image.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_content_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
@@ -322,7 +325,7 @@ def tenant_content_page(request, tenant_pk):
     }
     return render(request, 'curation/tenants/tenant_content_page.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@is_tenant_admin
 def tenant_settings(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {

@@ -5,11 +5,10 @@ from builtins import str
 from django.shortcuts import get_object_or_404
 from isisdata.models import *
 
-from rules import predicate
+import rules
 
 
-
-@predicate
+@rules.predicate
 def is_accessible_by_dataset(user, obj):
     """
     Checks if the user has a role that has a dataset rule that applies to
@@ -41,7 +40,7 @@ def is_accessible_by_dataset(user, obj):
                              & Q(accessrule__datasetrule__isnull=False))
     return roles.count() > 0
 
-@predicate
+@rules.predicate
 def is_generic_obj_accessible_by_tenant(user, obj):
     have_source_attribute = ['Attribute']
     have_subject_attribute = ['LinkedData', 'CCRelation']
@@ -63,7 +62,7 @@ def is_generic_obj_accessible_by_tenant(user, obj):
 
 
 
-@predicate
+@rules.predicate
 def is_accessible_by_tenant(user, obj):
     """
     Checks if the user has a role that has a tenant rule that applies to
@@ -88,24 +87,24 @@ def is_accessible_by_tenant(user, obj):
     return roles.count() > 0
 
 
-@predicate
+@rules.predicate
 def can_view_citation_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_VIEW, AccessRule.CITATION)
 
 
 
-@predicate
+@rules.predicate
 def can_update_citation_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_UPDATE, AccessRule.CITATION)
 
 
 
-@predicate
+@rules.predicate
 def can_view_authority_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_VIEW, AccessRule.AUTHORITY)
 
 
-@predicate
+@rules.predicate
 def can_update_authority_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_UPDATE, AccessRule.AUTHORITY)
 
@@ -155,69 +154,69 @@ def is_field_action_allowed(user, object, action, object_type):
     return is_allowed
 
 
-@predicate
+@rules.predicate
 def can_view_record(user, object):
     return is_action_allowed(user, object, CRUDRule.VIEW)
 
 
-@predicate
+@rules.predicate
 def can_view_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.VIEW)
 
 
-@predicate
+@rules.predicate
 def can_view_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.VIEW)
 
 
-@predicate
+@rules.predicate
 def can_edit_record(user, object):
     return is_action_allowed(user, object, CRUDRule.UPDATE)
 
 
-@predicate
+@rules.predicate
 def can_edit_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.UPDATE)
 
 
-@predicate
+@rules.predicate
 def can_edit_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.UPDATE)
 
 
-@predicate
+@rules.predicate
 def can_create_record(user, object):
     return is_action_allowed(user, object, CRUDRule.CREATE)
 
 
-@predicate
+@rules.predicate
 def can_create_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.CREATE)
 
 
-@predicate
+@rules.predicate
 def can_create_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.CREATE)
 
 
-@predicate
+@rules.predicate
 def can_delete_record(user, object):
     return is_action_allowed(user, object, CRUDRule.DELETE)
 
 
-@predicate
+@rules.predicate
 def can_delete_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.DELETE)
 
 
-@predicate
+@rules.predicate
 def can_delete_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.DELETE)
@@ -262,12 +261,12 @@ def has_dataset_rule(role):
     return has_ds_rule
 
 
-@predicate
+@rules.predicate
 def can_view_user_module(user):
     return is_user_module_action_allowed(user, UserModuleRule.VIEW)
 
 
-@predicate
+@rules.predicate
 def can_update_user_module(user):
     return is_user_module_action_allowed(user, UserModuleRule.UPDATE)
 
@@ -286,17 +285,17 @@ def is_user_module_action_allowed(user, action):
     return False
 
 
-@predicate
+@rules.predicate
 def is_user_staff(user, object):
     return user.is_staff
 
 
-@predicate
+@rules.predicate
 def is_user_superuser(user, object):
     return user.is_superuser
 
 
-@predicate
+@rules.predicate
 def has_zotero_access(user):
     # if user is superuser they can always do everything
     if user.is_superuser:
@@ -308,3 +307,30 @@ def has_zotero_access(user):
             return True
 
     return False
+
+rules.add_rule('is_accessible_by_dataset',is_accessible_by_dataset)
+rules.add_rule('can_view_record', can_view_record)
+rules.add_rule('can_edit_record', can_edit_record)
+rules.add_rule('can_create_record', can_create_record)
+rules.add_rule('can_delete_record', can_delete_record)
+
+rules.add_rule('can_view_citation_field', can_view_citation_field & can_view_citation_record_using_id)
+rules.add_rule('can_update_citation_field', can_update_citation_field & can_edit_citation_record_using_id)
+
+rules.add_rule('can_view_authority_field', can_view_authority_field & can_view_authority_record_using_id)
+rules.add_rule('can_update_authority_field', can_update_authority_field & can_edit_authority_record_using_id)
+
+rules.add_rule('is_user_staff', is_user_staff)
+rules.add_rule('is_user_superuser', is_user_superuser)
+rules.add_rule('can_view_user_module', can_view_user_module)
+rules.add_rule('can_update_user_module', can_update_user_module)
+
+can_access_and_view = is_accessible_by_dataset & can_view_record & is_accessible_by_tenant
+rules.add_rule('can_access_and_view', can_access_and_view)
+
+can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record & is_accessible_by_tenant
+rules.add_rule('can_access_view_edit', can_access_view_edit)
+
+rules.add_rule('has_zotero_access', has_zotero_access)
+rules.add_rule('is_accessible_by_tenant', is_accessible_by_tenant)
+rules.add_rule('is_generic_obj_accessible_by_tenant', is_generic_obj_accessible_by_tenant)
