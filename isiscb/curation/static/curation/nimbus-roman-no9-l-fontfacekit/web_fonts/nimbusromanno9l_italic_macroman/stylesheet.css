@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'nimbus_roman_no9_lRgIt';
+    src: url('NimbusRomNo9L-RegIta-webfont.eot');
+    src: url('NimbusRomNo9L-RegIta-webfont.eot?#iefix') format('embedded-opentype'),
+         url('NimbusRomNo9L-RegIta-webfont.woff2') format('woff2'),
+         url('NimbusRomNo9L-RegIta-webfont.woff') format('woff'),
+         url('NimbusRomNo9L-RegIta-webfont.ttf') format('truetype'),
+         url('NimbusRomNo9L-RegIta-webfont.svg#nimbus_roman_no9_lRgIt') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

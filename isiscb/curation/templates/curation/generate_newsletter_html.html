@@ -1,0 +1,197 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load addcss %}
+{% load general_tags %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+        <h1 class="panel-title">Preview of HTML Snippet Components</h1>
+    </div>
+    <div class="panel-body">
+        <div class="col-sm-6">
+            <div id="listHTMLSnippetContent">
+                {% for citation in citations %}
+                    <p style="padding-left: 25px; text-indent: -25px; font-family: nimbus_roman_no9_lregular; font-size: 18px;">
+                        <a href="{{ citation.generate_uri }}">
+                            {{ citation.id|get_print_formatted_citation }}
+                        </a>
+                    </p>
+                {% endfor %}
+            </div>
+            <hr>
+            <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+        <div class="col-sm-6">
+            <div class="row" id="boxesHTMLSnippetContent">
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if facets.PR %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-relation panel-heading">
+                        <strong>Authors & Contributors</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.PR|slice:"6" %}
+                        {% if facet.authority %}
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                          <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.PH %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading panel-heading-relation">
+                        <strong>Journals</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.PH|slice:"6" %}
+                        {% if facet.authority %}
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                          <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.IH %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading panel-heading-relation">
+                        <strong>Publishers</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.IH|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if facets.CO %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Concepts</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.CO|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.PE %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>People</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.PE|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.TI %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Time Periods</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.TI|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.GE %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Places</strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.GE|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% if facets.IN %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Institutions </strong>
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.IN|slice:"6" %}
+                        {% if facet.authority %}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+                            <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+            </div>
+            <hr>
+            <textarea id="boxesHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+    </div>
+    <div class="panel-footer clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let listHTMLSnippet = document.getElementById("listHTMLSnippetContent").outerHTML;
+    let listHTMLSnippetContainer = document.getElementById("listHTMLSnippetContainer");
+    listHTMLSnippetContainer.value += listHTMLSnippet;
+
+    let boxesHTMLSnippet = document.getElementById("boxesHTMLSnippetContent").outerHTML;
+    let boxesHTMLSnippetContainer = document.getElementById("boxesHTMLSnippetContainer");
+    boxesHTMLSnippetContainer.value += boxesHTMLSnippet;
+
+    function copyListHTMLSnippet() {
+        let listCopyTextarea = document.querySelector('#listHTMLSnippetContainer');
+        listCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("This bibliography has been copied to your clipboard.", "success");
+    }
+
+    function copyBoxesHTMLSnippet() {
+        let boxesCopyTextarea = document.querySelector('#boxesHTMLSnippetContainer');
+        boxesCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("These boxes has been copied to your clipboard.", "success");
+    }
+</script>
+{% endblock %}

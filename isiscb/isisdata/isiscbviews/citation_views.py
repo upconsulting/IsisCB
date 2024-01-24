@@ -103,7 +103,7 @@ def citation(request, citation_id, tenant_id=None):
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
 
-    similar_objects = _get_facets_from_similar_citations(similar_citations)
+    similar_objects = get_facets_from_citations(similar_citations)
 
     googleBooksImage = None
     if tenant and tenant.settings.google_api_key:
@@ -262,33 +262,36 @@ def _get_related_citations(citation_id, tenant, include_all_projects):
         'related_citations_as': related_citations_as,
     }
 
-def _get_facets_from_similar_citations(similar_citations):
-    similar_objects = defaultdict(list)
+def get_facets_from_citations(citations):
+    objects = defaultdict(list)
 
-    if similar_citations:
-        similar_citations_ids = [citation.id for citation in similar_citations]
-        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
-        for acrelation in similar_acrelations:
+    if citations:
+        citations_ids = [citation.id for citation in citations]
+        citations_qs = Citation.objects.all().filter(id__in=citations_ids)
+        acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
+        for acrelation in acrelations:
             if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
-                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
+                objects[acrelation.type_broad_controlled].append(acrelation.authority)
             if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
-                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
+                objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
-    if similar_objects:
-        similar_objects = _generate_similar_facets(similar_objects)
+    if objects:
+        objects = generate_facets(objects)
 
-    return similar_objects
+    print('aaaaaa')
+    print(objects)
 
-def _generate_similar_facets(similar_objects):
-    for key in similar_objects:
-        authorities_count = Counter(similar_objects[key])
-        similar_facets = []
+    return objects
+
+def generate_facets(objects):
+    for key in objects:
+        authorities_count = Counter(objects[key])
+        facets = []
 
         for authority in authorities_count:
-            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
-        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+            facets.append({'authority':authority, 'count':authorities_count[authority]})
+        facets = sorted(facets, key=itemgetter('count'), reverse=True)
 
-        similar_objects[key] = similar_facets
+        objects[key] = facets
 
-    return similar_objects
+    return objects

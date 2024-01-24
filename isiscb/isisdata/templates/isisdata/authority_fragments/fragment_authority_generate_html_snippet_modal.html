@@ -1,0 +1,50 @@
+<div class="modal fade" id="generateHTMLModal" style="height: 75%;" tabindex="-1" role="dialog" aria-labelledby="generateHTMLLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+        </div>
+        <div class="modal-body" style="max-height: 390px;">
+          <div class="panel panel-default" id="HTMLSnippetContent" style='margin: 0 15px 20px 15px;'>
+            <div class="panel-heading">
+              <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>
+              <br>
+              <hr style="margin-top:5px; margin-bottom:5px;">
+              <strong style="margin-top: 5px; font-size:1.7em;" id="recordName">{{ authority.name }}</strong>
+            </div>
+            <div class="panel-body">
+              <div class="col-sm-12" style="padding-right:0;">
+                {% include 'isisdata/authority_fragments/fragment_authority_snippet_info_box.html' %}
+              </div>
+            </div>
+          </div>
+          <textarea id="HTMLSnippetContainer" style="height: 1000px; width: 100%;"></textarea>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-default" onclick="generateHTMLSnippet()">Generate HTML</button>
+            <button type="button" class="btn btn-default" onclick="copyHTMLSnippet()">Copy HTML</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateHTMLSnippet() {
+      // HTML snippeting
+      const HTMLSnippet = document.getElementById("HTMLSnippetContent").outerHTML;
+      let HTMLSnippetContainer = document.getElementById("HTMLSnippetContainer");
+      HTMLSnippetContainer.value += HTMLSnippet;
+      // end HTML snippeting
+    }
+    
+    // copy HTML snippet
+    function copyHTMLSnippet() {
+      let copyTextarea = document.querySelector('#HTMLSnippetContainer');
+      // copyTextarea.focus();
+      copyTextarea.select();
+      document.execCommand("copy");
+      $.notify("URL of this record has been copied to your clipboard.", "success");
+    }
+    // end copy HTML snippet
+  </script>

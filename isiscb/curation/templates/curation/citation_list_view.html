@@ -34,7 +34,12 @@ $('body').ready(function() {
       form.submit();
       e.preventDefault();
     });
-
+    $('#generate_newsletter_html').click(function(e) {
+      form.attr('action', '{% url "curation:generate_newsletter_html" %}');
+      form.attr('target', '_blank');
+      form.submit();
+      e.preventDefault();
+    });
     $('.queryset-checkbox').change(function() {
       toggleLinkRecordsBtn();
     });
@@ -112,6 +117,10 @@ function toggleLinkRecordsBtn() {
     <a class="btn btn-primary btn-xs" disabled href="#" id="link_records_btn">
       <i class="fa fa-link" aria-hidden="true"></i>
         Link Records
+    </a>
+    <a class="btn btn-primary btn-xs" id="generate_newsletter_html">
+      <i class="far fa-file-code"></i>
+      Generate Newsletter HTML
     </a>
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
@@ -249,6 +258,31 @@ function toggleLinkRecordsBtn() {
 
     </table>
 </form>
+
+<!-- Newsletter Modal -->
+<div class="modal fade" id="newsletterModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Newsletter HTML</h4>
+      </div>
+      <div class="modal-body">
+        {% for citation in citations %}
+        <p>
+          <a href="{{ citation.generate_uri }}">
+            {{ citation.id|get_print_formatted_citation }}
+          </a>
+
+        </p>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" onclick="copyHTMLSnippet()">Copy HTML</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="linkRecordsModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">

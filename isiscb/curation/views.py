@@ -35,6 +35,7 @@ from isisdata.utils import strip_punctuation, normalize
 from isisdata import operations
 from isisdata.filters import *
 from isisdata import tasks as data_tasks
+from isisdata.isiscbviews.citation_views import get_facets_from_citations
 from curation import p3_port_utils
 from curation import curation_util as c_util
 
@@ -1677,6 +1678,7 @@ def citations(request):
         user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = None
 
     context.update({
+        'citations': filtered_objects.qs,
         'objects': filtered_objects,
         # 'filters_active': filters_active,
         'result_count': result_count,
@@ -2307,6 +2309,34 @@ def quick_and_dirty_citation_search(request):
 def bulk_select_citation(request):
     template = 'curation/bulk_select_citation.html'
     context = {}
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def generate_newsletter_html(request):
+    """
+    User has selected some number of records.
+
+    Selection can be explicit via a list of pks in the ``queryset`` form field,
+    or implicit via the ``filters`` from the list view.
+    """
+    template = 'curation/generate_newsletter_html.html'
+    object_type = request.POST.get('object_type', 'CITATION')
+    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    context = {}
+
+    citations = [citation for citation in queryset]
+
+    facets = get_facets_from_citations(citations)
+
+    context.update({'citations': citations, 'facets': facets, 'filters': filter_params_raw})
+
+    context.update({
+        'object_type': object_type,
+    })
+
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

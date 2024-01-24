@@ -175,10 +175,16 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="panel-heading">
       <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>
         <span class="btn-grp pull-right" style="padding-top:5px">
-            <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
-            <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
-            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
+          <div class="dropdown pull-right">
+            <a class="dropdown-toggle" type="button" id="extraFunctionsDropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fas fa-bars"></i></a>
+            <ul class="dropdown-menu" aria-labelledby="extraFunctionsDropdownMenu">
+              <li><a id="generateHTMLButton" data-toggle="modal" data-target="#generateHTMLModal">Generate HTML Snippet for {{ display_type }}</a></li>
+            </ul>
+          </div>
+          <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
+          <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
+          {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+          {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
         </span>
         <br>
         <hr style="margin-top:5px; margin-bottom:5px;">
@@ -393,6 +399,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       </div>
     </div>
   </div><!-- /modal -->
+
 <!-- subject Modal -->
   <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
     <div class="modal-dialog" role="document">
@@ -416,7 +423,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       </div>
     </div>
   </div><!-- /modal -->
-<!-- institution Modal -->
+
+<!-- people Modal -->
 <div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -536,7 +544,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 
-
 <!-- journals Modal -->
 <div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
   <div class="modal-dialog" role="document">
@@ -591,8 +598,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% include "isisdata/comments.html" %}
       </div>
     </div>
-
 </div>
+
+<!-- Generate HTML Modal-->
+  {% include "isisdata/authority_fragments/fragment_authority_generate_html_snippet_modal.html" %}
+<!-- /modal -->
 
 <script>
   $(function () {
