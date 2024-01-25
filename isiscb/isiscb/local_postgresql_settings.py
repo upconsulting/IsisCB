@@ -215,10 +215,14 @@ DATABASES = {
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        #'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        #'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
         #'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-        'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack1',
+        #'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
+        'URL': os.environ.get('SEARCH_HOST', 'http://localhost:8983/solr/haystack'),
+        'ADMIN_URL': 'http://127.0.0.1:8983/solr/admin/cores',
+        #'INDEX_NAME': 'haystack1',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'

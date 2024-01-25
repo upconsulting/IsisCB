@@ -8,6 +8,7 @@ from django.conf import settings
 
 
 class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
+
     def clean(self, query_fragment):
         """
         Provides a mechanism for sanitizing user input before presenting the
@@ -31,7 +32,10 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
         return ' '.join(cleaned_words)
     
     def build_query(self):
-        return super().build_query()
+        print("building query ------------")
+        query = super().build_query()
+        print(query)
+        return query
 
 
 class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
@@ -120,6 +124,7 @@ class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
     ):
         from haystack import connections
 
+        print("more like this ---------------")
         if not self.setup_complete:
             self.setup()
 
