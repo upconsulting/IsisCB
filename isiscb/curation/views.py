@@ -2320,23 +2320,17 @@ def generate_newsletter_html(request):
     or implicit via the ``filters`` from the list view.
     """
     template = 'curation/generate_newsletter_html.html'
-    object_type = request.POST.get('object_type', 'CITATION')
-    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
-        queryset = queryset.qs
-
     context = {}
 
-    citations = [citation for citation in queryset]
+    object_type = request.POST.get('object_type', 'CITATION')
+    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
+    if isinstance(queryset, CitationFilter):
+        queryset = queryset.qs
 
-    facets = get_facets_from_citations(citations)
+    facets = get_facets_from_citations(queryset)
 
-    context.update({'citations': citations, 'facets': facets, 'filters': filter_params_raw})
-
-    context.update({
-        'object_type': object_type,
-    })
-
+    context.update({'citations': queryset, 'facets': facets, 'filters': filter_params_raw, 'object_type': object_type})
+    
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

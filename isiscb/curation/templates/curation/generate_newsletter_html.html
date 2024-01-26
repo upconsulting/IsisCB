@@ -30,132 +30,36 @@
             <div class="row" id="boxesHTMLSnippetContent">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
                   {% if facets.PR %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-relation panel-heading">
-                        <strong>Authors & Contributors</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.PR|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                          <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Authors & Contributors" %}
                   {% endif %}
 
                   {% if facets.PH %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading panel-heading-relation">
-                        <strong>Journals</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.PH|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                          <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PH panel_title="Journals" %}
                   {% endif %}
 
                   {% if facets.IH %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading panel-heading-relation">
-                        <strong>Publishers</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.IH|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IH panel_title="Publishers" %}
                   {% endif %}
                 </div>
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
                   {% if facets.CO %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Concepts</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.CO|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.CO panel_title="Concepts" %}
                   {% endif %}
 
                   {% if facets.PE %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>People</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.PE|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PE panel_title="People" %}
                   {% endif %}
 
                   {% if facets.TI %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Time Periods</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.TI|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.TI panel_title="Time Periods" %}
                   {% endif %}
 
                   {% if facets.GE %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Places</strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.GE|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Places" %}
                   {% endif %}
 
                   {% if facets.IN %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Institutions </strong>
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in facets.IN|slice:"6" %}
-                        {% if facet.authority %}
-                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a><span> ({{facet.count}})</span>
-                            <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IN panel_title="Institutions" %}
                   {% endif %}
                 </div>
             </div>

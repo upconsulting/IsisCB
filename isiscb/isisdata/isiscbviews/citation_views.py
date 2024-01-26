@@ -278,9 +278,6 @@ def get_facets_from_citations(citations):
     if objects:
         objects = generate_facets(objects)
 
-    print('aaaaaa')
-    print(objects)
-
     return objects
 
 def generate_facets(objects):
