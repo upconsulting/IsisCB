@@ -2322,7 +2322,7 @@ def generate_newsletter_html(request):
     template = 'curation/generate_newsletter_html.html'
     context = {}
 
-    object_type = request.POST.get('object_type', 'CITATION')
+    object_type = 'CITATION'
     queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
     if isinstance(queryset, CitationFilter):
         queryset = queryset.qs

@@ -139,7 +139,13 @@
                   {% endif %}
                 </ul>
               </li>
-
+              <li>
+                <form style="margin: 0px;" method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% if tenant %}{% url 'tenants:home' tenant.identifier %}{% else %}{% url 'index' %}{% endif %}"/>
+                    <button type="submit" class="btn btn-nav-li">Log out</button>
+                  </form>
+              </li>
           </ul>
         </div>
       </div>

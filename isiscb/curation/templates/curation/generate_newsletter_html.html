@@ -16,7 +16,7 @@
         <div class="col-sm-6">
             <div id="listHTMLSnippetContent">
                 {% for citation in citations %}
-                    <p style="padding-left: 25px; text-indent: -25px; font-family: nimbus_roman_no9_lregular; font-size: 18px;">
+                    <p class="tinos-regular" style="padding-left: 25px; text-indent: -25px; font-size: 18px;">
                         <a href="{{ citation.generate_uri }}">
                             {{ citation.id|get_print_formatted_citation }}
                         </a>
