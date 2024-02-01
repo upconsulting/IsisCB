@@ -2329,7 +2329,12 @@ def generate_newsletter_html(request):
 
     facets = get_facets_from_citations(queryset)
 
-    context.update({'citations': queryset, 'facets': facets, 'filters': filter_params_raw, 'object_type': object_type})
+    context.update({
+        'citations': queryset, 
+        'facets': facets, 
+        'filters': filter_params_raw, 
+        'object_type': object_type
+    })
     
     return render(request, template, context)
 
