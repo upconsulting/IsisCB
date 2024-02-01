@@ -1,5 +1,6 @@
 {% load static %}
 {% load addcss %}
+{% load app_filters %}
 
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
@@ -131,7 +132,7 @@
             <div class="panel-body">
             {% for notification in notifications %}
             <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
-                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text}}
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text|bleach_safe}}
             </div>
             {% endfor %}
         </div>

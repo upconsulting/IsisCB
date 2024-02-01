@@ -58,6 +58,7 @@ class TenantSettings(models.Model):
     default_featured_citation = models.ForeignKey('Citation', on_delete=models.SET_NULL, blank=True, null=True)
     subject_searches_all_tenants = models.BooleanField(default=False)
     public_search_all_tenants_default = models.BooleanField(default=False)
+    hide_title_in_navbar = models.BooleanField(default=False)
 
     @property
     def home_main_block(self):

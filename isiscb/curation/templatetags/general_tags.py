@@ -53,6 +53,9 @@ def get_item(dictionary, key):
 
 @register.filter
 def is_external_tenant(record, tenant):
+    if not record:
+        return True
+    
     if (not record.owning_tenant and tenant) or (record.owning_tenant and not tenant):
         return True    
 

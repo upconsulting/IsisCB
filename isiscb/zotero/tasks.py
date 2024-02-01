@@ -105,7 +105,7 @@ def ingest_citation(request, accession, draftcitation):
         'record_status_value': CuratedMixin.INACTIVE,
         'record_status_explanation': u'Inactive by default',
         'record_history': _record_history_message(request, accession),
-        'belongs_to': tenant.default_dataset if tenant else None,
+        'belongs_to': accession.ingest_to if accession.ingest_to else (tenant.default_dataset if tenant else None),
         'zotero_accession': accession,
     })
 

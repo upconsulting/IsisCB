@@ -35,8 +35,17 @@
     <div class="col-md-5">
       <p>
        
+        {% if previous %}
+        <a id="citation_previous" href="{% url 'curation:subjects_and_categories' previous %}?search={{ search_key }}&current={{ previous_index }}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+        &nbsp; &nbsp; &nbsp;
+        {% endif %}
+
         <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
    Back to Citation</a>
+        {% if next %}
+        &nbsp; &nbsp; &nbsp;
+        <a id="citation_next" href="{% url 'curation:subjects_and_categories' next %}?search={{ search_key }}&current={{ next_index }}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+        {% endif %}
       </p>
     </div>
     
@@ -130,7 +139,7 @@
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
              <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
-             {% else %}}
+             {% else %}
              <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
