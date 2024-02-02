@@ -42,11 +42,12 @@ def _format_contributors(citation):
      - more than three authors: LASTNAME1, Firstname1, Firstname2 LASTNAME2, Firstname3 LASTNAME3, et al.
     """
     contrib_acrelations = citation.get_all_contributors
-    contribs = []
-    if contrib_acrelations:
-        for contrib_acrelation in contrib_acrelations:
-            if hasattr(contrib_acrelation.authority, "name"):
-                contribs.append(contrib_acrelation.authority.name)
+    # contribs = []
+    contribs = [acrel.authority.name for acrel in filter(lambda rel: hasattr(rel.authority,'name') and rel.authority.name, contrib_acrelations)]
+    # if contrib_acrelations:
+    #     for contrib_acrelation in contrib_acrelations:
+    #         if hasattr(contrib_acrelation.authority, "name"):
+    #             contribs.append(contrib_acrelation.authority.name)
 
     formatted_contributors = ''
     if contribs:
