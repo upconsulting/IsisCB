@@ -154,7 +154,7 @@ def generate_mods_xml(citation):
         related_item.appendChild(rel_title_info)
 
         rel_title = doc.createElement('title')
-        rel_title.appendChild(doc.createTextNode(periodical.authority.nam if periodical.authority else ''))
+        rel_title.appendChild(doc.createTextNode(periodical.authority.name if periodical.authority else ''))
         rel_title_info.appendChild(rel_title)
         # add volume, etc. info
         related_item.appendChild(part)
