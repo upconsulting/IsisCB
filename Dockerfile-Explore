@@ -1,0 +1,14 @@
+FROM python:3.9
+
+RUN apt-get update
+RUN apt-get install -y redis-server
+
+ENV DJANGO_SETTINGS_MODULE=isiscb.docker_settings
+ENV UPLOAD_BULK_CHANGE_PATH="/app/exports/"
+ENV BULK_CHANGE_ERROR_PATH="/app/exports/"
+ENV UPLOAD_IMPORT_PATH="/app/exports/"
+ENV API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
+
+WORKDIR /app/code 
+
+ENTRYPOINT ["/app/code/scripts/startup.sh"]

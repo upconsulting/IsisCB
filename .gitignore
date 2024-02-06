@@ -62,6 +62,12 @@ db.sqlite3
 server_start
 
 isiscb/isisdata/fixtures/*
+data/db/*
+data/files/*
+data/logs/*
+
+!data/files/.gitkeep
+!data/logs/.gitkeep
 
 # Elastic Beanstalk Files
 #.elasticbeanstalk/*
