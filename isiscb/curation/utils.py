@@ -3,32 +3,24 @@ from isisdata.templatetags.app_filters import *
 
 def get_printlike_citation(id):
     citation = Citation.objects.get(pk=id)
-    formatted_citation = ''
-
-    formatted_contributors = _format_contributors(citation)
-    formatted_title = _format_title(citation)
-    formatted_publisher_or_periodical = _format_publisher_or_periodical(citation)
-    formatted_date = _format_date(citation, formatted_publisher_or_periodical)
-    formatted_pages_or_isbn = _format_pages_or_isbn(citation)
 
     # ASSEMBLE FORMATTED COMPONENTS
+
     # contribs
-    if formatted_contributors and formatted_contributors[-1] == '.':
-        formatted_citation = formatted_contributors
-    else:
-        formatted_citation = formatted_contributors + '.'
+    formatted_citation = _format_contributors(citation)
 
     # title
-    formatted_citation = formatted_citation + ' ' + formatted_title + ' '
+    formatted_citation = formatted_citation + ' ' + _format_title(citation) + ' '
 
     # publisher_or_periodical
-    formatted_citation = formatted_citation + formatted_publisher_or_periodical
+    formatted_citation = formatted_citation + _format_publisher_or_periodical(citation)
 
     # date
-    formatted_citation = formatted_citation + formatted_date
+    formatted_publisher_or_periodical = _format_publisher_or_periodical(citation)
+    formatted_citation = formatted_citation + _format_date(citation, formatted_publisher_or_periodical)
 
     # pages_or_isbn
-    formatted_citation = formatted_citation + formatted_pages_or_isbn
+    formatted_citation = formatted_citation + _format_pages_or_isbn(citation)
 
     return mark_safe(formatted_citation)
 
@@ -44,17 +36,19 @@ def _format_contributors(citation):
     contrib_acrelations = citation.get_all_contributors
     contribs = [acrel.authority.name for acrel in filter(lambda rel: rel.authority and rel.authority.name, contrib_acrelations)]
 
+    if not contribs:
+        return ''
+    
     formatted_contributors = ''
-    if contribs:
-        formatted_contributors = _build_name_last_first_html(contribs[0])
-        if len(contribs) == 1:
-            formatted_contributors = formatted_contributors + '.'
-        elif len(contribs) == 2:
-            formatted_contributors = formatted_contributors + 'and ' + _build_name_first_last_html(contribs[1]) + '.'
-        elif len(contribs) == 3:
-            formatted_contributors = formatted_contributors + ', ' + _build_name_first_last_html(contribs[1]) + ', and ' + _build_name_first_last_html(contribs[2]) + '.'
-        elif len(contribs) > 3:
-            formatted_contributors = formatted_contributors + ', ' + _build_name_first_last_html(contribs[1]) + ', ' + _build_name_first_last_html(contribs[2]) + ', et al.'
+    formatted_contributors = _build_name_last_first_html(contribs[0])
+    if len(contribs) == 1:
+        formatted_contributors = formatted_contributors + '.'
+    elif len(contribs) == 2:
+        formatted_contributors = formatted_contributors + 'and ' + _build_name_first_last_html(contribs[1]) + '.'
+    elif len(contribs) == 3:
+        formatted_contributors = formatted_contributors + ', ' + _build_name_first_last_html(contribs[1]) + ', and ' + _build_name_first_last_html(contribs[2]) + '.'
+    elif len(contribs) > 3:
+        formatted_contributors = formatted_contributors + ', ' + _build_name_first_last_html(contribs[1]) + ', ' + _build_name_first_last_html(contribs[2]) + ', et al.'
     
     return formatted_contributors
 
@@ -152,13 +146,12 @@ def _format_pages_or_isbn(citation):
     elif citation.type_controlled == Citation.THESIS:
         formatted_pages_or_isbn = '.'
     else:
-        formatted_pages_or_isbn = (', ' if citation.type_controlled is 'CH' else ': ')
+        preamble = (', ' if citation.type_controlled == Citation.CHAPTER else ': ')
         if citation.part_details and citation.part_details.pages_free_text:
-            formatted_pages_or_isbn = formatted_pages_or_isbn + citation.part_details.pages_free_text
+            formatted_pages_or_isbn = formatted_pages_or_isbn + preamble + citation.part_details.pages_free_text + '.'
         elif citation.part_details and citation.part_details.page_begin:
-            formatted_pages_or_isbn = formatted_pages_or_isbn + str(citation.part_details.page_begin)
+            formatted_pages_or_isbn = formatted_pages_or_isbn + preamble + str(citation.part_details.page_begin) + '.'
             if citation.part_details.page_end:
-                formatted_pages_or_isbn = formatted_pages_or_isbn + str(citation.part_details.page_end)
-        formatted_pages_or_isbn = formatted_pages_or_isbn + '.'
+                formatted_pages_or_isbn = formatted_pages_or_isbn[:-1] + '-' + str(citation.part_details.page_end) + formatted_pages_or_isbn[-1:]
 
     return formatted_pages_or_isbn
