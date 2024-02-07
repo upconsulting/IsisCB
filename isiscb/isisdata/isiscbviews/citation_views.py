@@ -106,8 +106,7 @@ def citation(request, citation_id, tenant_id=None):
     similar_objects = _get_facets_from_similar_citations(similar_citations)
 
     googleBooksImage = None
-    if tenant and tenant.settings.google_api_key:
-        googleBooksImage = isisviews.get_google_books_image(citation, False, tenant.settings.google_api_key)
+    googleBooksImage = isisviews.get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)

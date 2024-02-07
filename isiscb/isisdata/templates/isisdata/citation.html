@@ -35,6 +35,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
 
     if (["BO","CH"].includes(citationType)){
+      {% if cover_image.url %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -47,6 +48,34 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageAdjacent").classList.add("col-md-8");
           document.getElementById("citationImageCaption").style.display = "block";
         }
+      {% else %}
+      let backgroundColors = ["#c95400", "#00284b", "#3d0034"];
+      let backgroundColor;
+
+      let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      let pubName = document.getElementsByClassName("pubName")[0].innerHTML;
+
+      if (pubName.length) {
+          if (alphabet.substring(0,8).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[0];
+          } else if (alphabet.substring(9,17).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[1];
+          } else {
+            backgroundColor = backgroundColors[2];
+          }
+      }
+
+      $('#placeholderImage').css('display', "block");
+      $('#placeholderImage').css('backgroundColor', backgroundColor);
+      $('#placeholderImage').append('<div class="effect" />');
+      $('#placeholderImage').append('<div class="light" />');
+      $('#pubName').css('padding-left', "10px");
+      $('#placeholderImage').addClass("book-cover");
+      $("#citatationImageBreak").css('display', "block");
+      $("#citationImageAdjacent").removeClass("col-md-12");
+      $("#citationImageAdjacent").addClass("col-md-8");
+    {% endif %}
 
     // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
     // (using a selection from 3 color choices) to use as the citation's featured image.
