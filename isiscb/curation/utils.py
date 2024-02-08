@@ -139,12 +139,9 @@ def _format_date(citation, formatted_publisher_or_periodical):
     return ('(' if formatted_publisher_or_periodical and formatted_publisher_or_periodical[-1] == ' ' else ' (') + date.strftime('%Y') + ')'
 
 def _format_pages_or_isbn(citation):
-    isbn = None
-    if citation.linkeddata_public:     
-        isbn = next((linked_datum for linked_datum in citation.linkeddata_public if linked_datum.type_controlled.name == 'ISBN'), None)
-
     formatted_pages_or_isbn = ''
-    if citation.type_controlled == Citation.BOOK:
+    if citation.type_controlled == Citation.BOOK:    
+        isbn = next((linked_datum for linked_datum in citation.linkeddata_public if linked_datum.type_controlled.name == 'ISBN'), None)
         if isbn:
             formatted_pages_or_isbn = formatted_pages_or_isbn + ' <span style="text-variant: small-caps;">ISBN</span>:' + isbn.universal_resource_name + '.'
     elif citation.type_controlled == Citation.THESIS:
