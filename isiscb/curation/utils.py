@@ -118,12 +118,14 @@ def _format_periodicals(citation):
             formatted_publisher_or_periodical = formatted_publisher_or_periodical + str(citation.part_details.volume_begin)
             if citation.part_details.volume_end:
                 formatted_publisher_or_periodical = formatted_publisher_or_periodical + '-' + str(citation.part_details.volume_end)
+
         if citation.part_details.issue_free_text:
             formatted_publisher_or_periodical = formatted_publisher_or_periodical + ', no. ' + citation.part_details.issue_free_text
         elif citation.part_details.issue_begin:
             formatted_publisher_or_periodical = formatted_publisher_or_periodical + ', no. ' + str(citation.part_details.issue_begin)
             if citation.part_details.issue_end:
                 formatted_publisher_or_periodical = formatted_publisher_or_periodical + '-' + str(citation.part_details.issue_end)
+
     return formatted_publisher_or_periodical
 
 def _format_date(citation, formatted_publisher_or_periodical):
@@ -132,7 +134,7 @@ def _format_date(citation, formatted_publisher_or_periodical):
         return ''
     # if it's a book, terminate the publication year with a period
     if citation.type_controlled == Citation.BOOK: 
-            return ' ' + date.strftime('%Y') + '.'
+        return ' ' + date.strftime('%Y') + '.'
     # otherwise, wrap the publication year in parentheses
     return ('(' if formatted_publisher_or_periodical and formatted_publisher_or_periodical[-1] == ' ' else ' (') + date.strftime('%Y') + ')'
 
@@ -140,7 +142,8 @@ def _format_pages_or_isbn(citation):
     isbn = None
     if citation.linkeddata_public:     
         isbn = next((linked_datum for linked_datum in citation.linkeddata_public if linked_datum.type_controlled.name == 'ISBN'), None)
-    formatted_pages_or_isbn = '' 
+
+    formatted_pages_or_isbn = ''
     if citation.type_controlled == Citation.BOOK:
         if isbn:
             formatted_pages_or_isbn = formatted_pages_or_isbn + ' <span style="text-variant: small-caps;">ISBN</span>:' + isbn.universal_resource_name + '.'
