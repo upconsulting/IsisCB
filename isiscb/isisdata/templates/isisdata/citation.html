@@ -33,7 +33,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     let imgUrl = "{{ cover_image.url|safe }}";
 
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
-
     if (["BO","CH"].includes(citationType)){
       {% if cover_image.url %}
         if (imgUrl.length){
@@ -349,6 +348,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
                    {% endif %}
                </div>
+             {% endif %}
+             {% if citation.type_controlled in 'BO,CH,TH' %}
+              <p id="pubName" class="pubName" style="color: #fff; word-break: break-word; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; top:0; left:0">{{ citation.title|truncatewords:16|bleach_safe }}</p>
              {% endif %}
            </div>
            <img id="citationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
@@ -1258,6 +1260,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     var btn = document.querySelector('.readMore');
 
     function toggleText() {
+      if (textHolder == undefined) {
+        return;
+      }
       textHolder.classList.toggle("truncate");
 
       if (textHolder.classList.contains("truncate")) {
