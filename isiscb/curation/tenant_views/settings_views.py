@@ -338,6 +338,7 @@ def tenant_settings(request, tenant_pk):
             tenant.title = form.cleaned_data['title']
             tenant.logo = form.cleaned_data['logo']
             tenant.contact_email = form.cleaned_data['contact_email']
+            tenant.blog_url = form.cleaned_data['blog_url']
             tenant.status = form.cleaned_data['status']
             if not tenant.settings:
                 tenant.settings = form.save()                

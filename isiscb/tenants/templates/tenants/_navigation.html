@@ -88,6 +88,7 @@
                 <ul class="nav navbar-nav navbar-nav-home">
                     <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
                     <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "tenants:about" tenant_id %}">About</a></li>
+                    {% if tenant.blog_url %}<li><a href="{{tenant.blog_url}}" target="_blank">Blog</a></li>{% endif %}
                     <li><a href="mailto:{{tenant.contact_email}}" target="_blank">Contact</a></li>
                     <!--<li><a id="includeAllTenantsNavItem" title="" href="#">
                         <input style="padding-top: 20px;" type="checkbox" name="site_include_all_projects" checked> <span id="includeAllToggleText">View all off</span>

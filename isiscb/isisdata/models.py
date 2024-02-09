@@ -219,6 +219,7 @@ class Tenant(models.Model):
     logo = models.ImageField(upload_to='tenant_logos', blank=True, null=True)
 
     contact_email = models.CharField(max_length=255, blank=True, null=True)
+    blog_url = models.CharField(max_length=255, blank=True, null=True)
 
     users = models.ManyToManyField(User, related_name="tenants")
 
