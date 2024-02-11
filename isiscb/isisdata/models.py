@@ -219,6 +219,7 @@ class Tenant(models.Model):
     logo = models.ImageField(upload_to='tenant_logos', blank=True, null=True)
 
     contact_email = models.CharField(max_length=255, blank=True, null=True)
+    blog_url = models.CharField(max_length=255, blank=True, null=True)
 
     users = models.ManyToManyField(User, related_name="tenants")
 
@@ -1207,12 +1208,14 @@ class Citation(ReferencedEntity, CuratedMixin):
         SAFE_TAGS = ['em', 'b', 'i', 'strong', 'a']
         SAFE_ATTRS = {'a': ['href', 'rel']}
 
+        if not self.abstract:
+            return ""
+
         no_tags = mark_safe(bleach.clean(self.abstract, tags=SAFE_TAGS, # Whitelist
                                       attributes=SAFE_ATTRS,
                                       strip=True))
-        if not self.abstract:
-            return ""
-        match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', self.abstract)
+        
+        match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', no_tags)
         if match:
             return match.groups()[0].strip()
         return self.abstract

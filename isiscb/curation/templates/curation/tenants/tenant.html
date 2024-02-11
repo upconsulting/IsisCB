@@ -40,6 +40,10 @@
             <td>{{tenant.contact_email|default_if_none:''}}</td>
           </tr>
           <tr>
+            <th width="20%">Blog Url</th>
+            <td><a target="_blank" href="{{tenant.blog_url|default_if_none:''}}">{{tenant.blog_url|default_if_none:''}}</a></td>
+          </tr>
+          <tr>
             <th width="20%">URL Identifier</th>
             <td>{{tenant.identifier}} <small>(<span class="fa fa-warning"></span> This value can only be changed by a system administrator.)</small></td>
           </tr>
