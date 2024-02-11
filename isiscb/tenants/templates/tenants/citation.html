@@ -494,10 +494,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  </div>
                  <hr style="margin: 10px 0">
              {% endif %}
-
-             <div style="font-size: .9em;">Part of: <a href="{% url 'tenants:home' citation.owning_tenant.identifier %}">{{ citation.owning_tenant.name }}</a></div>
-             <hr style="margin: 10px 0">
-
            </div>
            <div class='col-sm-12 col-md-6' style="padding-right: 0;">
              <div class="panel panel-default">
@@ -794,7 +790,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation|get_uri:tenant_id|cut:"https://"|cut:"http://" }}</span> <i class="far fa-copy"></i></span>
              </div>
            </div>
+           <hr style="margin: 10px 0">
+           <div style="font-size: .9em;"><i class="fas fa-university"></i> This citation is part of the {% if citation.owning_tenant.identifier != tenant.identifier %}<a href="{% url 'tenants:home' citation.owning_tenant.identifier %}">{% endif %}{{ citation.owning_tenant.name }}{% if citation.owning_tenant.identifier != tenant.identifier %}</a>{% endif %} database.</div>
+           <hr style="margin: 10px 0">
          </div>
+
+        
         </div>
         <div class="col-sm-12 col-md-5">
           <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
