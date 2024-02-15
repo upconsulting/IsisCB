@@ -1,13 +1,18 @@
 from __future__ import unicode_literals
-from haystack.backends.elasticsearch_backend import ElasticsearchSearchBackend, ElasticsearchSearchEngine, ElasticsearchSearchQuery
+#from haystack.backends.elasticsearch_backend import ElasticsearchSearchBackend, ElasticsearchSearchEngine, ElasticsearchSearchQuery
+from haystack.backends.elasticsearch7_backend import Elasticsearch7SearchBackend, Elasticsearch7SearchEngine, Elasticsearch7SearchQuery
 from haystack.utils import get_identifier, get_model_ct
 from haystack.constants import DJANGO_CT
 import six
 import requests, elasticsearch
 from django.conf import settings
 
+import logging
 
-class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
+logger = logging.getLogger(__name__)
+
+
+class IsisCBElasticsearchSearchQuery(Elasticsearch7SearchQuery):
 
     def clean(self, query_fragment):
         """
@@ -33,78 +38,131 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
     
     def build_query(self):
         print("building query ------------")
+        logger.error("buliding query")
         query = super().build_query()
-        print(query)
+        logger.error(query)
         return query
 
 
-class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
+DEFAULT_FIELD_MAPPING = {
+    "type": "text",
+    "analyzer": "snowball",
+}
+FIELD_MAPPINGS = {
+    "edge_ngram": {
+        "type": "text",
+        "analyzer": "edgengram_analyzer",
+    },
+    "ngram": {
+        "type": "text",
+        "analyzer": "ngram_analyzer",
+    },
+    "date": {"type": "date"},
+    "datetime": {"type": "date"},
+    "location": {"type": "geo_point"},
+    "boolean": {"type": "boolean"},
+    "float": {"type": "float"},
+    "long": {"type": "long"},
+    "integer": {"type": "long"},
+}
+
+class IsisCBElasticsearchSearchBackend(Elasticsearch7SearchBackend):
     RESERVED_CHARACTERS = (
         '\\', '+', '-', '&&', '||', '!', '(', ')', '{', '}',
         '[', ']', '^', '"', '~',  ':', '/', #'*', '?',
     )
 
     DEFAULT_SETTINGS = {
-        'settings': {
+        "settings": {
+            "index": {
+                "max_ngram_diff": 2,
+            },
             "analysis": {
                 "analyzer": {
-                    "default" : {
-                        "tokenizer" : "standard",
-                        "filter" : ["standard", "asciifolding"]
-                    },
                     "ngram_analyzer": {
-                        "type": "custom",
                         "tokenizer": "standard",
-                        "filter": ["haystack_ngram", "lowercase"]
+                        "filter": [
+                            "haystack_ngram",
+                            "lowercase",
+                        ],
                     },
                     "edgengram_analyzer": {
-                        "type": "custom",
                         "tokenizer": "standard",
-                        "filter": ["haystack_edgengram", "lowercase", "asciifolding"]
-                    }
-                },
-                "tokenizer": {
-                    "haystack_ngram_tokenizer": {
-                        "type": "nGram",
-                        "min_gram": 3,
-                        "max_gram": 15,
+                        "filter": [
+                            "haystack_edgengram",
+                            "lowercase",
+                        ],
                     },
-                    "haystack_edgengram_tokenizer": {
-                        "type": "edgeNGram",
-                        "min_gram": 3,
-                        "max_gram": 15,
-                        "side": "front"
-                    }
                 },
                 "filter": {
                     "haystack_ngram": {
-                        "type": "nGram",
+                        "type": "ngram",
                         "min_gram": 3,
-                        "max_gram": 15
+                        "max_gram": 4,
                     },
                     "haystack_edgengram": {
-                        "type": "edgeNGram",
-                        "min_gram": 3,
-                        "max_gram": 15
-                    }
-                }
-            }
-        }
+                        "type": "edge_ngram",
+                        "min_gram": 2,
+                        "max_gram": 15,
+                    },
+                },
+            },
+        },
     }
 
-    def build_schema(self, fields):
-        content_field_name, mapping = super(
-            IsisCBElasticsearchSearchBackend, self
-        ).build_schema(
-            fields
-        )
+    def _get_current_mapping(self, field_mapping):
+        logger.error("============> current mapping")
+        logger.error(field_mapping)
+        logger.error("========> existing mapping")
+        logger.error(self.existing_mapping)
+        return {"modelresult": {"properties": field_mapping}}
 
-        for field_name, field_class in fields.items():
-            field_mapping = mapping[field_class.index_fieldname]
-            if field_class.field_type == "object":
-                mapping[field_class.index_fieldname] = {"type": "object"}
+    # def build_schema(self, fields):
+    #     content_field_name, mapping = super(
+    #         IsisCBElasticsearchSearchBackend, self
+    #     ).build_schema(
+    #         fields
+    #     )
+
+    #     for field_name, field_class in fields.items():
+    #         field_mapping = mapping[field_class.index_fieldname]
+    #         if field_class.field_type == "object":
+    #             mapping[field_class.index_fieldname] = {"type": "object"}
+
+    #     return (content_field_name, mapping)
+    def build_schema(self, fields):
+        content_field_name = ""
+        mapping = self._get_common_mapping()
+
+        for _, field_class in fields.items():
+            field_mapping = FIELD_MAPPINGS.get(
+                field_class.field_type, DEFAULT_FIELD_MAPPING
+            ).copy()
+            if field_class.boost != 1.0:
+                field_mapping["boost"] = field_class.boost
+
+            if field_class.document is True:
+                content_field_name = field_class.index_fieldname
+
+            # Do this last to override `text` fields.
+            if field_mapping["type"] == "text":
+                logger.error("========== this is a text field ==============")
+                logger.error(field_mapping)
+                logger.error(field_class.index_fieldname)
+                if field_class.indexed is False or hasattr(field_class, "facet_for"):
+                    logger.error("making it a keyword")
+                    field_mapping["type"] = "keyword"
+                    del field_mapping["analyzer"]
+                    logger.error(field_mapping)
+                    
+
+            mapping[field_class.index_fieldname] = field_mapping
+            
+        logger.error("mapping ----->")
+        logger.error(mapping)
 
         return (content_field_name, mapping)
+
 
     def _get_doc_type_option(self):
         return {
@@ -217,6 +275,6 @@ class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
 
         return self._process_results(raw_results, result_class=result_class)
 
-class IsisCBElasticsearchSearchEngine(ElasticsearchSearchEngine):
+class IsisCBElasticsearchSearchEngine(Elasticsearch7SearchEngine):
     backend = IsisCBElasticsearchSearchBackend
     query = IsisCBElasticsearchSearchQuery

@@ -9,11 +9,17 @@ information, see ``LICENSE.md`` in this repository.
 
 ## Deployment
 
-IsisCB Explore can be run as a WSGI application, e.g. using Gunicorn behind
-NginX, or in Apache using mod_wsgi.
+There is a Docker Compose setup available to run the Explore system for development. To start the Docker containers run the following command from the root directory of this project.
 
-The main application should be run from ``isiscb.wsgi``.
+`docker-compose -f docker-compose-explore.yml up`
 
-Worker processes should be run from ``isiscb.celery``.
+If you have existing database, you will first have to import the existing data into the Docker container PostgreSQL database before running the Explore system's container.
 
+# Contributors
 
+The [Explore system](https://isiscb.org/) is being developed by [A Place Called Up Consulting](http://aplacecalledup.com/) for Stephen P. Weldon, University of Oklahoma. The following people are currently or have been contributing to the development:
+
+- Julia Damerow
+- Erick B. Peirson
+- Taylor Quinn
+- Paul Vieth

@@ -42,7 +42,7 @@
                 <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
                     <form method="get" action="/{{ PORTAL_PREFIX }}/{{tenant_id}}/search" style='width: 100%'>
                         <div class="input-group" style='width: 100%'>
-                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the {{ tenant.title }}...">
                             <span class="input-group-btn" style='width: 20px;'>
                                 <button class="btn btn-default" type="submit">Search</button>
                             </span>
@@ -88,6 +88,7 @@
                 <ul class="nav navbar-nav navbar-nav-home">
                     <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
                     <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "tenants:about" tenant_id %}">About</a></li>
+                    {% if tenant.blog_url %}<li><a href="{{tenant.blog_url}}" target="_blank">Blog</a></li>{% endif %}
                     <li><a href="mailto:{{tenant.contact_email}}" target="_blank">Contact</a></li>
                     <!--<li><a id="includeAllTenantsNavItem" title="" href="#">
                         <input style="padding-top: 20px;" type="checkbox" name="site_include_all_projects" checked> <span id="includeAllToggleText">View all off</span>

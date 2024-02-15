@@ -26,6 +26,9 @@ import base64
 import csv
 import os
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 # The following code initializes two maps:
 #  - one that maps two letter country codes (e.g. DE, US) to three letter country codes (e.g. DEU, USA)
@@ -568,16 +571,15 @@ def get_place_map_data(request, authority_id, tenant_id=None):
     if tenant_id:
         tenant = Tenant.objects.filter(identifier=tenant_id).first()
 
-    sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)
+    sqs = SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)
     map_search_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
-    if tenant_id and not include_all_tenants:
-        map_search_results = map_search_results.filter(owning_tenant=tenant_id)
-
+    if tenant and not include_all_tenants:
+        map_search_results = map_search_results.filter(owning_tenant=tenant.id)
     related_geographics_facet = map_search_results.facet_counts()['fields']['geographic_ids'] if 'fields' in map_search_results.facet_counts() else []
     geocodes = map_search_results.facet_counts()['fields']['geocodes'] if 'fields' in map_search_results.facet_counts() else []
     citation_count = _get_citation_count_per_country(geocodes)

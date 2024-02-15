@@ -977,6 +977,7 @@ class TenantSettingsForm(forms.ModelForm):
     title = forms.CharField(help_text='Title of bibliography')
     logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
     contact_email = forms.EmailField(help_text='Email address for contacting the bilbiographer.')
+    blog_url = forms.CharField(help_text='URL of project blog.', required=False)
     google_api_key = forms.CharField(help_text='API key for Google', required=False)
     twitter_api_key = forms.CharField(help_text='API key for Twitter', required=False)
     twitter_user_name = forms.CharField(help_text='User id for Twitter', required=False)
@@ -1005,6 +1006,7 @@ class TenantSettingsForm(forms.ModelForm):
             self.fields['status'].initial = kwargs['instance'].tenant.status
             self.fields['logo'].initial = kwargs['instance'].tenant.logo
             self.fields['contact_email'].initial = kwargs['instance'].tenant.contact_email
+            self.fields['blog_url'].initial = kwargs['instance'].tenant.blog_url
             if kwargs['instance'].tenant.settings.google_api_key:
                 self.initial['google_api_key'] = api_keys.decrypt_key(kwargs['instance'].tenant.settings.google_api_key).decode("utf-8")
             if kwargs['instance'].tenant.settings.twitter_api_key:

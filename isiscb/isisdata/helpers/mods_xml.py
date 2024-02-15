@@ -46,7 +46,7 @@ def generate_mods_xml(citation):
         mods.appendChild(name)
         name_part = doc.createElement('namePart')
         name.appendChild(name_part)
-        name_part_text = doc.createTextNode(author.authority.name)
+        name_part_text = doc.createTextNode(author.authority.name if author.authority else "") 
         name_part.appendChild(name_part_text)
         # role
         role = doc.createElement('role')
@@ -65,7 +65,7 @@ def generate_mods_xml(citation):
         mods.appendChild(name)
         name_part = doc.createElement('namePart')
         name.appendChild(name_part)
-        name_part_text = doc.createTextNode(edt.authority.name)
+        name_part_text = doc.createTextNode(edt.authority.name if edt.authority else '') 
         name_part.appendChild(name_part_text)
         # role
         role = doc.createElement('role')
@@ -84,7 +84,7 @@ def generate_mods_xml(citation):
         mods.appendChild(name)
         name_part = doc.createElement('namePart')
         name.appendChild(name_part)
-        name_part_text = doc.createTextNode(contr.authority.name)
+        name_part_text = doc.createTextNode(contr.authority.name if contr.authority else '') 
         name_part.appendChild(name_part_text)
         # role
         role = doc.createElement('role')
@@ -139,7 +139,7 @@ def generate_mods_xml(citation):
     publishers = get_publisher(citation)
     for pub in publishers:
         publisher = doc.createElement('publisher')
-        publisher.appendChild(doc.createTextNode(pub.authority.name))
+        publisher.appendChild(doc.createTextNode(pub.authority.name if pub.authority else ''))
         origin_info.appendChild(publisher)
 
     # Periodical
@@ -154,7 +154,7 @@ def generate_mods_xml(citation):
         related_item.appendChild(rel_title_info)
 
         rel_title = doc.createElement('title')
-        rel_title.appendChild(doc.createTextNode(periodical.authority.name))
+        rel_title.appendChild(doc.createTextNode(periodical.authority.name if periodical.authority else ''))
         rel_title_info.appendChild(rel_title)
         # add volume, etc. info
         related_item.appendChild(part)
@@ -221,7 +221,7 @@ def generate_mods_xml(citation):
                 identifier.setAttribute('type', 'doi')
             else:
                 identifier.setAttribute('type', 'isbn')
-            identifier.appendChild(doc.createTextNode(linked_data.universal_resource_name))
+            identifier.appendChild(doc.createTextNode(linked_data.universal_resource_name if linked_data.universal_resource_name else ''))
             mods.appendChild(identifier)
 
     return doc.toprettyxml(indent="    ", encoding="utf-8")
