@@ -53,7 +53,7 @@ urlpatterns = [
     re_path(r'^citation/export$', views.export_citations, name="export-citations"),
     re_path(r'^citation/export/status$', views.export_citations_status, name="export-citations-status"),
     re_path(r'^citation/select$', views.bulk_select_citation, name='citation-bulk-select'),
-    re_path(r'^citation/newsletter$', views.generate_newsletter_html, name='generate_newsletter_html'),
+    re_path(r'^citation/newsletter/$', views.generate_newsletter_html, name='generate_newsletter_html'),
 
     re_path(r'^authority/collection$', views.authority_collections, name='authority-collections'),
     re_path(r'^authority/collection/add$', views.add_authority_collection, name='add-authority-collection'),

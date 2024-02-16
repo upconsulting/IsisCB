@@ -2,6 +2,7 @@
 {% load static %}
 {% load addcss %}
 {% load general_tags %}
+{% load app_filters %}
 
 {% block content %}
 <div class="panel panel-default">
@@ -14,17 +15,134 @@
     </div>
     <div class="panel-body">
         <div class="col-sm-6">
-            <div id="listHTMLSnippetContent">
-                {% for citation in citations %}
-                    <p class="tinos-regular" style="padding-left: 25px; text-indent: -25px; font-size: 18px;">
-                        <a href="{{ citation.generate_uri }}">
-                            {{ citation.id|get_print_formatted_citation }}
+          {% if page_results.has_previous or page_results.has_next %}
+            <nav class="hidden-print">
+                <ul class="pagination">
+                    <li class="disabled"><a>Page:</a></li>
+                    {% if page_results.has_previous %}
+                    <li>
+                        {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                        {% with ppage="page_citation:"|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
                         </a>
-                    </p>
-                {% endfor %}
-            </div>
-            <hr>
-            <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    {% if page_results.has_previous or page_results.has_next %}
+                    {% for p in page_results.paginator.page_range %}
+                    {% with pagenr=forloop.counter|stringformat:"s" %}
+                    {% with ppage='page_citation:'|add:pagenr %}
+                    {% with page_results.paginator.page_range|last as last %}
+                    {% with page_results.paginator.page_range|first as first %}
+                        {% if page_results.number >= 4 and p == first %}
+                        <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ first }}</a></li>
+                        <li class="disabled"><span>...</span></li>
+                        {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                        <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ p }}</a></li>
+                        {% elif p == last %}
+                        <li class="disabled"><span>...</span></li>
+                        <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ last }}</a></li>
+                        {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if page_results.has_next %}
+                    <li>
+                        {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                        {% with ppage='page_citation:'|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+          {% endif %}
+          <div id="listHTMLSnippetContent">
+              {% for citation in page_results %}
+                  <p class="tinos-regular" style="padding-left: 25px; text-indent: -25px; font-size: 18px;"><a href="{{ citation|get_uri }}">{{ citation.id|get_print_formatted_citation }}</a></p>
+              {% endfor %}
+          </div>
+          <hr>
+          {% if page_results.has_previous or page_results.has_next %}
+              <nav class="hidden-print">
+                  <ul class="pagination">
+                      <li class="disabled"><a>Page:</a></li>
+                      {% if page_results.has_previous %}
+                      <li>
+                          {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                          {% with ppage="page_citation:"|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&laquo;</span>
+                      </li>
+                      {% endif %}
+
+                      {% if page_results.has_previous or page_results.has_next %}
+                      {% for p in page_results.paginator.page_range %}
+                      {% with pagenr=forloop.counter|stringformat:"s" %}
+                      {% with ppage='page_citation:'|add:pagenr %}
+                      {% with page_results.paginator.page_range|last as last %}
+                      {% with page_results.paginator.page_range|first as first %}
+                          {% if page_results.number >= 4 and p == first %}
+                          <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ first }}</a></li>
+                          <li class="disabled"><span>...</span></li>
+                          {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                          <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ p }}</a></li>
+                          {% elif p == last %}
+                          <li class="disabled"><span>...</span></li>
+                          <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ last }}</a></li>
+                          {% endif %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endfor %}
+                      {% endif %}
+
+                      {% if page_results.has_next %}
+                      <li>
+                          {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                          {% with ppage='page_citation:'|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&raquo;</span>
+                      </li>
+                      {% endif %}
+                  </ul>
+              </nav>
+          {% endif %}
+          <hr>
+          <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
         </div>
         <div class="col-sm-6">
             <div class="row" id="boxesHTMLSnippetContent">
@@ -74,6 +192,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script>
     let listHTMLSnippet = document.getElementById("listHTMLSnippetContent").outerHTML;

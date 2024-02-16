@@ -41,7 +41,7 @@ def _format_contributors(citation):
     
     formatted_contributors = _build_name_last_first_html(contribs[0])
     if len(contribs) == 2:
-        formatted_contributors = formatted_contributors + 'and ' + _build_name_first_last_html(contribs[1])
+        formatted_contributors = formatted_contributors + ' and ' + _build_name_first_last_html(contribs[1])
     elif len(contribs) == 3:
         formatted_contributors = formatted_contributors + ', ' + _build_name_first_last_html(contribs[1]) + ', and ' + _build_name_first_last_html(contribs[2])
     elif len(contribs) > 3:
@@ -55,14 +55,16 @@ def _build_name_last_first_html(contrib):
     if "," in contrib:
         return '<span style="font-variant: small-caps;">' + contrib.split(',')[0] + '</span>, ' + contrib.split(',')[1]
     if " " in contrib:
-        return '<span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>, ' + contrib.split(' ')[0]  
+        return '<span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>, ' + contrib.split(' ')[0] 
+     
     return '<span style="font-variant: small-caps;">' + contrib + '</span>'
     
 def _build_name_first_last_html(contrib):
-    if " " in contrib: 
-        return contrib.split(' ')[0] + ' <span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>'
     if "," in contrib:
         return contrib.split(',')[1] + ' <span style="font-variant: small-caps;">' + contrib.split(',')[0] + '</span>'
+    if " " in contrib: 
+        return contrib.split(' ')[0] + ' <span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>'
+    
     return '<span style="font-variant: small-caps;">' + contrib + '</span>'
     
 def _format_title(citation):
@@ -72,6 +74,7 @@ def _format_title(citation):
         return '<i>' + title + '</i>.'
     if citation.type_controlled == Citation.REVIEW or citation.type_controlled == Citation.ESSAY_REVIEW:
         return title + '.'
+    
     return '"' + title + '."'
 
 def _format_publisher_or_periodical(citation):
@@ -135,6 +138,7 @@ def _format_date(citation, formatted_publisher_or_periodical):
     # if it's a book, terminate the publication year with a period
     if citation.type_controlled == Citation.BOOK: 
         return ' ' + date.strftime('%Y') + '.'
+    
     # otherwise, wrap the publication year in parentheses
     return ('(' if formatted_publisher_or_periodical and formatted_publisher_or_periodical[-1] == ' ' else ' (') + date.strftime('%Y') + ')'
 

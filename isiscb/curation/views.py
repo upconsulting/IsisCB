@@ -2322,18 +2322,46 @@ def generate_newsletter_html(request):
     template = 'curation/generate_newsletter_html.html'
     context = {}
 
-    object_type = 'CITATION'
-    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter):
-        queryset = queryset.qs
+    user_session = request.session
 
-    facets = get_facets_from_citations(queryset)
+    search_key = request.GET.get('search')
+    filter_params = user_session.get('%s_citation_search_params' % search_key) if search_key else None
+
+    if filter_params:
+        _qs = operations.filter_queryset(request.user, Citation.objects.all())
+        queryset = CitationFilter(filter_params, queryset=_qs, request=request)
+    else:
+        queryset, filter_params_raw = _get_filtered_queryset(request, object_type='CITATION')
+        filter_params = QueryDict(filter_params_raw, mutable=True)
+
+    # We use the filter parameters in this form to specify the queryset for
+    #  bulk actions.
+    if isinstance(filter_params, QueryDict):
+        encoded_params = filter_params.urlencode().encode('utf-8')
+    else:
+        _params = QueryDict(mutable=True)
+        for k, v in [k_v for k_v in list(filter_params.items()) if k_v[1] is not None]:
+            _params[k] = v
+        encoded_params = _params.urlencode().encode('utf-8')
+
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
+
+    user_session['%s_citation_search_params' % str(search_key)] = filter_params
+
+    page_number = request.GET.get('page_citation', 1)
+    paginator = Paginator(queryset.qs, 100)
+    page_results = paginator.get_page(page_number)
+
+    facets = get_facets_from_citations(queryset.qs)
 
     context.update({
-        'citations': queryset, 
-        'facets': facets, 
-        'filters': filter_params_raw, 
-        'object_type': object_type
+        'page_results': page_results, 
+        'facets': facets,
+        'search_key': search_key,
+        'paginator': paginator,
     })
     
     return render(request, template, context)

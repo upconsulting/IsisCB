@@ -70,3 +70,17 @@ def get_tenant(id):
 @register.filter
 def get_print_formatted_citation(id):
     return get_printlike_citation(id)
+
+# This method figures out what page number each paginator button should link to given the current page number. Key is the url code for setting the page: 'page_citation'. 'sort_str' contains this key and the page number in question.
+@register.filter
+def set_bookshelf_page(link, sort_str):
+    [key, page_number] = sort_str.split(":")
+    if key in link:
+        return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
+    else:
+        new_link = link + "?" if "?" not in link else link + "&"
+        return new_link + key + "=" + str(page_number)
+    
+# This method appends the search filters to the paginator buttons so that the correct queryset can be paginated for each page change
+# @register.filter
+# def set_paginator_search_filters(link, sort_str):
