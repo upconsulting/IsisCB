@@ -23,7 +23,7 @@
                     <li>
                         {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
                         {% with ppage="page_citation:"|add:pagenr %}
-                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Previous">
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}&search={{search_key}}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         </a>
                         {% endwith %}
@@ -42,13 +42,13 @@
                     {% with page_results.paginator.page_range|last as last %}
                     {% with page_results.paginator.page_range|first as first %}
                         {% if page_results.number >= 4 and p == first %}
-                        <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ first }}</a></li>
+                        <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
                         <li class="disabled"><span>...</span></li>
                         {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
-                        <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ p }}</a></li>
+                        <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
                         {% elif p == last %}
                         <li class="disabled"><span>...</span></li>
-                        <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ last }}</a></li>
+                        <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
                         {% endif %}
                     {% endwith %}
                     {% endwith %}
@@ -61,7 +61,7 @@
                     <li>
                         {% with pagenr=page_results.next_page_number|stringformat:"s" %}
                         {% with ppage='page_citation:'|add:pagenr %}
-                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Next">
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         </a>
                         {% endwith %}
@@ -89,7 +89,7 @@
                       <li>
                           {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
                           {% with ppage="page_citation:"|add:pagenr %}
-                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}" aria-label="Previous">
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Previous">
                           <span aria-hidden="true">&laquo;</span>
                           </a>
                           {% endwith %}
@@ -108,13 +108,13 @@
                       {% with page_results.paginator.page_range|last as last %}
                       {% with page_results.paginator.page_range|first as first %}
                           {% if page_results.number >= 4 and p == first %}
-                          <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ first }}</a></li>
+                          <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
                           <li class="disabled"><span>...</span></li>
                           {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
-                          <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ p }}</a></li>
+                          <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
                           {% elif p == last %}
                           <li class="disabled"><span>...</span></li>
-                          <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage|add:'&search='|add:search_key }}">{{ last }}</a></li>
+                          <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
                           {% endif %}
                       {% endwith %}
                       {% endwith %}

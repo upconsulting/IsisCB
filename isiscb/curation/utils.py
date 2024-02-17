@@ -24,14 +24,15 @@ def get_printlike_citation(id):
 
     return mark_safe(formatted_citation)
 
-# formats list of contributor names depending on the number of contributors in the last; formats all surnames in smallcaps
 def _format_contributors(citation): 
     """
-     Function to format the list of contributors, in the following way:
+     Function to format the list of contributors depending on the number of contributors, in the following way:
      - one author: LASTNAME, Firstname.
      - two authors: LASTNAME1, Firstname1 and Firstname2 LASTNAME2.
      - three authors: LASTNAME1, Firstname1, Firstname2 LASTNAME2, and Firstname3 LASTNAME3.
      - more than three authors: LASTNAME1, Firstname1, Firstname2 LASTNAME2, Firstname3 LASTNAME3, et al.
+
+    All surnames are formatted in smallcaps
     """
     contrib_acrelations = citation.get_all_contributors
     contribs = [acrel.authority.name for acrel in filter(lambda rel: rel.authority and rel.authority.name, contrib_acrelations)]
@@ -89,10 +90,16 @@ def _format_publisher_or_periodical(citation):
         return publishers.first().authority.name + ',' if publishers and publishers.first().authority else ''
     
     if citation.type_controlled == Citation.CHAPTER:
-        containing_citation = CCRelation.objects.filter(object_id=citation.id, type_controlled=CCRelation.INCLUDES_CHAPTER, subject__public=True, public=True)
+        containing_citation = CCRelation.objects.filter(object_id=citation.id, \
+                                                        type_controlled=CCRelation.INCLUDES_CHAPTER, \
+                                                        subject__public=True, public=True)
         formatted_publisher_or_periodical = ' In <i>' + containing_citation.first().subject.title + '</i>' if containing_citation else ''
-        containing_citation_editor = containing_citation.first().subject.get_all_contributors[0].authority if containing_citation and containing_citation.first().subject.get_all_contributors else None
-        formatted_publisher_or_periodical = formatted_publisher_or_periodical + (', edited by <span style="font-variant: small-caps;">' + containing_citation_editor.name + '</span>' if containing_citation_editor else '')
+        containing_citation_editor = containing_citation.first().subject.get_all_contributors[0].authority \
+                if containing_citation and containing_citation.first().subject.get_all_contributors \
+                else None
+        formatted_publisher_or_periodical = formatted_publisher_or_periodical + \
+            (', edited by <span style="font-variant: small-caps;">' + containing_citation_editor.name + '</span>' \
+             if containing_citation_editor else '')
         return formatted_publisher_or_periodical
     
     if citation.type_controlled == Citation.THESIS:
