@@ -328,6 +328,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <div class="row" style="padding-left: 15px">
           <strong style="font-size: 1.4em; color: #012E63">{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}<strong>:</Strong><span style="font-size: 1.5em">&nbsp{{ citation.subtype.name }}</span>{% endif %}
             <span class="btn-grp pull-right" style="padding-bottom:5px">
+              <div class="dropdown pull-right">
+                <a class="dropdown-toggle" type="button" id="extraFunctionsDropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fas fa-bars"></i></a>
+                <ul class="dropdown-menu" aria-labelledby="extraFunctionsDropdownMenu">
+                  <li><a data-toggle="modal" data-target="#generateHTMLModal">Generate HTML Snippet for Citation</a></li>
+                </ul>
+              </div>
               <span class="authorityLink topAuthorityLink" style="margin-right: 20px;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ citation.id }} <i class="far fa-copy"></i></span>
               <textarea style="position: absolute;left: -9999px;" class="hiddenCitationLink">{{ citation|get_uri:tenant_id }}</textarea>
               {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="Edit this entry"></a>{% endif %}
@@ -1322,6 +1328,321 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div><!-- /modal -->
 </div>
 
+<!-- Generate HTML Modal-->
+<div class="modal fade" id="generateHTMLModal" style="height: 75%;" tabindex="-1" role="dialog" aria-labelledby="generateHTMLLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="generateHTMLLabel">HTML Snippet for Citation {{citation.id}}: {{citation|get_title}} </h4>
+      </div>
+      <div class="modal-body" style="max-height: 390px;">
+        <div class="panel panel-default" id="HTMLSnippetContent" style='display: block; margin: 0 15px 20px 15px;'>
+          <div class="panel-heading">
+            <div class="row" style="padding-left: 15px">
+              <strong style="font-size: 1.4em; color: #012E63">{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}<strong>:</Strong><span style="font-size: 1.5em">&nbsp{{ citation.subtype.name }}</span>{% endif %}
+            </div>
+    
+            {% with citation|get_pub_year as pub_year %}
+            {% with citation|get_title as citation_title %}
+            <a href="{{citation | get_uri}}" style="color:#333;"><h3 style="margin: 0px">{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
+              {% if citation.stub_record_status == 'SR' %}
+              <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
+              {% endif %}
+            </h3></a>
+            {% if citation|has_title and citation.complete_citation %}
+            <p>
+            <strong>Full citation:</strong> {{ citation.complete_citation }}
+            </p>
+            {% endif %}
+            {% endwith %}
+            {% endwith %}
+          </div>
+          <div class="panel-body">
+            <div class="col-sm-12">
+             <div class="col-sm-12 col-md-6" style="padding: 0 0 0 8px;">
+               <div id="snippetPlaceholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+                 {% for prop in properties_map %}
+                   {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+                 {% endfor %}
+                 {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                   <div style="text-align: center;">
+                       {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+                         <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
+                       {% endif %}
+                       {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                         <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
+                       {% endif %}
+                   </div>
+                 {% endif %}
+               </div>
+               <img id="snippetCitationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
+               <span id="snippetCitationImageCaption" style="color: gray; text-align: center; display: none; font-size: .9em;">source: Google Books</span>
+             </div>
+    
+             <div class="col-sm-12 col-md-12" id="snippetCitationImageAdjacent" style="padding: 0; padding-left: 15px; font-size: 1.1em">
+               <div class='col-sm-12' style='padding: 0;'>
+                 {% if authors|length > 0 %}
+                 <p>
+                 {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
+                 </p>
+                 <hr style="margin: 10px 0">
+                 {% endif %}
+    
+                 {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+                   {% for prop in properties_map %}
+                   {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
+                   <br/>
+                   {% endfor %}
+    
+                   {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+                   <span>Volume: </span>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}
+                   <br/>
+                   {% endif %}
+    
+                   {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                   <span>Issue: </span> {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}
+                   <br/>
+                   {% endif %}
+    
+                   {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+                   <span>Pages: </span> {{ citation|get_public_page_string }}
+                   <br/>
+                   {% endif %}
+    
+                   <hr style="margin: 10px 0">
+                 {% endif %}
+    
+                 {% if citation.linkeddata_public.all|length > 0 %}
+                    {% for entry in citation.linkeddata_public.all %}
+                      <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                       <span>{{ entry.type_controlled }}: <a href="{{ entry|linkeddata_for_display }}" taget="_blank"> {{ entry.universal_resource_name }}</a></span>
+                      </div>
+                    {% endfor %}
+                 {% endif %}
+               </div>
+             </div>
+             <div class="col-sm-12 col-md-12" style="padding: 0;">
+               <hr style="margin: 10px 0; display: none;" id="snippetCitatationImageBreak">
+               <!-- subject tags -->
+               {% if concepts or time_periods or places or people or institutions %}
+                 <div class="panel panel-default">
+                   <div class="panel-body subject-tags" style="padding: 15px;">
+                     {% if concepts %}
+                       {% for concept in concepts %}
+                       {% if concept.authority %}
+                       <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                           <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
+                       </a>
+                       {% endif %}
+                       {% endfor %}
+                     {% endif %}
+                     {% if time_periods %}
+                       {% for time in time_periods %}
+                       {% if time.authority %}
+                       <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
+                           <span class="label label-times link-label">{{ time.authority.name }}</span>
+                       </a>
+                       {% endif %}
+                       {% endfor %}
+                     {% endif %}
+                     {% if places %}
+                       {% for place in places %}
+                       {% if place.authority %}
+                       <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
+                           <span class="label label-places link-label">{{ place.authority.name }}</span>
+                       </a>
+                       {% endif %}
+                       {% endfor %}
+                     {% endif %}
+                     {% if people %}
+                       {% for person in people %}
+                       {% if person.authority %}
+                       <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
+                           <span class="label label-people link-label">{{ person.authority.name }}</span>
+                       </a>
+                       {% endif %}
+                       {% endfor %}
+                     {% endif %}
+                     {% if institutions %}
+                       {% for institution in institutions %}
+                       {% if institution.authority %}
+                       <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
+                           <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
+                       </a>
+                       {% endif %}
+                       {% endfor %}
+                     {% endif %}
+                   </div>
+                 </div>
+               {% endif %}
+    
+               <!-- <div></div> -->
+               {% if related_citations_rb %}
+                 <div class="panel panel-default">
+                   <div class="panel-heading">
+                      <i class="fas fa-book"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Reviewed By
+                   </div>
+                   <div class="panel-body">
+                       {% for cc_rel in related_citations_rb %}
+                         {% with cc_rel.object as citation_object %}
+                           {% include "isisdata/citation_entry.html" %}
+                         {% endwith %}
+                       {% endfor %}
+                   </div>
+                 </div>
+               {% endif %}
+    
+               <!-- Review of -->
+               {% if related_citations_ro or related_citations_inv_rb %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="fas fa-book"></i> Review Of
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_ro %}
+                      {% if cc_rel.subject.id == citation_id %}
+                        {% with cc_rel.object as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% else %}
+                        {% with cc_rel.subject as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% endif %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               <!-- Includes Chapter -->
+               {% if related_citations_ic %}
+                 <div class="panel panel-default">
+                   <div class="panel-heading">
+                     <i class="fas fa-book"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book-open"></i> Includes Chapters
+                   </div>
+                   <div class="panel-body">
+                       {% for cc_rel in related_citations_ic %}
+                         {% with cc_rel.object as citation_object %}
+                           {% include "isisdata/citation_entry.html" %}
+                         {% endwith %}
+                       {% endfor %}
+                   </div>
+                 </div>
+               {% endif %}
+    
+               {% if related_citations_inv_ic %}
+                <div class="panel panel-default chapter-included">
+                  <div class="panel-heading">
+                    <i class="fas fa-book-open"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book"></i> Included in
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_inv_ic %}
+                      {% with cc_rel.subject as citation_object %}
+                        {% include "isisdata/citation_entry.html" %}
+                      {% endwith %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               <!-- Includes Series Article -->
+               {% if related_citations_isa %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Includes Series Articles
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_isa %}
+                        {% with cc_rel.object as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               {% if related_citations_inv_isa %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Included in
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_inv_isa %}
+                        {% with cc_rel.subject as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               <!-- Response to -->
+               {% if related_citations_re %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Response to
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_re %}
+                        {% with cc_rel.object as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               {% if related_citations_inv_re %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Has Response
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_inv_re %}
+                        {% with cc_rel.subject as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+    
+               <!-- Associated with -->
+               {% if related_citations_as %}
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <i class="far fa-file-alt"></i> <i class="fas fa-arrows-alt-h"></i> <i class="far fa-file-alt"></i> Associated with
+                  </div>
+                  <div class="panel-body">
+                      {% for cc_rel in related_citations_as %}
+                        {% if cc_rel.subject.id == citation.id %}
+                        {% with cc_rel.object as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                        {% else %}
+                        {% with cc_rel.subject as citation_object %}
+                          {% include "isisdata/citation_entry.html" %}
+                        {% endwith %}
+                        {% endif %}
+                      {% endfor %}
+                  </div>
+                </div>
+               {% endif %}
+             </div>
+            </div>
+          </div>
+        </div>
+        <textarea id="HTMLSnippetContainer" style="height: 1000px; width: 100%;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" onclick="copyHTMLSnippet()">Copy HTML</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /modal -->
+
 <div ng-app="commentsApp">
   <div class="col-md-12" style="padding-top: 15px">
     <div class="col-sm-12 main" style="padding-top: 15px">
@@ -1331,6 +1652,23 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div>
 
 <script>
+    // HTML snippeting
+
+    const HTMLSnippet = document.getElementById("HTMLSnippetContent").outerHTML;
+    let HTMLSnippetContainer = document.getElementById("HTMLSnippetContainer");
+    HTMLSnippetContainer.value += HTMLSnippet;
+    // end HTML snippeting
+
+    // copy HTML snippet
+    function copyHTMLSnippet() {
+      let copyTextarea = document.querySelector('#HTMLSnippetContainer');
+      // copyTextarea.focus();
+      copyTextarea.select();
+      document.execCommand("copy");
+      $.notify("URL of this record has been copied to your clipboard.", "success");
+    }
+    // end copy HTML snippet
+    
     var textHolder = document.querySelector('.itemAbstract');
     var btn = document.querySelector('.readMore');
 
