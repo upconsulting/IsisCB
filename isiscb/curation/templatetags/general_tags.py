@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from django import template
 from isisdata.models import *
 from dateutil.relativedelta import relativedelta
+from isisdata.templatetags.app_filters import *
+from curation.utils import *
 
 register = template.Library()
 
@@ -64,3 +66,21 @@ def get_tenant(id):
     if id:
         return Tenant.objects.get(pk=id)
     return ""
+
+@register.filter
+def get_print_formatted_citation(id):
+    return get_printlike_citation(id)
+
+@register.filter
+def set_bookshelf_page(link, sort_str):
+    """
+    This method figures out what page number each paginator button should link to given the current
+    page number. Key is the url code for setting the page: 'page_citation'. 'sort_str' contains 
+    this key and the page number in question.
+    """
+    [key, page_number] = sort_str.split(":")
+    if key in link:
+        return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
+    else:
+        new_link = link + "?" if "?" not in link else link + "&"
+        return new_link + key + "=" + str(page_number)

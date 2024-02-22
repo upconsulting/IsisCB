@@ -192,25 +192,26 @@
 </div>
 
   <script>
-    let textHolder = document.querySelector('.wikiIntro');
-    let btn = document.querySelector('.readMore');
-
-    function toggleText() {
-      textHolder.classList.toggle("truncate");
-    }
-
-    btn.addEventListener('click', toggleText);
+    
   </script>
 
-<!-- gets wikimedia image and synopsis where possible -->
-<script type="text/javascript">
 
+<script type="text/javascript">
+  //wikipedia abstract text toggler
+  let textHolder = document.getElementById("wikiIntro");
+  let btn = document.querySelector('.readMore');
+
+  function toggleText() {
+    textHolder.classList.toggle("truncate");
+  }
+
+  btn.addEventListener('click', toggleText);
+
+  //gets wikimedia image and synopsis where possible
   let wikiImage = "{{ wikiImage|safe }}";
   let wikiIntro = `{{ wikiIntro }}`;
   let wikiCredit = "{{ wikiCredit|safe }}";
   let type = "{{display_type}}";
-
-  console.log(wikiImage);
 
   let default_image_map = {
     "Concept": "{% static 'isisdata/images/concept_default_image.png' %}",
@@ -276,8 +277,6 @@
   document.getElementById('wikiImageBorder').style.display = "block";
 
   if (wikiIntro !== "") {
-    let textHolder = document.querySelector('.wikiIntro');
-
     textHolder.innerHTML = wikiIntro;
     document.getElementById('wikiIntroBreak').style.display = "inline-block";
     document.getElementById('wikiSynopsisCredit').style.display = "block";
@@ -287,7 +286,7 @@
     $(other).html('a<br>b').hide().appendTo('body');
     let size = $(other).height() / 2;
     $(other).remove();
-    let lines = $(textHolder).height() /  size;
+    let lines = $(textHolder).height() / size;
 
     if (lines > 7) {
       document.getElementById('wikiIntroButton').style.display = "inline-block";

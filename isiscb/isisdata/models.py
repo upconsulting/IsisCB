@@ -999,7 +999,7 @@ class ReferencedEntity(models.Model):
         Create a new Unique Resource Identifier.
         """
         values = type(self).__name__.lower(), self.id
-        return urllib.parse.urlunparse(('http', settings.DOMAIN,
+        return urllib.parse.urlunparse(('https', settings.DOMAIN,
                                     'isis/{0}/{1}/'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
@@ -2753,7 +2753,6 @@ class Annotation(models.Model):
     @property
     def byline(self):
         return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
-
 
 class CitationCollection(models.Model):
     """

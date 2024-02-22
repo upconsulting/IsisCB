@@ -1,0 +1,15 @@
+{% load general_tags %}
+
+<div class="panel panel-default facet-box">
+    <div class="panel-heading-relation panel-heading">
+      <strong>{{panel_title}}</strong>
+    </div>
+    <div class="panel-body">
+      {% for facet in facets|slice:"6" %}
+      {% if facet.authority %}
+        <a class="tinos-regular" title="Go to page for {{facet.authority.name}}" href="{{ facet.authority|get_uri }}">{{facet.authority.name}}</a><span> ({{facet.count}})</span>
+        <br>
+      {% endif %}
+      {% endfor %}
+    </div>
+</div>
