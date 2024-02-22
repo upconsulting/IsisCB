@@ -1345,7 +1345,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     
             {% with citation|get_pub_year as pub_year %}
             {% with citation|get_title as citation_title %}
-            <a href="{{citation | get_uri}}" style="color:#333;"><h3 style="margin: 0px">{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
+            <a href="{{citation | get_uri:tenant_id}}" style="color:#333;"><h3 style="margin: 0px">{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
               {% if citation.stub_record_status == 'SR' %}
               <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
               {% endif %}
