@@ -215,8 +215,9 @@ DATABASES = {
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        #'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         #'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'http://search:9200/'),
         'INDEX_NAME': 'haystack1',
         #'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',

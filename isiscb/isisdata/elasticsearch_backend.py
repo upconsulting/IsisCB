@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-#from haystack.backends.elasticsearch_backend import ElasticsearchSearchBackend, ElasticsearchSearchEngine, ElasticsearchSearchQuery
-from haystack.backends.elasticsearch7_backend import Elasticsearch7SearchBackend, Elasticsearch7SearchEngine, Elasticsearch7SearchQuery
+from haystack.backends.elasticsearch_backend import ElasticsearchSearchBackend, ElasticsearchSearchEngine, ElasticsearchSearchQuery
+#from haystack.backends.elasticsearch7_backend import Elasticsearch7SearchBackend, Elasticsearch7SearchEngine, Elasticsearch7SearchQuery
 from haystack.utils import get_identifier, get_model_ct
 from haystack.constants import DJANGO_CT
 import six
@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class IsisCBElasticsearchSearchQuery(Elasticsearch7SearchQuery):
+class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
 
     def clean(self, query_fragment):
         """
