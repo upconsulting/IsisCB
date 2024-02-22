@@ -8,9 +8,6 @@
 
 {% for task in tasks %}
 <div class="row">
-    <div class="col-xs-12">
-      <p><br><em>{{ task.label }}</em></p>
-    </div>
     <div class="col-xs-4">
         <p>Field: {{ task.value.0 }}</p>
         <p>Value: {{ task.value.1 }}</p>
@@ -32,9 +29,11 @@
             for support, or consult the server logs.
         </p>
         {% else %}
-        {% block extrahead %}
-        <meta http-equiv="refresh" content="3"/>
-        {% endblock %}
+        <script>
+          setTimeout(function(){
+            window.location.reload(1);
+          }, 3000);
+        </script>
 
         <p class="text-warning">
             {% if task.max_value == 0 %}
@@ -50,6 +49,9 @@
             {% endif %}
         </p>
         {% endif %}
+    </div>
+    <div class="col-xs-12">
+      <p><br><em>{{ task.label }}</em></p>
     </div>
 </div>
 {% endfor %}

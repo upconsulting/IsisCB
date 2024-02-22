@@ -130,7 +130,6 @@ def get_authors_editors_preloaded(citation_id):
     rtype_display = dict(ACRelation.TYPE_CHOICES)
     return ', '.join(['%s (%s)' % (obj.get('authority__name', None) or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or 'missing', rtype_display[obj['type_controlled']]) for obj in qs])
 
-
 @register.filter(name='get_citation_pubdate')
 def get_citation_pubdate(obj):
     for attribute in obj.attributes.all():

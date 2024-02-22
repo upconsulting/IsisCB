@@ -1,0 +1,221 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load addcss %}
+{% load general_tags %}
+{% load app_filters %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+        <h1 class="panel-title">Preview of HTML Snippet Components</h1>
+    </div>
+    <div class="panel-body">
+        <div class="col-sm-6">
+          {% if page_results.has_previous or page_results.has_next %}
+            <nav class="hidden-print">
+                <ul class="pagination">
+                    <li class="disabled"><a>Page:</a></li>
+                    {% if page_results.has_previous %}
+                    <li>
+                        {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                        {% with ppage="page_citation:"|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}&search={{search_key}}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    {% if page_results.has_previous or page_results.has_next %}
+                    {% for p in page_results.paginator.page_range %}
+                    {% with pagenr=forloop.counter|stringformat:"s" %}
+                    {% with ppage='page_citation:'|add:pagenr %}
+                    {% with page_results.paginator.page_range|last as last %}
+                    {% with page_results.paginator.page_range|first as first %}
+                        {% if page_results.number >= 4 and p == first %}
+                        <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
+                        <li class="disabled"><span>...</span></li>
+                        {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                        <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
+                        {% elif p == last %}
+                        <li class="disabled"><span>...</span></li>
+                        <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
+                        {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if page_results.has_next %}
+                    <li>
+                        {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                        {% with ppage='page_citation:'|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+          {% endif %}
+          <div id="listHTMLSnippetContent">
+              {% for citation in page_results %}
+                  <p class="tinos-regular" style="padding-left: 25px; text-indent: -25px; font-size: 18px;"><a href="{{ citation|get_uri:citation.owning_tenant }}">{{ citation.id|get_print_formatted_citation }}</a></p>
+              {% endfor %}
+          </div>
+          <hr>
+          {% if page_results.has_previous or page_results.has_next %}
+              <nav class="hidden-print">
+                  <ul class="pagination">
+                      <li class="disabled"><a>Page:</a></li>
+                      {% if page_results.has_previous %}
+                      <li>
+                          {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                          {% with ppage="page_citation:"|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&laquo;</span>
+                      </li>
+                      {% endif %}
+
+                      {% if page_results.has_previous or page_results.has_next %}
+                      {% for p in page_results.paginator.page_range %}
+                      {% with pagenr=forloop.counter|stringformat:"s" %}
+                      {% with ppage='page_citation:'|add:pagenr %}
+                      {% with page_results.paginator.page_range|last as last %}
+                      {% with page_results.paginator.page_range|first as first %}
+                          {% if page_results.number >= 4 and p == first %}
+                          <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
+                          <li class="disabled"><span>...</span></li>
+                          {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                          <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
+                          {% elif p == last %}
+                          <li class="disabled"><span>...</span></li>
+                          <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
+                          {% endif %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endfor %}
+                      {% endif %}
+
+                      {% if page_results.has_next %}
+                      <li>
+                          {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                          {% with ppage='page_citation:'|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&raquo;</span>
+                      </li>
+                      {% endif %}
+                  </ul>
+              </nav>
+          {% endif %}
+          <hr>
+          <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+        <div class="col-sm-6">
+            <div class="row" id="boxesHTMLSnippetContent">
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if facets.PR %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Authors & Contributors" %}
+                  {% endif %}
+
+                  {% if facets.PH %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PH panel_title="Journals" %}
+                  {% endif %}
+
+                  {% if facets.IH %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IH panel_title="Publishers" %}
+                  {% endif %}
+                </div>
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if facets.CO %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.CO panel_title="Concepts" %}
+                  {% endif %}
+
+                  {% if facets.PE %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PE panel_title="People" %}
+                  {% endif %}
+
+                  {% if facets.TI %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.TI panel_title="Time Periods" %}
+                  {% endif %}
+
+                  {% if facets.GE %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Places" %}
+                  {% endif %}
+
+                  {% if facets.IN %}
+                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IN panel_title="Institutions" %}
+                  {% endif %}
+                </div>
+            </div>
+            <hr>
+            <textarea id="boxesHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+    </div>
+    <div class="panel-footer clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    let listHTMLSnippet = document.getElementById("listHTMLSnippetContent").outerHTML;
+    let listHTMLSnippetContainer = document.getElementById("listHTMLSnippetContainer");
+    listHTMLSnippetContainer.value += listHTMLSnippet;
+
+    let boxesHTMLSnippet = document.getElementById("boxesHTMLSnippetContent").outerHTML;
+    let boxesHTMLSnippetContainer = document.getElementById("boxesHTMLSnippetContainer");
+    boxesHTMLSnippetContainer.value += boxesHTMLSnippet;
+
+    function copyListHTMLSnippet() {
+        let listCopyTextarea = document.querySelector('#listHTMLSnippetContainer');
+        listCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("This bibliography has been copied to your clipboard.", "success");
+    }
+
+    function copyBoxesHTMLSnippet() {
+        let boxesCopyTextarea = document.querySelector('#boxesHTMLSnippetContainer');
+        boxesCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("These boxes has been copied to your clipboard.", "success");
+    }
+</script>
+{% endblock %}

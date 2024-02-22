@@ -16,8 +16,6 @@
   {% endif %}
 </div>
 
-<p><br><em>{{ task.label }}</em></p>
-
 {% if task.state == 'SUCCESS' %}
 <p class="text-warning">
   {% if exported_type == 'CITATION' or exported_type == 'AUTHORITY' %}
@@ -35,9 +33,11 @@
     for support, or consult the server logs.
 </p>
 {% else %}
-{% block extrahead %}
-<meta http-equiv="refresh" content="3"/>
-{% endblock %}
+<script>
+  setTimeout(function(){
+    window.location.reload(1);
+  }, 3000);
+</script>
 
 <p class="text-warning">
     {% if task.max_value == 0 %}
@@ -69,5 +69,8 @@
     <a class="btn btn-md btn-success" href="{% url "curation:authority_list" %}">Return to Search Interface</a>
   {% endif %}
 </div>
+
+<p><br><em>{{ task.label }}</em></p>
+
 
 {% endblock %}
