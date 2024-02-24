@@ -160,8 +160,7 @@ HAYSTACK_DEFAULT_INDEX = 'default'
 
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-        # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
     },
