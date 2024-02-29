@@ -1272,7 +1272,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     sqs.query.set_limits(low=0, high=30)
     # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
     featured_citations = sqs.all().exclude(public="false")
-    featured_citations = featured_citations.filter(subject_ids__in=current_featured_authority_ids, owning_tenant=tenant).filter(type__in=['Book', 'Article']).filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+    featured_citations = featured_citations.filter(subject_ids__in=current_featured_authority_ids, owning_tenant=tenant.id).filter(type__in=['Book', 'Article']).filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
