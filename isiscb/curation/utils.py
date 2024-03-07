@@ -35,7 +35,7 @@ def _format_contributors(citation):
     All surnames are formatted in smallcaps
     """
     contrib_acrelations = citation.get_all_contributors
-    contribs = [acrel.authority.name for acrel in filter(lambda rel: rel.authority and rel.authority.name, contrib_acrelations)]
+    contribs = [acrel for acrel in filter(lambda rel: rel.authority and rel.authority.name, contrib_acrelations)]
 
     if not contribs:
         return ''
@@ -53,20 +53,33 @@ def _format_contributors(citation):
     return formatted_contributors
 
 def _build_name_last_first_html(contrib):
-    if "," in contrib:
-        return '<span style="font-variant: small-caps;">' + contrib.split(',')[0] + '</span>, ' + contrib.split(',')[1]
-    if " " in contrib:
-        return '<span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>, ' + contrib.split(' ')[0] 
+    full_name = contrib.authority.name
+    is_editor = True if contrib.type_controlled == ACRelation.EDITOR else False
+    # Last, First
+    if "," in full_name:
+        return '<span style="font-variant: small-caps;">' + full_name.split(',')[0] + '</span>, ' \
+            + full_name.split(',')[1] \
+            +  (" (ed.)" if is_editor else "")
+    # First Last, First M. Last (split on last blank)
+    if " " in full_name:
+        name_parts = full_name.rsplit(' ', 1)
+        return '<span style="font-variant: small-caps;">' + name_parts[1] + '</span>, ' + name_parts[0] +  (" (ed.)" if is_editor else "")
      
-    return '<span style="font-variant: small-caps;">' + contrib + '</span>'
+    return '<span style="font-variant: small-caps;">' + full_name + '</span>' + (" (ed.)" if is_editor else "")
     
 def _build_name_first_last_html(contrib):
-    if "," in contrib:
-        return contrib.split(',')[1] + ' <span style="font-variant: small-caps;">' + contrib.split(',')[0] + '</span>'
-    if " " in contrib: 
-        return contrib.split(' ')[0] + ' <span style="font-variant: small-caps;">' + contrib.split(' ')[1] + '</span>'
+    full_name = contrib.authority.name
+    is_editor = True if contrib.type_controlled == ACRelation.EDITOR else False
+    if "," in full_name:
+        return full_name.split(',')[1] \
+            + ' <span style="font-variant: small-caps;">' \
+            + full_name.split(',')[0] + '</span>' \
+            + (" (ed.)" if is_editor else "")
+    if " " in full_name: 
+        name_parts = full_name.rsplit(' ', 1)
+        return name_parts[0] + ' <span style="font-variant: small-caps;">' + name_parts[1] + '</span>' + (" (ed.)" if is_editor else "")
     
-    return '<span style="font-variant: small-caps;">' + contrib + '</span>'
+    return '<span style="font-variant: small-caps;">' + full_name + '</span>' + (" (ed.)" if is_editor else "")
     
 def _format_title(citation):
     title = get_title(citation)
