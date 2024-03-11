@@ -136,6 +136,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     # IEXP-163
     concepts_only_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
+    # IEXP-513: for facet boxes on authority pages generated through search
+    publication_host_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
     dataset_typed_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_typed_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
@@ -410,6 +413,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
             if a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
                 multivalue_data['other_person_ids'].append(ident)
+            
+            if a['acrelation__type_broad_controlled'] == ACRelation.PUBLICATION_HOST:
+                if ident not in multivalue_data['publication_host_ids']:
+                    multivalue_data['publication_host_ids'].append(ident)
 
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
                 multivalue_data['persons'].append(name)

@@ -892,29 +892,51 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             </div>
             <div role="tabpanel" class="tab-pane" id="catalog">
               <div class="row">
-                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.PR %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-relation panel-heading">
-                        <strong>Authors & Contributors</strong>
-                        {% if similar_objects.PR|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
+                <div class="panel-heading">
+                  <strong>Authors & Contributors</strong>
+                  {% if facets.fields.persons_ids|length > 5 and facets.fields.persons_ids|length > 0 %}
+                        <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style='float:right;'>
+                          More <i class="fas fa-angle-down"></i>
                         </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.PR|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                          {{facet.authority.name}}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                          <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
                   {% endif %}
+                </div>
+                <div id="collapseAuthors" class="panel-collapse collapse in collapseAuthors">
+                  <div class="facet_panel panel-body">
+                    {% if facets.fields.all_contributor_ids %}
+                    <div class="row panel-row">
+        
+                          {% for author in facets.field.all_contributor_ids %}
+                          {% with author|create_facet_string:'citation_persons_ids' as encoded_author %}
+                          <div class="col-md-12">
+                            <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{author|get_authority_name}} <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'tenants:authority' tenant_id author %}?"><i class="fas fa-external-link-alt"></i></a>
+                          </div>
+                          {% endwith %}
+                          {% endfor %}
+        
+                          {% if selected_facets.citation_persons_ids %}
+                          <div class="col-md-12">
+                            <hr style="margin-top: 4px; margin-bottom: 4px;">
+                          </div>
+                          {% endif %}
+        
+                          {# Provide only the top 5 authors #}
+                          {% for author in facets_citation.fields.persons_ids|slice:":5" %}
+                          {% if "citation_persons_ids" not in selected_facets.keys or author.0 not in selected_facets.citation_persons_ids %}
+                          <div class="col-md-12" style="padding:0 0 0 15px">
+                            <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i> ({{ author.1 }})</a> {{ author.0|get_authority_name }} <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'tenants:authority' tenant_id author.0 %}?"><i class="fas fa-external-link-alt"></i></a>
+                          </div>
+                          {% endif %}
+                          {% endfor %}
+                    </div>
+        
+                      {% else %}
+                      <div class="row panel-row">
+                        <div class="col-md-12 panel-cell">
+                          <p>No author facets.</p>
+                        </div>
+                      </div>
+                      {% endif %}
+                  </div>
 
                   {% if similar_objects.PH %}
                     <div class="panel panel-default facet-box">

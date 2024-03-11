@@ -725,6 +725,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               </a>
               <a id="catalog-tab" href="#catalog" class="btn tab-btn-default" role="tab" data-toggle="tab">
                 <input type="radio" />Indexes
+                  
               </a>
             </div>
           </div>
@@ -801,12 +802,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <div role="tabpanel" class="tab-pane" id="catalog">
               <div class="row">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.PR %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Authors & Contributors" facets=similar_objects.PR %}
+                  {{facets.fields.keys}}
+                  {% if facets.fields.all_contributor_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids %}
                   {% endif %}
 
-                  {% if similar_objects.PH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Journals" facets=similar_objects.PH %}
+                  {% if facets.fields.publication_host_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids %}
                   {% endif %}
 
                   {% if similar_objects.IH %}

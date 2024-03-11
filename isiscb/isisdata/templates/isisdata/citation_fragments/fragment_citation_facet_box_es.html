@@ -1,0 +1,20 @@
+{% load facet_filters %}
+
+<div class="panel panel-default facet-box">
+    <div class="panel-heading-relation panel-heading">
+        <strong>{{panel_title}}</strong>
+        {% if facets|length > 6 %}
+            <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
+                More <i class="far fa-caret-square-down"></i>
+            </button>
+        {% endif %}
+    </div>
+    <div class="panel-body">
+    {% for facet in facets|slice:"6" %}
+        <a title="See all citations connected to facet.0|get_authority_name" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.0|urlencode }}"><i class="fas fa-search"></i></a>
+        {{facet.0|get_authority_name}}
+        <a title="Go to page for {{facet.0|get_authority_name}}" href={% url 'authority' facet.0 %}><i class="fas fa-external-link-alt"></i></a>
+        <br>
+    {% endfor %}
+    </div>
+</div>
