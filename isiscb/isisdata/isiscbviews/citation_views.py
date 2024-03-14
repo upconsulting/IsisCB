@@ -105,6 +105,7 @@ def citation(request, citation_id, tenant_id=None):
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
 
+    old_objects = get_facets_from_citations_old(similar_citations)
     similar_objects = get_facets_from_citations([citation.id for citation in similar_citations])
     
     googleBooksImage = None
@@ -211,6 +212,7 @@ def citation(request, citation_id, tenant_id=None):
         'last_query': last_query,
         'query_string': query_string,
         'similar_citations': similar_citations,
+        'old_facets': old_objects,
         'facets': similar_objects.facet_counts(),
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
@@ -273,6 +275,9 @@ def get_facets_from_citations(citations):
                 facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
                 facet('category_ids', size=100).facet('other_person_ids', size=100).\
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_only_by_subject_ids', size=100).\
+                facet('institutional_host_ids', size=100).\
+                facet('about_person_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000).\
@@ -284,22 +289,23 @@ def get_facets_from_citations(citations):
     sqs = sqs.filter(sq).exclude(public="false")
     return sqs
 
-    # objects = defaultdict(list)
+def get_facets_from_citations_old(citations):
+    objects = defaultdict(list)
 
-    # if citations:
-    #     citations_ids = [citation.id for citation in citations]
-    #     citations_qs = Citation.objects.all().filter(id__in=citations_ids)
-    #     acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
-    #     for acrelation in acrelations:
-    #         if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
-    #             objects[acrelation.type_broad_controlled].append(acrelation.authority)
-    #         if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
-    #             objects[acrelation.authority.type_controlled].append(acrelation.authority)
+    if citations:
+        citations_ids = [citation.id for citation in citations]
+        citations_qs = Citation.objects.all().filter(id__in=citations_ids)
+        acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
+        for acrelation in acrelations:
+            if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
+                objects[acrelation.type_broad_controlled].append(acrelation.authority)
+            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
+                objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
-    # if objects:
-    #     objects = generate_facets(objects)
+    if objects:
+        objects = generate_facets(objects)
 
-    # return objects
+    return objects
 
 def generate_facets(objects):
     for key in objects:

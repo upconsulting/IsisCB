@@ -802,38 +802,65 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <div role="tabpanel" class="tab-pane" id="catalog">
               <div class="row">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {{facets.fields.keys}}
                   {% if facets.fields.all_contributor_ids %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids"%}
+                  {% endif %}
+
+                  {% if old_facets.PR %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Authors & Contributors old" facets=old_facets.PR %}
                   {% endif %}
 
                   {% if facets.fields.publication_host_ids %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" %}
                   {% endif %}
 
-                  {% if similar_objects.IH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Publishers" facets=similar_objects.IH %}
+                  {% if old_facets.PH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Journals old" facets=old_facets.PH %}
+                  {% endif %}
+
+                  {% if facets.fields.institutional_host_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" %}
+                  {% endif %}
+
+                  {% if old_facets.IH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Publishers old" facets=old_facets.IH %}
                   {% endif %}
                 </div>
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.CO %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Concepts" facets=similar_objects.CO %}
+                  
+                  {% if facets.fields.concepts_only_by_subject_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" %}
+                  {% endif %}
+                  {% if old_facets.CO %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Concepts old" facets=old_facets.CO %}
                   {% endif %}
 
-                  {% if similar_objects.PE %}
-                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="People" facets=similar_objects.PE %}
+                  {% if facets.fields.about_person_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People old" facets=facets.fields.about_person_ids facet_field="about_person_ids"  %}
+                  {% endif %}
+                  {% if old_facets.PE %}
+                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="People old" facets=old_facets.PE %}
                   {% endif %}
 
-                  {% if similar_objects.TI %}
-                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Time Periods" facets=similar_objects.TI %}
+                  {% if facets.fields.time_period_ids %}
+                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" %}
+                  {% endif %}
+                  {% if old_facets.TI %}
+                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Time Periods old" facets=old_facets.TI %}
                   {% endif %}
 
-                  {% if similar_objects.GE %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Places" facets=similar_objects.GE %}
+                  {% if facets.fields.geographic_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" %}
+                  {% endif %}
+                  {% if old_facets.GE %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Places old" facets=old_facets.GE %}
                   {% endif %}
 
-                  {% if similar_objects.IN %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Institutions" facets=similar_objects.IN %}
+                  {% if facets.fields.institutions_by_subject_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids" %}
+                  {% endif %}
+                  {% if old_facets.IN %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Institutions old" facets=old_facets.IN %}
                   {% endif %}
                 </div>
               </div>
