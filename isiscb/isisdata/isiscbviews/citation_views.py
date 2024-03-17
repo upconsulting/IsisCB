@@ -14,7 +14,7 @@ from django.conf import settings
 
 from rest_framework.reverse import reverse
 
-from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.query import EmptySearchQuerySet, SearchQuerySet, SQ
 from collections import defaultdict, Counter
 from urllib.parse import quote
 import base64
@@ -103,8 +103,11 @@ def citation(request, citation_id, tenant_id=None):
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
 
-    similar_objects = get_facets_from_citations(similar_citations)
-
+    if tenant and not request.include_all_tenants:
+        similar_objects = get_facets_from_citations([citation.id for citation in similar_citations], tenant_id=tenant.pk)
+    else:
+        similar_objects = get_facets_from_citations([citation.id for citation in similar_citations])
+    
     googleBooksImage = None
     if tenant and tenant.settings.google_api_key:
         googleBooksImage = isisviews.get_google_books_image(citation, False, tenant.settings.google_api_key)
@@ -209,6 +212,7 @@ def citation(request, citation_id, tenant_id=None):
         'last_query': last_query,
         'query_string': query_string,
         'similar_citations': similar_citations,
+        'facets': similar_objects.facet_counts(),
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
         'tenant_id': tenant_id,
@@ -262,7 +266,35 @@ def _get_related_citations(citation_id, tenant, include_all_projects):
         'related_citations_as': related_citations_as,
     }
 
-def get_facets_from_citations(citations):
+import logging
+logger = logging.getLogger(__name__)
+def get_facets_from_citations(citations, tenant_id=None):
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_only_by_subject_ids', size=100).\
+                facet('institutional_host_ids', size=100).\
+                facet('about_person_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000).\
+                facet('publication_host_ids', size=100)
+   
+    # filter by tenant if tenant is identified
+    if tenant_id:
+        sqs = sqs.filter(tenant_ids=tenant_id)
+    
+    # filter by citation ids
+    sq = SQ()
+    for citation_id in citations:
+        sq.add(SQ(id=citation_id), SQ.OR)
+    sqs = sqs.filter(sq).exclude(public="false")
+
+    return sqs
+
+def get_facets_from_citations_old(citations):
     objects = defaultdict(list)
 
     if citations:

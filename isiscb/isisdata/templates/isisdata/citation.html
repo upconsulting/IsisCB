@@ -801,37 +801,51 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <div role="tabpanel" class="tab-pane" id="catalog">
               <div class="row">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.PR %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Authors & Contributors" facets=similar_objects.PR %}
+                  {% if facets.fields.all_contributor_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal"%}
                   {% endif %}
 
-                  {% if similar_objects.PH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Journals" facets=similar_objects.PH %}
+                  {% if old_facets.PR %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Authors & Contributors old" facets=old_facets.PR %}
                   {% endif %}
 
-                  {% if similar_objects.IH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Publishers" facets=similar_objects.IH %}
+                  {% if facets.fields.publication_host_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" %}
+                  {% endif %}
+
+                  {% if old_facets.PH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Journals old" facets=old_facets.PH %}
+                  {% endif %}
+
+                  {% if facets.fields.institutional_host_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" %}
+                  {% endif %}
+
+                  {% if old_facets.IH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Publishers old" facets=old_facets.IH %}
                   {% endif %}
                 </div>
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.CO %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Concepts" facets=similar_objects.CO %}
+                  
+                  {% if facets.fields.concepts_only_by_subject_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" %}
+                  {% endif %}
+                  
+                  {% if facets.fields.about_person_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" %}
+                  {% endif %}
+                 
+                  {% if facets.fields.time_period_ids %}
+                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" %}
+                  {% endif %}
+                 
+
+                  {% if facets.fields.geographic_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" %}
                   {% endif %}
 
-                  {% if similar_objects.PE %}
-                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="People" facets=similar_objects.PE %}
-                  {% endif %}
-
-                  {% if similar_objects.TI %}
-                  {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Time Periods" facets=similar_objects.TI %}
-                  {% endif %}
-
-                  {% if similar_objects.GE %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Places" facets=similar_objects.GE %}
-                  {% endif %}
-
-                  {% if similar_objects.IN %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Institutions" facets=similar_objects.IN %}
+                  {% if facets.fields.institutions_by_subject_ids %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" %}
                   {% endif %}
                 </div>
               </div>
@@ -851,28 +865,28 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div>
 
 <!-- authors modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="authorModal" modal_aria_labelledby="authorModalLabel" facets=similar_objects.PR modal_title="Authors & Contributors" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="authorModal" modal_aria_labelledby="authorModalLabel" facets=facets.fields.all_contributor_ids modal_title="Authors & Contributors" %}
 
 <!-- concepts Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="subjectModal" modal_aria_labelledby="subjectModalLabel" facets=similar_objects.CO modal_title="Concepts" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="subjectModal" modal_aria_labelledby="subjectModalLabel" facets=facets.fields.concepts_only_by_subject_ids modal_title="Concepts" %}
 
 <!-- people Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="peopleModal" modal_aria_labelledby="peopleModalLabel" facets=similar_objects.PE modal_title="People" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="peopleModal" modal_aria_labelledby="peopleModalLabel" facets=facets.fields.about_person_ids modal_title="People" %}
 
 <!-- places Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="placesModal" modal_aria_labelledby="placesModalLabel" facets=similar_objects.GE modal_title="Places" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="placesModal" modal_aria_labelledby="placesModalLabel" facets=facets.fields.geographic_ids modal_title="Places" %}
 
 <!-- institution Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="institutionModal" modal_aria_labelledby="institutionModalLabel" facets=similar_objects.IN modal_title="Institutions" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="institutionModal" modal_aria_labelledby="institutionModalLabel" facets=facets.fields.institutions_by_subject_ids modal_title="Institutions" %}
 
 <!-- times Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="timePeriodModal" modal_aria_labelledby="timePeriodModalLabel" facets=similar_objects.TI modal_title="Time Periods" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="timePeriodModal" modal_aria_labelledby="timePeriodModalLabel" facets=facets.fields.time_period_ids modal_title="Time Periods" %}
 
 <!-- publisher Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="publisherModal" modal_aria_labelledby="publisherModalLabel" facets=similar_objects.IH modal_title="Publishers" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="publisherModal" modal_aria_labelledby="publisherModalLabel" facets=facets.fields.institutional_host_ids modal_title="Publishers" %}
 
 <!-- periodical Modal -->
-{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal.html' with modal_id="journalModal" modal_aria_labelledby="journalModalLabel" facets=similar_objects.PH modal_title="Journals" %}
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="journalModal" modal_aria_labelledby="journalModalLabel" facets=facets.fields.publication_host_ids modal_title="Journals" %}
 
 <!-- link resolver modal -->
 <div class="modal fade" id="linkResolverModal" tabindex="-1" role="dialog" aria-labelledby="linkResolverModalLabel">
