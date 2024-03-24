@@ -3,7 +3,7 @@
 <div class="panel panel-default facet-box">
     <div class="panel-heading-relation panel-heading">
         <strong>{{panel_title}}</strong>
-        {% if facets|length > 6 %}
+        {% if facets|length > 6 and not hide_modal %}
             <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#{{model_id}}" style="float:right">
                 More <i class="far fa-caret-square-down"></i>
             </button>

@@ -289,10 +289,7 @@ def get_facets_from_citations(citations, tenant_id=None):
         sqs = sqs.filter(tenant_ids=tenant_id)
     
     # filter by citation ids
-    sq = SQ()
-    for citation_id in citations:
-        sq.add(SQ(id=citation_id), SQ.OR)
-    sqs = sqs.filter(sq).exclude(public="false")
+    sqs = sqs.filter(id__in=citations).exclude(public="false")
 
     return sqs
 
