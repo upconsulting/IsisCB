@@ -1,4 +1,5 @@
 {% load facet_filters %}
+{% load general_tags %}
 
 <div class="panel panel-default facet-box">
     <div class="panel-heading-relation panel-heading">
@@ -11,9 +12,9 @@
     </div>
     <div class="panel-body">
     {% for facet in facets|slice:"6" %}
-        <a title="See all citations connected to facet.0|get_authority_name" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_{{facet_field}}:{{ facet.0|urlencode }}"><i class="fas fa-search"></i></a>
+        <a title="See all citations connected to facet.0|get_authority_name" style="display: inline;" href="{{ tenant_id|get_uri_host }}{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_{{facet_field}}:{{ facet.0|urlencode }}"><i class="fas fa-search"></i></a>
         {{facet.0|get_authority_name}}
-        <a title="Go to page for {{facet.0|get_authority_name}}" href={% url 'tenants:authority' tenant_id facet.0 %}><i class="fas fa-external-link-alt"></i></a>
+        <a title="Go to page for {{facet.0|get_authority_name}}" href={{ facet.0 | get_authority_uri:tenant_id }}><i class="fas fa-external-link-alt"></i></a>
         <br>
     {% endfor %}
     </div>
