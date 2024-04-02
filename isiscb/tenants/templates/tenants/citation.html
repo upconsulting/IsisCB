@@ -893,190 +893,42 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <div role="tabpanel" class="tab-pane" id="catalog">
               <div class="row">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.PR %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-relation panel-heading">
-                        <strong>Authors & Contributors</strong>
-                        {% if similar_objects.PR|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.PR|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                          {{facet.authority.name}}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                          <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
+                {% if facets.fields.all_contributor_ids %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal"%}
+                {% endif %}
 
-                  {% if similar_objects.PH %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading panel-heading-relation">
-                        <strong>Journals</strong>
-                        {% if similar_objects.PH|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#journalModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.PH|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                          {{facet.authority.name}}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                          <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
+                
+                {% if facets.fields.publication_host_ids %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="journalModal" %}
+                {% endif %}
 
-                  {% if similar_objects.IH %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading panel-heading-relation">
-                        <strong>Publishers</strong>
-                        {% if similar_objects.IH|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#publisherModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.IH|slice:"6" %}
-                        {% if facet.authority %}
-                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                          {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
+                
+
+                {% if facets.fields.institutional_host_ids %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="journalModal" %}
+                {% endif %}
                 </div>
 
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if similar_objects.CO %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Concepts</strong>
-                        {% if similar_objects.CO|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#subjectModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.CO|slice:"6" %}
-                        {% if facet.authority %}
-                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                  {% if facets.fields.concepts_only_by_subject_ids %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" %}
+                  {% endif %}
+                  
+                  {% if facets.fields.about_person_ids %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" %}
+                  {% endif %}
+                 
+                  {% if facets.fields.time_period_ids %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" %}
+                  {% endif %}
+                 
+
+                  {% if facets.fields.geographic_ids %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" %}
                   {% endif %}
 
-                  {% if similar_objects.PE %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>People</strong>
-                        {% if similar_objects.PE|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.PE|slice:"6" %}
-                        {% if facet.authority %}
-                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
-
-                  {% if similar_objects.GE %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Places</strong>
-                        {% if similar_objects.GE|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.GE|slice:"6" %}
-                        {% if facet.authority %}
-                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
-
-                  {% if similar_objects.TI %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Times</strong>
-                        {% if similar_objects.TI|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.TI|slice:"6" %}
-                        {% if facet.authority %}
-                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endif %}
-
-                  {% if similar_objects.IN %}
-                    <div class="panel panel-default facet-box">
-                      <div class="panel-heading-subjects panel-heading">
-                        <strong>Institutions </strong>
-                        {% if similar_objects.IN|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style="float:right">
-                          More <i class="far fa-caret-square-down"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      <div class="panel-body">
-                        {% for facet in similar_objects.IN|slice:"6" %}
-                        {% if facet.authority %}
-                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-                        {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-                        <br>
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
+                  {% if facets.fields.institutions_by_subject_ids %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" %}
                   {% endif %}
                 </div>
               </div>
@@ -1087,228 +939,32 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
 </div>
 
+
 <!-- authors modal -->
-<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Authors & Contributors</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for facet in similar_objects.PR %}
-          {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="authorModal" modal_aria_labelledby="authorModalLabel" facets=facets.fields.all_contributor_ids modal_title="Authors & Contributors" %}
+
 <!-- concepts Modal -->
-<div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Concepts</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for facet in similar_objects.CO %}
-          {% if facet.authority %}
-            <li>
-              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
-              <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-            </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="subjectModal" modal_aria_labelledby="subjectModalLabel" facets=facets.fields.concepts_only_by_subject_ids modal_title="Concepts" %}
+
 <!-- people Modal -->
-<div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title" id="myModalLabel">People</h4>
-    </div>
-    <div class="modal-body">
-      <ul class="unselected_facets">
-        {% for facet in similar_objects.PE %}
-        {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    </div>
-  </div>
-</div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="peopleModal" modal_aria_labelledby="peopleModalLabel" facets=facets.fields.about_person_ids modal_title="People" %}
 
 <!-- places Modal -->
-<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Places</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for facet in similar_objects.GE %}
-          {% if facet.authority %}
-            <li>
-              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-              {{facet.authority.name}}
-              <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-            </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-  </div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="placesModal" modal_aria_labelledby="placesModalLabel" facets=facets.fields.geographic_ids modal_title="Places" %}
 
 <!-- institution Modal -->
-<div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title" id="myModalLabel">Institutions</h4>
-    </div>
-    <div class="modal-body">
-      <ul class="unselected_facets">
-        {% for facet in similar_objects.IN %}
-        {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    </div>
-  </div>
-</div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="institutionModal" modal_aria_labelledby="institutionModalLabel" facets=facets.fields.institutions_by_subject_ids modal_title="Institutions" %}
 
 <!-- times Modal -->
-<div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title" id="myModalLabel">Time Periods</h4>
-    </div>
-    <div class="modal-body">
-      <ul class="unselected_facets">
-        {% for facet in similar_objects.TI %}
-        {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    </div>
-  </div>
-</div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="timePeriodModal" modal_aria_labelledby="timePeriodModalLabel" facets=facets.fields.time_period_ids modal_title="Time Periods" %}
 
 <!-- publisher Modal -->
-<div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title" id="myModalLabel">Publishers</h4>
-    </div>
-    <div class="modal-body">
-      <ul class="unselected_facets">
-        {% for facet in similar_objects.IH %}
-        {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    </div>
-  </div>
-</div>
-</div><!-- /modal -->
-
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="publisherModal" modal_aria_labelledby="publisherModalLabel" facets=facets.fields.institutional_host_ids modal_title="Publishers" %}
 
 <!-- periodical Modal -->
-<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title" id="myModalLabel">Journals</h4>
-    </div>
-    <div class="modal-body">
-      <ul class="unselected_facets">
-        {% for facet in similar_objects.PH %}
-        {% if facet.authority %}
-          <li>
-            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
-            {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
-          </li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    </div>
-  </div>
-</div>
-</div><!-- /modal -->
+{% include 'tenants/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="journalModal" modal_aria_labelledby="journalModalLabel" facets=facets.fields.publication_host_ids modal_title="Journals" %}
+
+
   <!-- link resolver modal -->
   <div class="modal fade" id="linkResolverModal" tabindex="-1" role="dialog" aria-labelledby="linkResolverModalLabel">
     <div class="modal-dialog" role="document">

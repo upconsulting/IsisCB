@@ -144,46 +144,85 @@
           <hr>
           <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
         </div>
-        <!--<div class="col-sm-6">
+        <div class="col-sm-6">
             <div class="row" id="boxesHTMLSnippetContent">
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if facets.PR %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Authors & Contributors" %}
+                  {% if facets.fields.all_contributor_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal" hide_modal=1 %}
+                  {% endif %}
                   {% endif %}
 
-                  {% if facets.PH %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PH panel_title="Journals" %}
+                  
+                  {% if facets.fields.publication_host_ids %}
+                  {% if tenant_id %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="publicationHostModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="publicationHostModal" hide_modal=1 %}
+                  {% endif %}
                   {% endif %}
 
-                  {% if facets.IH %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IH panel_title="Publishers" %}
+                  
+
+                  {% if facets.fields.institutional_host_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="institutionalHostModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="institutionalHostModal" hide_modal=1 %}
                   {% endif %}
+                  {% endif %}
+
+                  
                 </div>
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-                  {% if facets.CO %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.CO panel_title="Concepts" %}
+                  
+                  {% if facets.fields.concepts_only_by_subject_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" hide_modal=1  %}
+                  {% endif %}
+                  {% endif %}
+                  
+                  {% if facets.fields.about_person_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" hide_modal=1 %}
+                  {% endif %}
+                  {% endif %}
+                 
+                  {% if facets.fields.time_period_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" hide_modal=1 %}
+                  {% endif %}
+                  {% endif %}
+                 
+
+                  {% if facets.fields.geographic_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" hide_modal=1 %}
+                  {% endif %}
                   {% endif %}
 
-                  {% if facets.PE %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PE panel_title="People" %}
+                  {% if facets.fields.institutions_by_subject_ids %}
+                  {% if tenant_id %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" tenant_id=tenant.identifier hide_modal=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" hide_modal=1 %}
                   {% endif %}
-
-                  {% if facets.TI %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.TI panel_title="Time Periods" %}
-                  {% endif %}
-
-                  {% if facets.GE %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.PR panel_title="Places" %}
-                  {% endif %}
-
-                  {% if facets.IN %}
-                    {% include 'curation/fragment_citation_facet_boxes.html' with facets=facets.IN panel_title="Institutions" %}
                   {% endif %}
                 </div>
-            </div>
+              </div>
             <hr>
             <textarea id="boxesHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
-        </div>-->
+        </div>
     </div>
     <div class="panel-footer clearfix">
         <div class="btn-group pull-right">

@@ -118,7 +118,7 @@ function toggleLinkRecordsBtn() {
       <i class="fa fa-link" aria-hidden="true"></i>
         Link Records
     </a>
-    <a class="btn btn-primary btn-xs" id="generate_newsletter_html">
+    <a class="btn btn-primary btn-xs {% if result_count > 1000 %}disabled{% endif%}" {% if result_count > 1000 %}aria-disabled="true"{% endif %}id="generate_newsletter_html">
       <i class="far fa-file-code"></i>
       Generate Newsletter HTML
     </a>
