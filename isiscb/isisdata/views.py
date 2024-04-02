@@ -736,7 +736,7 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
 
 
 
-def get_google_books_image(citation, featured, apiKey):
+def get_google_books_image(citation, featured, api_key=None):
 
     # Provide image for citation
     if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
@@ -782,9 +782,11 @@ def get_google_books_image(citation, featured, apiKey):
     elif ' ' in contrib:
         contrib = contrib[contrib.find(' '):]
 
-    #apiKey = settings.GOOGLE_BOOKS_API_KEY
-
-    url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+    if api_key:
+        # apparently the google books api works without a key, so we only use one if we have one
+        url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=api_key)
+    else:
+        url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH_NO_KEY.format(title=title)
     url = url.replace(" ", "%20")
 
     with requests.get(url) as resp:
@@ -804,7 +806,10 @@ def get_google_books_image(citation, featured, apiKey):
     if not bookGoogleId:
         return {}
 
-    url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+    if api_key:
+        url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=api_key)
+    else:
+        url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH_NO_KEY.format(bookGoogleId=bookGoogleId)
     url2 = url2.replace(" ", "%20")
 
     with urlopen(url2) as response:
@@ -813,16 +818,17 @@ def get_google_books_image(citation, featured, apiKey):
         if 'imageLinks' in book["volumeInfo"]:
             imageLinks = book["volumeInfo"]["imageLinks"].keys()
 
-            if "medium" in imageLinks and not featured:
+            # we probably always want the thumbnail since the other ones are often just the top part of the image
+            if "thumbnail" in imageLinks:
+                cover_image["size"] = "thumbnail"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            elif "medium" in imageLinks and not featured:
                 cover_image["size"] = "standard"
                 cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
             elif "small" in imageLinks and not featured:
                 cover_image["size"] = "standard"
                 cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-            elif "thumbnail" in imageLinks:
-                cover_image["size"] = "thumbnail"
-                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-
+            
             if citation.type_controlled in [Citation.BOOK]:
                 google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
             elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
@@ -1289,8 +1295,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = None
-    if tenant and tenant.settings and tenant.settings.google_api_key:
-        featured_citation_image = get_google_books_image(featured_citation, True, tenant.settings.google_api_key)
+    featured_citation_image = get_google_books_image(featured_citation, True)
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]

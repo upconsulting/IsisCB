@@ -407,7 +407,9 @@ WIKIPEDIA_REFRESH_TIME = os.environ.get('WIKPEDIA_REFRESH_TIME', 30)
 
 GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
 GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
+GOOGLE_BOOKS_TITLE_QUERY_PATH_NO_KEY = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH_NO_KEY', "https://www.googleapis.com/books/v1/volumes?q={title}")
 GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
+GOOGLE_BOOKS_ITEM_GET_PATH_NO_KEY = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH_NO_KEY', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?projection=lite")
 
 # number of days after which we want to refresh cached data about books from google books
 GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)

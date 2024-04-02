@@ -36,7 +36,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {# this only works if type controlled is not a substring of a value in the list #}
     {% if citation.type_controlled in 'BO,CH' %}
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
-    {% if cover_image %}
+    {% if cover_image.url %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -49,7 +49,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageAdjacent").classList.add("col-md-8");
           document.getElementById("citationImageCaption").style.display = "block";
         }
-      {% else %}
+    {% else %}
         let backgroundColors = ["#c95400", "#00284b", "#3d0034"];
         let backgroundColor;
 
@@ -1330,6 +1330,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     var btn = document.querySelector('.readMore');
 
     function toggleText() {
+      if (textHolder == undefined) {
+        return;
+      }
       textHolder.classList.toggle("truncate");
 
       if (textHolder.classList.contains("truncate")) {
