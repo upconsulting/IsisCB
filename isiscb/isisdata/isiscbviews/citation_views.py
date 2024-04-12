@@ -16,7 +16,7 @@ from haystack.query import SQ
 
 from rest_framework.reverse import reverse
 
-from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.query import EmptySearchQuerySet, SearchQuerySet, SQ
 from collections import defaultdict, Counter
 from urllib.parse import quote
 import base64
