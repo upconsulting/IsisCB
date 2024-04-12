@@ -2356,11 +2356,12 @@ def generate_newsletter_html(request):
     page_results = paginator.get_page(page_number)
 
     # due to performance issues, this is temporarily commented out
-    #facets = get_facets_from_citations(queryset.qs)
+    facets = get_facets_from_citations(queryset.qs.values_list('id', flat=True))
+    print(facets)
 
     context.update({
         'page_results': page_results, 
-        #'facets': facets,
+        'facets': facets.facet_counts(),
         'search_key': search_key,
         'paginator': paginator,
     })

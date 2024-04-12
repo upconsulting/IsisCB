@@ -33,8 +33,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     let imgUrl = "{{ cover_image.url|safe }}";
 
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
-
     if (["BO","CH"].includes(citationType)){
+      {% if cover_image.url %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -55,6 +55,34 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("snippetCitationImageAdjacent").classList.add("col-md-8");
           document.getElementById("snippetCitationImageCaption").style.display = "block";
         }
+      {% else %}
+      let backgroundColors = ["#c95400", "#00284b", "#3d0034"];
+      let backgroundColor;
+
+      let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      let pubName = document.getElementsByClassName("pubName")[0].innerHTML;
+
+      if (pubName.length) {
+          if (alphabet.substring(0,8).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[0];
+          } else if (alphabet.substring(9,17).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[1];
+          } else {
+            backgroundColor = backgroundColors[2];
+          }
+      }
+
+      $('#placeholderImage').css('display', "block");
+      $('#placeholderImage').css('backgroundColor', backgroundColor);
+      $('#placeholderImage').append('<div class="effect" />');
+      $('#placeholderImage').append('<div class="light" />');
+      $('#pubName').css('padding-left', "10px");
+      $('#placeholderImage').addClass("book-cover");
+      $("#citatationImageBreak").css('display', "block");
+      $("#citationImageAdjacent").removeClass("col-md-12");
+      $("#citationImageAdjacent").addClass("col-md-8");
+    {% endif %}
 
     // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
     // (using a selection from 3 color choices) to use as the citation's featured image.
@@ -342,6 +370,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                    {% endif %}
                </div>
              {% endif %}
+             {% if citation.type_controlled in 'BO,CH,TH' %}
+              <p id="pubName" class="pubName" style="color: #fff; word-break: break-word; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; top:0; left:0">{{ citation.title|truncatewords:16|bleach_safe }}</p>
+             {% endif %}
            </div>
            <img id="citationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
            <span id="citationImageCaption" style="color: gray; text-align: center; display: none; font-size: .9em;">source: Google Books</span>
@@ -499,7 +530,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if concepts %}
                    {% for concept in concepts %}
                    {% if concept.authority %}
-                   <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{{ concept.authority|get_uri }}" style="font-size: 1.1em;">
                        <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -725,6 +756,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               </a>
               <a id="catalog-tab" href="#catalog" class="btn tab-btn-default" role="tab" data-toggle="tab">
                 <input type="radio" />Indexes
+                  
               </a>
             </div>
           </div>
@@ -804,25 +836,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {% if facets.fields.all_contributor_ids %}
                     {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal"%}
                   {% endif %}
-
-                  {% if old_facets.PR %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Authors & Contributors old" facets=old_facets.PR %}
-                  {% endif %}
-
+              
                   {% if facets.fields.publication_host_ids %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" %}
-                  {% endif %}
-
-                  {% if old_facets.PH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Journals old" facets=old_facets.PH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="journalModal" %}
                   {% endif %}
 
                   {% if facets.fields.institutional_host_ids %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" %}
-                  {% endif %}
-
-                  {% if old_facets.IH %}
-                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box.html' with panel_title="Publishers old" facets=old_facets.IH %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="journalModal" %}
                   {% endif %}
                 </div>
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
@@ -964,14 +984,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <div class='col-sm-12' style='padding: 0;'>
                  {% if authors|length > 0 %}
                  <p>
-                 {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
+                 {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{{ acrelation.authority|get_uri }}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
                  </p>
                  <hr style="margin: 10px 0">
                  {% endif %}
     
                  {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
                    {% for prop in properties_map %}
-                   {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
+                   {% if prop.authority %}<a href="{{ prop.authority|get_uri }}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
                    <br/>
                    {% endfor %}
     
@@ -1011,7 +1031,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if concepts %}
                        {% for concept in concepts %}
                        {% if concept.authority %}
-                       <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ concept.authority|get_uri }}" style="font-size: 1.1em;">
                            <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1020,7 +1040,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if time_periods %}
                        {% for time in time_periods %}
                        {% if time.authority %}
-                       <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ time.authority|get_uri }}" style="font-size: 1.1em;">
                            <span class="label label-times link-label">{{ time.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1029,7 +1049,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if places %}
                        {% for place in places %}
                        {% if place.authority %}
-                       <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ place.authority|get_uri }}" style="font-size: 1.1em;">
                            <span class="label label-places link-label">{{ place.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1038,7 +1058,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if people %}
                        {% for person in people %}
                        {% if person.authority %}
-                       <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ person.authority|get_uri }}" style="font-size: 1.1em;">
                            <span class="label label-people link-label">{{ person.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1047,7 +1067,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if institutions %}
                        {% for institution in institutions %}
                        {% if institution.authority %}
-                       <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ institution.authority|get_uri }}" style="font-size: 1.1em;">
                            <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1246,6 +1266,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     var btn = document.querySelector('.readMore');
 
     function toggleText() {
+      if (textHolder == undefined) {
+        return;
+      }
       textHolder.classList.toggle("truncate");
 
       if (textHolder.classList.contains("truncate")) {

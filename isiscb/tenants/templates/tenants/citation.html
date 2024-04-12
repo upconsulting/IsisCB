@@ -36,7 +36,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {# this only works if type controlled is not a substring of a value in the list #}
     {% if citation.type_controlled in 'BO,CH' %}
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
-    {% if cover_image %}
+    {% if cover_image.url %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -49,7 +49,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageAdjacent").classList.add("col-md-8");
           document.getElementById("citationImageCaption").style.display = "block";
         }
-      {% else %}
+    {% else %}
         let backgroundColors = ["#c95400", "#00284b", "#3d0034"];
         let backgroundColor;
 
@@ -1041,14 +1041,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <div class='col-sm-12' style='padding: 0;'>
                  {% if authors|length > 0 %}
                  <p>
-                 {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
+                 {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{{ acrelation.authority | get_uri:tenant_id }}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
                  </p>
                  <hr style="margin: 10px 0">
                  {% endif %}
     
                  {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
                    {% for prop in properties_map %}
-                   {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
+                   {% if prop.authority %}<a href="{{ prop.authority|get_uri:tenant_id }}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
                    <br/>
                    {% endfor %}
     
@@ -1088,7 +1088,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if concepts %}
                        {% for concept in concepts %}
                        {% if concept.authority %}
-                       <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ concept.authority|get_uri:tenant_id }}" style="font-size: 1.1em;">
                            <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1097,7 +1097,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if time_periods %}
                        {% for time in time_periods %}
                        {% if time.authority %}
-                       <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ time.authority|get_uri:tenant_id }}" style="font-size: 1.1em;">
                            <span class="label label-times link-label">{{ time.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1106,7 +1106,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if places %}
                        {% for place in places %}
                        {% if place.authority %}
-                       <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ place.authority|get_uri:tenant_id }}" style="font-size: 1.1em;">
                            <span class="label label-places link-label">{{ place.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1115,7 +1115,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if people %}
                        {% for person in people %}
                        {% if person.authority %}
-                       <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ person.authority|get_uri:tenant_id }}" style="font-size: 1.1em;">
                            <span class="label label-people link-label">{{ person.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1124,7 +1124,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                      {% if institutions %}
                        {% for institution in institutions %}
                        {% if institution.authority %}
-                       <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
+                       <a href="{{ institution.authority|get_uri:tenant_id }}" style="font-size: 1.1em;">
                            <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
                        </a>
                        {% endif %}
@@ -1330,6 +1330,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     var btn = document.querySelector('.readMore');
 
     function toggleText() {
+      if (textHolder == undefined) {
+        return;
+      }
       textHolder.classList.toggle("truncate");
 
       if (textHolder.classList.contains("truncate")) {

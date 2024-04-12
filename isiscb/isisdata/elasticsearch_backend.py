@@ -8,6 +8,7 @@ from django.conf import settings
 
 
 class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
+    
     def clean(self, query_fragment):
         """
         Provides a mechanism for sanitizing user input before presenting the

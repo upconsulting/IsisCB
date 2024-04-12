@@ -12,6 +12,8 @@ from django.contrib.staticfiles import finders
 
 from django.conf import settings
 
+from haystack.query import SQ
+
 from rest_framework.reverse import reverse
 
 from haystack.query import EmptySearchQuerySet, SearchQuerySet, SQ
@@ -109,8 +111,7 @@ def citation(request, citation_id, tenant_id=None):
         similar_objects = get_facets_from_citations([citation.id for citation in similar_citations])
     
     googleBooksImage = None
-    if tenant and tenant.settings.google_api_key:
-        googleBooksImage = isisviews.get_google_books_image(citation, False, tenant.settings.google_api_key)
+    googleBooksImage = isisviews.get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
@@ -287,10 +288,7 @@ def get_facets_from_citations(citations, tenant_id=None):
         sqs = sqs.filter(tenant_ids=tenant_id)
     
     # filter by citation ids
-    sq = SQ()
-    for citation_id in citations:
-        sq.add(SQ(id=citation_id), SQ.OR)
-    sqs = sqs.filter(sq).exclude(public="false")
+    sqs = sqs.filter(id__in=citations).exclude(public="false")
 
     return sqs
 
