@@ -1946,6 +1946,8 @@ def quick_and_dirty_authority_search(request):
     * system_blank: allows classification system to be not set (default is 'true')
     * max: maximal number of results (default is 10)
     * tenant_ids: ids of tenants to be searched or None to search all tenants
+    * only_defaults: if set to 'true' searches only authorities from datasets that are set as default;
+      if nothing is specified this is set to 'false'
     * use_custom_cmp: if set to true, uses a custom compare function for ordering results;
       default is 'false'.
       Custom ordering works as follows:
@@ -1969,6 +1971,7 @@ def quick_and_dirty_authority_search(request):
 
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
+    only_defaults = request.GET.get('only_defaults', 'false') == 'true'
 
     # In some cases, the curator wants to limit to active only for certain
     #  authority types.
@@ -1995,6 +1998,9 @@ def quick_and_dirty_authority_search(request):
         query = Q()
 
     query &= Q(classification_system_object__subject_search_searchable=True)
+
+    if only_defaults:
+        query &= Q(belongs_to__subject_search_default=True)
     
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]

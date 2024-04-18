@@ -1181,8 +1181,8 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 class DatasetAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'editor', 'owning_tenant']
-    list_display = ['name', 'owning_tenant']
+    fields = ['name', 'description', 'editor', 'owning_tenant', 'subject_search_default']
+    list_display = ['name', 'owning_tenant', 'subject_search_default']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
