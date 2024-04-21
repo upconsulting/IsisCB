@@ -58,7 +58,8 @@ def is_generic_obj_accessible_by_tenant(user, obj):
         return is_accessible_by_tenant(user, getattr(obj, 'authority', None))
     if type(obj).__name__ in have_citation_attribute:
         return is_accessible_by_tenant(user, getattr(obj, 'citation', None))
-    return False
+    
+    return is_accessible_by_tenant(user, obj)
 
 
 
