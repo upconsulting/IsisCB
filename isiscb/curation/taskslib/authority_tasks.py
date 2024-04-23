@@ -397,7 +397,7 @@ FIELD_MAP = {
         'CBA Redirect': 'redirect_to_id',
         'CBA ClassCode': 'classification_code',
         'CBA ClassHier': 'classification_hierarchy',
-        'CBA ClassSystem': 'classification_system',
+        'CBA ClassSystem': 'find:ClassificationSystem:name:classification_system_object',
         'CBA Description': 'description',
         'CBA Dataset': 'find:Dataset:name:belongs_to',
         'CBA Notes': 'administrator_notes',
