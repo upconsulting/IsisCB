@@ -7,13 +7,14 @@
 {% load static %}
 {% load tenanttags %}
 {% load addcss %}
+{% load cache %}
+{% load cached_tags %}
 
 {% block extra_head%}
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', (event) => {
         let citationType = "{{ citation.type_controlled }}";
-        let propertiesMap = "{{properties_map}}"
-
+        
         // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
         // (using a selection from 3 color choices) to use as the citation's featured image.
         // Weldon wanted each journal to have the same cover color everytime,
@@ -138,6 +139,12 @@
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
+        {% cache 86400 featured %}
+        {% with citation=tenant_id|get_featured_citation %}
+        {% with featured_authority=tenant_id|get_featured_authorities %}
+        {% with featured_citation_authors=citation|get_featured_citation_authors %}
+        {% with featured_citation_image=citation|get_featured_citation_image %}
+        {% with wikidata=featured_authority|get_wiki_data %}
         <div class="row">
             <div class="col-sm-12 col-md-8" style="padding: 0;">
                 <div class='row' style='margin: 0;'>
@@ -234,11 +241,11 @@
                             <a href="{{ featured_authority.id|get_authority_uri_from_id }}"><h4 style="margin: 5px 0px">{{ featured_authority.name }}</h4></a>
                         </div>
                         <div class="panel-body">
-                            <div class="{% if wikiImage%}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikiImage%}height: 0;{% endif%}">
-                                <img src="{{ wikiImage|safe }}" href="{{ wikiCredit }}" style="width: 100%">
+                            <div class="{% if wikidata.0 %}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikidata.0%}height: 0;{% endif%}">
+                                <img src="{{ wikidata.0|safe }}" href="{{ wikidata.2 }}" style="width: 100%">
                             </div>
-                            <div class="col-sm-12 {% if wikiImage%}col-md-7{% endif%}">
-                                <p class="truncate" style="margin-bottom: 0">{{ wikiIntro }}</p>
+                            <div class="col-sm-12 {% if wikidata.0 %}col-md-7{% endif%}">
+                                <p class="truncate" style="margin-bottom: 0">{{ wikidata.1 }}</p>
                             </div>
                             <div class='row'>
                                 <div class="col-sm-12" style="margin-top: 10px;">
@@ -267,6 +274,12 @@
                 </div>
             </div>
         </div>
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endcache %}
     </div>
 </div>
 <div class='row content-container new-container' style='width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: #fff;'>

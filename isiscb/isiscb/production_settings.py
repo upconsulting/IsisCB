@@ -164,6 +164,8 @@ HAYSTACK_CONNECTIONS = {
         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
+        'TIMEOUT': 4,
+        'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
@@ -196,6 +198,10 @@ CACHES = {
     'search_results_cache': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'search_cache',
+    },
+    'template_fragments': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'db_template_cache',
     }
 }
 

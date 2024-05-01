@@ -26,6 +26,7 @@ from isisdata.models import *
 from isisdata.tasks import *
 import isisdata.views as isisviews
 import isisdata.helpers.isiscb_utils as isiscb_utils
+import isisdata.google as google
 
 def citation(request, citation_id, tenant_id=None):
     """
@@ -111,7 +112,7 @@ def citation(request, citation_id, tenant_id=None):
         similar_objects = get_facets_from_citations([citation.id for citation in similar_citations])
     
     googleBooksImage = None
-    googleBooksImage = isisviews.get_google_books_image(citation, False)
+    googleBooksImage = google.get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
