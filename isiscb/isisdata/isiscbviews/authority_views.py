@@ -9,6 +9,7 @@ from django.core.cache import caches
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from django.contrib.staticfiles import finders
+from django.views.decorators.cache import cache_page
 
 from django.conf import settings
 
@@ -565,6 +566,7 @@ def _get_wikipedia_image_synopsis(authority, author_contributor_count, related_c
 
     return wikiImage, wikiIntro, wikiCredit
 
+@cache_page(60*60*24)
 def get_place_map_data(request, authority_id, tenant_id=None):
     include_all_tenants = request.include_all_tenants if request.include_all_tenants else False
     tenant = None
