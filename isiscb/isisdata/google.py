@@ -4,7 +4,7 @@ from isisdata.models import *
 
 from urllib.request import urlopen
 
-import requests
+import requests, json
 
 
 def get_google_books_image(citation, featured, api_key=None):
