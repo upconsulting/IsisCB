@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from django import template
 from isisdata.models import *
 
+from urllib.request import urlopen
+
 import requests
 
 
