@@ -153,6 +153,9 @@ DATABASES = {
     }
 }
 
+# to make sure bots don't bring the site down, we limit the search to 300 for now
+MAX_SEARCH_RESULTS = os.environ.get('MAX_SEARCH_RESULTS', 300)
+
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 

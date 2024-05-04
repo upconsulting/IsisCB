@@ -979,8 +979,8 @@ class IsisSearchView(FacetedSearchView):
             self.queryset['citation'][start_offset_citation:start_offset_citation + self.results_per_page]
             self.queryset['authority'][start_offset_authority:start_offset_authority+ self.results_per_page]
 
-            paginator_authority = Paginator(self.queryset['authority'], self.results_per_page)
-            paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
+            paginator_authority = Paginator(self.queryset['authority'][:settings.MAX_SEARCH_RESULTS], self.results_per_page)
+            paginator_citation = Paginator(self.queryset['citation'][:settings.MAX_SEARCH_RESULTS], self.results_per_page)
 
 
         try:

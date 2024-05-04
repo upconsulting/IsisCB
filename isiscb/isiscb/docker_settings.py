@@ -212,6 +212,9 @@ DATABASES = {
     }
 }
 
+# to make sure bots don't bring the site down, we limit the search to 300 for now
+MAX_SEARCH_RESULTS = os.environ.get('MAX_SEARCH_RESULTS', 300)
+
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
