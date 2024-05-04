@@ -79,23 +79,6 @@
                     </div>
                     <div class="col-md-2" >
                     <form id="browse-form" class='form-inline' method="get" action="/isis/">
-                        <div class="input-group">
-                            <input id="id_q" name="q" type="hidden" class="form-control" value="*">
-                            <span>
-                                <button id="submit-browse" class="btn btn-default" type="submit">Browse</button>
-                                <script>
-                                    $("#submit-browse").click(function(e) {
-                                        e.preventDefault();
-                                        var chosen_tenant = $("#owning_tenant_field").val();
-                                        $("#browse_tenant_portal").val(chosen_tenant);
-                                        $("#browse_owning_tenant").val(chosen_tenant);
-                                        $("#browse-form").attr("action", "/p/"+chosen_tenant+"/search");
-                                        $("#browse-form").submit();
-                                    });
-                                </script>
-                            </span>
-                        </div>
-                        <div>
                             <input id="id_models" name="models" type="hidden" value="isisdata.citation">
                             <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
                             <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">

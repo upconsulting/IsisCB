@@ -6,7 +6,6 @@ from isisdata.isiscbviews import authority_views, citation_views
 from django.conf.urls import url
 
 from haystack.forms import FacetedSearchForm
-from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
 sqs = SearchQuerySet().facet('authors', size=100). \
