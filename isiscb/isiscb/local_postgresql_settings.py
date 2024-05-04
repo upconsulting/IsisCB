@@ -222,7 +222,7 @@ HAYSTACK_CONNECTIONS = {
         #'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
         'INDEX_NAME': 'haystack1',
-        'TIMEOUT': 4,
+        'TIMEOUT': os.environ.get('ES_TIMEOUT', 1),
         'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }
