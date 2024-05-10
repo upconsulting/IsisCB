@@ -5,7 +5,9 @@ from isisdata.models import *
 from urllib.request import urlopen
 
 import requests, json
+import logging
 
+logger = logging.getLogger(__name__)
 
 def get_google_books_image(citation, featured, api_key=None):
 

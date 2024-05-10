@@ -11,6 +11,10 @@
 {% load cached_tags %}
 
 {% block extra_head%}
+
+{% cache 86400 featured-js tenant_id %}
+{% with citation=tenant_id|get_featured_citation %}
+{% with properties_map=citation|get_featured_citation_properties %}
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', (event) => {
         let citationType = "{{ citation.type_controlled }}";
@@ -48,6 +52,9 @@
         $('#author-timeline strong').html('Related citations | ');
     });
 </script>
+{% endwith %}
+{% endwith %}
+{% endcache %}
 
     <style>
         .truncate {
@@ -122,6 +129,7 @@
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
         {% cache 86400 featured %}
         {% with citation=tenant_id|get_featured_citation %}
+        {% with properties_map=citation|get_featured_citation_properties %}
         {% with featured_authority=tenant_id|get_featured_authorities %}
         {% with featured_citation_authors=citation|get_featured_citation_authors %}
         {% with featured_citation_image=citation|get_featured_citation_image %}
@@ -255,6 +263,7 @@
                 </div>
             </div>
         </div>
+        {% endwith %}
         {% endwith %}
         {% endwith %}
         {% endwith %}
