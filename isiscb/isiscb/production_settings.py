@@ -153,6 +153,9 @@ DATABASES = {
     }
 }
 
+# to make sure bots don't bring the site down, we limit the search to 300 for now
+MAX_SEARCH_RESULTS = os.environ.get('MAX_SEARCH_RESULTS', 300)
+
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
@@ -164,7 +167,7 @@ HAYSTACK_CONNECTIONS = {
         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
-        'TIMEOUT': 4,
+        'TIMEOUT': os.environ.get('ES_TIMEOUT', 1),
         'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }

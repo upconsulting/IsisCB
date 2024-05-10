@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import login_required
 from haystack.forms import FacetedSearchForm
 from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
@@ -55,8 +56,8 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
-    url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='index'),
-    url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='isis-index'),
+    url(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='index'),
+    url(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='isis-index'),
     url(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
@@ -68,7 +69,7 @@ urlpatterns = [
     url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
     url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
-    url(r'^search/', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='haystack_search'),
+    url(r'^search/', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='haystack_search'),
     url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
     url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
     url(r'^help', views.help, name='help'),
