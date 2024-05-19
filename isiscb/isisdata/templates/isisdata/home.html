@@ -12,7 +12,7 @@
 
 {% block extra_head%}
 
-{% cache 86400 featured-js tenant_id %}
+{% cache 72000 featured-js tenant_id %}
 {% with citation=tenant_id|get_featured_citation %}
 {% with properties_map=citation|get_featured_citation_properties %}
 <script type="text/javascript">
@@ -45,8 +45,10 @@
             document.getElementById("citationImageCaption").style.display = "none";
             document.getElementById("placeholderImage").style.display = "block";
             document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
-            document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
-            document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            if (document.getElementById("citationImageAdjacent")) {
+                document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+                document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+            }
         }
 
         $('#author-timeline strong').html('Related citations | ');
@@ -127,7 +129,8 @@
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
-        {% cache 86400 featured %}
+        {% cache 72000 featured tenant_id %}
+        <!-- the following should be cached for 24 hours -->
         {% with citation=tenant_id|get_featured_citation %}
         {% with properties_map=citation|get_featured_citation_properties %}
         {% with featured_authority=tenant_id|get_featured_authorities %}
@@ -270,6 +273,7 @@
         {% endwith %}
         {% endwith %}
         {% endcache %}
+        
     </div>
 </div>
 <div class='row content-container new-container' style='width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: #fff;'>
