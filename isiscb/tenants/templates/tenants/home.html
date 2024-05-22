@@ -12,6 +12,10 @@
 {% load cached_tags %}
 
 {% block extra_head%}
+
+{% cache 72000 featured-js tenant_id %}
+{% with citation=tenant_id|get_featured_citation %}
+{% with properties_map=citation|get_featured_citation_properties %}
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', (event) => {
         let citationType = "{{ citation.type_controlled }}";
@@ -56,6 +60,9 @@
         }
     });
 </script>
+{% endwith %}
+{% endwith %}
+{% endcache %}
 
     <style>
         .truncate {
@@ -138,8 +145,9 @@
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
-        {% cache 86400 featured tenant_id %}
+        {% cache 72000 featured tenant_id %}
         {% with citation=tenant_id|get_featured_citation %}
+        {% with properties_map=citation|get_featured_citation_properties %}
         {% with featured_authority=tenant_id|get_featured_authorities %}
         {% with featured_citation_authors=citation|get_featured_citation_authors %}
         {% with featured_citation_image=citation|get_featured_citation_image %}
@@ -234,7 +242,7 @@
                             </div>
                             <div class='row'>
                                 <div class="col-sm-12" style="margin-top: 10px;">
-
+                                    {% include 'tenants/authority_fragments/fragment_authority_publications_graph.html' with authority=featured_authority %}
                                 </div>
                             </div>
                         </div>
@@ -261,6 +269,7 @@
             </div>
             {% endif %}
         </div>
+        {% endwith %}
         {% endwith %}
         {% endwith %}
         {% endwith %}

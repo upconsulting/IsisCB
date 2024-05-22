@@ -9,5 +9,5 @@ def add_tenants(request):
             if role.tenant_rules:
                 # there should only be one
                 if role.tenant_rules[0].tenant:
-                    return {'tenant_id': role.tenant_rules[0].tenant.id , 'tenant': role.tenant_rules[0].tenant, 'tenant_access': c_util.get_tenant_access(request.user, role.tenant_rules[0].tenant)}
+                    return {'tenant_pk': role.tenant_rules[0].tenant.id , 'tenant': role.tenant_rules[0].tenant, 'tenant_access': c_util.get_tenant_access(request.user, role.tenant_rules[0].tenant)}
     return {}

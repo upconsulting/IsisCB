@@ -9,8 +9,10 @@ from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from django.shortcuts import get_object_or_404
 from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
 from haystack.inputs import Raw, AutoQuery
+import logging
 
 register = template.Library()
+logger = logging.getLogger(__name__)
 
 @register.filter
 def get_featured_citation(tenant_id):
@@ -46,9 +48,7 @@ def get_featured_citation(tenant_id):
 
 @register.filter
 def get_featured_citation_image(featured_citation):
-     featured_citation_image = None
-     featured_citation_image = google.get_google_books_image(featured_citation, True)
-     return featured_citation_image
+     return google.get_google_books_image(featured_citation, True)
 
 @register.filter
 def get_featured_citation_properties(featured_citation):

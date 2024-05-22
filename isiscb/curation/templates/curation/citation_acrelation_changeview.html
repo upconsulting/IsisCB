@@ -330,7 +330,7 @@ $(document).ready(function() {
                                   </div>
                                   <div class="col-xs-10">
                                       <div class="h5">
-                                        ` + (!(suggestion.owning_tenant == {{tenant_id}}) ? '<i class="fas fa-share-alt"></i> ' : '') + ` 
+                                        ` + (!(suggestion.owning_tenant == {{tenant_pk}}) ? '<i class="fas fa-share-alt"></i> ' : '') + ` 
                                         <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
                                               class="search-authority-anchor"
                                               target="_blank"

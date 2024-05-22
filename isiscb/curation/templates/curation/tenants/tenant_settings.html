@@ -224,7 +224,7 @@
   }
 
   const citationSearch = new QuickSearch("{% url "curation:quick_and_dirty_citation_search" %}", 
-      "{{tenant_id}}",
+      "{{tenant_pk}}",
       "default_featured_citation",
   )
   function triggerCitationSearch(force, maxResults){
