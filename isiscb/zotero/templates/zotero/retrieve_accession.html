@@ -161,7 +161,7 @@ But for now the list is stored as string :-p
                                       <span class="resolved">
                                         &nbsp;{{ authority.name }} 
                                         <span class="glyphicon glyphicon-chevron-right"></span>
-                                        {{authority_resolution.to_instance.name}} {% if tenant_id is not authority_resolution.to_instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} ({{authority_resolution.to_instance.id}})
+                                        {{authority_resolution.to_instance.name}} {% if tenant_pk is not authority_resolution.to_instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} ({{authority_resolution.to_instance.id}})
                                         <div class="pull-right">
                                         <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
                                         </div>
@@ -169,7 +169,7 @@ But for now the list is stored as string :-p
                                       </span>
                                       {% else %}
                                       <span class="text-info">
-                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} {% if authority.owning_tenant and tenant_id is not authority.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %}
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} {% if authority.owning_tenant and tenant_pk is not authority.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %}
                                         <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>
                                       <div class="pull-right">
                                         <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
@@ -359,7 +359,7 @@ $(document).ready(function() {
         var filter_type = $('#authority-search-filter-type').val();
         var search_endpoint = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&max=" + String(max_results) + "&q=" + query;
         if (!searchAll) {
-            search_endpoint += "&tenant_ids=" + {{tenant_id}};
+            search_endpoint += "&tenant_ids=" + {{tenant_pk}};
         }
         if (filter_type != "") {
             search_endpoint += "&type=" + filter_type;
@@ -410,7 +410,7 @@ $(document).ready(function() {
                                             data-html="true"
                                             data-placement="left"
                                             data-title="` + format_citations(suggestion.related_citations) + `">` 
-                                            if (suggestion.owning_tenant != {{tenant_id}}) {
+                                            if (suggestion.owning_tenant != {{tenant_pk}}) {
                                                 choice_elem += '<i class="fas fa-share-alt"></i> '
                                             }
                                             choice_elem += suggestion.name 
@@ -670,8 +670,9 @@ var triggerSkipAuthority = function(draftauthority_id, callback) {
 }
 
 var triggerResolveAuthority = function(draftauthority_id, authority_id) {
+    console.log("here")
     $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
-        cleanupResolvedAuthority(draftauthority_id,result['data']['authority_id'], result['data']['authority_name'], result['data']['authority_owner'] == {{ tenant_id }});
+        cleanupResolvedAuthority(draftauthority_id,result['data']['authority_id'], result['data']['authority_name'], result['data']['authority_owner'] == {{ tenant_pk }});
     })
 }
 
