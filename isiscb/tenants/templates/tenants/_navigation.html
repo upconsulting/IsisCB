@@ -9,11 +9,13 @@
             {% if tenant.logo %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
             {% endif %}
+            {% if not tenant.settings.hide_title_in_navbar %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}">
                 <div style="line-height:50px; font-size: 22px; color: white">
                     {{ tenant.title }}
                 </div> 
             </a>
+            {% endif %}
             {% if notifications %}
             <div class="navbar-brand" style="margin-left: 0px; color: #f3c11d; padding-top: 5px;">
             <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
