@@ -74,43 +74,6 @@ def citation(request, citation_id, tenant_id=None):
     # get citations related through CCRelations
     context.update(_get_related_citations(citation_id, tenant, request.include_all_tenants))
 
-    # Similar Citations Generator
-    if subjects:
-        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        sqs.query.set_limits(low=0, high=20)
-        results = sqs.all().exclude(public="false")
-        if tenant and not request.include_all_tenants:
-            results = results.filter(tenant_ids=tenant.pk)
-        similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
-    elif citation.type_controlled not in ['RE']:
-        mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        mlt.query.set_limits(low=0, high=20)
-        if tenant and not request.include_all_tenants:
-            mlt = mlt.filter(tenant_ids=tenant_id)
-        similar_citations = mlt.all().exclude(public="false").query.get_results()
-    else:
-        similar_citations = []
-        word_cloud_results = EmptySearchQuerySet()
-
-    if tenant and not request.include_all_tenants:
-        similar_objects = get_facets_from_citations([citation.id for citation in similar_citations], tenant_id=tenant.pk)
-    else:
-        similar_objects = get_facets_from_citations([citation.id for citation in similar_citations])
-    
     googleBooksImage = None
     googleBooksImage = google.get_google_books_image(citation, False)
 
@@ -122,13 +85,12 @@ def citation(request, citation_id, tenant_id=None):
     # Location of citation in REST API
     api_view = reverse('citation-detail', args=[citation.id], request=request)
 
-    # Provide progression through search results, if present.
-
     # make sure we have a session key
     if hasattr(request, 'session') and not request.session.session_key:
         request.session.save()
         request.session.modified = True
 
+    # Provide progression through search results, if present.
     session_id = request.session.session_key
     fromsearch = request.GET.get('fromsearch', False)
     last_query = request.GET.get('last_query', None) 
@@ -213,10 +175,7 @@ def citation(request, citation_id, tenant_id=None):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-        'similar_citations': similar_citations,
-        'facets': similar_objects.facet_counts(),
         'cover_image': googleBooksImage,
-        'similar_objects': similar_objects,
         'tenant_id': tenant_id,
     })
 
