@@ -110,3 +110,27 @@
     </div>
   </div>
 </div>
+
+<!-- authors modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="authorModal" modal_aria_labelledby="authorModalLabel" facets=facets.fields.all_contributor_ids modal_title="Authors & Contributors" %}
+
+<!-- concepts Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="subjectModal" modal_aria_labelledby="subjectModalLabel" facets=facets.fields.concepts_only_by_subject_ids modal_title="Concepts" %}
+
+<!-- people Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="peopleModal" modal_aria_labelledby="peopleModalLabel" facets=facets.fields.about_person_ids modal_title="People" %}
+
+<!-- places Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="placesModal" modal_aria_labelledby="placesModalLabel" facets=facets.fields.geographic_ids modal_title="Places" %}
+
+<!-- institution Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="institutionModal" modal_aria_labelledby="institutionModalLabel" facets=facets.fields.institutions_by_subject_ids modal_title="Institutions" %}
+
+<!-- times Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="timePeriodModal" modal_aria_labelledby="timePeriodModalLabel" facets=facets.fields.time_period_ids modal_title="Time Periods" %}
+
+<!-- publisher Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="publisherModal" modal_aria_labelledby="publisherModalLabel" facets=facets.fields.institutional_host_ids modal_title="Publishers" %}
+
+<!-- periodical Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="journalModal" modal_aria_labelledby="journalModalLabel" facets=facets.fields.publication_host_ids modal_title="Journals" %}

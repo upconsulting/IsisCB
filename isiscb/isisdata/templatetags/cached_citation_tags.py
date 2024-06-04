@@ -61,6 +61,7 @@ def _get_data(context, citation):
     return {
         "similar_citations":similar_citations,
         'facets': similar_objects.facet_counts(),
+        'tenant_id': tenant_id,
         }
 
 def _get_facets_from_citations(citations, tenant_id=None):
