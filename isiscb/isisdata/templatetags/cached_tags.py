@@ -102,5 +102,4 @@ def get_wiki_data(featured_authority):
     return (wikiImage, wikiIntro, wikiCredit)
 
 
-
        
