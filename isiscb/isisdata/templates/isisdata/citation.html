@@ -762,7 +762,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               </a>
             </div>
           </div>
-          {% cache 1 similar_citations_and_facets tenant_id citation %}
+          {% cache 604800 similar_citations_and_facets tenant_id citation %}
           <!--604800 cached for a week -->
           {% get_similar_citations_and_facets citation %}
           {% endcache %}
