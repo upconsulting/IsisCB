@@ -4,6 +4,7 @@
 {% load authority_filters %}
 {% load citation_filters %}
 {% load facet_filters %}
+{% load cached_authority_tags %}
 
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   <div style="z-index: 10; position: relative;">
@@ -19,7 +20,8 @@
   <hr id="wikiImageBorder" style="display:none;">
 
   <p>
-
+    {% related_citation_count authority.id tenant_id include_all_tenants %}
+    
     {% if related_citations_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
@@ -49,7 +51,7 @@
     related to {{ authority.name }} as a publisher
     <br>
     {% endif %}
-
+    
     {% if subject_category_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show

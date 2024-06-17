@@ -5,7 +5,7 @@
 {% load authority_filters %}
 {% load facet_filters %}
 {% load metadata_filters %}
-
+{% load cached_authority_tags %}
 
 
 {% block authority_tabs %}
@@ -26,6 +26,8 @@
       <h4 style="margin: 0;">Related Citations</h4>
     </div>
     <div class="panel-body">
+      {% related_citations_list authority.id tenant_id include_all_tenants page_citation %}
+                  
       {% for result in page_results %}
         <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
             <p style="margin-bottom: 20px; font-size: 1.1em;">

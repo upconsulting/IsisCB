@@ -5,6 +5,7 @@
 {% load authority_filters %}
 {% load facet_filters %}
 {% load metadata_filters %}
+{% load cached_authority_tags %}
 
 {% block extra_head %}
 <script>
@@ -162,6 +163,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       })
     })
   </script>
+
+  {% wikipedia_info authority.id tenant_id include_all_tenants  %}
   <div class="panel panel-default" id="infoPanel" style='margin: 0 15px 20px 15px;'>
     <div class="panel-heading">
       <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>

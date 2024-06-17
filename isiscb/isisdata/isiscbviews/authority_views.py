@@ -406,73 +406,22 @@ def authority(request, authority_id, tenant_id=None):
     if redirect:
         return redirect
     
-    tenant = None
-    tenant_id_to_filter = None
+    # make sure tenant exists
     if tenant_id:
-        tenant = get_object_or_404(Tenant, identifier=tenant_id)
-        if tenant:
-            tenant_id_to_filter = tenant.id
-
+       get_object_or_404(Tenant, identifier=tenant_id)
+        
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
-
-    sqs, related_citations = _get_word_cloud_results(authority.id, tenant_id_to_filter, request.include_all_tenants)
-
-    def filter_by_tenant(sqs, tenant_id):
-        """ Method that filters records by tenant if there are any and then returns the count"""
-        if tenant_id and not request.include_all_tenants:
-            tenant = Tenant.objects.filter(identifier=tenant_id).first()
-            sqs = sqs.filter(owning_tenant=tenant.pk)
-        return sqs
-    
-    related_citations = filter_by_tenant(related_citations.order_by('-publication_date_for_sort'), tenant_id)
-    
-    related_geographics_facet = related_citations.facet_counts()['fields']['geographic_ids'] if 'fields' in related_citations.facet_counts() else []
-    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
-    
-    # count related citations
-    related_citations_count = filter_by_tenant(related_citations, tenant_id).count()
-
-    # count citations with this authority as subject
-    subject_category_sqs = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id)
-    subject_category_count = filter_by_tenant(subject_category_sqs, tenant_id).count()
-    
-    # count citations with this authority as contributor
-    author_contributor_sqs = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id)
-    author_contributor_count = filter_by_tenant(author_contributor_sqs, tenant_id).count()
-    
-    # count citations with this tenant as publisher
-    publisher_sqs = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id)
-    publisher_count = filter_by_tenant(publisher_sqs, tenant_id).count()
-
-    display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
-
-    page_number = request.GET.get('page_citation', 1)
-    paginator = Paginator(related_citations, 20)
-    page_results = paginator.get_page(page_number)
-
-    # gets featured image and synopsis of authority from wikipedia
-    wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count)
 
     context = {
         'authority_id': authority_id,
         'authority': authority,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
-        'display_type': display_type,
-        'related_citations_count': related_citations_count,
         'api_view': api_view,
         'redirect_from': redirect_from,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
-        'wikiIntro': wikiIntro,
-        'wikiImage': wikiImage,
-        'wikiCredit': wikiCredit,
-        'page_results': page_results,
-        'related_geographics_facet': related_geographics_facet,
-        'author_contributor_count': author_contributor_count,
-        'publisher_count': publisher_count,
-        'subject_category_count': subject_category_count,
+        'page_citation': request.GET.get('page_citation', 1),
         'tenant_id': tenant_id,
     }
 
@@ -517,6 +466,7 @@ def _get_display_type(authority, author_contributor_count, publisher_count, rela
 def _remove_self_from_facets(facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]
 
+# TODO: put somewhere else or use wikidata tag instead
 def _get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
     wikiImage = wikiCredit = wikiIntro = ''
 
