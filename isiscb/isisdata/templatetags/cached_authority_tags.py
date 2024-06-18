@@ -162,6 +162,67 @@ class RelatedCitationsList(RelatedCitationsSuperclass):
         context['page_results'] = paginator.get_page(page_number)
         return ""
 
+class AuthorityFacets(RelatedCitationsSuperclass):
+    
+    def __init__(self, authority_id, tenant_id, include_all_tenants):
+        super(AuthorityFacets, self).__init__(authority_id, tenant_id, include_all_tenants)
+        
+    def render(self, context):
+        authority_id = self.authority_id.resolve(context)
+        tenant_id = self.tenant_id.resolve(context)
+        include_all_tenants = self.include_all_tenants.resolve(context)
+
+        search_results = self._get_filtered_related_citations(self.sqs, authority_id, tenant_id, include_all_tenants)
+        subject_ids_facet = search_results.facet_counts()['fields']['subject_ids'] if 'fields' in search_results.facet_counts() else []
+        related_contributors_facet = search_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in search_results.facet_counts() else []
+        related_institutions_facet = search_results.facet_counts()['fields']['institution_ids'] if 'fields' in search_results.facet_counts() else []
+        related_geographics_facet = search_results.facet_counts()['fields']['geographic_ids'] if 'fields' in search_results.facet_counts() else []
+        related_timeperiod_facet = search_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in search_results.facet_counts() else []
+        related_categories_facet = search_results.facet_counts()['fields']['category_ids'] if 'fields' in search_results.facet_counts() else []
+        related_other_person_facet = search_results.facet_counts()['fields']['other_person_ids'] if 'fields' in search_results.facet_counts() else []
+        related_publisher_facet = search_results.facet_counts()['fields']['publisher_ids'] if 'fields' in search_results.facet_counts() else []
+        related_journal_facet = search_results.facet_counts()['fields']['periodical_ids'] if 'fields' in search_results.facet_counts() else []
+        related_subject_concepts_facet = search_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+        related_subject_people_facet = search_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+        related_subject_institutions_facet = search_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in search_results.facet_counts() else []
+        related_dataset_facet = search_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in search_results.facet_counts() else []
+
+        # remove current authority from facet results
+        subject_ids_facet = self._remove_self_from_facets(subject_ids_facet, authority_id)
+        related_contributors_facet =self._remove_self_from_facets(related_contributors_facet, authority_id)
+        related_institutions_facet = self._remove_self_from_facets(related_institutions_facet, authority_id)
+        related_geographics_facet = self._remove_self_from_facets(related_geographics_facet, authority_id)
+        related_timeperiod_facet = self._remove_self_from_facets(related_timeperiod_facet, authority_id)
+        related_categories_facet = self._remove_self_from_facets(related_categories_facet, authority_id)
+        related_other_person_facet = self._remove_self_from_facets(related_other_person_facet, authority_id)
+        related_publisher_facet = self._remove_self_from_facets(related_publisher_facet, authority_id)
+        related_journal_facet = self._remove_self_from_facets(related_journal_facet, authority_id)
+        related_subject_concepts_facet = self._remove_self_from_facets(related_subject_concepts_facet, authority_id)
+        related_subject_people_facet = self._remove_self_from_facets(related_subject_people_facet, authority_id)
+        related_subject_institutions_facet = self._remove_self_from_facets(related_subject_institutions_facet, authority_id)
+        related_dataset_facet = self._remove_self_from_facets(related_dataset_facet, authority_id)
+
+        context['subject_ids_facet'] = subject_ids_facet
+        context['related_contributors_facet'] = related_contributors_facet
+        context['related_institutions_facet'] = related_institutions_facet
+        context['related_geographics_facet'] = related_geographics_facet
+        context['related_timeperiod_facet'] = related_timeperiod_facet
+        context['related_categories_facet'] = related_categories_facet
+        context['related_other_person_facet'] = related_other_person_facet
+        context['related_publisher_facet'] = related_publisher_facet
+        context['related_journal_facet'] = related_journal_facet
+        context['related_subject_concepts_facet'] = related_subject_concepts_facet
+        context['related_subject_people_facet'] = related_subject_people_facet
+        context['related_subject_institutions_facet'] = related_subject_institutions_facet
+        context['related_dataset_facet'] = related_dataset_facet
+        
+        return ""
+
+    def _remove_self_from_facets(self, facet, authority_id):
+        return [x for x in facet if x[0].upper() != authority_id.upper()]
+
+
+
 @register.tag(name="related_citation_count")
 def do_related_citation_count(parser, token):
     try:
@@ -194,3 +255,14 @@ def do_related_citations_list(parser, token):
             "%r tag requires a 4 arguments" % token.contents.split()[0]
         )
     return RelatedCitationsList(authority_id, tenant_id, include_all_tenants, page_nr)
+
+@register.tag(name="authority_facets")
+def do_authority_facets(parser, token):
+    try:
+        # split_contents() knows not to split quoted strings.
+        tag_name, authority_id, tenant_id, include_all_tenants = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError(
+            "%r tag requires a 3 arguments" % token.contents.split()[0]
+        )
+    return AuthorityFacets(authority_id, tenant_id, include_all_tenants)

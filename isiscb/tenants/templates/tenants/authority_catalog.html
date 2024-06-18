@@ -4,6 +4,7 @@
 {% load search_filters %}
 {% load authority_filters %}
 {% load facet_filters %}
+{% load cached_authority_tags %}
 
 {% block authority_tabs %}
   <div id="tab search_tabs" class="btn-group" role="group" style="font-size: 1.1em; font-weight: 400;">
@@ -17,6 +18,7 @@
 {% endblock %}
 
 {% block tab_content %}
+{% authority_facets authority.id tenant_id include_all_tenants %}
 <div class="col-sm-12 col-md-6">
   <div class="panel panel-default facet-box">
     <div class=" panel-heading">
