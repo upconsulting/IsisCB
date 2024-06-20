@@ -7,7 +7,7 @@ import pytz, random, requests
 from urllib.request import urlopen
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from django.shortcuts import get_object_or_404
-from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
+from isisdata.helpers import external_services
 from haystack.inputs import Raw, AutoQuery
 import logging
 
@@ -98,9 +98,8 @@ def get_wiki_data(featured_authority):
             .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
 
     # get wikipedia data
-    wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
+    wikiImage, wikiIntro, wikiCredit = external_services.get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
     return (wikiImage, wikiIntro, wikiCredit)
-
 
 
        

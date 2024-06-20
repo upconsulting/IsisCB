@@ -168,6 +168,7 @@ TEMPLATES = [
                 'isisdata.context_processors.google',
                 'isisdata.context_processors.portal_prefix',
                 'isisdata.context_processors.notifications',
+                'isisdata.context_processors.cache_timeout',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],
@@ -176,6 +177,9 @@ TEMPLATES = [
 ]
 
 #WSGI_APPLICATION = 'isiscb.wsgi.application'
+
+# in seconds, default is a month (2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
 
 LOGGING = {
 	"version": 1,

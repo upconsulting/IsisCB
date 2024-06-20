@@ -5,7 +5,10 @@
 {% load citation_filters %}
 {% load facet_filters %}
 {% load general_tags %}
+{% load cache %}
 
+{% cache CACHE_TIMEOUT authority_wikipedia authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   <div style="z-index: 10; position: relative;">
     <div id="snippetWikiImageContainer" style="display:none; position: relative;  margin: auto;">
@@ -93,7 +96,7 @@
     let snippetWikiImage = "{{ wikiImage|safe }}";
     let snippetWikiCredit = "{{ wikiCredit|safe }}";
     let type = "{{display_type}}";
-
+    
     let default_image_map = {
       "Concept": "{% static 'isisdata/images/concept_default_image.png' %}",
       "Person": "{% static 'isisdata/images/person_default_image.jpeg' %}",
@@ -173,3 +176,4 @@
     document.getElementById("places_map_snippet_container").getElementsByClassName("modebar-container")[0].remove();
   }
 </script>
+{% endcache %}

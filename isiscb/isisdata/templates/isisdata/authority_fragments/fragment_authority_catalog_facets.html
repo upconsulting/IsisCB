@@ -1,0 +1,393 @@
+{% load app_filters %}
+{% load search_filters %}
+{% load authority_filters %}
+{% load facet_filters %}
+{% load cached_authority_tags %}
+{% load cache %}
+
+{% cache CACHE_TIMEOUT authority_facet_boxes authority.id tenant_id include_all_tenants %}
+
+{% authority_facets authority.id tenant_id include_all_tenants %}
+<div class="row">
+    <div class="col-sm-12 col-md-6">
+    <div class="panel panel-default facet-box">
+        <div class=" panel-heading">
+        <strong>Authors & Contributors</strong>
+        {% if related_contributors_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_contributors_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_persons_ids'%}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading ">
+        <strong>Journals</strong>
+        {% if related_journal_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#journalModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_journal_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading ">
+        <strong>Publishers</strong>
+        {% if related_publisher_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#publisherModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_publisher_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading panel-heading">
+        <strong>Datasets</strong>
+        </div>
+        <div class="panel-body">
+        {% for facet in related_dataset_facet|slice:"6" %}
+        <i class="fa fa-database" aria-hidden="true"></i> {% with facet.0 as authority_name %}
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_dataset_typed_names_exact:{{facet.0|urlencode}}">
+            {{authority_name}} ({{facet.1}} citations)
+        </a>
+
+        {% endwith %}
+        <br>
+        {% endfor %}
+        </div>
+    </div>
+    </div>
+    <div class="col-sm-12 col-md-6">
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>Concepts</strong>
+        {% if related_subject_concepts_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#subjectModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_subject_concepts_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids_exact' %}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>People</strong>
+        {% if related_subject_people_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_subject_people_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids'%}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>Time Periods</strong>
+        {% if related_timeperiod_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_timeperiod_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>Places</strong>
+        {% if related_geographics_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_geographics_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>Institutions </strong>
+        {% if related_subject_institutions_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_subject_institutions_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact'%}
+        {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+        <strong>Categories</strong>
+        {% if related_categories_facet|length > 6 %}
+        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#categoryModal" style="float:right">
+            More <i class="far fa-caret-square-down"></i>
+        </button>
+        {% endif %}
+        </div>
+        <div class="panel-body">
+        {% for facet in related_categories_facet|slice:"6" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}
+        {% endfor %}
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- facet modals -->
+<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Authors & Contributors</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in related_contributors_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+
+<!-- subject Modal -->
+  <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Concepts</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in related_subject_concepts_facet %}
+              <li>
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids' %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+
+<!-- people Modal -->
+<div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">People</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_subject_people_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- institution Modal -->
+<div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Institutions</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_subject_institutions_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- categories Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Categories</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_categories_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- time period Modal -->
+<div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Time Periods</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_timeperiod_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- publisher Modal -->
+<div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Publishers</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_publisher_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- journals Modal -->
+<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Journals</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_journal_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_geographics_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+{% endcache %}

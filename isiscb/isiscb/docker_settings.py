@@ -19,6 +19,9 @@ sys.path.append('..')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# in seconds, default is a month (2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
 
@@ -168,6 +171,7 @@ TEMPLATES = [
                 'isisdata.context_processors.google',
                 'isisdata.context_processors.portal_prefix',
                 'isisdata.context_processors.notifications',
+                'isisdata.context_processors.cache_timeout',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],

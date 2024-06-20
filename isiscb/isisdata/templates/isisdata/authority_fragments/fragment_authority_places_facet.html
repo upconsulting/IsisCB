@@ -1,5 +1,8 @@
 {% load facet_filters %}
+{% load cache %}
 
+{% cache CACHE_TIMEOUT authority_map authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
 <div class="panel-heading-subjects panel panel-default facet-box">
   <div class="panel-heading-subjects panel-heading">
     <strong>Related places {% if related_geographics_facet|length > 0 %}<a class="mapView" id="showListLink" style="cursor:pointer">(List view)</a><a class="listView" id="showMapLink" style="display:none; cursor:pointer">(Map view)</a>{% endif %}</strong>
@@ -277,3 +280,4 @@
     </div>
   </div>
 </div>
+{% endcache %}
