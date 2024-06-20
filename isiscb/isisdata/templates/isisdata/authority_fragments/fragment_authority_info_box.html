@@ -4,7 +4,12 @@
 {% load authority_filters %}
 {% load citation_filters %}
 {% load facet_filters %}
+{% load cached_authority_tags %}
+{% load cache %}
 
+{% cache 604800 authority_info_box_cache authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
+    
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   <div style="z-index: 10; position: relative;">
     <div id="wikiImageContainer" style="display:none; position: relative;  margin: auto;">
@@ -17,9 +22,9 @@
     <p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{authority.name}}</p>
   </div>
   <hr id="wikiImageBorder" style="display:none;">
-
-  <p>
-
+    <p>
+    {% related_citation_count authority.id tenant_id include_all_tenants %}
+    
     {% if related_citations_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
@@ -49,7 +54,7 @@
     related to {{ authority.name }} as a publisher
     <br>
     {% endif %}
-
+    
     {% if subject_category_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
     Show
@@ -60,6 +65,7 @@
     <br>
     {% endif %}
   </p>
+
 
   {% for attribute in authority.attributes.all %}
   {% if attribute|is_attribute_visible and not attribute|is_bibliographic_essay %}
@@ -168,7 +174,7 @@
       <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Academia-logo-2021.svg" height="14px" width="11px"> <a target="_blank" href="https://www.academia.edu/search?q={{authority.name}}&tab=2">Academia.edu</a>
       <br>
 
-      {% if display_type == 'Author' %}
+       {% if display_type == 'Author' %}
         <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
         <br>
       {% endif %}
@@ -295,3 +301,4 @@
   }
 
 </script>
+{% endcache %}

@@ -52,7 +52,6 @@ from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
-from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
 import isisdata.helpers.isiscb_utils as isiscb_utils
 
 
