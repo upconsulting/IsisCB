@@ -26,7 +26,7 @@
       <h4 style="margin: 0;">Related Citations</h4>
     </div>
     <div class="panel-body">
-      {% cache 604800 authority_tenant_related_citations authority.id tenant_id include_all_tenants %}
+      {% cache CACHE_TIMEOUT authority_tenant_related_citations authority.id tenant_id include_all_tenants %}
       <!--604800 cached for a week -->{% related_citations_list authority.id tenant_id include_all_tenants page_citation %}
                   
       {% for result in page_results %}

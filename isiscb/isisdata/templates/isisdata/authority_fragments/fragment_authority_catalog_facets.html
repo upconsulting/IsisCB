@@ -5,8 +5,8 @@
 {% load cached_authority_tags %}
 {% load cache %}
 
-{% cache 604800 authority_facet_boxes authority.id tenant_id include_all_tenants %}
-<!--604800 cached for a week -->
+{% cache CACHE_TIMEOUT authority_facet_boxes authority.id tenant_id include_all_tenants %}
+
 {% authority_facets authority.id tenant_id include_all_tenants %}
 <div class="row">
     <div class="col-sm-12 col-md-6">

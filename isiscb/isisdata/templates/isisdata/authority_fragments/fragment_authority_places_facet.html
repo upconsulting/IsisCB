@@ -1,7 +1,7 @@
 {% load facet_filters %}
 {% load cache %}
 
-{% cache 604800 authority_map authority.id tenant_id include_all_tenants %}
+{% cache CACHE_TIMEOUT authority_map authority.id tenant_id include_all_tenants %}
 <!--604800 cached for a week -->
 <div class="panel-heading-subjects panel panel-default facet-box">
   <div class="panel-heading-subjects panel-heading">

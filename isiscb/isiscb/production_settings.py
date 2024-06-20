@@ -18,6 +18,9 @@ import markdown
 
 sys.path.append('..')
 
+# in seconds, default is a month (2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -133,6 +136,7 @@ TEMPLATES = [
                 'isisdata.context_processors.google',
                 'isisdata.context_processors.notifications',
                 'isisdata.context_processors.portal_prefix',
+                'isisdata.context_processors.cache_timeout',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants',
             ],

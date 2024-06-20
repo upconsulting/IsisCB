@@ -5,7 +5,7 @@
 {% load search_filters %}
 {% load metadata_filters %}
 
-{% cache 604800 authority_related_citations authority.id tenant_id include_all_tenants %}
+{% cache CACHE_TIMEOUT authority_related_citations authority.id tenant_id include_all_tenants %}
 <!--604800 cached for a week -->
     {% related_citations_list authority.id tenant_id include_all_tenants page_citation %}
     {% for result in page_results %}
