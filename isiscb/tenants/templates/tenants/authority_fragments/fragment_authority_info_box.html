@@ -7,7 +7,7 @@
 {% load cached_authority_tags %}
 {% load cache %}
 
-{% cache 604800 authority_tenant_info_box_cache authority.id tenant_id include_all_tenants %}
+{% cache CACHE_TIMEOUT authority_tenant_info_box_cache authority.id tenant_id include_all_tenants %}
 <!--604800 cached for a week -->
 
 <div class="col-sm-12 col-md-6" style="padding-left: 0">

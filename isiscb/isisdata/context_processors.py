@@ -23,3 +23,6 @@ def notifications(request):
     if active_messages:
         return {'notifications': active_messages }
     return {}
+
+def cache_timeout(request):
+    return {'CACHE_TIMEOUT': settings.CACHE_TIMEOUT}

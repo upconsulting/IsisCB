@@ -7,7 +7,7 @@
 {% load general_tags %}
 {% load cache %}
 
-{% cache 604800 authority_wikipedia authority.id tenant_id include_all_tenants %}
+{% cache CACHE_TIMEOUT authority_wikipedia authority.id tenant_id include_all_tenants %}
 <!--604800 cached for a week -->
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   <div style="z-index: 10; position: relative;">
