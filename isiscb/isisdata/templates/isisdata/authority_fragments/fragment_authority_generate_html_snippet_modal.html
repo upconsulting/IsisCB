@@ -1,3 +1,6 @@
+{% load cache %}
+
+{% cache 604800 authority_generate_html_modal authority.id tenant_id include_all_tenants %}
 <div class="modal fade" id="generateHTMLModal" style="height: 75%;" tabindex="-1" role="dialog" aria-labelledby="generateHTMLLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -50,3 +53,5 @@
     }
     // end copy HTML snippet
   </script>
+
+{% endcache %}

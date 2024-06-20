@@ -5,6 +5,10 @@
 {% load citation_filters %}
 {% load facet_filters %}
 {% load cached_authority_tags %}
+{% load cache %}
+
+{% cache 604800 authority_tenant_info_box_cache authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
 
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   <div style="z-index: 10; position: relative;">
@@ -161,7 +165,7 @@
           <hr style='margin: 7px 0;'>
         {% endif %}
       {% endwith %}
-
+      
       {% if display_type == 'Author' %}
         <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
         <br>
@@ -296,3 +300,4 @@
   }
 
 </script>
+{% endcache %}

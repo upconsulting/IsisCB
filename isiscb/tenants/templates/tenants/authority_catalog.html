@@ -5,6 +5,7 @@
 {% load authority_filters %}
 {% load facet_filters %}
 {% load cached_authority_tags %}
+{% load cache %}
 
 {% block authority_tabs %}
   <div id="tab search_tabs" class="btn-group" role="group" style="font-size: 1.1em; font-weight: 400;">
@@ -18,6 +19,9 @@
 {% endblock %}
 
 {% block tab_content %}
+
+{% cache 604800 authority_tenant_facet_boxes authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
 {% authority_facets authority.id tenant_id include_all_tenants %}
 <div class="col-sm-12 col-md-6">
   <div class="panel panel-default facet-box">
@@ -357,6 +361,8 @@
     </div>
   </div>
 </div><!-- /modal -->
+
+{% endcache %}
 {% endblock %}
 
       

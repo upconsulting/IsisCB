@@ -26,7 +26,8 @@
       <h4 style="margin: 0;">Related Citations</h4>
     </div>
     <div class="panel-body">
-      {% related_citations_list authority.id tenant_id include_all_tenants page_citation %}
+      {% cache 604800 authority_tenant_related_citations authority.id tenant_id include_all_tenants %}
+      <!--604800 cached for a week -->{% related_citations_list authority.id tenant_id include_all_tenants page_citation %}
                   
       {% for result in page_results %}
         <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
@@ -200,6 +201,7 @@
               </ul>
           </nav>
       {% endif %}
+      {% endcache %}
     </div>
   </div>
 </div>

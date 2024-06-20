@@ -50,4 +50,4 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                 wikipedia_data = WikipediaData(img_url=wikiImage, credit=wikiCredit, intro=wikiIntro, authority_id=authority.id)
                 wikipedia_data.save()
 
-            return wikiImage, wikiIntro, wikiCredit
+        return wikiImage, wikiIntro, wikiCredit

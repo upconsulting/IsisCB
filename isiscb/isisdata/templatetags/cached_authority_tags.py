@@ -131,7 +131,7 @@ class WikipediaInfo(RelatedCitationsSuperclass):
         context["wikiImage"] = wikiImage
         context['wikiIntro'] = wikiIntro
         context['wikiCredit'] = wikiCredit
-        
+          
         return ""
 
     def _get_display_type(self, authority, author_contributor_count, publisher_count, related_citations_count):
@@ -220,8 +220,6 @@ class AuthorityFacets(RelatedCitationsSuperclass):
 
     def _remove_self_from_facets(self, facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]
-
-
 
 @register.tag(name="related_citation_count")
 def do_related_citation_count(parser, token):
