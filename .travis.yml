@@ -23,6 +23,7 @@ before_install:
 - pip install -U pip
 - pip install -U six
 - pip install -U setuptools==69.5.1
+- pip install --use-deprecated=legacy-resolver -U celery==4.4.2 
 - sudo apt-get install libgnutls28-dev
 script:
 - pip install nose
