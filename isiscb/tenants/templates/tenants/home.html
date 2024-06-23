@@ -8,8 +8,14 @@
 {% load content_tags %}
 {% load tenanttags %}
 {% load addcss %}
+{% load cache %}
+{% load cached_tags %}
 
 {% block extra_head%}
+
+{% cache 72000 featured-js tenant_id %}
+{% with citation=tenant_id|get_featured_citation %}
+{% with properties_map=citation|get_featured_citation_properties %}
 <script type="text/javascript">
     window.addEventListener('DOMContentLoaded', (event) => {
         let citationType = "{{ citation.type_controlled }}";
@@ -54,6 +60,9 @@
         }
     });
 </script>
+{% endwith %}
+{% endwith %}
+{% endcache %}
 
     <style>
         .truncate {
@@ -131,32 +140,18 @@
                 </div>
                 <br>
                 <div class="row">
-                    <div class="browse-button" style="float: right; padding: 0 15px 0 0;">
-                        <form method="get" action="/{{PORTAL_PREFIX}}/{{ tenant_id }}/search">
-                            <div class="input-group">
-                                <input id="id_q" name="q" type="hidden" class="form-control" value="*">
-                                <span>
-                                    <button class="btn btn-primary btn-lg" style="background-color: #fff; border-color: #ccc; color: #333;" type="submit">Browse</button>
-                                </span>
-                            </div>
-                            <div>
-                                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
-                                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
-                                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                                <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
-                                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
-                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
-                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
-                                <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
-                                <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
-                            </div>
-                        </form>
-                    </div>
-                    <span style="float: right; font-size: 20px; margin-right: 15px; padding-top: 9px;">Explore the entire database</span>
+                   
                 </div>
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
+        {% cache 72000 featured tenant_id %}
+        {% with citation=tenant_id|get_featured_citation %}
+        {% with properties_map=citation|get_featured_citation_properties %}
+        {% with featured_authority=tenant_id|get_featured_authorities %}
+        {% with featured_citation_authors=citation|get_featured_citation_authors %}
+        {% with featured_citation_image=citation|get_featured_citation_image %}
+        {% with wikidata=featured_authority|get_wiki_data %}
         <div class="row">
             <div class="col-sm-12 col-md-{{tweet_url|featured_column_width}}" style="padding: 0;">
                 <div class="col-sm-12 col-md-{{ citation|get_featured_column_width:featured_authority }} featured-citation">
@@ -239,15 +234,15 @@
                             <a href="{% url 'tenants:authority' tenant_id featured_authority.id %}"><h4 style="margin: 5px 0px">{{ featured_authority.name }}</h4></a>
                         </div>
                         <div class="panel-body">
-                            <div class="{% if wikiImage%}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikiImage%}height: 0;{% endif%}">
-                                <img src="{{ wikiImage|safe }}" href="{{ wikiCredit }}" style="width: 100%">
+                            <div class="{% if wikidata.0%}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikidata.0%}height: 0;{% endif%}">
+                                <img src="{{ wikidata.0|safe }}" href="{{ wikidata.2 }}" style="width: 100%">
                             </div>
-                            <div class="col-sm-12 {% if wikiImage%}col-md-7{% endif%}">
-                                <p class="truncate" style="margin-bottom: 0">{{ wikiIntro }}</p>
+                            <div class="col-sm-12 {% if wikidata.0%}col-md-7{% endif%}">
+                                <p class="truncate" style="margin-bottom: 0">{{ wikidata.1 }}</p>
                             </div>
                             <div class='row'>
                                 <div class="col-sm-12" style="margin-top: 10px;">
-
+                                    {% include 'tenants/authority_fragments/fragment_authority_publications_graph.html' with authority=featured_authority %}
                                 </div>
                             </div>
                         </div>
@@ -274,6 +269,13 @@
             </div>
             {% endif %}
         </div>
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endcache %}
     </div>
 </div>
 

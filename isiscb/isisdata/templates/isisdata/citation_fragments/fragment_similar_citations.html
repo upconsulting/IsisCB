@@ -1,0 +1,136 @@
+{% load app_filters %}
+{% load search_filters %}
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="bookshelf">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 style="margin: 0;">Similar Citations</h4>
+        </div>
+        <div class="panel-body">
+        {% for citation in similar_citations %}
+            <div class="{% if citation.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if citation.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+                <p style="margin-bottom: 15px;">
+                {% if citation.stub_record_status == 'SR' %}
+                    <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
+                {% endif %}
+                {% if citation.type == "Book" %}
+                    <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Thesis" %}
+                    <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Multimedia Object" %}
+                    <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Chapter" %}
+                    <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% else %}
+                    <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% endif %}
+
+                {% url 'citation' citation.id|get_pk as citation_url %}
+                {% if citation.title == 'Title missing' and citation.complete_citation %}
+                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                    {{citation.complete_citation}}
+                </a>
+                {% else %}
+                    {% if citation.authors_exact %}
+                    {% for author in citation.authors_exact %}
+                        <span>{{ author }};</span>
+                    {% endfor %}
+                    {% endif %}
+                    {% if citation.publication_date %}
+                    ({{ citation.publication_date.0 }})
+                    <br>
+                    {% if citation.title %}
+                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                        {{ citation.title|bleach_safe }}
+                        </a>
+                    {% endif %}
+                    {% elif citation.publication_date.0 and not authors %}
+                    {% if citation.title %}
+                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                        {{ citation.title|bleach_safe }}
+                        </a>
+                    {% endif %}
+                    ({{ citation.publication_date.0 }})
+                    {% else %}
+                    {% if citation.title %}
+                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                        {{ citation.title|bleach_safe }}
+                        </a>
+                    {% endif %}
+                    {% endif %}
+                {% endif %}
+                    <span class="visible-print-inline">({{ citation_url }})</span>
+                </p>
+            </div>
+            {% empty %}
+                <h3>No results found . . . <i class="fas fa-child"></i></h3>
+            {% endfor %}
+        </div>
+    </div>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="catalog">
+    <div class="row">
+      <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+        {% if facets.fields.all_contributor_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal"%}
+        {% endif %}
+    
+        {% if facets.fields.publication_host_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="journalModal" %}
+        {% endif %}
+
+        {% if facets.fields.institutional_host_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="journalModal" %}
+        {% endif %}
+      </div>
+      <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+        
+        {% if facets.fields.concepts_only_by_subject_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" %}
+        {% endif %}
+        
+        {% if facets.fields.about_person_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" %}
+        {% endif %}
+       
+        {% if facets.fields.time_period_ids %}
+        {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" %}
+        {% endif %}
+       
+
+        {% if facets.fields.geographic_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" %}
+        {% endif %}
+
+        {% if facets.fields.institutions_by_subject_ids %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- authors modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="authorModal" modal_aria_labelledby="authorModalLabel" facets=facets.fields.all_contributor_ids modal_title="Authors & Contributors" %}
+
+<!-- concepts Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="subjectModal" modal_aria_labelledby="subjectModalLabel" facets=facets.fields.concepts_only_by_subject_ids modal_title="Concepts" %}
+
+<!-- people Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="peopleModal" modal_aria_labelledby="peopleModalLabel" facets=facets.fields.about_person_ids modal_title="People" %}
+
+<!-- places Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="placesModal" modal_aria_labelledby="placesModalLabel" facets=facets.fields.geographic_ids modal_title="Places" %}
+
+<!-- institution Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="institutionModal" modal_aria_labelledby="institutionModalLabel" facets=facets.fields.institutions_by_subject_ids modal_title="Institutions" %}
+
+<!-- times Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="timePeriodModal" modal_aria_labelledby="timePeriodModalLabel" facets=facets.fields.time_period_ids modal_title="Time Periods" %}
+
+<!-- publisher Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="publisherModal" modal_aria_labelledby="publisherModalLabel" facets=facets.fields.institutional_host_ids modal_title="Publishers" %}
+
+<!-- periodical Modal -->
+{% include 'isisdata/citation_fragments/fragment_citation_facet_box_modal_es.html' with modal_id="journalModal" modal_aria_labelledby="journalModalLabel" facets=facets.fields.publication_host_ids modal_title="Journals" %}

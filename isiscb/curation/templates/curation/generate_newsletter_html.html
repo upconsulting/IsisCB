@@ -1,0 +1,260 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load addcss %}
+{% load general_tags %}
+{% load app_filters %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+        <h1 class="panel-title">Preview of HTML Snippet Components</h1>
+    </div>
+    <div class="panel-body">
+        <div class="col-sm-6">
+          {% if page_results.has_previous or page_results.has_next %}
+            <nav class="hidden-print">
+                <ul class="pagination">
+                    <li class="disabled"><a>Page:</a></li>
+                    {% if page_results.has_previous %}
+                    <li>
+                        {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                        {% with ppage="page_citation:"|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}&search={{search_key}}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    {% if page_results.has_previous or page_results.has_next %}
+                    {% for p in page_results.paginator.page_range %}
+                    {% with pagenr=forloop.counter|stringformat:"s" %}
+                    {% with ppage='page_citation:'|add:pagenr %}
+                    {% with page_results.paginator.page_range|last as last %}
+                    {% with page_results.paginator.page_range|first as first %}
+                        {% if page_results.number >= 4 and p == first %}
+                        <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
+                        <li class="disabled"><span>...</span></li>
+                        {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                        <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
+                        {% elif p == last %}
+                        <li class="disabled"><span>...</span></li>
+                        <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
+                        {% endif %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if page_results.has_next %}
+                    <li>
+                        {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                        {% with ppage='page_citation:'|add:pagenr %}
+                        <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        {% endwith %}
+                        {% endwith %}
+                    </li>
+                    {% else %}
+                    <li class="disabled">
+                        <span aria-hidden="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+          {% endif %}
+          <div id="listHTMLSnippetContent">
+              {% for citation in page_results %}
+                  <p class="tinos-regular" style="padding-left: 25px; text-indent: -25px; font-size: 18px;"><a target="_blank" href="{{ citation|get_uri:citation.owning_tenant.identifier }}">{{ citation.id|get_print_formatted_citation }}</a></p>
+              {% endfor %}
+          </div>
+          <hr>
+          {% if page_results.has_previous or page_results.has_next %}
+              <nav class="hidden-print">
+                  <ul class="pagination">
+                      <li class="disabled"><a>Page:</a></li>
+                      {% if page_results.has_previous %}
+                      <li>
+                          {% with pagenr=page_results.previous_page_number|stringformat:"s" %}
+                          {% with ppage="page_citation:"|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&laquo;</span>
+                      </li>
+                      {% endif %}
+
+                      {% if page_results.has_previous or page_results.has_next %}
+                      {% for p in page_results.paginator.page_range %}
+                      {% with pagenr=forloop.counter|stringformat:"s" %}
+                      {% with ppage='page_citation:'|add:pagenr %}
+                      {% with page_results.paginator.page_range|last as last %}
+                      {% with page_results.paginator.page_range|first as first %}
+                          {% if page_results.number >= 4 and p == first %}
+                          <li {% if page_results.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ first }}</a></li>
+                          <li class="disabled"><span>...</span></li>
+                          {% elif page_results.number <= p|add:"2" and page_results.number >= p|add:"-4" %}
+                          <li {% if page_results.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ p }}</a></li>
+                          {% elif p == last %}
+                          <li class="disabled"><span>...</span></li>
+                          <li {% if page_results.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_bookshelf_page:ppage}}&search={{search_key}}">{{ last }}</a></li>
+                          {% endif %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endwith %}
+                      {% endfor %}
+                      {% endif %}
+
+                      {% if page_results.has_next %}
+                      <li>
+                          {% with pagenr=page_results.next_page_number|stringformat:"s" %}
+                          {% with ppage='page_citation:'|add:pagenr %}
+                          <a href="{{ request.get_full_path|set_bookshelf_page:ppage }}" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          </a>
+                          {% endwith %}
+                          {% endwith %}
+                      </li>
+                      {% else %}
+                      <li class="disabled">
+                          <span aria-hidden="true">&raquo;</span>
+                      </li>
+                      {% endif %}
+                  </ul>
+              </nav>
+          {% endif %}
+          <hr>
+          <textarea id="listHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+        <div class="col-sm-6">
+            <div class="row" id="boxesHTMLSnippetContent">
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if facets.fields.all_contributor_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Authors & Contributors" facets=facets.fields.all_contributor_ids facet_field="all_contributor_ids" model_id="authorModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+
+                  
+                  {% if facets.fields.publication_host_ids %}
+                  {% if tenant_pk %}
+                  {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="publicationHostModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Journals" facets=facets.fields.publication_host_ids facet_field="publication_host_ids" model_id="publicationHostModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+
+                  
+
+                  {% if facets.fields.institutional_host_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="institutionalHostModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="institutionalHostModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+
+                  
+                </div>
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  
+                  {% if facets.fields.concepts_only_by_subject_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Concepts" facets=facets.fields.concepts_only_by_subject_ids facet_field="concepts_only_by_subject_ids" model_id="subjectModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+                  
+                  {% if facets.fields.about_person_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="People" facets=facets.fields.about_person_ids facet_field="about_person_ids" model_id="peopleModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+                 
+                  {% if facets.fields.time_period_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Time Periods" facets=facets.fields.time_period_ids facet_field="time_period_ids" model_id="timePeriodModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+                 
+
+                  {% if facets.fields.geographic_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Places" facets=facets.fields.geographic_ids facet_field="geographic_ids" model_id="placesModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+
+                  {% if facets.fields.institutions_by_subject_ids %}
+                  {% if tenant_pk %}
+                    {% include 'tenants/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" tenant_id=tenant.identifier hide_modal=1 show_count=1 %}
+                  {% else %}
+                    {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Institutions" facets=facets.fields.institutions_by_subject_ids facet_field="institutions_by_subject_ids"  model_id="institutionModal" hide_modal=1 show_count=1 %}
+                  {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            <hr>
+            <textarea id="boxesHTMLSnippetContainer" style="display: block; width: 100%; height: 500px"></textarea>
+        </div>
+    </div>
+    <div class="panel-footer clearfix">
+        <div class="btn-group pull-right">
+            <a href="#" class="btn btn-default" onclick="copyListHTMLSnippet()">Copy List HTML</a>
+            <a href="#" class="btn btn-default" onclick="copyBoxesHTMLSnippet()">Copy Boxes HTML</a>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    let listHTMLSnippet = document.getElementById("listHTMLSnippetContent").outerHTML;
+    let listHTMLSnippetContainer = document.getElementById("listHTMLSnippetContainer");
+    listHTMLSnippetContainer.value += listHTMLSnippet;
+
+    let boxesHTMLSnippet = document.getElementById("boxesHTMLSnippetContent").outerHTML;
+    let boxesHTMLSnippetContainer = document.getElementById("boxesHTMLSnippetContainer");
+    boxesHTMLSnippetContainer.value += boxesHTMLSnippet;
+
+    function copyListHTMLSnippet() {
+        let listCopyTextarea = document.querySelector('#listHTMLSnippetContainer');
+        listCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("This bibliography has been copied to your clipboard.", "success");
+    }
+
+    function copyBoxesHTMLSnippet() {
+        let boxesCopyTextarea = document.querySelector('#boxesHTMLSnippetContainer');
+        boxesCopyTextarea.select();
+        document.execCommand("copy");
+        $.notify("These boxes has been copied to your clipboard.", "success");
+    }
+</script>
+{% endblock %}

@@ -387,7 +387,7 @@ $(document).ready(function() {
         var id_result_container = $(search_input.attr('selected-result-target'));
 
         searchTimer = setTimeout(function() {
-          $.ajax("{% url "curation:quick_and_dirty_citation_search" %}?tenant_ids={{tenant_id}}&max=" + max_results + "&q=" + query, {
+          $.ajax("{% url "curation:quick_and_dirty_citation_search" %}?tenant_ids={{tenant_pk}}&max=" + max_results + "&q=" + query, {
               failure: function(result) {
                   // do nothing
               },

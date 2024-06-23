@@ -181,6 +181,14 @@
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="addSubjects">
         <p>
+          <fieldset>
+            <input type="radio" id="search_only_defaults_datasets" name="search_datasets" checked /> Only default dataset 
+            &nbsp; &nbsp; &nbsp; 
+            <input type="radio" id="search_all_datasets" name="search_datasets" /> All datasets
+          </fieldset>
+        </p>
+
+        <p>
           <div class="input-group">
             <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
             </input>
@@ -217,7 +225,7 @@
             </span>
           </div>
         </p>
-
+        
         <ul class="list-group" id="subjectSearchResultsContainer">
 
         </ul>
@@ -318,6 +326,11 @@ function triggerSearchSubjects(force) {
     url += "&max=" + max_results + "&force=" + force; 
     if (!search_all_tenants) {
       url += "&tenant_ids={{instance.owning_tenant.id}}";
+    }
+    if ($("#search_all_datasets").is(":checked") == true && (types.includes("CO") || types.length == 0)) {
+      url += "&only_defaults=false"
+    } else {
+      url += "&only_defaults=true"
     }
     url += "&q=" + $('#subjectSearchQuery').val();
     $.ajax(url, {

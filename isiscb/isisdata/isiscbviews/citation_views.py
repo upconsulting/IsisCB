@@ -12,9 +12,11 @@ from django.contrib.staticfiles import finders
 
 from django.conf import settings
 
+from haystack.query import SQ
+
 from rest_framework.reverse import reverse
 
-from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.query import EmptySearchQuerySet, SearchQuerySet, SQ
 from collections import defaultdict, Counter
 from urllib.parse import quote
 import base64
@@ -24,6 +26,7 @@ from isisdata.models import *
 from isisdata.tasks import *
 import isisdata.views as isisviews
 import isisdata.helpers.isiscb_utils as isiscb_utils
+import isisdata.google as google
 
 def citation(request, citation_id, tenant_id=None):
     """
@@ -71,43 +74,8 @@ def citation(request, citation_id, tenant_id=None):
     # get citations related through CCRelations
     context.update(_get_related_citations(citation_id, tenant, request.include_all_tenants))
 
-    # Similar Citations Generator
-    if subjects:
-        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        sqs.query.set_limits(low=0, high=20)
-        results = sqs.all().exclude(public="false")
-        if tenant and not request.include_all_tenants:
-            results = results.filter(tenant_ids=tenant.pk)
-        similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
-    elif citation.type_controlled not in ['RE']:
-        mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-        mlt.query.set_limits(low=0, high=20)
-        if tenant and not request.include_all_tenants:
-            mlt = mlt.filter(tenant_ids=tenant_id)
-        similar_citations = mlt.all().exclude(public="false").query.get_results()
-    else:
-        similar_citations = []
-        word_cloud_results = EmptySearchQuerySet()
-
-    similar_objects = _get_facets_from_similar_citations(similar_citations)
-
     googleBooksImage = None
-    if tenant and tenant.settings.google_api_key:
-        googleBooksImage = isisviews.get_google_books_image(citation, False, tenant.settings.google_api_key)
+    googleBooksImage = google.get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
@@ -117,13 +85,12 @@ def citation(request, citation_id, tenant_id=None):
     # Location of citation in REST API
     api_view = reverse('citation-detail', args=[citation.id], request=request)
 
-    # Provide progression through search results, if present.
-
     # make sure we have a session key
     if hasattr(request, 'session') and not request.session.session_key:
         request.session.save()
         request.session.modified = True
 
+    # Provide progression through search results, if present.
     session_id = request.session.session_key
     fromsearch = request.GET.get('fromsearch', False)
     last_query = request.GET.get('last_query', None) 
@@ -208,9 +175,7 @@ def citation(request, citation_id, tenant_id=None):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-        'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
-        'similar_objects': similar_objects,
         'tenant_id': tenant_id,
     })
 
@@ -262,33 +227,58 @@ def _get_related_citations(citation_id, tenant, include_all_projects):
         'related_citations_as': related_citations_as,
     }
 
-def _get_facets_from_similar_citations(similar_citations):
-    similar_objects = defaultdict(list)
+import logging
+logger = logging.getLogger(__name__)
+def get_facets_from_citations(citations, tenant_id=None):
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_only_by_subject_ids', size=100).\
+                facet('institutional_host_ids', size=100).\
+                facet('about_person_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000).\
+                facet('publication_host_ids', size=100)
+   
+    # filter by tenant if tenant is identified
+    if tenant_id:
+        sqs = sqs.filter(tenant_ids=tenant_id)
+    
+    # filter by citation ids
+    sqs = sqs.filter(id__in=citations).exclude(public="false")
 
-    if similar_citations:
-        similar_citations_ids = [citation.id for citation in similar_citations]
-        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
-        for acrelation in similar_acrelations:
+    return sqs
+
+def get_facets_from_citations_old(citations):
+    objects = defaultdict(list)
+
+    if citations:
+        citations_ids = [citation.id for citation in citations]
+        citations_qs = Citation.objects.all().filter(id__in=citations_ids)
+        acrelations = [acr for citation in citations_qs for acr in citation.acrelations.all()]
+        for acrelation in acrelations:
             if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
-                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
+                objects[acrelation.type_broad_controlled].append(acrelation.authority)
             if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
-                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
+                objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
-    if similar_objects:
-        similar_objects = _generate_similar_facets(similar_objects)
+    if objects:
+        objects = generate_facets(objects)
 
-    return similar_objects
+    return objects
 
-def _generate_similar_facets(similar_objects):
-    for key in similar_objects:
-        authorities_count = Counter(similar_objects[key])
-        similar_facets = []
+def generate_facets(objects):
+    for key in objects:
+        authorities_count = Counter(objects[key])
+        facets = []
 
         for authority in authorities_count:
-            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
-        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+            facets.append({'authority':authority, 'count':authorities_count[authority]})
+        facets = sorted(facets, key=itemgetter('count'), reverse=True)
 
-        similar_objects[key] = similar_facets
+        objects[key] = facets
 
-    return similar_objects
+    return objects

@@ -34,7 +34,12 @@ $('body').ready(function() {
       form.submit();
       e.preventDefault();
     });
-
+    $('#generate_newsletter_html').click(function(e) {
+      form.attr('action', '{% url "curation:generate_newsletter_html" %}');
+      form.attr('target', '_blank');
+      form.submit();
+      e.preventDefault();
+    });
     $('.queryset-checkbox').change(function() {
       toggleLinkRecordsBtn();
     });
@@ -112,6 +117,10 @@ function toggleLinkRecordsBtn() {
     <a class="btn btn-primary btn-xs" disabled href="#" id="link_records_btn">
       <i class="fa fa-link" aria-hidden="true"></i>
         Link Records
+    </a>
+    <a class="btn btn-primary btn-xs {% if result_count > 1000 %}disabled{% endif%}" {% if result_count > 1000 %}aria-disabled="true"{% endif %}id="generate_newsletter_html">
+      <i class="far fa-file-code"></i>
+      Generate Newsletter HTML
     </a>
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />

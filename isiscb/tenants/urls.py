@@ -2,11 +2,12 @@ from . import views
 from isisdata import views as isiscbviews
 from isisdata import forms as isiscbforms
 from isisdata.isiscbviews import authority_views, citation_views
+from django.contrib.auth.decorators import login_required
+
 
 from django.conf.urls import url
 
 from haystack.forms import FacetedSearchForm
-from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
 sqs = SearchQuerySet().facet('authors', size=100). \
@@ -52,7 +53,7 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 app_name = "tenants"
 urlpatterns = [
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/$', views.home, name='home'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/search$', isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs), name='index'),
+    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/search$', login_required(isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs)), name='index'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/$', views.home, name='authority-base'),
     url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),

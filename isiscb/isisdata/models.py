@@ -999,7 +999,7 @@ class ReferencedEntity(models.Model):
         Create a new Unique Resource Identifier.
         """
         values = type(self).__name__.lower(), self.id
-        return urllib.parse.urlunparse(('http', settings.DOMAIN,
+        return urllib.parse.urlunparse(('https', settings.DOMAIN,
                                     'isis/{0}/{1}/'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
@@ -2529,6 +2529,20 @@ class PartDetails(models.Model):
             return u'{0} - {1}'.format(self.page_begin, self.page_end)
 
         return self.page_begin if self.page_begin else self.page_end
+    
+class Dataset(CuratedMixin):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    editor = models.CharField(max_length=255, null=True)
+    owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
+                             help_text=help_text("""The tenant this dataset belongs to."""), on_delete=models.SET_NULL)
+    subject_search_default = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return u'{0}'.format(self.name)
+
+    def __str__(self):
+        return u'{0}'.format(self.name)
 
 class Place(models.Model):
     """
@@ -2753,7 +2767,6 @@ class Annotation(models.Model):
     @property
     def byline(self):
         return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
-
 
 class CitationCollection(models.Model):
     """
@@ -3106,21 +3119,6 @@ class TenantRule(AccessRule):
     tenant = models.ForeignKey(Tenant, null=True, blank=True,
                              help_text=help_text("""The tenant this rule allows access to."""), on_delete=models.SET_NULL)
 
-
-
-class Dataset(CuratedMixin):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    editor = models.CharField(max_length=255, null=True)
-    owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
-                             help_text=help_text("""The tenant this dataset belongs to."""), on_delete=models.SET_NULL)
-
-
-    def __unicode__(self):
-        return u'{0}'.format(self.name)
-
-    def __str__(self):
-        return u'{0}'.format(self.name)
 
 
 class AsyncTask(models.Model):

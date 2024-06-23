@@ -168,6 +168,7 @@ TEMPLATES = [
                 'isisdata.context_processors.google',
                 'isisdata.context_processors.portal_prefix',
                 'isisdata.context_processors.notifications',
+                'isisdata.context_processors.cache_timeout',
                 'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],
@@ -176,6 +177,9 @@ TEMPLATES = [
 ]
 
 #WSGI_APPLICATION = 'isiscb.wsgi.application'
+
+# in seconds, default is a month (2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
 
 LOGGING = {
 	"version": 1,
@@ -212,12 +216,17 @@ DATABASES = {
     }
 }
 
+# to make sure bots don't bring the site down, we limit the search to 300 for now
+MAX_SEARCH_RESULTS = os.environ.get('MAX_SEARCH_RESULTS', 300)
+
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'http://search:9200/'),
         'INDEX_NAME': 'haystack1',
+        'TIMEOUT': os.environ.get('ES_TIMEOUT', 1),
+        'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
@@ -249,6 +258,10 @@ CACHES = {
     'search_results_cache': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'search_cache',
+    },
+    'template_fragments': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'db_template_cache',
     }
 }
 
@@ -406,7 +419,9 @@ WIKIPEDIA_REFRESH_TIME = os.environ.get('WIKPEDIA_REFRESH_TIME', 30)
 
 GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
 GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
+GOOGLE_BOOKS_TITLE_QUERY_PATH_NO_KEY = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH_NO_KEY', "https://www.googleapis.com/books/v1/volumes?q={title}")
 GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
+GOOGLE_BOOKS_ITEM_GET_PATH_NO_KEY = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH_NO_KEY', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?projection=lite")
 
 # number of days after which we want to refresh cached data about books from google books
 GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)

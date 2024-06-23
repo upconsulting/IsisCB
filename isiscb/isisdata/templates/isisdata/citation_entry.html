@@ -24,7 +24,7 @@
   {% endif %}
   <!-- title -->
   {% if citation_object|get_pub_year %}({{ citation_object|get_pub_year }}){% endif %}
-  <a href="{% url 'index' citation_object.id %}" class="titleLink">{{ citation_object|get_title|bleach_safe }}</a>.
+  <a href="{{  citation_object|get_uri:tenant_id }}" class="titleLink">{{ citation_object|get_title|bleach_safe }}</a>.
   <!-- book title -->
   {% if citation_object|get_book_title %}
   In: <em>{{ citation_object|get_book_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}

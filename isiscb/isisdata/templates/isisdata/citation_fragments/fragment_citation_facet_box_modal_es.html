@@ -1,0 +1,28 @@
+{% load facet_filters %}
+
+<div class="modal fade" id={{modal_id}} tabindex="-1" role="dialog" aria-labelledby={{modal_aria_labelledby}}>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">{{modal_title}}</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in facets %}
+            {% if facet.0 %}
+            <li>
+              <a title="See all citations connected to {{facet.0|get_authority_name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.0 }}"><i class="fas fa-search"></i></a>
+              {{facet.0|get_authority_name}}
+              <a title="Go to page for {{facet.0|get_authority_name}}" href={% url 'authority' facet.0 %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

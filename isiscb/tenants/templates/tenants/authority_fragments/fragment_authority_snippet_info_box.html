@@ -1,0 +1,179 @@
+{% load app_filters %}
+{% load static %}
+{% load search_filters %}
+{% load authority_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load general_tags %}
+{% load cache %}
+
+{% cache CACHE_TIMEOUT authority_tenant_wikipedia authority.id tenant_id include_all_tenants %}
+<!--604800 cached for a week -->
+<div class="col-sm-12 col-md-6" style="padding-left: 0">
+  <div style="z-index: 10; position: relative;">
+    <div id="snippetWikiImageContainer" style="display:none; position: relative;  margin: auto;">
+      <h3 id="snippetImageCaption" style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">{{display_type}}:<br/>{{authority.name}}</h3>
+      <img id="snippetWikiImage" style="position: relative; max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none; z-index: -1;" src=''></img>
+    </div>
+  </div>
+  <a id="snippetWikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
+  <div id="snippetPlaceholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+    <p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{authority.name}}</p>
+  </div>
+  <hr id="snippetWikiImageBorder" style="display:none;">
+
+  
+</div>
+
+<div class="col-sm-12 col-md-6" style="padding: 0;">
+  <p id="related_citations_container">
+    {% if related_citations_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{{ tenant_id|get_uri_host }}{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+      {{related_citations_count}} citations
+    </a>
+    related to {{authority.name}}
+    <br>
+    {% endif %}
+
+    {% if author_contributor_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{{ tenant_id|get_uri_host }}{% url 'tenants:index' tenant_id %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{author_contributor_count}} citations
+    </a>
+    related to {{ authority.name }} as an author
+    <br>
+    {% endif %}
+
+    {% if publisher_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{{ tenant_id|get_uri_host }}{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{publisher_count}} citations
+    </a>
+    related to {{ authority.name }} as a publisher
+    <br>
+    {% endif %}
+
+    {% if subject_category_count > 0 %}
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    Show
+    <a href="{{ tenant_id|get_uri_host }}{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{subject_category_count}} citations
+    </a>
+    related to {{authority.name }} as a subject or category
+    <br>
+    {% endif %}
+  </p>
+  <hr>
+</div>
+
+<div class="col-xs-12" style="padding: 0;">
+  <div class="panel panel-default">
+    <div class="panel-heading">Publications Timeline</div>
+    <div class="panel-body">
+      <div id="publications_timeline_snippet_container">
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">Related Places Map</div>
+    <div class="panel-body">
+      <div id="places_map_snippet_container">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  document.getElementById("generateHTMLButton").addEventListener("click", prepareHTMLSnippet);
+
+  function prepareHTMLSnippet() {
+    //gets wikimedia image and synopsis where possible
+    let snippetWikiImage = "{{ wikiImage|safe }}";
+    let snippetWikiCredit = "{{ wikiCredit|safe }}";
+    let type = "{{display_type}}";
+
+    let default_image_map = {
+      "Concept": "{% static 'isisdata/images/concept_default_image.png' %}",
+      "Person": "{% static 'isisdata/images/person_default_image.jpeg' %}",
+      "Author": "{% static 'isisdata/images/person_default_image.jpeg' %}",
+      "Geographic Term": "{% static 'isisdata/images/place_default_image.png' %}",
+      "Institution": "{% static 'isisdata/images/institution_default_image.png' %}",
+      "Publisher": "{% static 'isisdata/images/publisher_default_image.jpeg' %}",
+      "Time Period": "{% static 'isisdata/images/time_default_image.jpeg' %}",
+      "Category Division": "{% static 'isisdata/images/category_default_image.png' %}",
+    };
+
+    let default_background_map = {
+      "Concept": "rgb(30, 96, 145, 0.5)",
+      "Person": "rgb(153, 217, 140, 0.5)",
+      "Author": "rgb(153, 217, 140, 0.5)",
+      "Geographic Term": "rgb(22, 138, 173, 0.5)",
+      "Institution": "rgb(52, 160, 164, 0.5)",
+      "Publisher": "rgb(52, 160, 164, 0.5)",
+      "Time Period": "rgb(82, 182, 154, 0.5)",
+      "Category Division": "rgb(30, 96, 145, 0.5)",
+    };
+    // prepare image
+    let snippetTextHolder = document.getElementById("snippetWikiIntro");
+
+    if (snippetWikiImage !== "") {
+      document.getElementById('snippetWikiImageContainer').style.display = 'block';
+      document.getElementById('snippetWikiImage').src = snippetWikiImage;
+      document.getElementById('snippetWikiImageCredit').style.display = "block";
+      document.getElementById('snippetWikiImageCredit').href = wikiCredit;
+      document.getElementById('snippetWikiImage').style.display = "block";
+    } else if (type !== "Serial Publication" && type !== "Creative Work" && type !== "Cross-reference" && type !== "Bibliographic List"){
+      document.getElementById('snippetWikiImageContainer').style.display = 'block';
+      document.getElementById('snippetWikiImageContainer').style.height = '200px';
+      document.getElementById('snippetWikiImageContainer').style.width = '200px';
+      document.getElementById('snippetImageCaption').style.display = 'block';
+      document.getElementById('snippetWikiImageContainer').style.backgroundColor = default_background_map[type];
+      document.getElementById('snippetWikiImage').src = default_image_map[type];
+      document.getElementById('snippetWikiImage').style.height = "200px";
+      document.getElementById('snippetWikiImage').style.width = "200px";
+      document.getElementById('snippetWikiImage').style.display = "block";
+    } else if (type == "Serial Publication"){
+
+      let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+      let backgroundColor;
+
+      let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+
+      if (periodicalName.length) {
+          if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[0];
+          } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+            backgroundColor = backgroundColors[1];
+          } else {
+            backgroundColor = backgroundColors[2];
+          }
+      }
+
+      document.getElementById("snippetPlaceholderImage").style.display = "block";
+      document.getElementById("snippetPlaceholderImage").style.backgroundColor = backgroundColor;
+    }
+
+    document.getElementById('snippetWikiImageBorder').style.display = "block";
+
+    // grab and insert publications timeline snippet
+    let publications_timeline_html = document.getElementById("chart_sm").outerHTML;
+    let publications_timeline_snippet_container = document.getElementById("publications_timeline_snippet_container");
+    publications_timeline_snippet_container.innerHTML = publications_timeline_html;
+
+    // grab and insert places map snippet
+    let places_map_html = document.getElementById("placesMap").outerHTML;
+    let places_map_snippet_container = document.getElementById("places_map_snippet_container");
+    places_map_snippet_container.innerHTML = places_map_html;
+
+    // remove map mode bar controls
+    document.getElementById("places_map_snippet_container").getElementsByClassName("modebar-container")[0].remove();
+  }
+</script>
+{% endcache %}
