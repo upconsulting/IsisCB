@@ -225,7 +225,7 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'http://search:9200/'),
         'INDEX_NAME': 'haystack1',
-        'TIMEOUT': os.environ.get('ES_TIMEOUT', 1),
+        'TIMEOUT': os.environ.get('ES_TIMEOUT', 100),
         'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }

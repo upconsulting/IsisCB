@@ -77,13 +77,9 @@ class IsisCBElasticsearch7SearchBackend(Elasticsearch7SearchBackend):
         mapping = self._get_common_mapping()
 
         for _, field_class in fields.items():
-            logger.error(field_class)
-            logger.error(field_class.index_fieldname)
-            logger.error(field_class.field_type)
             field_mapping = FIELD_MAPPINGS.get(
                 field_class.field_type, DEFAULT_FIELD_MAPPING
             ).copy()
-            logger.error(field_mapping["type"])
             if field_class.boost != 1.0:
                 field_mapping["boost"] = field_class.boost
 
@@ -98,7 +94,6 @@ class IsisCBElasticsearch7SearchBackend(Elasticsearch7SearchBackend):
 
             mapping[field_class.index_fieldname] = field_mapping
 
-        logger.error(mapping)
         return (content_field_name, mapping)
 
 
