@@ -210,7 +210,7 @@ MAX_SEARCH_RESULTS = os.environ.get('MAX_SEARCH_RESULTS', 300)
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
         'INDEX_NAME': 'haystack-test',
     },

@@ -189,8 +189,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
             if tenant:
                 sqs_citation = sqs_citation.filter(tenant_ids=tenant.id)
                 sqs_authority = sqs_authority.filter(tenant_ids=tenant.id)
-        results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
-        results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
+        results_authority = sqs_authority.models(*self.get_authority_model()).filter(public="true").order_by(sort_order_authority)
+        results_citation = sqs_citation.models(*self.get_citation_model()).filter(public="true").order_by(sort_order_citation)
 
         return {'authority': results_authority,
                 'citation': results_citation}
