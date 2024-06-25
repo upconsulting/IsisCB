@@ -1136,7 +1136,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 class IsisCBUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined')
+    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined', 'last_login')
 
     # def joined(self, obj, *args, **kwargs):
     #     return obj.date_joined
