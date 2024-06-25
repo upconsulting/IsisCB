@@ -1094,6 +1094,7 @@ class PartDetailsAdmin(SimpleHistoryAdmin):
 
 class SearchQueryAdmin(SimpleHistoryAdmin):
     exclude = []
+    list_display = ('id', 'user', 'created_on')
 
     #def get_model_perms(self, request):
     #    """
