@@ -81,7 +81,7 @@
         {% endif %}
 
         {% if facets.fields.institutional_host_ids %}
-          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="journalModal" %}
+          {% include 'isisdata/citation_fragments/fragment_citation_facet_box_es.html' with panel_title="Publishers" facets=facets.fields.institutional_host_ids facet_field="institutional_host_ids" model_id="publisherModal" %}
         {% endif %}
       </div>
       <div class="col-sm-12 col-md-6" style="padding-left: 0;">
