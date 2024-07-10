@@ -13,9 +13,10 @@ services:
     ports:
       - "5432:5432"
   search:
-    image: elasticsearch:1.7-alpine
+    image: elasticsearch:7.17.18
     ports:
       - "9200:9200"
+    environment: ['discovery.type=single-node'] #, 'xpack.security.enabled=false', 'xpack.security.enrollment.enabled=false']
   web:
     build: 
        context: .

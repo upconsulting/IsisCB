@@ -167,11 +167,10 @@ HAYSTACK_DEFAULT_INDEX = 'default'
 
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-        # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
-        'TIMEOUT': os.environ.get('ES_TIMEOUT', 1),
+        'TIMEOUT': os.environ.get('ES_TIMEOUT', 100),
         'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }

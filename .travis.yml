@@ -16,13 +16,14 @@ before_script:
 - psql -c 'create database test_isiscb;' -U postgres
 - sleep 10
 before_install:
-- curl https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.6.deb -o elasticsearch.deb
+- curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.0-amd64.deb -o elasticsearch.deb
 - sudo dpkg -i --force-confnew elasticsearch.deb
 - sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
 - sudo service elasticsearch restart
-- pip install -U pip
+- pip install pip==23.3.2
 - pip install -U six
-- pip install -U setuptools==69.5.1
+- pip install setuptools==69.5.1
+- pip install celery==4.4.2
 - sudo apt-get install libgnutls28-dev
 script:
 - pip install nose
@@ -51,6 +52,18 @@ deploy:
     region: us-west-2
     app: isiscb-production-celery-p3
     env: isiscb-production-celery-p3
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      tags: true
+      all_branches: true
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: isiscb-production-dedicated
+    env: Isiscb-production-dedicated-env
     bucket_name: elasticbeanstalk-us-west-2-655333410217
     on:
       repo: upconsulting/IsisCB

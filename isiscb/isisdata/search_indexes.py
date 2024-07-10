@@ -572,19 +572,20 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE and attr['attributes__value_freeform']:
                 date = attr['attributes__value_freeform']
                 # IEXP-8: let's handle cases like 2001 - 2002 or 2001-01-02
-                freeform_dates.append(date)
+                if str(date) not in freeform_dates:
+                    freeform_dates.append(str(date))
                 patternYearSpan = re.match("([0-9]{4}).+?([0-9]{4})", date)
                 if patternYearSpan:
-                    for d in patternYearSpan.groups(): freeform_dates.append(d)
+                    for d in patternYearSpan.groups(): freeform_dates.append(str(d)) if str(d) not in freeform_dates else freeform_dates
                     continue
                 patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}", date)
                 if patternFullDate:
-                    for d in patternFullDate.groups(): freeform_dates.append(d)
+                    for d in patternFullDate.groups(): freeform_dates.append(str(d)) if str(d) not in freeform_dates else freeform_dates
                     continue
                 # patterns e.g. 1999 (pub. 2000) or 1993-94
                 patternBrackets = re.match(".*([0-9]{4}).*", date)
                 if patternBrackets:
-                    for d in patternBrackets.groups(): freeform_dates.append(d)
+                    for d in patternBrackets.groups(): freeform_dates.append(str(d)) if str(d) not in freeform_dates else freeform_dates
                     continue
 
         # this is a hack but it works, so :op
@@ -594,9 +595,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 try:
                     attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
                     if type(attr.value.cvalue()) == list:
-                        freeform_dates += attr.value.cvalue()
-                    else:
-                        freeform_dates.append(attr.value.cvalue().year)
+                        freeform_dates += [str(value) for value in attr.value.cvalue() if str(value) not in freeform_dates]
+                    elif str(attr.value.cvalue().year) not in freeform_dates:
+                        freeform_dates.append(str(attr.value.cvalue().year))
                 except ObjectDoesNotExist as E:
                     print("Attribute does not exist.")
                     print(E)
@@ -604,7 +605,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if freeform_dates:
             return freeform_dates
 
-        return ""
+        return []
 
     def prepare_publication_date_for_sort(self, data):
         """
