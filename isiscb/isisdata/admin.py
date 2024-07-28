@@ -1094,12 +1094,13 @@ class PartDetailsAdmin(SimpleHistoryAdmin):
 
 class SearchQueryAdmin(SimpleHistoryAdmin):
     exclude = []
+    list_display = ('id', 'user', 'created_on')
 
-    def get_model_perms(self, request):
-        """
-        Return empty perms dict thus hiding the model from admin index.
-        """
-        return {}
+    #def get_model_perms(self, request):
+    #    """
+    #    Return empty perms dict thus hiding the model from admin index.
+    #    """
+    #    return {}
 
 
 class LanguageAdmin(SimpleHistoryAdmin):
@@ -1135,7 +1136,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 class IsisCBUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined')
+    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined', 'last_login')
 
     # def joined(self, obj, *args, **kwargs):
     #     return obj.date_joined

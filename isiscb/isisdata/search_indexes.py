@@ -618,7 +618,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         for attribute in data['attributes']:
             if attribute['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 return attribute['attributes__value_freeform']
-        return ''
+        return None
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
