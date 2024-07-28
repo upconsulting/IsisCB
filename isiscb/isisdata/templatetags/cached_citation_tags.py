@@ -62,6 +62,7 @@ def _get_data(context, citation):
         "similar_citations":similar_citations,
         'facets': similar_objects.facet_counts(),
         'tenant_id': tenant_id,
+        'user': context['request'].user,
         }
 
 def _get_facets_from_citations(citations, tenant_id=None):
