@@ -211,10 +211,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 <div class="panel-heading">
                   <h4 style="margin: 0;">Related Citations</h4>
                 </div>
+                {% if user.is_authenticated %}
                 <div class="panel-body">
                   {% include 'isisdata/authority_fragments/fragment_authority_related_citations_list.html' %}
                 </div>
-               
+                {% else %}
+                <div class="panel-body">
+                  {% include 'isisdata/authority_fragments/fragment_authority_related_citations_list_nologin.html' %}
+                </div>
+                {% endif %}
               </div>
             </div>
         </div>
