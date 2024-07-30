@@ -5,7 +5,7 @@
 {% load cached_authority_tags %}
 {% load cache %}
 
-{% cache CACHE_TIMEOUT authority_facet_boxes authority.id tenant_id include_all_tenants %}
+{% cache CACHE_TIMEOUT authority_facet_boxes authority.id tenant_id include_all_tenants user.is_authenticated %}
 
 {% authority_facets authority.id tenant_id include_all_tenants %}
 <div class="row">

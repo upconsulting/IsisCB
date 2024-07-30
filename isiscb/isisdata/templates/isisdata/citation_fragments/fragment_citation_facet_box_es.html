@@ -14,7 +14,9 @@
     {% for facet in facets|slice:"6" %}
         <a title="See all citations connected to {{facet.0|get_authority_name}}" style="display: inline;" href="{{ tenant_id|get_uri_host }}{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_{{facet_field}}:{{ facet.0|urlencode }}"><i class="fas fa-search"></i></a>
         {% if show_count %}({{facet.1}}){% endif %} {{facet.0|get_authority_name}}
+        {% if user.is_authenticated %}
         <a title="Go to page for {{facet.0|get_authority_name}}" href={{ facet.0 | get_authority_uri }}><i class="fas fa-external-link-alt"></i></a>
+        {% endif %}
         <br>
     {% endfor %}
     </div>
