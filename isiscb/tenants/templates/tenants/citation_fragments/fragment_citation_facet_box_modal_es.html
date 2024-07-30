@@ -14,7 +14,9 @@
             <li>
               <a title="See all citations connected to {{facet.0|get_authority_name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?{% if not include_all_tenants %}owning_tenant={{tenant_id}}&{% endif %}tenant_portal={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.0 }}"><i class="fas fa-search"></i></a>
               {{facet.0|get_authority_name}}
+              {% if user.is_authenticated %}
               <a title="Go to page for {{facet.0|get_authority_name}}" href={% url 'tenants:authority' tenant_id facet.0 %}><i class="fas fa-external-link-alt"></i></a>
+              {% endif %}
             </li>
             {% endif %}
             {% endfor %}
