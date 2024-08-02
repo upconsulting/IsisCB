@@ -373,12 +373,23 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
-        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
-        if cutil.get_tenant(self.user):
-            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
-        else:
-            self.fields['belongs_to'].queryset = Dataset.objects.all()
+        # get datasets user has access to
+        roles = self.user.isiscb_roles.all()
+        ds_roles = [rule for role in roles for rule in role.dataset_rules]
+        accessible_datasets = [role.dataset for role in ds_roles]
 
+        queryset = Dataset.objects.filter()
+        if cutil.get_tenant(self.user):
+            queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
+        
+        if accessible_datasets:
+            queryset = queryset.filter(id__in=accessible_datasets)
+
+        self.fields['belongs_to'].queryset = queryset
+        self.fields['belongs_to'].required = True
+        
+        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
+        
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
