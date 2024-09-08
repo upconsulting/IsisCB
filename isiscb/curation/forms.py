@@ -528,7 +528,7 @@ class AuthorityForm(forms.ModelForm):
         # get datasets user has access to
         roles = self.user.isiscb_roles.all()
         ds_roles = [rule for role in roles for rule in role.dataset_rules]
-        accessible_datasets = [role.dataset for role in ds_roles]
+        accessible_datasets = [role.dataset for role in ds_roles if role.can_write]
 
         queryset = Dataset.objects.filter()
         if cutil.get_tenant(self.user):
@@ -564,6 +564,19 @@ class AuthorityForm(forms.ModelForm):
         if self.instance.pk and self.instance.owning_tenant and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
             raise ValidationError(
                 "Owning tenant cannot be changed."
+            )
+
+         # get datasets user has access to
+        roles = self.user.isiscb_roles.all()
+        ds_roles = [rule for role in roles for rule in role.dataset_rules]
+        accessible_datasets = [role.dataset for role in ds_roles if role.can_write]
+        logger.error(accessible_datasets)
+
+        # for some reason the pks in accessible_datasets are strings not ints
+        if self.cleaned_data['belongs_to'].pk not in [int(ds) for ds in accessible_datasets]:
+            logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
+            raise ValidationError(
+                "User cannot write to dataset."
             )
 
     def _get_validation_exclusions(self):
@@ -686,7 +699,8 @@ class TenantRuleForm(forms.ModelForm):
         ]
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset = forms.ChoiceField(required=False)
+    dataset = forms.ChoiceField(required=True)
+    can_write = forms.BooleanField(required=False, label="Can write to dataset")
 
     def __init__(self, *args, **kwargs):
         super(DatasetRuleForm, self).__init__( *args, **kwargs)
@@ -709,7 +723,7 @@ class DatasetRuleForm(forms.ModelForm):
         model = DatasetRule
 
         fields = [
-            'dataset', 'role'
+            'dataset', 'role', 'can_write'
         ]
 
 

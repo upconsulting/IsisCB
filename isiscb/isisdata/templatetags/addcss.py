@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 from django import template
+from django.forms.fields import BooleanField
 register = template.Library()
 
 @register.filter(name='addcss')
 def addcss(field, css):
     if type(field) is str:
+        return field
+    if type(field.field) is BooleanField:
         return field
     parts = css.split(';')
     placeholder = parts[1] if len(parts) == 2 else ''
