@@ -16,6 +16,7 @@ import rules
 import itertools
 import curation.curation_util as cutil
 import logging
+import curation.permissions_util as permissions_util
 
 logger = logging.getLogger(__name__)
 
@@ -374,9 +375,7 @@ class CitationForm(forms.ModelForm):
         self.user = user
 
         # get datasets user has access to
-        roles = self.user.isiscb_roles.all()
-        ds_roles = [rule for role in roles for rule in role.dataset_rules]
-        accessible_datasets = [role.dataset for role in ds_roles]
+        accessible_datasets = permissions_util.get_writable_datasets(self.user)
 
         queryset = Dataset.objects.filter()
         if cutil.get_tenant(self.user):
@@ -437,6 +436,19 @@ class CitationForm(forms.ModelForm):
                 "Owning tenant cannot be changed."
             )
 
+        if 'belongs_to' not in self.cleaned_data:
+            raise ValidationError(
+                "Please select a dataset."
+            )
+
+        # get datasets user has access to
+        accessible_datasets = permissions_util.get_writable_datasets(self.user)
+
+        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
+            logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
+            raise ValidationError(
+                "User cannot write to dataset."
+            )
 
 
 
@@ -526,9 +538,7 @@ class AuthorityForm(forms.ModelForm):
         self.fields['classification_system_object'].queryset = cutil.get_classification_systems(user)
         
         # get datasets user has access to
-        roles = self.user.isiscb_roles.all()
-        ds_roles = [rule for role in roles for rule in role.dataset_rules]
-        accessible_datasets = [role.dataset for role in ds_roles if role.can_write]
+        accessible_datasets = permissions_util.get_writable_datasets(self.user)
 
         queryset = Dataset.objects.filter()
         if cutil.get_tenant(self.user):
@@ -566,14 +576,14 @@ class AuthorityForm(forms.ModelForm):
                 "Owning tenant cannot be changed."
             )
 
-         # get datasets user has access to
-        roles = self.user.isiscb_roles.all()
-        ds_roles = [rule for role in roles for rule in role.dataset_rules]
-        accessible_datasets = [role.dataset for role in ds_roles if role.can_write]
-        logger.error(accessible_datasets)
-
-        # for some reason the pks in accessible_datasets are strings not ints
-        if self.cleaned_data['belongs_to'].pk not in [int(ds) for ds in accessible_datasets]:
+        if 'belongs_to' not in self.cleaned_data:
+            raise ValidationError(
+                "Please select a dataset."
+            )
+        
+        # get datasets user has access to
+        accessible_datasets = permissions_util.get_writable_datasets(self.user)
+        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."

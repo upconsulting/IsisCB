@@ -39,6 +39,7 @@ from isisdata.isiscbviews.citation_views import get_facets_from_citations
 from curation import p3_port_utils
 from curation import curation_util as c_util
 
+import curation.permissions_util as permissions_util
 
 from curation.tracking import TrackingWorkflow
 from zotero.models import ImportAccession
@@ -58,6 +59,8 @@ from unidecode import unidecode
 from collections import Counter
 import bleach
 import logging
+
+logger = logging.getLogger(__name__)
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -2001,7 +2004,11 @@ def quick_and_dirty_authority_search(request):
 
     if only_defaults:
         query &= Q(belongs_to__subject_search_default=True)
-    
+
+    accessible_datasets = permissions_util.get_accessible_datasets(request.user)
+    if accessible_datasets:
+        query &= Q(belongs_to__in=accessible_datasets)
+                   
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
