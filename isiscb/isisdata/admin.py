@@ -1182,8 +1182,8 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 class DatasetAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'editor', 'owning_tenant', 'subject_search_default']
-    list_display = ['name', 'owning_tenant', 'subject_search_default']
+    fields = ['name', 'description', 'editor', 'owning_tenant', 'subject_search_default', 'label']
+    list_display = ['name', 'label', 'owning_tenant', 'subject_search_default']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -1201,7 +1201,7 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
 class TenantAdmin(admin.ModelAdmin):
     fields = ['name', 'title', 'description', 
             'identifier', 'home_page_template', 
-            'use_home_page_template', 'default_dataset']
+            'use_home_page_template', 'default_dataset', 'default_datasets_reading']
     exlude = ('attributes')
     readonly_fields = ["nr_of_citations", "nr_of_authorities", 
             "nr_of_class_systems", "unassigned_all_citations", 

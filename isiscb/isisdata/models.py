@@ -237,6 +237,8 @@ class Tenant(models.Model):
     to work. Do not change this value unless you know what you are doing."""))
 
     default_dataset = models.OneToOneField('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
+    default_datasets_reading = models.ManyToManyField('isisdata.Dataset', null=True,  related_name='reading_tenants')
+
 
     ACTIVE = 'ACT'
     INACTIVE = 'INA'
@@ -2532,6 +2534,7 @@ class PartDetails(models.Model):
     
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255, null=True)
     description = models.TextField()
     editor = models.CharField(max_length=255, null=True)
     owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
@@ -3082,6 +3085,7 @@ class DatasetRule(AccessRule):
     This rules limits the records a user has access to to a specific dataset.
     """
     dataset = models.CharField(max_length=255, null=True, blank=True, default=None)
+    can_write = models.BooleanField(default=False)
 
 
 class UserModuleRule(AccessRule):
