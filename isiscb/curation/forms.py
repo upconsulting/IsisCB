@@ -381,7 +381,7 @@ class CitationForm(forms.ModelForm):
         if cutil.get_tenant(self.user):
             queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
         
-        if accessible_datasets:
+        if accessible_datasets is not None:
             queryset = queryset.filter(id__in=accessible_datasets)
 
         self.fields['belongs_to'].queryset = queryset
@@ -544,7 +544,7 @@ class AuthorityForm(forms.ModelForm):
         if cutil.get_tenant(self.user):
             queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
         
-        if accessible_datasets:
+        if accessible_datasets is not None:
             queryset = queryset.filter(id__in=accessible_datasets)
 
         self.fields['belongs_to'].queryset = queryset
