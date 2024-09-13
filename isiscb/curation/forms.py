@@ -444,7 +444,7 @@ class CitationForm(forms.ModelForm):
         # get datasets user has access to
         accessible_datasets = permissions_util.get_writable_datasets(self.user)
 
-        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
+        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."
@@ -583,7 +583,7 @@ class AuthorityForm(forms.ModelForm):
         
         # get datasets user has access to
         accessible_datasets = permissions_util.get_writable_datasets(self.user)
-        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
+        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."
