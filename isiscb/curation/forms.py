@@ -381,7 +381,7 @@ class CitationForm(forms.ModelForm):
         if cutil.get_tenant(self.user):
             queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
         
-        if accessible_datasets:
+        if accessible_datasets is not None:
             queryset = queryset.filter(id__in=accessible_datasets)
 
         self.fields['belongs_to'].queryset = queryset
@@ -444,7 +444,7 @@ class CitationForm(forms.ModelForm):
         # get datasets user has access to
         accessible_datasets = permissions_util.get_writable_datasets(self.user)
 
-        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
+        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."
@@ -544,7 +544,7 @@ class AuthorityForm(forms.ModelForm):
         if cutil.get_tenant(self.user):
             queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
         
-        if accessible_datasets:
+        if accessible_datasets is not None:
             queryset = queryset.filter(id__in=accessible_datasets)
 
         self.fields['belongs_to'].queryset = queryset
@@ -583,7 +583,7 @@ class AuthorityForm(forms.ModelForm):
         
         # get datasets user has access to
         accessible_datasets = permissions_util.get_writable_datasets(self.user)
-        if self.cleaned_data['belongs_to'].pk not in accessible_datasets:
+        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."
