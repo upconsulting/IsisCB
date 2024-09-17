@@ -330,6 +330,53 @@ class StubCheckboxInput(forms.widgets.CheckboxInput):
     def __init__(self, attrs=None, check_test=None):
         super().__init__(attrs, lambda v: v == Citation.STUB_RECORD)
 
+def _set_belongs_to(belongs_to_field, user, instance):
+    """
+    Helper function to set the belongs_to field (dataset field) to readonly in citations and
+    authority form.
+    """
+    # get datasets user has access to
+    accessible_datasets = permissions_util.get_writable_datasets(user)
+
+    ds_queryset = Dataset.objects.filter()
+    if cutil.get_tenant(user):
+        ds_queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(user))
+    
+    if accessible_datasets is not None:
+        ds_queryset = ds_queryset.filter(id__in=accessible_datasets)
+
+    if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
+        # if dataset is set but dataset cannot be edited by user, disable field
+        belongs_to_field.queryset = Dataset.objects.filter(pk=instance.belongs_to.pk)
+        belongs_to_field.widget.attrs['readonly'] = True
+        belongs_to_field.widget.attrs['disabled'] = True
+    else: 
+        belongs_to_field.queryset = ds_queryset
+        belongs_to_field.required = True
+
+def _clean_belongs_to(cleaned_data, user, instance):
+    if 'belongs_to' not in cleaned_data:
+        raise ValidationError(
+            "Please select a dataset."
+        )
+
+    # get datasets user has access to
+    accessible_datasets = permissions_util.get_writable_datasets(user)
+    ds_queryset = Dataset.objects.filter()
+    if cutil.get_tenant(user):
+        ds_queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(user))
+    
+    # if user can't modify dataset, it should stay the same as before
+    if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
+        cleaned_data['belongs_to'] = instance.belongs_to
+    else:
+        # if user tries to set dataset to one they don't have acces to
+        if accessible_datasets is not None and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
+            logger.error("ERROR: User cannot write to dataset " + str(cleaned_data['belongs_to'].pk))
+            raise ValidationError(
+                "User cannot write to dataset."
+            )
+
 class CitationForm(forms.ModelForm):
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
@@ -374,18 +421,7 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
-        # get datasets user has access to
-        accessible_datasets = permissions_util.get_writable_datasets(self.user)
-
-        queryset = Dataset.objects.filter()
-        if cutil.get_tenant(self.user):
-            queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
-        
-        if accessible_datasets is not None:
-            queryset = queryset.filter(id__in=accessible_datasets)
-
-        self.fields['belongs_to'].queryset = queryset
-        self.fields['belongs_to'].required = True
+        _set_belongs_to(self.fields['belongs_to'], self.user, self.instance)
         
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
         
@@ -435,20 +471,8 @@ class CitationForm(forms.ModelForm):
             raise ValidationError(
                 "Owning tenant cannot be changed."
             )
-
-        if 'belongs_to' not in self.cleaned_data:
-            raise ValidationError(
-                "Please select a dataset."
-            )
-
-        # get datasets user has access to
-        accessible_datasets = permissions_util.get_writable_datasets(self.user)
-
-        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
-            logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
-            raise ValidationError(
-                "User cannot write to dataset."
-            )
+        
+        _clean_belongs_to(self.cleaned_data, self.user, self.instance)
 
 
 
@@ -537,18 +561,7 @@ class AuthorityForm(forms.ModelForm):
 
         self.fields['classification_system_object'].queryset = cutil.get_classification_systems(user)
         
-        # get datasets user has access to
-        accessible_datasets = permissions_util.get_writable_datasets(self.user)
-
-        queryset = Dataset.objects.filter()
-        if cutil.get_tenant(self.user):
-            queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
-        
-        if accessible_datasets is not None:
-            queryset = queryset.filter(id__in=accessible_datasets)
-
-        self.fields['belongs_to'].queryset = queryset
-        self.fields['belongs_to'].required = True
+        _set_belongs_to(self.fields['belongs_to'], self.user, self.instance)
 
         # disable fields user doesn't have access to
         if self.instance.pk:
@@ -576,18 +589,7 @@ class AuthorityForm(forms.ModelForm):
                 "Owning tenant cannot be changed."
             )
 
-        if 'belongs_to' not in self.cleaned_data:
-            raise ValidationError(
-                "Please select a dataset."
-            )
-        
-        # get datasets user has access to
-        accessible_datasets = permissions_util.get_writable_datasets(self.user)
-        if accessible_datasets is not None and self.cleaned_data['belongs_to'].pk not in accessible_datasets:
-            logger.error("ERROR: User cannot write to dataset " + str(self.cleaned_data['belongs_to'].pk))
-            raise ValidationError(
-                "User cannot write to dataset."
-            )
+        _clean_belongs_to(self.cleaned_data, self.user, self.instance)
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
