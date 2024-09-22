@@ -256,14 +256,14 @@ def add_dataset_rule(request, role_id, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_rule.html'
-        form = DatasetRuleForm(initial = { 'role': role })
+        form = DatasetRuleForm(request.user, initial = { 'role': role })
         header_template = get_template('curation/rule_dataset_header.html').render(context)
         context.update({
             'form': form,
             'header': header_template
         })
     elif request.method == 'POST':
-        form = DatasetRuleForm(request.POST)
+        form = DatasetRuleForm(request.user, request.POST)
 
         if form.is_valid():
             rule = form.save()
@@ -279,8 +279,6 @@ def add_dataset_rule(request, role_id, user_id=None):
                 'form': form,
                 'header': header_template,
             })
-
-        return redirect('curation:role', role_id=role.pk)
 
     return render(request, template, context)
 

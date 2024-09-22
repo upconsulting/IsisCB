@@ -111,7 +111,11 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Limited Dataset</td>
       <td>User has access to records {% if rule.can_write %}and can <span class="label label-warning">create</span> new records{% endif %} in dataset '{{ rule.dataset|get_dataset_name }}'.</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>
+        {% if update_module %}
+        <form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
   {% endif %}
