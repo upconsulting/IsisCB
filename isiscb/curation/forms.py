@@ -366,7 +366,7 @@ def _clean_belongs_to(cleaned_data, user, instance):
      
     # if user can't modify dataset, it should stay the same as before
     if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
-       cleaned_data['belongs_to'] = instance.belongs_to
+        cleaned_data['belongs_to'] = instance.belongs_to
     else:
         # if user tries to set dataset to one they don't have acces to
         if accessible_datasets is not None and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
