@@ -1,4 +1,4 @@
-
+from isisdata.models import Dataset
 
 def get_accessible_datasets(user):
     roles = user.isiscb_roles.all()
@@ -13,3 +13,13 @@ def get_writable_datasets(user):
         return None
     # else an empty list indicates that there are dataset restrictions but no write permissions
     return [int(role.dataset) for role in ds_roles if role.can_write]
+
+def get_accessible_dataset_objects(user):
+    if user.is_superuser:
+        return Dataset.objects.all()
+    return Dataset.objects.filter(id__in=get_accessible_datasets(user))
+
+def get_writable_dataset_objects(user):
+    if user.is_superuser:
+        return Dataset.objects.all()
+    return Dataset.objects.filter(id__in=get_writable_datasets(user))

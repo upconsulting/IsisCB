@@ -362,13 +362,11 @@ def _clean_belongs_to(cleaned_data, user, instance):
 
     # get datasets user has access to
     accessible_datasets = permissions_util.get_writable_datasets(user)
-    ds_queryset = Dataset.objects.filter()
-    if cutil.get_tenant(user):
-        ds_queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(user))
-    
+    ds_queryset = Dataset.objects.filter(id__in=accessible_datasets)
+     
     # if user can't modify dataset, it should stay the same as before
     if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
-        cleaned_data['belongs_to'] = instance.belongs_to
+       cleaned_data['belongs_to'] = instance.belongs_to
     else:
         # if user tries to set dataset to one they don't have acces to
         if accessible_datasets is not None and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
@@ -714,22 +712,33 @@ class DatasetRuleForm(forms.ModelForm):
     dataset = forms.ChoiceField(required=True)
     can_write = forms.BooleanField(required=False, label="Can write to dataset")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(DatasetRuleForm, self).__init__( *args, **kwargs)
+        self.user = user
 
-        dataset_values = Dataset.objects.all()
+        # if user is not admin, they should only see datasets they have access to
+        accessible_datasets = permissions_util.get_accessible_dataset_objects(user)
+        
         choices = set()
         choices.add((None, "No Dataset"))
-        for ds in dataset_values:
+        for ds in accessible_datasets:
             choices.add((ds.pk, ds.name))
         self.fields['dataset'].choices = choices
 
-    def clean_field(self):
-        data = self.cleaned_data['dataset']
-        if data == '':
-            data = None
+    def clean(self):
+        dataset = self.cleaned_data['dataset']
+        if dataset:
+            if dataset and self.cleaned_data['can_write'] == True and int(dataset) not in permissions_util.get_writable_datasets(self.user):
+                raise forms.ValidationError(
+                    "You cannot write to this dataset, so you can't allow other users to either."
+                )
 
-        return data
+    def clean_dataset(self):
+        dataset = self.cleaned_data['dataset']
+        if dataset == '':
+            dataset = None
+
+        return dataset
 
     class Meta(object):
         model = DatasetRule
