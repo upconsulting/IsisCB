@@ -5,6 +5,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -362,6 +363,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
     COL_NOTES = 'CBA Notes'
     COL_STATUS = 'CBA Status'
     COL_EXPLANATION = 'CBA RecordStatusExplanation'
+    COL_LINKED_DATA = 'CBA LinkedData'
 
     properties = {}
 
@@ -369,7 +371,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         return
 
     auth_type = row[COL_TYPE]
-    redirect_to = row[COL_REDIRECT]
+    redirect_to = row[COL_REDIRECT] if COL_REDIRECT in row else None
     if redirect_to:
         try:
             Authority.objects.get(pk=redirect_to)
@@ -381,13 +383,13 @@ def _create_authority(row, user_id, results, task_id, created_on):
             results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(redirect_to)))
             return
 
-    name = row[COL_NAME]
+    name = row[COL_NAME] if COL_NAME in row else None
     if name:
         properties.update({
             'name': name,
         })
 
-    first_name = row[COL_FIRST]
+    first_name = row[COL_FIRST] if COL_FIRST in row else None
     if first_name:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -396,7 +398,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. First name will be ignored."%(name)))
 
-    last_name = row[COL_LAST]
+    last_name = row[COL_LAST] if COL_LAST in row else None
     if last_name:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -405,7 +407,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Last name will be ignored."%(name)))
 
-    suffix = row[COL_SUFFIX]
+    suffix = row[COL_SUFFIX] if COL_SUFFIX in row else None
     if suffix:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -414,7 +416,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Suffix will be ignored."%(name)))
 
-    preferred = row[COL_PREFERRED]
+    preferred = row[COL_PREFERRED] if COL_PREFERRED in row else None
     if preferred:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -423,24 +425,18 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Preferred name will be ignored."%(name)))
 
-    class_system = row[COL_CLASS_SYSTEM]
-    if class_system:
-        if class_system not in list(dict(Authority.CLASS_SYSTEM_CHOICES).keys()):
-            results.append((WARNING, "Classification System does not exist.", "", "The Classification System %s does not exist."%(class_system)))
-        else:
-            properties.update({
-                'classification_system': class_system,
-            })
-
+    
     _add_optional_simple_property(row, COL_CLASS_CODE, properties, 'classification_code')
     _add_optional_simple_property(row, COL_CLASS_HIERARCHY, properties, 'classification_hierarchy')
     _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
 
     _add_dataset(row, COL_DATASET, properties, results)
-
+    _add_classification_system(row, COL_CLASS_SYSTEM, properties, results)
+    
     _add_optional_simple_property(row, COL_NOTES, properties, 'administrator_notes')
     _add_status(row, COL_STATUS, properties, results)
     _add_optional_simple_property(row, COL_EXPLANATION, properties, 'record_status_explanation')
+
 
     # for whatever reason, no history object is created for authorities
     properties.update({
@@ -455,6 +451,40 @@ def _create_authority(row, user_id, results, task_id, created_on):
         authority = Authority(**properties)
 
     _create_record(authority, user_id, results)
+
+    # add new linked data entries if applicable
+    _add_linked_data(row, COL_LINKED_DATA, authority, results)
+    
+
+def _add_linked_data(row, col_type_heading, authority, results):
+    """
+    Method to add linked data entries to an object. Entries should be of the form:
+    type::"urn"::"uri"::"description";type::"urn"::"uri"::"description";
+    """
+    if not row[col_type_heading]:
+        return
+    
+    new_linked_data_entries = []
+    items = re.search('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
+    for item in items:
+        ld_type = item.group(1)
+        if not ld_type:
+            results.append((ERROR, "No type for linked data entry provided.. Skipping."))
+            continue
+        linked_data_type = LinkedDataType.objects.filter(name=ld_type).first()
+        if not linked_data_type:
+            results.append((ERROR, "%s type missing"%(ld_type), "", "There is no linked data type: %s. Skipping."%(ld_type)))
+            continue
+
+        urn = item.group(2)
+        uri = item.group(3)
+        description = item.group(4)
+
+        new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, uri=uri, description=description)
+        
+        new_linked_data.subject = authority
+        new_linked_data.save()
+
 
 def _add_type(row, col_type_heading, obj_type, results, properties):
     auth_type = row[col_type_heading]
@@ -472,7 +502,7 @@ def _add_type(row, col_type_heading, obj_type, results, properties):
     return True
 
 def _add_dataset(row, col_dataset_heading, properties, results):
-    dataset = row[col_dataset_heading]
+    dataset = row[col_dataset_heading] if col_dataset_heading in row else None
     if dataset:
         try:
             belongs_to = Dataset.objects.filter(name=dataset).first()
@@ -482,9 +512,20 @@ def _add_dataset(row, col_dataset_heading, properties, results):
         except:
             results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
 
+def _add_classification_system(row, col_classsys_heading, properties, results):
+    class_system = row[col_classsys_heading] if col_classsys_heading in row else None
+    if class_system:
+        try:
+            classification_system_object = Dataset.objects.filter(name=class_system).first()
+            properties.update({
+                'classification_system_object_id': classification_system_object.id,
+            })
+        except:
+            results.append((WARNING, "Classification System does not exist.", "", "The classificaiton system %s does not exist."%(class_system)))
+
 
 def _add_status(row, col_status_heading, properties, results):
-    status = row[col_status_heading]
+    status = row[col_status_heading] if col_status_heading in row else None
     if status:
         status_id = STATUS_MAP.get(status, None)
         if status_id:
@@ -498,7 +539,7 @@ def _add_status(row, col_status_heading, properties, results):
             results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(status)))
 
 def _add_optional_simple_property(row, col_heading, properties, field_name):
-    value = row[col_heading]
+    value = row[col_heading] if col_heading in row else None
     if value:
         properties.update({
             field_name: value,
