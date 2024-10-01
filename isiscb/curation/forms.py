@@ -728,7 +728,9 @@ class DatasetRuleForm(forms.ModelForm):
     def clean(self):
         dataset = self.cleaned_data['dataset']
         if dataset:
-            if dataset and self.cleaned_data['can_write'] == True and int(dataset) not in permissions_util.get_writable_datasets(self.user):
+            writable_datasets = permissions_util.get_writable_datasets(self.user)
+            # if user is not limited with datasets, writable_datasets is None else [] or [ds1.pk, ds2.pk,...]
+            if dataset and self.cleaned_data['can_write'] == True and writable_datasets != None and int(dataset) not in writable_datasets:
                 raise forms.ValidationError(
                     "You cannot write to this dataset, so you can't allow other users to either."
                 )
