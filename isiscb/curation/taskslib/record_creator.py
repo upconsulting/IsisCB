@@ -465,9 +465,9 @@ def _add_linked_data(row, col_type_heading, authority, results):
         return
     
     new_linked_data_entries = []
-    items = re.search('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
+    items = re.findall('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
     for item in items:
-        ld_type = item.group(1)
+        ld_type = item[1]
         if not ld_type:
             results.append((ERROR, "No type for linked data entry provided.. Skipping."))
             continue
@@ -476,9 +476,9 @@ def _add_linked_data(row, col_type_heading, authority, results):
             results.append((ERROR, "%s type missing"%(ld_type), "", "There is no linked data type: %s. Skipping."%(ld_type)))
             continue
 
-        urn = item.group(2)
-        uri = item.group(3)
-        description = item.group(4)
+        urn = item[2]
+        uri = item[3]
+        description = item[4]
 
         new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, uri=uri, description=description)
         
