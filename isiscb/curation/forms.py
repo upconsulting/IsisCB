@@ -362,14 +362,17 @@ def _clean_belongs_to(cleaned_data, user, instance):
 
     # get datasets user has access to
     accessible_datasets = permissions_util.get_writable_datasets(user)
-    ds_queryset = Dataset.objects.filter(id__in=accessible_datasets)
+    if accessible_datasets:
+        ds_queryset = Dataset.objects.filter(id__in=accessible_datasets)
+    else:
+        ds_queryset = []
      
     # if user can't modify dataset, it should stay the same as before
     if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
         cleaned_data['belongs_to'] = instance.belongs_to
     else:
         # if user tries to set dataset to one they don't have acces to
-        if accessible_datasets is not None and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
+        if accessible_datasets and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
             logger.error("ERROR: User cannot write to dataset " + str(cleaned_data['belongs_to'].pk))
             raise ValidationError(
                 "User cannot write to dataset."
@@ -730,7 +733,7 @@ class DatasetRuleForm(forms.ModelForm):
         if dataset:
             writable_datasets = permissions_util.get_writable_datasets(self.user)
             # if user is not limited with datasets, writable_datasets is None else [] or [ds1.pk, ds2.pk,...]
-            if dataset and self.cleaned_data['can_write'] == True and writable_datasets != None and int(dataset) not in writable_datasets:
+            if dataset and self.cleaned_data['can_write'] == True and int(dataset) not in writable_datasets:
                 raise forms.ValidationError(
                     "You cannot write to this dataset, so you can't allow other users to either."
                 )
