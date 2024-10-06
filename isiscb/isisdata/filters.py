@@ -15,6 +15,7 @@ from curation.tracking import TrackingWorkflow
 from django_filters import filters
 from django.http import QueryDict
 from django.contrib.auth.models import User
+from curation import permissions_util
 
 import pytz
 from django.conf import settings
@@ -135,7 +136,7 @@ class CitationFilter(django_filters.FilterSet):
 
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
-            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects(self.request.user)]
         else:
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
@@ -487,7 +488,7 @@ class AuthorityFilter(django_filters.FilterSet):
 
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
-            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.filter(owning_tenant=tenant)]
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects(self.request.user)]
         else:
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
