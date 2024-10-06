@@ -1,6 +1,9 @@
 from isisdata.models import Dataset, TenantRule
 import curation.curation_util as c_util
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_accessible_datasets(user):
     if user.is_superuser:
