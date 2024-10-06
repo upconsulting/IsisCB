@@ -4,6 +4,7 @@
 {% load render_object %}
 {% load permission_tags %}
 {% load rules %}
+{% load general_tags %}
 
 {% block content %}
 
@@ -186,6 +187,7 @@ function highlightFilters() {
         <tr>
           <th>Username</th>
           <th></th>
+          <th>Tenant</th>
           <th>Email</th>
           <th>Roles</th>
           <th></th>
@@ -200,6 +202,9 @@ function highlightFilters() {
           <td>
             {% if user.is_superuser %}<span class="label label-danger">System Admin</span> {% endif %}
             {% if user.is_staff %}<span class="label label-warning">Curation Access</span>{% endif %}
+          </td>
+          <td>
+            {{ user|get_user_tenant|default_if_none:"" }}
           </td>
           <td>
             {{ user.email }}
