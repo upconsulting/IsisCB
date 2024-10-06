@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 from isisdata.models import *
+import curation.curation_util as c_util
+import curation.permissions_util as p_util
+
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -293,7 +297,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
     _add_optional_simple_property(row, COL_COMPLETE_CITATION, properties, 'complete_citation')
     _add_optional_simple_property(row, COL_STUB_RECORD_STATUS, properties, 'stub_record_status')
 
-    _add_dataset(row, COL_DATASET, properties, results)
+    _add_dataset(row, COL_DATASET, user_id, properties, results)
 
     language = row[COL_LANGUAGE]
     language_obj = None
@@ -430,7 +434,15 @@ def _create_authority(row, user_id, results, task_id, created_on):
     _add_optional_simple_property(row, COL_CLASS_HIERARCHY, properties, 'classification_hierarchy')
     _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
 
-    _add_dataset(row, COL_DATASET, properties, results)
+    try:
+        _add_dataset(row, COL_DATASET, user_id, properties, results)
+    except PermissionDenied as e:
+        results.append((ERROR, repr(e), "", ""))
+        return
+    except ObjectDoesNotExist as e:
+        results.append((ERROR, "Dataset does not exist.", "", "The dataset %s does not exist."%(row[COL_DATASET])))
+        return
+    
     _add_classification_system(row, COL_CLASS_SYSTEM, properties, results)
     
     _add_optional_simple_property(row, COL_NOTES, properties, 'administrator_notes')
@@ -450,24 +462,45 @@ def _create_authority(row, user_id, results, task_id, created_on):
     else:
         authority = Authority(**properties)
 
-    _create_record(authority, user_id, results)
+    _add_tenant(authority, user_id)
+     # add new linked data entries if applicable
+    linked_data_records = _add_linked_data(row, COL_LINKED_DATA, authority, results)
 
-    # add new linked data entries if applicable
-    _add_linked_data(row, COL_LINKED_DATA, authority, results)
-    
+    _create_record(authority, user_id, results)
+    # save new linked data records
+    if linked_data_records:
+        for ld in linked_data_records:
+            ld.subject = authority
+            ld.save()
+   
+
+def _add_tenant(record, user_id):
+    """
+    Method to set the owning tenant of an object. This function assumes that the
+    object has an "owning_tenant" property.
+    """
+    user = User.objects.get(pk=user_id)   
+    tenant = c_util.get_tenant(user)
+    record.owning_tenant = tenant
 
 def _add_linked_data(row, col_type_heading, authority, results):
     """
-    Method to add linked data entries to an object. Entries should be of the form:
+    Function to add linked data entries to an object. Entries should be of the form:
     type::"urn"::"uri"::"description";type::"urn"::"uri"::"description";
+
+    This will not save the created linked data records but instead return them as array for the
+    calling function to save them when appropriate.
     """
     if not row[col_type_heading]:
         return
     
     new_linked_data_entries = []
     items = re.findall('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
+    print(items)
+    logger.error("log")
+    logger.error(items)
     for item in items:
-        ld_type = item[1]
+        ld_type = item[0]
         if not ld_type:
             results.append((ERROR, "No type for linked data entry provided.. Skipping."))
             continue
@@ -476,14 +509,16 @@ def _add_linked_data(row, col_type_heading, authority, results):
             results.append((ERROR, "%s type missing"%(ld_type), "", "There is no linked data type: %s. Skipping."%(ld_type)))
             continue
 
-        urn = item[2]
-        uri = item[3]
-        description = item[4]
+        urn = item[1]
+        uri = item[2]
+        description = item[3]
 
-        new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, uri=uri, description=description)
-        
+        new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, url=uri, description=description)
+            
         new_linked_data.subject = authority
-        new_linked_data.save()
+        new_linked_data_entries.append(new_linked_data)
+
+    return new_linked_data_entries
 
 
 def _add_type(row, col_type_heading, obj_type, results, properties):
@@ -501,16 +536,22 @@ def _add_type(row, col_type_heading, obj_type, results, properties):
     })
     return True
 
-def _add_dataset(row, col_dataset_heading, properties, results):
+def _add_dataset(row, col_dataset_heading, user_id, properties, results):
     dataset = row[col_dataset_heading] if col_dataset_heading in row else None
     if dataset:
-        try:
-            belongs_to = Dataset.objects.filter(name=dataset).first()
-            properties.update({
-                'belongs_to_id': belongs_to.id,
-            })
-        except:
-            results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
+        belongs_to = Dataset.objects.filter(name=dataset).first()
+        user = User.objects.get(pk=user_id)  
+
+        if not belongs_to:
+            raise ObjectDoesNotExist("Dataset does not exist.") 
+
+        if not belongs_to in p_util.get_writable_dataset_objects(user):
+            raise PermissionDenied("User cannot write to dataset %s."%belongs_to.name)
+        
+        properties.update({
+            'belongs_to_id': belongs_to.id,
+        })
+            
 
 def _add_classification_system(row, col_classsys_heading, properties, results):
     class_system = row[col_classsys_heading] if col_classsys_heading in row else None
