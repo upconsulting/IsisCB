@@ -22,6 +22,11 @@ def get_tenant(user):
 def get_tenant_access(user, tenant):
     if not user.is_authenticated:
         return None
+    
+    # superusers can do anything
+    if user.is_superuser:
+        return TenantRule.UPDATE
+    
     tenant_role = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False)).first()
     if tenant_role and tenant_role.tenant_rules and tenant_role.tenant_rules.first().tenant == tenant:
         return tenant_role.tenant_rules.first().allowed_action
