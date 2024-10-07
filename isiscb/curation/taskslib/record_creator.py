@@ -297,7 +297,14 @@ def _create_citation(row, user_id, results, task_id, created_on):
     _add_optional_simple_property(row, COL_COMPLETE_CITATION, properties, 'complete_citation')
     _add_optional_simple_property(row, COL_STUB_RECORD_STATUS, properties, 'stub_record_status')
 
-    _add_dataset(row, COL_DATASET, user_id, properties, results)
+    try:
+        _add_dataset(row, COL_DATASET, user_id, properties, results)
+    except PermissionDenied as e:
+        results.append((ERROR, repr(e), "", ""))
+        return
+    except ObjectDoesNotExist as e:
+        results.append((ERROR, "Dataset does not exist.", "", "The dataset %s does not exist."%(row[COL_DATASET])))
+        return
 
     language = row[COL_LANGUAGE]
     language_obj = None
@@ -467,11 +474,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
     linked_data_records = _add_linked_data(row, COL_LINKED_DATA, authority, results)
 
     _create_record(authority, user_id, results)
-    # save new linked data records
-    if linked_data_records:
-        for ld in linked_data_records:
-            ld.subject = authority
-            ld.save()
+    _save_linked_data(linked_data_records, authority)
    
 
 def _add_tenant(record, user_id):
@@ -482,6 +485,17 @@ def _add_tenant(record, user_id):
     user = User.objects.get(pk=user_id)   
     tenant = c_util.get_tenant(user)
     record.owning_tenant = tenant
+
+def _save_linked_data(linked_data_records, authority):
+    """
+    Save linked data records with correct authority.
+    """
+    if linked_data_records:
+        # we need to make sure the subjec type is authority, or the generic relations don't work
+        authority_obj = Authority.objects.get(pk=authority.id)
+        for ld in linked_data_records:
+            ld.subject = authority_obj
+            ld.save()
 
 def _add_linked_data(row, col_type_heading, authority, results):
     """
@@ -496,9 +510,7 @@ def _add_linked_data(row, col_type_heading, authority, results):
     
     new_linked_data_entries = []
     items = re.findall('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
-    print(items)
-    logger.error("log")
-    logger.error(items)
+    
     for item in items:
         ld_type = item[0]
         if not ld_type:
