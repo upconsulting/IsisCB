@@ -4,6 +4,7 @@ import curation.curation_util as c_util
 import curation.permissions_util as p_util
 
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.db import transaction
 
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -283,6 +284,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
     COL_EXPLANATION = 'CBB RecordStatusExplanation'
     COL_COMPLETE_CITATION = 'CBB CompleteCitation'
     COL_STUB_RECORD_STATUS = 'CBB StubRecordStatus'
+    COL_LINKED_DATA = 'CBB LinkedData'
 
     properties = {}
 
@@ -305,16 +307,6 @@ def _create_citation(row, user_id, results, task_id, created_on):
     except ObjectDoesNotExist as e:
         results.append((ERROR, "Dataset does not exist.", "", "The dataset %s does not exist."%(row[COL_DATASET])))
         return
-
-    language = row[COL_LANGUAGE]
-    language_obj = None
-    if language:
-        try:
-            language_obj = Language.objects.filter(name=language).first()
-        except Exception as e:
-            logger.error(e)
-            results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
-
 
     # create properties for part details
     properties_part_details = {}
@@ -351,12 +343,28 @@ def _create_citation(row, user_id, results, task_id, created_on):
 
     _add_creation_note(properties, task_id, user_id, created_on)
 
-    citation = Citation(**properties)
-    _create_record(citation, user_id, results)
+    
+    with transaction.atomic():
+        citation = Citation(**properties)
+        _add_tenant(citation, user_id)
+        
+        linked_data_records = _add_linked_data(row, COL_LINKED_DATA, citation, results)
 
-    if language_obj:
-        citation.language.add(language_obj)
-        citation.save()
+        language = row[COL_LANGUAGE] if COL_LANGUAGE in row else None
+        language_obj = None
+        if language:
+            try:
+                language_obj = Language.objects.filter(name=language).first()
+            except Exception as e:
+                logger.error(e)
+                results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
+
+        _create_record(citation, user_id, results)
+        
+        _save_linked_data_citation(linked_data_records, citation)
+        if language_obj:
+            citation.language.add(language_obj)
+            citation.save()
 
 def _create_authority(row, user_id, results, task_id, created_on):
     COL_TYPE = 'CBA Type'
@@ -469,12 +477,13 @@ def _create_authority(row, user_id, results, task_id, created_on):
     else:
         authority = Authority(**properties)
 
-    _add_tenant(authority, user_id)
-     # add new linked data entries if applicable
-    linked_data_records = _add_linked_data(row, COL_LINKED_DATA, authority, results)
+    with transaction.atomic():
+        _add_tenant(authority, user_id)
+        # add new linked data entries if applicable
+        linked_data_records = _add_linked_data(row, COL_LINKED_DATA, authority, results)
 
-    _create_record(authority, user_id, results)
-    _save_linked_data(linked_data_records, authority)
+        _create_record(authority, user_id, results)
+        _save_linked_data_authority(linked_data_records, authority)
    
 
 def _add_tenant(record, user_id):
@@ -486,7 +495,7 @@ def _add_tenant(record, user_id):
     tenant = c_util.get_tenant(user)
     record.owning_tenant = tenant
 
-def _save_linked_data(linked_data_records, authority):
+def _save_linked_data_authority(linked_data_records, authority):
     """
     Save linked data records with correct authority.
     """
@@ -497,7 +506,17 @@ def _save_linked_data(linked_data_records, authority):
             ld.subject = authority_obj
             ld.save()
 
-def _add_linked_data(row, col_type_heading, authority, results):
+def _save_linked_data_citation(linked_data_records, citation):
+    """
+    Save linked data records with correct citation.
+    """
+    if linked_data_records:
+        # we need to make sure the subjec type is authority, or the generic relations don't work
+        for ld in linked_data_records:
+            ld.subject = citation
+            ld.save()
+
+def _add_linked_data(row, col_type_heading, record, results):
     """
     Function to add linked data entries to an object. Entries should be of the form:
     type::"urn"::"uri"::"description";type::"urn"::"uri"::"description";
@@ -505,7 +524,7 @@ def _add_linked_data(row, col_type_heading, authority, results):
     This will not save the created linked data records but instead return them as array for the
     calling function to save them when appropriate.
     """
-    if not row[col_type_heading]:
+    if col_type_heading not in row or not row[col_type_heading]:
         return
     
     new_linked_data_entries = []
@@ -527,9 +546,9 @@ def _add_linked_data(row, col_type_heading, authority, results):
 
         new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, url=uri, description=description)
             
-        new_linked_data.subject = authority
+        new_linked_data.subject = record
         new_linked_data_entries.append(new_linked_data)
-
+        
     return new_linked_data_entries
 
 
@@ -563,6 +582,8 @@ def _add_dataset(row, col_dataset_heading, user_id, properties, results):
         properties.update({
             'belongs_to_id': belongs_to.id,
         })
+    else:
+        raise PermissionDenied("Dataset is missing.")
             
 
 def _add_classification_system(row, col_classsys_heading, properties, results):
