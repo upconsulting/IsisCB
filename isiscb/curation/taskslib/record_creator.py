@@ -27,6 +27,8 @@ WARNING = 'WARNING'
 
 RECORD_HISTORY = 'record_history'
 
+LINKED_DATA_PREFIX = 'LinkedData::'
+    
 def _create_linkeddata(row, user_id, results, task_id, created_on):
     COL_LD_URN = 'LED URN'
     COL_LD_STATUS = 'LED Status'
@@ -104,20 +106,22 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     if not _add_type(row, COL_ACR_TYPE, ACRelation, results, properties):
         return
 
-    authority_id = row[COL_ACR_AUTHORITY_ID]
+    authority_id = row[COL_ACR_AUTHORITY_ID] if COL_ACR_AUTHORITY_ID in row else None
     if not authority_id:
         results.append((ERROR, "Authority missing", "", "There was no authority provided. Skipping."))
         return
-
+   
     try:
-        Authority.objects.get(pk=authority_id)
+        authority = _get_authority(authority_id, results, user_id)
+        if not authority:
+            return
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(authority_id)))
         return
 
     properties.update({
-        'authority_id': authority_id
+        'authority_id': authority.id
     })
 
     citation_id = row[COL_ACR_CITATION_ID]
@@ -149,6 +153,41 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
     acr_relation = ACRelation(**properties)
     _create_record(acr_relation, user_id, results)
+
+def _get_authority(authority_id, results, user_id):
+    if not authority_id.startswith(LINKED_DATA_PREFIX):
+        try:
+            return Authority.objects.get(pk=authority_id)
+        except Exception as e:
+            logger.error(e)
+            results.append((ERROR, e, "", "There was an issue with authority id %s. Skipping."%(authority_id)))
+            return None
+        
+    prefix_and_id = authority_id[len(LINKED_DATA_PREFIX):]
+    prefix, id = prefix_and_id.split("::")
+    user = User.objects.get(pk=user_id)   
+    tenant = c_util.get_tenant(user)
+    try:
+        # there should be only one with the given id and of given type
+        linked_data_entry = LinkedData.objects.filter(universal_resource_name=id, type_controlled__name=prefix)
+        if linked_data_entry.count() > 1:
+            logger.error("There are more than one linked data entry for %s and %s."%(prefix, id))
+            results.append((ERROR, "More than one linked data entry.", "", "There are more than one linked data entry for %s. Skipping."%(prefix_and_id)))
+            return None
+        
+        # TODO: check dataset for right permissions
+        belongs_to = linked_data_entry.first().subject.belongs_to
+        user = User.objects.get(pk=user_id)  
+
+        if not belongs_to in p_util.get_accessible_dataset_objects(user):
+            raise PermissionDenied("User cannot use authority %s from dataset %s."%(linked_data_entry.subject, belongs_to.name))
+        
+        return linked_data_entry.first().subject
+    except Exception as e:
+        logger.error(e)
+        results.append((ERROR, "Linked data entry does not exist", "", "There exists no authority with linked data %s and %s. Skipping."%(prefix, id)))
+        return None
+        
 
 def _create_aarelation(row, user_id, results, task_id, created_on):
     COL_AAR_TYPE = 'AAR Type'
