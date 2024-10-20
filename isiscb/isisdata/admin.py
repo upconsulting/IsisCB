@@ -988,6 +988,8 @@ class AARelationAdmin(SimpleHistoryAdmin,
 
     form = AARelationForm
 
+class AARelationTypeAdmin(SimpleHistoryAdmin):
+    list_display = ('pk', 'name', 'description')
 
 class LinkedDataTypeAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'pattern')
@@ -1290,6 +1292,7 @@ admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
+admin.site.register(AARelationType, AARelationTypeAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(LinkedDataType, LinkedDataTypeAdmin)
 admin.site.register(PartDetails, PartDetailsAdmin)
