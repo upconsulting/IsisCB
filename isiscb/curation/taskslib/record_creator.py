@@ -191,8 +191,8 @@ def _get_authority(authority_id, results, user_id):
 
 def _create_aarelation(row, user_id, results, task_id, created_on):
     COL_AAR_TYPE = 'AAR Type'
-    COL_AAR_OBJECT = 'AAR ID Cit Obj'
-    COL_AAR_SUBJECT = 'AAR ID Cit Subj'
+    COL_AAR_OBJECT = 'AAR ID Obj'
+    COL_AAR_SUBJECT = 'AAR ID Subj'
     COL_AAR_NOTES = 'AAR Notes'
     COL_AAR_STATUS = 'AAR Status'
     COL_AAR_EXPLANATION = 'AAR RecordStatusExplanation'
@@ -215,7 +215,11 @@ def _create_aarelation(row, user_id, results, task_id, created_on):
 
     subject_id = row[COL_AAR_SUBJECT]
     try:
-        Authority.objects.get(pk=subject_id)
+        authority = _get_authority(subject_id, results, user_id)
+        if not authority:
+            return
+        # if subject was referenced via linked data, we need the authority id
+        subject_id = authority.id
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(subject_id)))
@@ -227,7 +231,11 @@ def _create_aarelation(row, user_id, results, task_id, created_on):
 
     object_id = row[COL_AAR_OBJECT]
     try:
-        Authority.objects.get(pk=object_id)
+        authority = _get_authority(object_id, results, user_id)
+        if not authority:
+            return
+        # if subject was referenced via linked data, we need the authority id
+        object_id = authority.id
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(object_id)))
