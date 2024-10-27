@@ -1,32 +1,27 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
-from future import standard_library
-standard_library.install_aliases()
+
 from builtins import str
 from builtins import object
-from django import forms
+
+from future import standard_library
+
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 from django.core.cache import caches
-from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.db import connection
-from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
-from django.utils.translation import get_language
-
-from itertools import chain
-from operator import itemgetter
+from django.conf import settings
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
-from haystack.inputs import Raw, AutoQuery
+from haystack.inputs import AutoQuery
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -38,26 +33,29 @@ from rest_framework.decorators import action
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale, json, requests, random
-import pytz
+import codecs
+import json
+import re
 
-from collections import defaultdict, Counter
 from .helpers.mods_xml import initial_response, generate_mods_xml
 from .helpers.linked_data import generate_authority_rdf, generate_citation_rdf
 from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
-from isisdata.models import *
+from isisdata.models import Citation, Authority, Value, AttributeType, Attribute
+from isisdata.models import Language, Comment, LinkedDataType, CCRelation, ACRelation
+from isisdata.models import AARelation, PartDetails, LinkedData, Dataset, SearchQuery
+from isisdata.models import UserProfile, Tenant
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
-from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
 import isisdata.helpers.isiscb_utils as isiscb_utils
 
 
 from unidecode import unidecode
-import datetime, logging
+import logging
 
+standard_library.install_aliases()
 logger = logging.getLogger(__name__)
 
 
@@ -168,7 +166,6 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         Create a new ``Comment`` instance.
         """
 
-        id = args[0].get('id', None)
         subject_field = args[0].get('subject_field', None)
         subject_content_type = args[0].get('subject_content_type', None)
         subject_instance_id = args[0].get('subject_instance_id', None)
@@ -553,21 +550,14 @@ def api_root(request, format=None):
         'linkeddata': reverse('linkeddata-list', request=request, format=format),
     })
 
-def index(request):
-    context = {
-        'test': False,
-    }
-    return render(request, 'isisdata/index.html', context)
-
-
 def index(request, obj_id=None):
-    if (obj_id == None):
+    if (obj_id is None):
         return render(request, 'isisdata/index.html', {})
     try:
         object = Authority.objects.get(id=obj_id)
     except Authority.DoesNotExist:
         object = None
-    if object != None:
+    if object is not None:
         return redirect('authority', authority_id = obj_id)
 
     return redirect('citation', citation_id = obj_id)
@@ -620,7 +610,7 @@ def statistics(request):
     """
 
     # set timeout (in sec) to one day
-    cache_timeout = 86400
+    #cache_timeout = 86400
 
     # cache = caches['default']
     # citations_count = cache.get('statistics_citation')
@@ -746,7 +736,7 @@ def search_saved(request):
     """
 
     # If the user is Anonymous, redirect them to the login view.
-    if not type(request.user._wrapped) is User:
+    if type(request.user._wrapped) is not User:
         return HttpResponseRedirect(reverse('login'))
 
     save = request.GET.get('save', None)
@@ -788,7 +778,7 @@ def search_history(request):
     """
 
     # If the user is Anonymous, redirect them to the login view.
-    if not type(request.user._wrapped) is User:
+    if type(request.user._wrapped) is not User:
         return HttpResponseRedirect(reverse('login'))
 
     searchqueries = request.user.searches.order_by('-created_on')
@@ -867,12 +857,12 @@ class IsisSearchView(FacetedSearchView):
         
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
-        excluded_facets = self.request.GET.get('excluded_facets', None)
+        #excluded_facets = self.request.GET.get('excluded_facets', None)
 
-        sort_field_citation = self.request.GET.get('sort_order_citation', None)
-        sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
-        sort_field_authority = self.request.GET.get('sort_order_authority', None)
-        sort_order_authority = self.request.GET.get('sort_order_dir_authority', None)
+        #sort_field_citation = self.request.GET.get('sort_order_citation', None)
+        #sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
+        #sort_field_authority = self.request.GET.get('sort_order_authority', None)
+        #sort_order_authority = self.request.GET.get('sort_order_dir_authority', None)
 
         # If the user is logged in, attempt to save the search in their
         #  search history.
@@ -897,7 +887,7 @@ class IsisSearchView(FacetedSearchView):
             #request.session['last_query'] = request.get_full_path()
 
         # Used to identify the current search for retrieval from the cache.
-        cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}'.format(parameters, search_models, selected_facets, excluded_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
+        #cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}'.format(parameters, search_models, selected_facets, excluded_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
         # 'search_results_cache' is the database cache
         #  (see production_settings.py).
@@ -917,7 +907,6 @@ class IsisSearchView(FacetedSearchView):
         #  feature in the citation and authority detail views. It is independent
         #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            #search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore')).decode(errors="ignore")
             search_key = isiscb_utils.generate_search_key(self.request.get_full_path())
             # make sure we have a session key
             if hasattr(self.request, 'session') and not self.request.session.session_key:
