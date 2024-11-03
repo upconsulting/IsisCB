@@ -395,7 +395,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
         citation = Citation(**properties)
         _add_tenant(citation, user_id)
         
-        linked_data_records = _add_linked_data(row, COL_LINKED_DATA, citation, results)
+        linked_data_records, linked_data_identifiers = _add_linked_data(row, COL_LINKED_DATA, citation, results)
 
         language = row[COL_LANGUAGE] if COL_LANGUAGE in row else None
         language_obj = None
@@ -406,7 +406,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
                 logger.error(e)
                 results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
 
-        _create_record(citation, user_id, results)
+        _create_record(citation, user_id, results, alternate_ids=linked_data_identifiers)
         
         _save_linked_data_citation(linked_data_records, citation)
         if language_obj:
@@ -527,9 +527,9 @@ def _create_authority(row, user_id, results, task_id, created_on):
     with transaction.atomic():
         _add_tenant(authority, user_id)
         # add new linked data entries if applicable
-        linked_data_records = _add_linked_data(row, COL_LINKED_DATA, authority, results)
+        linked_data_records, linked_data_identifiers = _add_linked_data(row, COL_LINKED_DATA, authority, results)
 
-        _create_record(authority, user_id, results)
+        _create_record(authority, user_id, results, alternate_ids=linked_data_identifiers)
         _save_linked_data_authority(linked_data_records, authority)
    
 
@@ -575,6 +575,7 @@ def _add_linked_data(row, col_type_heading, record, results):
         return
     
     new_linked_data_entries = []
+    new_linked_data_identifiers = []
     items = re.findall('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
     
     for item in items:
@@ -595,8 +596,11 @@ def _add_linked_data(row, col_type_heading, record, results):
             
         new_linked_data.subject = record
         new_linked_data_entries.append(new_linked_data)
+
+        new_linked_data_identifier = "{0}{1}::{2}".format(LINKED_DATA_PREFIX, ld_type, urn)
+        new_linked_data_identifiers.append(new_linked_data_identifier)
         
-    return new_linked_data_entries
+    return new_linked_data_entries, new_linked_data_identifiers
 
 
 def _add_type(row, col_type_heading, obj_type, results, properties):
@@ -675,6 +679,6 @@ def _add_creation_note(properties, task_id, user_id, created_on):
         'modified_by_id': user_id,
     })
 
-def _create_record(record, user_id, results):
+def _create_record(record, user_id, results, alternate_ids=[]):
     record.save()
-    results.append((SUCCESS, record.id, record.id, 'Added'))
+    results.append((SUCCESS, record.id, ", ".join(alternate_ids), 'Added'))
