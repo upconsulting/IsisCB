@@ -7,4 +7,7 @@ def encrypt_key(key):
     return f.encrypt(bytes(key, 'utf-8'))
 
 def decrypt_key(key):
-    return f.decrypt(bytes(key, 'utf-8'))
+    try:
+        return f.decrypt(bytes(key, 'utf-8'))
+    except:
+        return b""
