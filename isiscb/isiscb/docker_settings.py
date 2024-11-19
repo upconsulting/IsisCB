@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.google',
     'rest_framework',
     'rest_framework.authtoken',
     'simple_history',
@@ -94,9 +95,6 @@ MIDDLEWARE= [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    # TODO: Remove
-    #'social.backends.twitter.TwitterOAuth',
-    #'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
@@ -111,7 +109,8 @@ SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
-
+SOCIAL_AUTH_GOOGLE_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_KEY', '')
+SOCIAL_AUTH_GOOGLE_SECRET = os.environ.get('SOCIAL_AUTH_GOOGLE_SECRET', '')
 
 SOCIALACCOUNT_PROVIDERS = {
     'twitter': {
@@ -141,6 +140,24 @@ SOCIALACCOUNT_PROVIDERS = {
             'first_name',
             'last_name',
         ]
+    },
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': SOCIAL_AUTH_GOOGLE_KEY,
+            'secret': SOCIAL_AUTH_GOOGLE_SECRET,
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
 

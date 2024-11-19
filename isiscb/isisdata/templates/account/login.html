@@ -19,6 +19,9 @@
 				<a class="btn btn-social-icon btn-twitter" href="{% provider_login_url 'twitter' %}" data-toggle="tooltip" data-placement="top" title="Login via Twitter">
 					<i class="fab fa-twitter"></i>
 				</a>
+				<a class="btn btn-social-icon btn-google" href="{% provider_login_url 'google' %}" data-toggle="tooltip" data-placement="top" title="Login via Google">
+					<i class="fab fa-google"></i>
+				</a>
 			</div>
 		</div>
 		<form action="{% url 'account_login' %}?next={{ request.GET.next|urlencode }}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
