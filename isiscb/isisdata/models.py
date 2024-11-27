@@ -2429,6 +2429,12 @@ class AttributeType(models.Model):
 
 
 class Attribute(ReferencedEntity, CuratedMixin):
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["source_instance_id"]),
+        ]
+
     ID_PREFIX = 'ATT'
     history = HistoricalRecords()
 
