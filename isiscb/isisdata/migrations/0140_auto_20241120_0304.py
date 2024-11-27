@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('isisdata', '0139_datasetrule_can_write'),
+        ('isisdata', '0136_dataset_subject_search_default'),
     ]
 
     operations = [
