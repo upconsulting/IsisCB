@@ -12,8 +12,7 @@ register = template.Library()
 @register.filter
 def get_authority_name(id):
     try:
-        authority = Authority.objects.get(id=id.upper())
-        name = authority.name
+        name = Authority.objects.values_list("name", flat=True).get(pk=id)
     except:
         name = id
     return name
