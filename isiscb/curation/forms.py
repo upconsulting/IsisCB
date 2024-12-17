@@ -712,7 +712,7 @@ class TenantRuleForm(forms.ModelForm):
         ]
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset = forms.ChoiceField(required=True)
+    dataset = forms.ChoiceField(required=False)
     can_write = forms.BooleanField(required=False, label="Can write to dataset")
 
     def __init__(self, user, *args, **kwargs):
@@ -729,8 +729,8 @@ class DatasetRuleForm(forms.ModelForm):
         self.fields['dataset'].choices = choices
 
     def clean(self):
-        dataset = self.cleaned_data['dataset']
-        if dataset:
+        if 'dataset' in self.cleaned_data and self.cleaned_data['dataset']:
+            dataset = self.cleaned_data['dataset']
             writable_datasets = permissions_util.get_writable_datasets(self.user)
             # if user is not limited with datasets, writable_datasets is None else [] or [ds1.pk, ds2.pk,...]
             if dataset and self.cleaned_data['can_write'] == True and int(dataset) not in writable_datasets:
