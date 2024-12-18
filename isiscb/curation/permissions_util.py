@@ -22,7 +22,7 @@ def get_accessible_datasets(user):
         return []
     
     # otherwise return all datasets in dataset rules
-    return [int(role.dataset) for role in ds_roles]
+    return [int(role.dataset) if role.dataset else None for role in ds_roles]
 
 def get_writable_datasets(user):
     if user.is_superuser:
@@ -44,7 +44,7 @@ def get_writable_datasets(user):
         return []
     
     # else return list with all write permissions
-    return [int(role.dataset) for role in ds_roles if role.can_write]
+    return [int(role.dataset) if role.dataset else None for role in ds_roles if role.can_write]
 
 def get_accessible_dataset_objects(user):
     if user.is_superuser:

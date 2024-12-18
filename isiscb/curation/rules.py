@@ -4,9 +4,12 @@ from __future__ import unicode_literals
 from builtins import str
 from django.shortcuts import get_object_or_404
 from isisdata.models import *
+import curation.curation_util as c_util
 
 import rules
+import logging
 
+logger = logging.getLogger(__name__)
 
 @rules.predicate
 def is_accessible_by_dataset(user, obj):
@@ -227,31 +230,39 @@ def is_action_allowed(user, obj, action):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
-    roles = user.isiscb_roles.all()
-    dataset = getattr(obj, 'belongs_to', None)
-
-    relevant_roles = roles
-    query = (Q(accessrule__datasetrule__dataset__isnull=True) \
-         | Q(accessrule__datasetrule__dataset='')) \
-         & Q(accessrule__datasetrule__isnull=False)
-    if dataset:
-        query = Q(accessrule__datasetrule__dataset=dataset.id) \
-                | Q(accessrule__tenantrule__tenant__default_dataset__id=dataset.id)
-
-    tenants = getattr(obj, 'tenants', None)
-    owner = getattr(obj, 'owning_tenant', None)
-    all_tenants = list(tenants.all())
-    if owner:
-        all_tenants.append(owner)
     
-    if all_tenants:
-        query = query | Q(accessrule__tenantrule__tenant__in=[t.id for t in all_tenants])
+    owning_tenant = getattr(obj, 'owning_tenant', None)
+    tenant_access = c_util.get_tenant_access(user, owning_tenant)
 
-    relevant_roles = roles.filter(query)
+    # if user is tenant admin, they cann see all records in tenant
+    if tenant_access == TenantRule.UPDATE:
+        return True
 
-    grant_roles = roles.filter(pk__in=relevant_roles.values_list('id', flat=True))
-    if grant_roles.count() > 0:
-        return grant_roles.filter(accessrule__crudrule__crud_action=action).count() > 0
+    roles = user.isiscb_roles.all()
+    # if there is no role that gives access to the tenant, deny access
+    if not roles.filter(accessrule__tenantrule__tenant=owning_tenant):
+        return False
+
+    dataset = getattr(obj, 'belongs_to', None)
+    relevant_roles = roles
+    if dataset:
+        # if the record is in a dataset, we want to filter only for roles that define
+        # access to that dataset
+        relevant_roles = roles.filter(accessrule__datasetrule__dataset=str(dataset.id))
+    else:
+        # for some reason query building with isnull does not work for this, so we need to iterate
+        # over all roles and look for the one with a null dataset rule.
+        null_dataset_role_ids = []
+        for role in roles:
+            if role.dataset_rules:
+                null_dataset_role_ids = null_dataset_role_ids + [role.id for ds_rule in role.dataset_rules if not ds_rule.dataset]
+        relevant_roles = roles.filter(id__in=null_dataset_role_ids)
+
+    # if there are roles for the dataset/no dataset, then we need to check if the requested
+    # action is given in the role
+    if relevant_roles.count() > 0:
+        return relevant_roles.filter(accessrule__crudrule__crud_action=action).count() > 0
+    
     return False
 
 

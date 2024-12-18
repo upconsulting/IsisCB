@@ -583,7 +583,7 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history', 'owning_tenant'),
+                       'record_history', 'owning_tenant', 'belongs_to'),
            'classes': ('extrapretty', 'collapse'),
         }),
     ]
