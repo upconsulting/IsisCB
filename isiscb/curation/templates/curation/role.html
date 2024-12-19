@@ -110,7 +110,12 @@ It seems like you've granted update, create, or delete access to records but no 
   {% for rule in role.dataset_rules %}
     <tr>
       <td>Limited Dataset</td>
-      <td>User has access to records {% if rule.can_write %}and can <span class="label label-warning">create</span> new records{% endif %} in dataset '{{ rule.dataset|get_dataset_name }}'.</td>
+      <td>
+        {% if rule.can_write %}
+        Dataset “{{ rule.dataset|get_dataset_name }}” is visible to user. User can create and update records in this dataset.
+        {% else %}
+        Dataset "{{ rule.dataset|get_dataset_name }}" is visible to user. User <span class="label label-danger">cannot</span> create or update records in this dataset.
+        {% endif %}
       <td>
         {% if update_module %}
         <form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>

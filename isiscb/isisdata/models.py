@@ -3062,7 +3062,7 @@ class CRUDRule(AccessRule):
     UPDATE = 'update'
     DELETE = 'delete'
     CRUD_CHOICES = (
-        (CREATE, 'Create'),
+        #(CREATE, 'Create'), # This does not seem to affect anything, so we can remove for now
         (VIEW, 'View'),
         (UPDATE, 'Update'),
         (DELETE, 'Delete'),

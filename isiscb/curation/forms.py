@@ -713,7 +713,17 @@ class TenantRuleForm(forms.ModelForm):
 
 class DatasetRuleForm(forms.ModelForm):
     dataset = forms.ChoiceField(required=False)
-    can_write = forms.BooleanField(required=False, label="Can write to dataset")
+    
+    CHOICES = [
+        (True, 'Allow user to create and update records in this dataset.'),
+        (False, 'Prevent user from creating or updating records in this dataset.'),
+    ]
+    can_write = forms.ChoiceField(
+        widget=forms.RadioSelect,
+        choices=CHOICES, 
+        label="",
+        required=True
+    )
 
     def __init__(self, user, *args, **kwargs):
         super(DatasetRuleForm, self).__init__( *args, **kwargs)

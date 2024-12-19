@@ -18,7 +18,15 @@
   {% if field.name != 'role' %}
   <div class="form-group">
       <label>{{ field.label }}</label>
+      {% if field.field.widget.input_type == 'radio' %}
+      {% for radio in field %}
+        <div class="myradio">
+            {{ radio }}
+        </div>
+      {% endfor %}
+      {% else %}
       {{ field|addcss:"form-control" }}
+      {% endif %}
       {% for error in field.errors %}
       <p class="error"><small>{{ error }}</small></p>
       {% endfor %}
