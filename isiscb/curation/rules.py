@@ -233,7 +233,7 @@ def is_action_allowed(user, obj, action):
     
     owning_tenant = getattr(obj, 'owning_tenant', None)
     tenant_access = c_util.get_tenant_access(user, owning_tenant)
-
+    
     # if user is tenant admin, they cann see all records in tenant
     if tenant_access == TenantRule.UPDATE:
         return True
@@ -243,7 +243,14 @@ def is_action_allowed(user, obj, action):
     if not roles.filter(accessrule__tenantrule__tenant=owning_tenant):
         return False
 
-    dataset = getattr(obj, 'belongs_to', None)
+    # if this function is called from a template, we don't get a full object
+    # just a dictionary of values
+    if type(obj) == dict:
+        dataset = obj.get('belongs_to')
+        dataset = Dataset.objects.filter(pk=dataset).first() if dataset else None
+    else:
+        dataset = getattr(obj, 'belongs_to', None)
+    
     relevant_roles = roles
     if dataset:
         # if the record is in a dataset, we want to filter only for roles that define

@@ -4,6 +4,7 @@
 {% load static %}
 {% load render_object %}
 {% load permission_tags %}
+{% load rules %}
 
 {% block extrahead %}
 <script src="{% static 'curation/js/moment.js' %}" type="text/javascript"></script>
@@ -155,6 +156,7 @@ function toggleLinkRecordsBtn() {
                 <th width="5%">Mod. by</th>
                 <th width="8%">Created</th>
                 <th width="5%">Created by</th>
+                <th width="2%"><i title="Indicates if user can edit a record." class="fa fa-pencil-square" aria-hidden="true"></i></th>
             </tr>
         </thead>
         <tbody>
@@ -243,6 +245,12 @@ function toggleLinkRecordsBtn() {
                 <td>
                   {% if object.created_by_native %}
                     {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }} ({{object.created_by_native__username}})
+                  {% endif %}
+                </td>
+                <td>
+                  {% test_rule 'can_edit_record' request.user object as can_edit_record %}
+                  {% if not can_edit_record %}
+                  <i title="This record is either not in your tenant, or you don't have edit permissions." class="fa fa-exclamation-circle" aria-hidden="true"></i>
                   {% endif %}
                 </td>
             </tr>
