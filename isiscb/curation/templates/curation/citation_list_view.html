@@ -141,6 +141,7 @@ function toggleLinkRecordsBtn() {
                     });
                     </script>
                 </th>
+                <th width="2%"><i title="Indicates if user can edit a record." class="fa fa-pencil-square" aria-hidden="true"></i></th>
                 <th width="2%"><i class="fa fa-thumbs-o-up" aria-hidden="true" title="Status"></i></th>
                 <th width="5%">ID</th>
                 <th width="2%"><i class="fa fa-file-text-o" aria-hidden="true" title="Type"></i></th>
@@ -156,7 +157,6 @@ function toggleLinkRecordsBtn() {
                 <th width="5%">Mod. by</th>
                 <th width="8%">Created</th>
                 <th width="5%">Created by</th>
-                <th width="2%"><i title="Indicates if user can edit a record." class="fa fa-pencil-square" aria-hidden="true"></i></th>
             </tr>
         </thead>
         <tbody>
@@ -169,6 +169,12 @@ function toggleLinkRecordsBtn() {
             <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %} {% if object.stub_record_status == 'SR'%}stubrecord{%endif%}">
                 <td>
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" data-citation-type="{{object.type_controlled}}"/>
+                </td>
+                <td>
+                  {% test_rule 'can_edit_record' request.user object as can_edit_record %}
+                  {% if not can_edit_record %}
+                  <i title="This record is either not in your tenant, or you don't have edit permissions." class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                  {% endif %}
                 </td>
                 <td>
                   {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
@@ -245,12 +251,6 @@ function toggleLinkRecordsBtn() {
                 <td>
                   {% if object.created_by_native %}
                     {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }} ({{object.created_by_native__username}})
-                  {% endif %}
-                </td>
-                <td>
-                  {% test_rule 'can_edit_record' request.user object as can_edit_record %}
-                  {% if not can_edit_record %}
-                  <i title="This record is either not in your tenant, or you don't have edit permissions." class="fa fa-exclamation-circle" aria-hidden="true"></i>
                   {% endif %}
                 </td>
             </tr>
