@@ -704,6 +704,7 @@ class RoleForm(forms.ModelForm):
             'name', 'description',
         ]
 
+
 class TenantRuleForm(forms.ModelForm):
     class Meta(object):
         model = TenantRule
@@ -743,7 +744,7 @@ class DatasetRuleForm(forms.ModelForm):
             dataset = self.cleaned_data['dataset']
             writable_datasets = permissions_util.get_writable_datasets(self.user)
             # if user is not limited with datasets, writable_datasets is None else [] or [ds1.pk, ds2.pk,...]
-            if dataset and self.cleaned_data['can_write'] == True and int(dataset) not in writable_datasets:
+            if dataset and (self.cleaned_data['can_write'] == True or self.cleaned_data['can_write'] == 'True') and int(dataset) not in writable_datasets:
                 raise forms.ValidationError(
                     "You cannot write to this dataset, so you can't allow other users to either."
                 )
