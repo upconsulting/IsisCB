@@ -2159,6 +2159,8 @@ def quick_and_dirty_authority_search(request):
             'type_controlled': obj.get_type_controlled_display(),
             'tenants': [t.id for t in obj.tenants.all()],
             'owning_tenant': obj.owning_tenant.id if obj.owning_tenant else '',
+            'belongs_to': obj.belongs_to.name if obj.belongs_to else None,
+            'can_edit': rules.test_rule('is_generic_obj_accessible_by_tenant', User.objects.get(pk=request.user.id), obj),                
         })
 
     return JsonResponse({'results': results})

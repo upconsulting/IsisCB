@@ -351,6 +351,11 @@ function triggerSearchSubjects(force) {
             }
             publicLink.html(linkText);
             newLi.append(publicLink);
+
+            if (r.belongs_to) {
+                newLi.append(" ")
+                newLi.append($(`<i class="fas fa-database" title="` + r.belongs_to + `"></i>`));
+            }
             var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
             suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
             newLi.append(suggestLink);
