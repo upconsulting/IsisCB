@@ -2006,9 +2006,18 @@ def quick_and_dirty_authority_search(request):
         query &= Q(belongs_to__subject_search_default=True)
 
     accessible_datasets = permissions_util.get_accessible_datasets(request.user)
+    
+    # we want to find all recoreds in an accessible data or if the record is not in a dataset
+    # but the user has access to records in dataset (None will be in the list of accessible datasets)
+    # then we need filter by dataset is null and this should be accessible datasets OR null
+    dataset_query = Q()
     if accessible_datasets:
-        query &= Q(belongs_to__in=accessible_datasets)
-                   
+        dataset_query = Q(belongs_to__in=accessible_datasets)
+    if None in accessible_datasets:
+        dataset_query = dataset_query | Q(belongs_to__isnull=True)
+
+    query &= dataset_query
+
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
