@@ -31,6 +31,7 @@
   <tr>
     <th width="20%">Role Name</th>
     <th>Description</th>
+    <th>Tenant</th>
     <th width="30%">Assigned to</th>
     <th width="10%"></th>
   </tr>
@@ -40,6 +41,14 @@
   <tr>
     <td><a href="{% url 'curation:role' role.pk %}">{{ role.name }}</a></td>
     <td>{{ role.description }}</td>
+    <td>
+      {% with role.tenant_rules.0 as role_tenant %}
+      {{ role_tenant.tenant.name }} 
+      {% if role_tenant %}
+      {% if role_tenant.allowed_action == 'update' %} <span class="label label-danger">Administrator</span> {% else %}<span class="label label-info">Editor</span>{% endif %}
+      {% endif %}
+      {% endwith %}
+    </td>
     <td>{% for user in role.users.all %}<a href="{% url 'curation:user' user.pk %}">{{ user.username }}</a>, {% endfor %}</td>
     <td>
       {% if update_module %}

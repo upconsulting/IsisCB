@@ -698,11 +698,60 @@ class PersonForm(forms.ModelForm):
 
 class RoleForm(forms.ModelForm):
 
+    tenants = forms.ChoiceField(choices=[], required=False)
+    tenant_role = forms.ChoiceField(choices=[
+        (TenantRule.VIEW, dict(TenantRule.FIELD_CHOICES)[TenantRule.VIEW]), 
+        (TenantRule.UPDATE, dict(TenantRule.FIELD_CHOICES)[TenantRule.UPDATE])
+        ])
+
     class Meta(object):
         model = IsisCBRole
         fields = [
             'name', 'description',
         ]
+
+    def __init__(self, user, *args, **kwargs):
+        super(RoleForm, self).__init__( *args, **kwargs)
+        self.user = user
+
+        if not self.user.is_superuser:
+            tenant = cutil.get_tenant(self.user)
+            tenants = set()
+            tenants.add((tenant.id, tenant))
+            self.fields['tenants'].choices = tenants
+        else:
+            tenants = [(t.id, t) for t in Tenant.objects.all()]
+            tenants.append((None, None))
+            self.fields['tenants'].choices = tenants
+
+    def clean(self):
+        if not self.user.is_superuser:
+            tenant = cutil.get_tenant(self.user)
+            if not tenant:
+                raise forms.ValidationError(
+                    "User does not have permission to create roles."
+                )
+            if cutil.get_tenant_access(self.user, tenant) != TenantRule.UPDATE:
+                raise forms.ValidationError(
+                    "User does not have permission to create roles."
+                )
+            
+        
+    def save(self, *args, **kwargs):
+        if not self.user.is_superuser:
+            new_role = super(RoleForm, self).save(*args, **kwargs)
+            tenant = cutil.get_tenant(self.user)
+            TenantRule.objects.create(role=new_role, tenant=tenant, allowed_action=self.cleaned_data['tenant_role'])
+        else:
+            new_role = super(RoleForm, self).save(*args, **kwargs)
+            
+            # if superuser selected a tenant, we also need to create a tenantrule
+            tenant_id = self.cleaned_data['tenants']
+            if tenant_id:
+                tenant = Tenant.objects.get(pk=int(tenant_id))
+                TenantRule.objects.create(role=new_role, tenant=tenant, allowed_action=self.cleaned_data['tenant_role'])
+
+            
 
 
 class TenantRuleForm(forms.ModelForm):
@@ -711,6 +760,7 @@ class TenantRuleForm(forms.ModelForm):
         fields = [
             'tenant', 'allowed_action'
         ]
+
 
 class DatasetRuleForm(forms.ModelForm):
     dataset = forms.ChoiceField(required=False)

@@ -58,9 +58,13 @@
    Add access to Zotero module</button>
     </form>
   </div>
-  {% if not role.tenant_rules %}
+  {% if not role.tenant_rules and user.is_superuser %}
   <div class="btn-group">
     <a href="{% url 'curation:create_tenant_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
+  </div>
+  {% elif not user.is_superuser %}
+  <div class="btn-group">
+    <a class="btn btn-sm btn-default" disabled title="Tenant can only be changed by superadmins."><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
   </div>
   {% else %}
   <div class="btn-group">
@@ -150,7 +154,18 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Tenant Access </td>
       <td>Tenant: {% if rule.allowed_action == 'update' %} <span class="label label-danger">Administrator</span> {% else %}<span class="label label-info">Editor</span>{% endif %} {{ rule.tenant.name }}</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>
+        {% if update_module and user.is_superuser %}
+        <form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>
+        {% endif %}
+        {% if update_module or user.is_superuser %}
+        {% if rule.allowed_action == 'view' %}
+        <form action="{% url 'curation:modify_tenant_rule' role.id rule.id %}" method="POST" style="margin: 0px;"><input type="hidden" name="allowed_action" value="update"/> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fas fa-user-edit"></i> Make Administrator</small></button></form>
+        {% else %}
+        <form action="{% url 'curation:modify_tenant_rule' role.id rule.id %}" method="POST" style="margin: 0px;"><input type="hidden" name="allowed_action" value="view"/> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fas fa-user-edit"></i> Make Editor</small></button></form>
+        {% endif %}
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
   {% endif %}
