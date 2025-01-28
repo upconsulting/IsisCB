@@ -125,12 +125,12 @@ def add_role(request, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_role.html'
-        form = RoleForm()
+        form = RoleForm(user=request.user)
         context.update({
             'form': form,
         })
     elif request.method == 'POST':
-        form = RoleForm(request.POST)
+        form = RoleForm(request.user, request.POST)
 
         if form.is_valid():
             role = form.save()
@@ -192,7 +192,11 @@ def role(request, role_id, user_id=None):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def roles(request):
-    roles = IsisCBRole.objects.all()
+    if request.user.is_superuser:
+        roles = IsisCBRole.objects.all()
+    else:
+        tenant_rules = TenantRule.objects.filter(tenant=cutil.get_tenant(request.user))
+        roles = set([rule.role for rule in tenant_rules])
 
     template = 'curation/roles.html'
     context = {
@@ -202,7 +206,7 @@ def roles(request):
 
     return render(request, template, context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 @check_rules('can_update_user_module')
 def add_tenant_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -243,6 +247,30 @@ def add_tenant_rule(request, role_id, user_id=None):
         return redirect('curation:role', role_id=role.pk)
 
     return render(request, template, context)
+
+def modify_tenant_rule(request, role_id, rule_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = {
+        'curation_section': 'users',
+        'role': role,
+    }
+
+    tenant_access = cutil.get_tenant_access(request.user, cutil.get_tenant(request.user))
+
+    # Is user allowed to change tenant?
+    if request.method == 'POST' and tenant_access == TenantRule.UPDATE:
+        rule = get_object_or_404(TenantRule, pk=rule_id)
+        permission = request.POST.get('allowed_action', TenantRule.VIEW)
+        # we dont' just want to pass a random string through
+        if permission == TenantRule.UPDATE:
+            rule.allowed_action = TenantRule.UPDATE
+        else:
+            rule.allowed_action = TenantRule.VIEW
+        rule.save()
+
+    return redirect('curation:role', role_id=role.pk)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
