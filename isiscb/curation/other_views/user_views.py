@@ -122,7 +122,7 @@ def add_role(request, user_id=None):
     context = {
         'curation_section': 'users',
     }
-
+    
     if request.method == 'GET':
         template = 'curation/add_role.html'
         form = RoleForm(user=request.user)
@@ -458,18 +458,36 @@ def add_role_to_user(request, user_edit_id, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_role_to_user.html'
-        form = AddRoleForm(initial = { 'users': user })
+        form = AddRoleForm(user=request.user, initial = { 'users': user })
         context.update({
             'form': form,
         })
     elif request.method == 'POST':
-        form = AddRoleForm(request.POST)
+        form = AddRoleForm(request.user, request.POST)
 
         if form.is_valid():
             role_id = form.cleaned_data['role']
             role = get_object_or_404(IsisCBRole, pk=role_id)
-            if role.tenant_rules and cutils.get_tenants(user):
-                messages.add_message(request, messages.ERROR, "User already belongs to a tenant. You cannot add a second tenant role.")
+            if role.tenant_rules:
+                tenants = set([rule.tenant for rule in role.tenant_rules])
+                tenants_of_user = list(cutils.get_tenants(user))
+                tenant_to_add = None
+                
+                # if for some reason two tenant rules are being added for different tenants
+                if len(tenants) > 1:
+                    messages.add_message(request, messages.ERROR, "Users can only belong two one tenant.")
+                else:
+                    tenant_to_add = tenants.pop()
+
+                if tenant_to_add:
+                    # if user already belongs to another tenant
+                    if tenants_of_user and tenant_to_add not in tenants_of_user:
+                        messages.add_message(request, messages.ERROR, "User already belongs to a tenant. You cannot add a second tenant role.")
+                    else:
+                        role.users.add(user)
+                        role.save()
+                else:
+                    messages.add_message(request, messages.ERROR, "Tenant rule was submitted with a tenant.")
             else:
                 role.users.add(user)
                 role.save()

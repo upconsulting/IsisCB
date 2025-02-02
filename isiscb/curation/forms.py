@@ -817,10 +817,15 @@ class DatasetRuleForm(forms.ModelForm):
 class AddRoleForm(forms.Form):
     role = forms.ChoiceField(required=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(AddRoleForm, self).__init__( *args, **kwargs)
 
-        roles = IsisCBRole.objects.all()
+        if user.is_superuser:
+            roles = IsisCBRole.objects.all()
+        else:
+            tenant_rules = TenantRule.objects.filter(tenant=cutil.get_tenant(user))
+            roles = set([rule.role for rule in tenant_rules])
+        
         choices = [(role.pk, role.name) for role in roles]
         self.fields['role'].choices = choices
 

@@ -24,11 +24,12 @@ def is_accessible_by_dataset(user, obj):
     roles = user.isiscb_roles.all()
 
     # if user is tenant admin, they have access to all datasets
+    # as long as there is one rule with tenant admin rights, we'll return true
     # we don't need to check if the tenant is the right one, as a user can only have
     # access to one tenant, and that will be checked by the tenant rule
     tenant_roles = roles.filter(accessrule__tenantrule__tenant__isnull=False)
     if tenant_roles:
-        if tenant_roles.first().tenant_rules[0].allowed_action == TenantRule.UPDATE:
+        if TenantRule.UPDATE in [trule.allowed_action for trole in tenant_roles for trule in trole.tenant_rules]:
             return True
 
 

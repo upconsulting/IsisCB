@@ -27,9 +27,13 @@ def get_tenant_access(user, tenant):
     if user.is_superuser:
         return TenantRule.UPDATE
     
-    tenant_role = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False)).first()
-    if tenant_role and tenant_role.tenant_rules and tenant_role.tenant_rules.first().tenant == tenant:
-        return tenant_role.tenant_rules.first().allowed_action
+    tenant_roles = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False))
+    if tenant_roles:
+        if TenantRule.UPDATE in [trule.allowed_action for trole in tenant_roles for trule in trole.tenant_rules]:
+            TenantRule.UPDATE
+        else:
+            TenantRule.VIEW
+
     return None
 
 def get_classification_systems(user):
