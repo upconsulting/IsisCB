@@ -136,7 +136,7 @@ class CitationFilter(django_filters.FilterSet):
 
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
-            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects(self.request.user)]
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects_in_tenant(self.request.user, tenant)]
         else:
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 
@@ -488,7 +488,7 @@ class AuthorityFilter(django_filters.FilterSet):
 
         if self.request:
             tenant = c_util.get_tenant(self.request.user)
-            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects(self.request.user)]
+            self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects_in_tenant(self.request.user, tenant)]
         else:
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
 

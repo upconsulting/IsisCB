@@ -31,6 +31,13 @@ def needs_view_rule(crud_rules):
 
     return False
 
+@register.filter
+def can_change_role(role, user):
+    return role.tenant_rules or user.is_superuser
+
+@register.filter
+def belongs_to_tenant(dataset_id, tenant):
+    return Dataset.objects.get(pk=dataset_id).owning_tenant == tenant
 
 @register.filter
 def create_perm_tuple(fieldname, id):

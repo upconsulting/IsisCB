@@ -782,11 +782,13 @@ class DatasetRuleForm(forms.ModelForm):
 
         # if user is not admin, they should only see datasets they have access to
         accessible_datasets = permissions_util.get_accessible_dataset_objects(user)
+        tenant = cutil.get_tenant(user)
         
         choices = set()
         choices.add((None, "No Dataset"))
         for ds in accessible_datasets:
-            choices.add((ds.pk, ds.name))
+            ds_name = f"{ds.name}" + (f" [Tenant: {ds.owning_tenant.name}]" if ds.owning_tenant != tenant else "")
+            choices.add((ds.pk, ds_name))
         self.fields['dataset'].choices = choices
 
     def clean(self):
@@ -826,7 +828,7 @@ class AddRoleForm(forms.Form):
             tenant_rules = TenantRule.objects.filter(tenant=cutil.get_tenant(user))
             roles = set([rule.role for rule in tenant_rules])
         
-        choices = [(role.pk, role.name) for role in roles]
+        choices = [(role.pk, ("[Tenant Admin Role] " if role.tenant_access_type == TenantRule.UPDATE else "") + role.name) for role in roles]
         self.fields['role'].choices = choices
 
 class CRUDRuleForm(forms.ModelForm):

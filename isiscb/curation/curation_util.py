@@ -1,5 +1,8 @@
 from isisdata.models import *
 import itertools
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_tenants(user):
     if user.is_superuser:
@@ -30,9 +33,9 @@ def get_tenant_access(user, tenant):
     tenant_roles = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False))
     if tenant_roles:
         if TenantRule.UPDATE in [trule.allowed_action for trole in tenant_roles for trule in trole.tenant_rules]:
-            TenantRule.UPDATE
+            return TenantRule.UPDATE
         else:
-            TenantRule.VIEW
+            return TenantRule.VIEW
 
     return None
 

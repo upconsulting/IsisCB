@@ -181,6 +181,10 @@ def role(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
     template = 'curation/role.html'
+    
+    if not request.user.is_superuser and role.tenant and role.tenant != cutil.get_tenant(request.user):
+        template = 'curation/access_denied.html'
+
     context = {
         'curation_section': 'users',
         'role': role,

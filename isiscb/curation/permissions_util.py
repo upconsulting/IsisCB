@@ -51,6 +51,11 @@ def get_accessible_dataset_objects(user):
         return Dataset.objects.all()
     return Dataset.objects.filter(id__in=get_accessible_datasets(user))
 
+def get_accessible_dataset_objects_in_tenant(user, tenant):
+    if user.is_superuser:
+        return Dataset.objects.all()
+    return [ds for ds in Dataset.objects.filter(id__in=get_accessible_datasets(user)) if ds.owning_tenant == tenant]
+
 def get_writable_dataset_objects(user):
     if user.is_superuser:
         return Dataset.objects.all()

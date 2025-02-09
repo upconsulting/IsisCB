@@ -3022,6 +3022,17 @@ class IsisCBRole(models.Model):
     @property
     def tenant_rules(self):
         return TenantRule.objects.filter(role=self.pk)
+    
+    @property
+    def tenant(self):
+        # there should only be one tenant per role
+        tenant_rule = self.tenant_rules.first()
+        return tenant_rule.tenant if tenant_rule else None
+    
+    @property
+    def tenant_access_type(self):
+        update_roles = list(filter(lambda rule: rule.allowed_action == TenantRule.UPDATE, self.tenant_rules))
+        return TenantRule.UPDATE if update_roles else TenantRule.VIEW
 
     def __unicode__(self):
         return self.name
