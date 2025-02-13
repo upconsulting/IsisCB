@@ -17,7 +17,6 @@
 <div class="alert alert-danger" role="alert">{{ message }}</div>
 {% endfor %}
 
-
 <div>
     {% if selected_user.is_superuser %}
     <form action="{% url 'curation:change_is_superuser' selected_user.pk %}" method="POST">
@@ -64,6 +63,14 @@
         {% endif %}
       </form>
     </p>
+    {% endif %}
+    <span class="label label-info">Tenant Access</span>
+    {% if selected_user|get_tenant_access_of_user == "update" %}
+    User is <span class="label label-danger">Administrator</span> for tenant <b>{{ selected_user|get_tenant_of_user }}</b>.
+    {% elif selected_user|get_tenant_access_of_user == "view" %}
+     User is <span class="label label-warning">Editor</span> for tenant <b>{{ selected_user|get_tenant_of_user }}</b>.
+    {% else %}
+     User does not have access to any tenant.
     {% endif %}
 </div>
 

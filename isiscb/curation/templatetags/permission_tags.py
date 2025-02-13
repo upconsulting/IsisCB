@@ -5,6 +5,7 @@ from builtins import map
 from past.utils import old_div
 from django import template
 from isisdata.models import *
+import curation.curation_util as c_util
 
 register = template.Library()
 
@@ -43,6 +44,17 @@ def belongs_to_tenant(dataset_id, tenant):
 def create_perm_tuple(fieldname, id):
     return (fieldname, id)
 
+@register.filter
+def get_tenant_of_user(user):
+    return c_util.get_tenant(user)
+
+@register.filter
+def get_tenant_access_of_user(user):
+    tenant = c_util.get_tenant(user)
+    if tenant:
+        return c_util.get_tenant_access(user, tenant)
+    
+    return None
 
 @register.filter
 def get_warnings_column_count_citation(instance):

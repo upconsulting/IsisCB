@@ -204,7 +204,13 @@ function highlightFilters() {
             {% if user.is_staff %}<span class="label label-warning">Curation Access</span>{% endif %}
           </td>
           <td>
-            {{ user|get_user_tenant|default_if_none:"" }}
+            {% if user|get_tenant_access_of_user == "update" %}
+            <span class="label label-danger">Administrator</span>
+            {% elif user|get_tenant_access_of_user == "view" %}
+            <span class="label label-warning">Editor</span>
+            {% endif %}
+            {{ user|get_user_tenant|default_if_none:"" }} 
+            
           </td>
           <td>
             {{ user.email }}
