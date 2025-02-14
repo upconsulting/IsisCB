@@ -237,6 +237,8 @@ class Tenant(models.Model):
     to work. Do not change this value unless you know what you are doing."""))
 
     default_dataset = models.OneToOneField('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
+    default_datasets_reading = models.ManyToManyField('isisdata.Dataset', null=True,  related_name='reading_tenants')
+
 
     ACTIVE = 'ACT'
     INACTIVE = 'INA'
@@ -2538,6 +2540,7 @@ class PartDetails(models.Model):
     
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255, null=True)
     description = models.TextField()
     editor = models.CharField(max_length=255, null=True)
     owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
@@ -3019,6 +3022,17 @@ class IsisCBRole(models.Model):
     @property
     def tenant_rules(self):
         return TenantRule.objects.filter(role=self.pk)
+    
+    @property
+    def tenant(self):
+        # there should only be one tenant per role
+        tenant_rule = self.tenant_rules.first()
+        return tenant_rule.tenant if tenant_rule else None
+    
+    @property
+    def tenant_access_type(self):
+        update_roles = list(filter(lambda rule: rule.allowed_action == TenantRule.UPDATE, self.tenant_rules))
+        return TenantRule.UPDATE if update_roles else TenantRule.VIEW
 
     def __unicode__(self):
         return self.name
@@ -3059,7 +3073,7 @@ class CRUDRule(AccessRule):
     UPDATE = 'update'
     DELETE = 'delete'
     CRUD_CHOICES = (
-        (CREATE, 'Create'),
+        #(CREATE, 'Create'), # This does not seem to affect anything, so we can remove for now
         (VIEW, 'View'),
         (UPDATE, 'Update'),
         (DELETE, 'Delete'),
@@ -3088,6 +3102,7 @@ class DatasetRule(AccessRule):
     This rules limits the records a user has access to to a specific dataset.
     """
     dataset = models.CharField(max_length=255, null=True, blank=True, default=None)
+    can_write = models.BooleanField(default=False)
 
 
 class UserModuleRule(AccessRule):

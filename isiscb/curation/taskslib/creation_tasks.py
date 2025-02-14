@@ -58,7 +58,7 @@ def create_records(file_path, error_path, task_id, user_id, record_type):
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
-        _save_results(error_path, results, ('Type', 'Title', 'Affected object', 'Message'))
+        _save_results(error_path, results, ('Type', 'Title', 'Ids', 'Message'))
 
         task.state = 'SUCCESS'
         task.save()

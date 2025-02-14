@@ -3,6 +3,7 @@ from builtins import object
 from django import forms
 
 from zotero.models import *
+import curation.permissions_util as p_util
 
 
 class ImportAccessionForm(forms.ModelForm):
@@ -11,13 +12,18 @@ class ImportAccessionForm(forms.ModelForm):
     """
 
     zotero_rdf = forms.FileField()
-    ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
-                                       empty_label='No dataset')
+    ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), required=True,
+                                       empty_label='Please select dataset')
 
-    def __init__(self, tenant, *args, **kwargs):
+    def __init__(self, tenant, user, *args, **kwargs):
         super(ImportAccessionForm, self).__init__(*args, **kwargs)
         if tenant:
-            self.fields['ingest_to'].queryset = Dataset.objects.filter(owning_tenant=tenant)
+            datasets = p_util.get_writable_dataset_objects(user)
+            self.fields['ingest_to'].queryset = datasets
+            if tenant.default_dataset in datasets:
+                self.fields['ingest_to'].initial = tenant.default_dataset
+            else:
+                self.fields['ingest_to'].initial = datasets.first()
 
     
     class Meta(object):

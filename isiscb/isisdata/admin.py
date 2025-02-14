@@ -583,7 +583,7 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history', 'owning_tenant'),
+                       'record_history', 'owning_tenant', 'belongs_to'),
            'classes': ('extrapretty', 'collapse'),
         }),
     ]
@@ -988,6 +988,8 @@ class AARelationAdmin(SimpleHistoryAdmin,
 
     form = AARelationForm
 
+class AARelationTypeAdmin(SimpleHistoryAdmin):
+    list_display = ('pk', 'name', 'description')
 
 class LinkedDataTypeAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'pattern')
@@ -1182,8 +1184,8 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 class DatasetAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'editor', 'owning_tenant', 'subject_search_default']
-    list_display = ['name', 'owning_tenant', 'subject_search_default']
+    fields = ['name', 'description', 'editor', 'owning_tenant', 'subject_search_default', 'label']
+    list_display = ['name', 'label', 'owning_tenant', 'subject_search_default']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -1290,6 +1292,7 @@ admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
+admin.site.register(AARelationType, AARelationTypeAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(LinkedDataType, LinkedDataTypeAdmin)
 admin.site.register(PartDetails, PartDetailsAdmin)

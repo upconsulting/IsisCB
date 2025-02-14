@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import json
 from django.conf import settings
 from isisdata.models import SystemNotification
 

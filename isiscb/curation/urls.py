@@ -146,6 +146,7 @@ urlpatterns = [
     re_path(r'^users/rule/dataset/(?P<role_id>[0-9]+)/$', user_views.add_dataset_rule, name='create_rule_dataset'),
     re_path(r'^users/rule/crud/(?P<role_id>[0-9]+)/$', user_views.add_crud_rule, name='create_rule_crud'),
     re_path(r'^users/rule/tenant/(?P<role_id>[0-9]+)/$', user_views.add_tenant_rule, name='create_tenant_rule'),
+    re_path(r'^users/rule/tenant/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)$', user_views.modify_tenant_rule, name='modify_tenant_rule'),
     re_path(r'^users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', user_views.add_field_rule, name='create_rule_citation_field'),
     re_path(r'^users/rule/user_module/(?P<role_id>[0-9]+)/$', user_views.add_user_module_rule, name='create_user_module_rule'),
     re_path(r'^users/rule/zotero/(?P<role_id>[0-9]+)/$', user_views.add_zotero_rule, name='add_zotero_rule'),

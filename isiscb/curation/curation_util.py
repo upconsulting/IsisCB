@@ -1,5 +1,8 @@
 from isisdata.models import *
 import itertools
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_tenants(user):
     if user.is_superuser:
@@ -22,9 +25,18 @@ def get_tenant(user):
 def get_tenant_access(user, tenant):
     if not user.is_authenticated:
         return None
-    tenant_role = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False)).first()
-    if tenant_role and tenant_role.tenant_rules and tenant_role.tenant_rules.first().tenant == tenant:
-        return tenant_role.tenant_rules.first().allowed_action
+    
+    # superusers can do anything
+    if user.is_superuser:
+        return TenantRule.UPDATE
+    
+    tenant_roles = user.isiscb_roles.filter(Q(accessrule__tenantrule__tenant__isnull=False))
+    if tenant_roles:
+        if TenantRule.UPDATE in [trule.allowed_action for trole in tenant_roles for trule in trole.tenant_rules]:
+            return TenantRule.UPDATE
+        else:
+            return TenantRule.VIEW
+
     return None
 
 def get_classification_systems(user):

@@ -15,7 +15,10 @@ from curation import actions
 import rules
 import itertools
 import curation.curation_util as cutil
+import logging
+import curation.permissions_util as permissions_util
 
+logger = logging.getLogger(__name__)
 
 class CCRelationForm(forms.ModelForm):
     subject = forms.CharField(widget=forms.HiddenInput(), required=True)
@@ -327,6 +330,54 @@ class StubCheckboxInput(forms.widgets.CheckboxInput):
     def __init__(self, attrs=None, check_test=None):
         super().__init__(attrs, lambda v: v == Citation.STUB_RECORD)
 
+def _set_belongs_to(belongs_to_field, user, instance):
+    """
+    Helper function to set the belongs_to field (dataset field) to readonly in citations and
+    authority form.
+    """
+    # get datasets user has access to
+    accessible_datasets = permissions_util.get_writable_datasets(user)
+
+    ds_queryset = Dataset.objects.filter()
+    if cutil.get_tenant(user):
+        ds_queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(user))
+    
+    if accessible_datasets is not None:
+        ds_queryset = ds_queryset.filter(id__in=accessible_datasets)
+
+    if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
+        # if dataset is set but dataset cannot be edited by user, disable field
+        belongs_to_field.queryset = Dataset.objects.filter(pk=instance.belongs_to.pk)
+        belongs_to_field.widget.attrs['readonly'] = True
+        belongs_to_field.widget.attrs['disabled'] = True
+    else: 
+        belongs_to_field.queryset = ds_queryset
+        belongs_to_field.required = True
+
+def _clean_belongs_to(cleaned_data, user, instance):
+    if 'belongs_to' not in cleaned_data:
+        raise ValidationError(
+            "Please select a dataset."
+        )
+
+    # get datasets user has access to
+    accessible_datasets = permissions_util.get_writable_datasets(user)
+    if accessible_datasets:
+        ds_queryset = Dataset.objects.filter(id__in=accessible_datasets)
+    else:
+        ds_queryset = []
+     
+    # if user can't modify dataset, it should stay the same as before
+    if instance.pk and instance.belongs_to and instance.belongs_to not in ds_queryset:
+        cleaned_data['belongs_to'] = instance.belongs_to
+    else:
+        # if user tries to set dataset to one they don't have acces to
+        if accessible_datasets and cleaned_data['belongs_to'] and cleaned_data['belongs_to'].pk not in accessible_datasets:
+            logger.error("ERROR: User cannot write to dataset " + str(cleaned_data['belongs_to'].pk))
+            raise ValidationError(
+                "User cannot write to dataset."
+            )
+
 class CitationForm(forms.ModelForm):
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
@@ -371,12 +422,10 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
+        _set_belongs_to(self.fields['belongs_to'], self.user, self.instance)
+        
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
-        if cutil.get_tenant(self.user):
-            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
-        else:
-            self.fields['belongs_to'].queryset = Dataset.objects.all()
-
+        
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
@@ -423,7 +472,8 @@ class CitationForm(forms.ModelForm):
             raise ValidationError(
                 "Owning tenant cannot be changed."
             )
-
+        
+        _clean_belongs_to(self.cleaned_data, self.user, self.instance)
 
 
 
@@ -512,11 +562,8 @@ class AuthorityForm(forms.ModelForm):
 
         self.fields['classification_system_object'].queryset = cutil.get_classification_systems(user)
         
-        if cutil.get_tenant(self.user):
-            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
-        else:
-            self.fields['belongs_to'].queryset = Dataset.objects.all()
-       
+        _set_belongs_to(self.fields['belongs_to'], self.user, self.instance)
+
         # disable fields user doesn't have access to
         if self.instance.pk:
             for field in self.fields:
@@ -542,6 +589,8 @@ class AuthorityForm(forms.ModelForm):
             raise ValidationError(
                 "Owning tenant cannot be changed."
             )
+
+        _clean_belongs_to(self.cleaned_data, self.user, self.instance)
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
@@ -649,11 +698,61 @@ class PersonForm(forms.ModelForm):
 
 class RoleForm(forms.ModelForm):
 
+    tenants = forms.ChoiceField(choices=[], required=False)
+    tenant_role = forms.ChoiceField(choices=[
+        (TenantRule.VIEW, dict(TenantRule.FIELD_CHOICES)[TenantRule.VIEW]), 
+        (TenantRule.UPDATE, dict(TenantRule.FIELD_CHOICES)[TenantRule.UPDATE])
+        ])
+
     class Meta(object):
         model = IsisCBRole
         fields = [
             'name', 'description',
         ]
+
+    def __init__(self, user, *args, **kwargs):
+        super(RoleForm, self).__init__( *args, **kwargs)
+        self.user = user
+
+        if not self.user.is_superuser:
+            tenant = cutil.get_tenant(self.user)
+            tenants = set()
+            tenants.add((tenant.id, tenant))
+            self.fields['tenants'].choices = tenants
+        else:
+            tenants = [(t.id, t) for t in Tenant.objects.all()]
+            tenants.append((None, None))
+            self.fields['tenants'].choices = tenants
+
+    def clean(self):
+        if not self.user.is_superuser:
+            tenant = cutil.get_tenant(self.user)
+            if not tenant:
+                raise forms.ValidationError(
+                    "User does not have permission to create roles."
+                )
+            if cutil.get_tenant_access(self.user, tenant) != TenantRule.UPDATE:
+                raise forms.ValidationError(
+                    "User does not have permission to create roles."
+                )
+            
+        
+    def save(self, *args, **kwargs):
+        if not self.user.is_superuser:
+            new_role = super(RoleForm, self).save(*args, **kwargs)
+            tenant = cutil.get_tenant(self.user)
+            TenantRule.objects.create(role=new_role, tenant=tenant, allowed_action=self.cleaned_data['tenant_role'])
+        else:
+            new_role = super(RoleForm, self).save(*args, **kwargs)
+            
+            # if superuser selected a tenant, we also need to create a tenantrule
+            tenant_id = self.cleaned_data['tenants']
+            if tenant_id:
+                tenant = Tenant.objects.get(pk=int(tenant_id))
+                TenantRule.objects.create(role=new_role, tenant=tenant, allowed_action=self.cleaned_data['tenant_role'])
+
+            
+
 
 class TenantRuleForm(forms.ModelForm):
     class Meta(object):
@@ -662,42 +761,74 @@ class TenantRuleForm(forms.ModelForm):
             'tenant', 'allowed_action'
         ]
 
+
 class DatasetRuleForm(forms.ModelForm):
     dataset = forms.ChoiceField(required=False)
+    
+    CHOICES = [
+        (True, 'Allow user to create and update records in this dataset.'),
+        (False, 'Prevent user from creating or updating records in this dataset.'),
+    ]
+    can_write = forms.ChoiceField(
+        widget=forms.RadioSelect,
+        choices=CHOICES, 
+        label="",
+        required=True
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(DatasetRuleForm, self).__init__( *args, **kwargs)
+        self.user = user
 
-        dataset_values = Dataset.objects.all()
+        # if user is not admin, they should only see datasets they have access to
+        accessible_datasets = permissions_util.get_accessible_dataset_objects(user)
+        tenant = cutil.get_tenant(user)
+        
         choices = set()
         choices.add((None, "No Dataset"))
-        for ds in dataset_values:
-            choices.add((ds.pk, ds.name))
+        for ds in accessible_datasets:
+            ds_name = f"{ds.name}" + (f" [Tenant: {ds.owning_tenant.name}]" if ds.owning_tenant != tenant else "")
+            choices.add((ds.pk, ds_name))
         self.fields['dataset'].choices = choices
 
-    def clean_field(self):
-        data = self.cleaned_data['dataset']
-        if data == '':
-            data = None
+    def clean(self):
+        if 'dataset' in self.cleaned_data and self.cleaned_data['dataset']:
+            dataset = self.cleaned_data['dataset']
+            writable_datasets = permissions_util.get_writable_datasets(self.user)
+            # if user is not limited with datasets, writable_datasets is None else [] or [ds1.pk, ds2.pk,...]
+            if dataset and (self.cleaned_data['can_write'] == True or self.cleaned_data['can_write'] == 'True') and int(dataset) not in writable_datasets:
+                raise forms.ValidationError(
+                    "You cannot write to this dataset, so you can't allow other users to either."
+                )
 
-        return data
+    def clean_dataset(self):
+        dataset = self.cleaned_data['dataset']
+        if dataset == '':
+            dataset = None
+
+        return dataset
 
     class Meta(object):
         model = DatasetRule
 
         fields = [
-            'dataset', 'role'
+            'dataset', 'role', 'can_write'
         ]
 
 
 class AddRoleForm(forms.Form):
     role = forms.ChoiceField(required=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(AddRoleForm, self).__init__( *args, **kwargs)
 
-        roles = IsisCBRole.objects.all()
-        choices = [(role.pk, role.name) for role in roles]
+        if user.is_superuser:
+            roles = IsisCBRole.objects.all()
+        else:
+            tenant_rules = TenantRule.objects.filter(tenant=cutil.get_tenant(user))
+            roles = set([rule.role for rule in tenant_rules])
+        
+        choices = [(role.pk, ("[Tenant Admin Role] " if role.tenant_access_type == TenantRule.UPDATE else "") + role.name) for role in roles]
         self.fields['role'].choices = choices
 
 class CRUDRuleForm(forms.ModelForm):

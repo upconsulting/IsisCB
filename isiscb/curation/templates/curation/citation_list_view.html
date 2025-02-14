@@ -4,6 +4,7 @@
 {% load static %}
 {% load render_object %}
 {% load permission_tags %}
+{% load rules %}
 
 {% block extrahead %}
 <script src="{% static 'curation/js/moment.js' %}" type="text/javascript"></script>
@@ -140,6 +141,7 @@ function toggleLinkRecordsBtn() {
                     });
                     </script>
                 </th>
+                <th width="2%"><i title="Indicates if user can edit a record." class="fa fa-pencil-square" aria-hidden="true"></i></th>
                 <th width="2%"><i class="fa fa-thumbs-o-up" aria-hidden="true" title="Status"></i></th>
                 <th width="5%">ID</th>
                 <th width="2%"><i class="fa fa-file-text-o" aria-hidden="true" title="Type"></i></th>
@@ -169,10 +171,20 @@ function toggleLinkRecordsBtn() {
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" data-citation-type="{{object.type_controlled}}"/>
                 </td>
                 <td>
+                  {% test_rule 'can_edit_record' request.user object as can_edit_record %}
+                  {% if not can_edit_record %}
+                  <i title="This record is either not in your tenant, or you don't have edit permissions." class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                  {% endif %}
+                </td>
+                <td>
                   {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
                 </td>
                 <td>
+                    {% if can_edit_record %}
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
+                    {% else %}
+                    {{ object.id }}
+                    {% endif %}
                     {% if not object.public %}
                     <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                     {% endif %}
@@ -752,7 +764,7 @@ function toggleLinkRecordsBtn() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Database</label>
+              <label class="col-lg-2 control-label">Dataset</label>
               <div class="col-lg-10">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
               </div>

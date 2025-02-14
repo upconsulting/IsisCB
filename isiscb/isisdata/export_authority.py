@@ -153,6 +153,7 @@ AUTHORITY_COLUMNS = [
     name_preferred,
     attributes,
     linked_data,
+    export.dataset,
     related_citations,
     related_citations_count,
     export.staff_notes,

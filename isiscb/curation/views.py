@@ -39,6 +39,7 @@ from isisdata.isiscbviews.citation_views import get_facets_from_citations
 from curation import p3_port_utils
 from curation import curation_util as c_util
 
+import curation.permissions_util as permissions_util
 
 from curation.tracking import TrackingWorkflow
 from zotero.models import ImportAccession
@@ -58,6 +59,8 @@ from unidecode import unidecode
 from collections import Counter
 import bleach
 import logging
+
+logger = logging.getLogger(__name__)
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -2001,7 +2004,20 @@ def quick_and_dirty_authority_search(request):
 
     if only_defaults:
         query &= Q(belongs_to__subject_search_default=True)
+
+    accessible_datasets = permissions_util.get_accessible_datasets(request.user)
     
+    # we want to find all recoreds in an accessible data or if the record is not in a dataset
+    # but the user has access to records in dataset (None will be in the list of accessible datasets)
+    # then we need filter by dataset is null and this should be accessible datasets OR null
+    dataset_query = Q()
+    if accessible_datasets:
+        dataset_query = Q(belongs_to__in=accessible_datasets)
+    if None in accessible_datasets:
+        dataset_query = dataset_query | Q(belongs_to__isnull=True)
+
+    query &= dataset_query
+
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
@@ -2143,6 +2159,8 @@ def quick_and_dirty_authority_search(request):
             'type_controlled': obj.get_type_controlled_display(),
             'tenants': [t.id for t in obj.tenants.all()],
             'owning_tenant': obj.owning_tenant.id if obj.owning_tenant else '',
+            'belongs_to': obj.belongs_to.name if obj.belongs_to else None,
+            'can_edit': rules.test_rule('is_generic_obj_accessible_by_tenant', User.objects.get(pk=request.user.id), obj),                
         })
 
     return JsonResponse({'results': results})

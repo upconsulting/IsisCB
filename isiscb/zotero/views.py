@@ -176,12 +176,12 @@ def create_accession(request):
 
     tenant = curation_util.get_tenant(request.user)     
     if request.method == 'GET':
-        initial = {'ingest_to': tenant.default_dataset, 'owning_tenant': tenant }
+        initial = {'owning_tenant': tenant }
         
-        form = ImportAccessionForm(tenant, initial=initial)
+        form = ImportAccessionForm(tenant, request.user, initial=initial)
 
     elif request.method == 'POST':
-        form = ImportAccessionForm(tenant, request.POST, request.FILES)
+        form = ImportAccessionForm(tenant, request.user, request.POST, request.FILES)
         if form.is_valid():
             instance = form.save()
             instance.imported_by = request.user
