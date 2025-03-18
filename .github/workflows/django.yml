@@ -22,7 +22,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install libgnutls for pycurl
-      run: sudo apt install -y libgnutls28-dev
+      run: sudo apt install -y libcurl4-openssl-dev libssl-dev
     - name: Install Dependencies
       run: |
         python -m pip install pip==23.3.2
