@@ -21,11 +21,15 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
     do_pks = roles.filter(Q(accessrule__crudrule__crud_action=do)).values_list('id', flat=True)
     dont_pks = roles.filter(~Q(accessrule__crudrule__crud_action=do)).values_list('id', flat=True)
 
+    
     # We need a separate query here, since those above are inner joins and
     #  we want access to adjacent accessrule entries rooted in the same role.
     include = list(roles.filter(pk__in=do_pks, accessrule__datasetrule__isnull=False).values_list('accessrule__datasetrule__dataset', flat=True))
     exclude = list(roles.filter(pk__in=dont_pks, accessrule__datasetrule__isnull=False).values_list('accessrule__datasetrule__dataset', flat=True))
     
+    # if a role gives access to a dataset and another role does not, we give access
+    exclude = filter(lambda ds: ds not in include, exclude)
+
     # Some citations and authorities are not assigned to a dataset. So if the
     #  dataset is not set, then the rule applies to records without a dataset.
     include_isnull = '' in include or None in include or not include
