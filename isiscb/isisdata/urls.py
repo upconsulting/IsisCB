@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 from django.conf.urls.static import static
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
@@ -55,33 +56,33 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('stub_record_status')
 
 urlpatterns = [
-    #url(r'^$', views.index, name='index'),
-    url(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='index'),
-    url(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='isis-index'),
-    url(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
-    url(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
-    url(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
-    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
-    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
-    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
-    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
-    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
-    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
-    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
-    url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
-    url(r'^search/', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='haystack_search'),
-    url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
-    url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
-    url(r'^help', views.help, name='help'),
-    url(r'^about', views.about, name='about'),
-    url(r'^statistics', views.statistics, name='statistics'),
-    url(r'^api', views.api_documentation, name='api'),
-    url(r'^(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
-    url(r'^playground', views.playground, name="playground"),
-    url(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
-    url(r'^termexplorer', views.term_explorer, name="term_explorer"),
-    url(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
-    url(r'^curation/', include('curation.urls', namespace="curation")),
+    #re_path(r'^$', views.index, name='index'),
+    re_path(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='index'),
+    re_path(r'^$', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='isis-index'),
+    re_path(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
+    re_path(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
+    re_path(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
+    re_path(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
+    re_path(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
+    re_path(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
+    re_path(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
+    re_path(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
+    re_path(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
+    re_path(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
+    re_path(r'^search/', login_required(IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs)), name='haystack_search'),
+    re_path(r'^unapi/+$', views.unapi_server_root, name='unapi'),
+    re_path(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
+    re_path(r'^help', views.help, name='help'),
+    re_path(r'^about', views.about, name='about'),
+    re_path(r'^statistics', views.statistics, name='statistics'),
+    re_path(r'^api', views.api_documentation, name='api'),
+    re_path(r'^(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
+    re_path(r'^playground', views.playground, name="playground"),
+    re_path(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
+    re_path(r'^termexplorer', views.term_explorer, name="term_explorer"),
+    re_path(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
+    re_path(r'^curation/', include('curation.urls', namespace="curation")),
 ]
 
 if settings.DEBUG:
@@ -91,5 +92,5 @@ if settings.DEBUG:
 #if settings.DEBUG:
 #    import debug_toolbar
 #    urlpatterns = [
-#        url('__debug__/', include(debug_toolbar.urls)),
+#        re_path('__debug__/', include(debug_toolbar.urls)),
 #    ] + urlpatterns

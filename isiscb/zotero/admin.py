@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 from builtins import zip
 from builtins import object
 from django.contrib import admin
-from django.conf.urls import url, include
+from django.conf.urls import include
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.template import RequestContext, loader
 from django.template.response import TemplateResponse
 from django.core.exceptions import ValidationError
 from django import forms
-from django.urls import reverse
+from django.urls import reverse, re_path
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.contrib.contenttypes.models import ContentType
@@ -443,46 +443,46 @@ class ImportAccessionAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(ImportAccessionAdmin, self).get_urls()
         extra_urls = [
-            url(r'^process/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^process/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.process),
                 name="importaccession_process"),
-            url(r'^draftcitations/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^draftcitations/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftcitations),
                 name="importaccession_draftcitations"),
-            url(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/$',
+            re_path(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftcitation),
                 name="importaccession_draftcitation"),
-            url(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/getcitation/$',
+            re_path(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/getcitation/$',
                 self.admin_site.admin_view(self.get_citation_for_draft),
                 name="importaccession_get_citation_for_draft"),
-            url(r'^citations/(?P<accession_id>[0-9]+)/(?P<citation_id>[A-Z]+[0-9]+)',
+            re_path(r'^citations/(?P<accession_id>[0-9]+)/(?P<citation_id>[A-Z]+[0-9]+)',
                 self.admin_site.admin_view(self.citation),
                 name="importaccession_citation"),
-            url(r'^authorities/(?P<accession_id>[0-9]+)/(?P<authority_id>[A-Z]+[0-9]+)/$',
+            re_path(r'^authorities/(?P<accession_id>[0-9]+)/(?P<authority_id>[A-Z]+[0-9]+)/$',
                 self.admin_site.admin_view(self.authority),
                 name='importaccession_authority'),
-            url(r'^authorities/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^authorities/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.authority),
                 name='importaccession_authorities'),
-            url(r'^acrelations/(?P<accession_id>[0-9]+)/(?P<acrelation_id>[A-Z]+[0-9]+)',
+            re_path(r'^acrelations/(?P<accession_id>[0-9]+)/(?P<acrelation_id>[A-Z]+[0-9]+)',
                 self.admin_site.admin_view(self.acrelation),
                 name='importaccession_acrelation'),
 
-            url(r'^acrelations/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^acrelations/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.acrelation),
                 name='importaccession_acrelations'),
 
-            url(r'^draftauthorities/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^draftauthorities/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftauthority),
                 name="importaccession_draftauthorities"),
-            url(r'^draftauthorities/(?P<accession_id>[0-9]+)/(?P<draftauthority_id>[0-9]+)/$',
+            re_path(r'^draftauthorities/(?P<accession_id>[0-9]+)/(?P<draftauthority_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftauthority),
                 name="importaccession_draftauthority"),
 
-            url(r'^draftacrelations/(?P<accession_id>[0-9]+)/(?P<draftacrelation_id>[0-9]+)/$',
+            re_path(r'^draftacrelations/(?P<accession_id>[0-9]+)/(?P<draftacrelation_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftacrelation),
                 name="importaccession_draftacrelation"),
-            url(r'^draftacrelations/(?P<accession_id>[0-9]+)/$',
+            re_path(r'^draftacrelations/(?P<accession_id>[0-9]+)/$',
                 self.admin_site.admin_view(self.draftacrelation),
                 name="importaccession_draftacrelations"),
         ]
@@ -1056,10 +1056,10 @@ class DraftCitationAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(DraftCitationAdmin, self).get_urls()
         extra_urls = [
-            url(r'^create_citation/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.create_citation), name="draftcitation_create_citation"),
-            url(r'^findmatches/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftcitation_findmatches"),
-            url(r'^match/$', self.admin_site.admin_view(self.match), name="draftcitation_match"),
-            url(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftcitation_resolve"),
+            re_path(r'^create_citation/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.create_citation), name="draftcitation_create_citation"),
+            re_path(r'^findmatches/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftcitation_findmatches"),
+            re_path(r'^match/$', self.admin_site.admin_view(self.match), name="draftcitation_match"),
+            re_path(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftcitation_resolve"),
         ]
         return extra_urls + urls
 
@@ -1287,10 +1287,10 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(DraftAuthorityAdmin, self).get_urls()
         extra_urls = [
-            url(r'^create_authority/(?P<draftauthority_id>[0-9]+)/$', self.admin_site.admin_view(self.create_authority), name="draftauthority_create_authority"),
-            url(r'^findmatches/(?P<draftauthority_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftauthority_findmatches"),
-            url(r'^match/$', self.admin_site.admin_view(self.match), name="draftauthority_match"),
-            url(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftauthority_resolve"),
+            re_path(r'^create_authority/(?P<draftauthority_id>[0-9]+)/$', self.admin_site.admin_view(self.create_authority), name="draftauthority_create_authority"),
+            re_path(r'^findmatches/(?P<draftauthority_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftauthority_findmatches"),
+            re_path(r'^match/$', self.admin_site.admin_view(self.match), name="draftauthority_match"),
+            re_path(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftauthority_resolve"),
         ]
         return extra_urls + urls
 
