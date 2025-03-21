@@ -5,7 +5,7 @@ from isisdata.isiscbviews import authority_views, citation_views
 from django.contrib.auth.decorators import login_required
 
 
-from django.conf.urls import url
+from django.urls import re_path
 
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
@@ -52,20 +52,20 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 
 app_name = "tenants"
 urlpatterns = [
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/$', views.home, name='home'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/search$', login_required(isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs)), name='index'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/$', views.home, name='authority-base'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/help', isiscbviews.help, name='help'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/about', isiscbviews.about, name='about'),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/playground', isiscbviews.playground, name="playground"),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/graphexplorer', isiscbviews.graph_explorer, name="graph_explorer"),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/termexplorer', isiscbviews.term_explorer, name="term_explorer"),
-    url(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/ngramexplorer', isiscbviews.ngram_explorer, name="ngram_explorer"),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/$', views.home, name='home'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/search$', login_required(isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs)), name='index'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', citation_views.citation, name='citation'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/$', views.home, name='authority-base'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/help', isiscbviews.help, name='help'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/about', isiscbviews.about, name='about'),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/playground', isiscbviews.playground, name="playground"),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/graphexplorer', isiscbviews.graph_explorer, name="graph_explorer"),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/termexplorer', isiscbviews.term_explorer, name="term_explorer"),
+    re_path(r'^(?P<tenant_id>[A-Za-z0-9\-]+)/ngramexplorer', isiscbviews.ngram_explorer, name="ngram_explorer"),
 
 ]
