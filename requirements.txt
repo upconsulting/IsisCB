@@ -39,7 +39,7 @@ django-registration==3.1.2
 django-simple-captcha==0.5.12
 django-simple-history==2.8.0
 django-storages==1.9.1
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 #djangorestframework-filters==0.11.1
 #docker==4.2.0
 #docker-compose==1.29.2
