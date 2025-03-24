@@ -31,4 +31,5 @@ jobs:
     - name: Run Tests
       run: |
         cd isiscb
+        export DJANGO_SETTINGS_MODULE=isiscb.test_settings
         python manage.py test
