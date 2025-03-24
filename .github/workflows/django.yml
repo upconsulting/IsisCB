@@ -30,4 +30,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        cd isiscb
         python manage.py test

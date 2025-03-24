@@ -7,7 +7,6 @@ from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured, FieldError
 from django.shortcuts import get_object_or_404, render
 from functools import WRAPPER_ASSIGNMENTS
-from django.utils.encoding import force_text
 
 
 import rules
