@@ -10,6 +10,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
     strategy:
       max-parallel: 4
       matrix:
@@ -31,6 +39,7 @@ jobs:
     - name: Run Tests
       run: |
         cd isiscb
+        export DATABASE_HOST=localhost
         export DJANGO_SETTINGS_MODULE=isiscb.github_settings
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
         python manage.py test
