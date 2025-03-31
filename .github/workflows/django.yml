@@ -42,4 +42,5 @@ jobs:
         export DATABASE_HOST=localhost
         export DJANGO_SETTINGS_MODULE=isiscb.github_settings
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
+        python manage.py migrate
         python manage.py test
