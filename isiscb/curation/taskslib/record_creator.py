@@ -130,14 +130,16 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
         return
 
     try:
-        Citation.objects.get(pk=citation_id)
+        citation = _get_citation(citation_id, results, user_id)
+        if not citation:
+            return
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(citation_id)))
         return
 
     properties.update({
-        'citation_id': citation_id,
+        'citation_id': citation.id,
     })
 
     _add_optional_simple_property(row, COL_ACR_NAME_DISPLAY, properties, 'name_for_display_in_citation')
@@ -154,6 +156,28 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     acr_relation = ACRelation(**properties)
     _create_record(acr_relation, user_id, results)
 
+def _get_linkeddata_prefix_and_urn(id):
+    """
+    Method to return prefix and id from a linkedata reference, e.g
+    LinkedData::URL::http://myid.org/id
+    will return
+    ("URL", "http://myid.org/id")
+    """
+    prefix_and_urn = id[len(LINKED_DATA_PREFIX):]
+    return prefix_and_urn.split("::")
+
+def _get_citation(citation_id, results, user_id):
+    if not citation_id.startswith(LINKED_DATA_PREFIX):
+        try:
+            return Citation.objects.get(pk=citation_id)
+        except Exception as e:
+            logger.error(e)
+            results.append((ERROR, e, "", "There was an issue with citation id %s. Skipping."%(citation_id)))
+            return None
+        
+    prefix, urn = _get_linkeddata_prefix_and_urn(citation_id)
+    return _get_linkeddata_subject(urn, prefix, results, user_id)  
+
 def _get_authority(authority_id, results, user_id):
     if not authority_id.startswith(LINKED_DATA_PREFIX):
         try:
@@ -163,16 +187,17 @@ def _get_authority(authority_id, results, user_id):
             results.append((ERROR, e, "", "There was an issue with authority id %s. Skipping."%(authority_id)))
             return None
         
-    prefix_and_id = authority_id[len(LINKED_DATA_PREFIX):]
-    prefix, id = prefix_and_id.split("::")
-    user = User.objects.get(pk=user_id)   
-    tenant = c_util.get_tenant(user)
+    prefix, urn = _get_linkeddata_prefix_and_urn(authority_id) 
+    return _get_linkeddata_subject(urn, prefix, results, user_id)  
+    
+
+def _get_linkeddata_subject(urn, prefix, results, user_id):
     try:
         # there should be only one with the given id and of given type
-        linked_data_entry = LinkedData.objects.filter(universal_resource_name=id, type_controlled__name=prefix)
+        linked_data_entry = LinkedData.objects.filter(universal_resource_name=urn, type_controlled__name=prefix)
         if linked_data_entry.count() > 1:
-            logger.error("There are more than one linked data entry for %s and %s."%(prefix, id))
-            results.append((ERROR, "More than one linked data entry.", "", "There are more than one linked data entry for %s. Skipping."%(prefix_and_id)))
+            logger.error("There are more than one linked data entry for %s and %s."%(prefix, urn))
+            results.append((ERROR, "More than one linked data entry.", "", "There are more than one linked data entry for %s. Skipping."%(prefix + "::" + urn)))
             return None
         
         # TODO: check dataset for right permissions
@@ -185,7 +210,7 @@ def _get_authority(authority_id, results, user_id):
         return linked_data_entry.first().subject
     except Exception as e:
         logger.error(e)
-        results.append((ERROR, "Linked data entry does not exist", "", "There exists no authority with linked data %s and %s. Skipping."%(prefix, id)))
+        results.append((ERROR, "Linked data entry does not exist", "", "There exists no authority with linked data %s and %s. Skipping."%(prefix, urn)))
         return None
         
 
