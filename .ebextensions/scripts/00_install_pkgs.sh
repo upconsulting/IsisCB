@@ -1,5 +1,5 @@
 echo 'Installing packages'
 
-amazon-linux-extras enable postgresql11
+amazon-linux-extras enable postgresql16
 yum clean metadata
-yum install postgresql11-devel
+yum install postgresql16-devel
