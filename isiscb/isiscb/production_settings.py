@@ -279,7 +279,12 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+#########################################
+
+# needed since Django 4/5 even when using S3 to copy static files to before upload to S3
+# before Django would copy directly to S3
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME', '')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY', '')
@@ -289,13 +294,10 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
-# STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
 # STATIC_URL ='/static/'
-
-MEDIA_URL = '/media/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
