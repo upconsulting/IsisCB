@@ -294,14 +294,14 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'isisdata.storage_backends.StaticStorage'
 
 STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
 # STATIC_URL ='/static/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'isisdata.storage_backends.MediaStorage'
 
 SITE_ID = 1
 
