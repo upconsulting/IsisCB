@@ -294,14 +294,24 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'isisdata.storage_backends.StaticStorage'
+#STATICFILES_STORAGE = 'isisdata.storage_backends.StaticStorage'
 
 STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
 # STATIC_URL ='/static/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'isisdata.storage_backends.MediaStorage'
+#DEFAULT_FILE_STORAGE = 'isisdata.storage_backends.MediaStorage'
+
+# since django 4.2, storage is defined in this way
+STORAGES = {
+    "default": {
+        "BACKEND": "isisdata.storage_backends.MediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": 'isisdata.storage_backends.StaticStorage'
+    }
+}
 
 SITE_ID = 1
 
