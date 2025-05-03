@@ -1,14 +1,13 @@
-name: Django CI
+name: Test and deploy to staging on push
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "master", "develop" ]
+    branches: [ "develop" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -56,3 +55,24 @@ jobs:
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
         python manage.py migrate
         python manage.py test
+  deploy:
+    #if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Deploy to AWS Staging Web
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_PLATFORM_VERSION: ${{ secrets.AWS_PLATFORM_VERSION }}
+        AWS_APP: ${{ secrets.AWS_APP }}
+      run: |
+        # Initialize the Elastic Beanstalk application with Node.js platform
+        eb init -p $AWS_PLATFORM_VERSION --region $AWS_REGION
+        # Deploy the application to Elastic Beanstalk
+        eb deploy $AWS_APP
