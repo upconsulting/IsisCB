@@ -64,6 +64,16 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.12
+
+    - name: Install awsebcli
+      run: |
+        python -m pip install pip==23.3.2
+        pip install awsebcli==3.23.2
+
     - name: Deploy to AWS Staging Web Instance
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
