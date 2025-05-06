@@ -13,7 +13,7 @@
 
 {% block extra_head%}
 
-{% cache 72000 featured-js tenant_id %}
+{% cache CACHE_TIMEOUT featured-js tenant_id %}
 {% with citation=tenant_id|get_featured_citation %}
 {% with properties_map=citation|get_featured_citation_properties %}
 <script type="text/javascript">
@@ -145,7 +145,7 @@
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
-        {% cache 72000 featured tenant_id %}
+        {% cache CACHE_TIMEOUT featured tenant_id %}
         {% with citation=tenant_id|get_featured_citation %}
         {% with properties_map=citation|get_featured_citation_properties %}
         {% with featured_authority=tenant_id|get_featured_authorities %}
