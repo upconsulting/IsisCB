@@ -81,10 +81,10 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_PLATFORM_VERSION: ${{ secrets.AWS_PLATFORM_VERSION }}
-        AWS_APP: ${{ secrets.AWS_APP }}
-        AWS_ENVIRONMENT: ${{ secrets.AWS_ENVIRONMENT }}
+        AWS_APP: ${{ vars.AWS_APP }}
+        AWS_ENVIRONMENT: ${{ vars.AWS_ENVIRONMENT }}
       run: |
-        # Initialize the Elastic Beanstalk application with Node.js platform
+        # Initialize the Elastic Beanstalk command line app
         eb init -p "$AWS_PLATFORM_VERSION" --region $AWS_REGION "$AWS_APP"
         # Deploy the application to Elastic Beanstalk
         eb deploy $AWS_ENVIRONMENT
