@@ -10,7 +10,6 @@ dnf install -y \
     zlib-devel \
     libjpeg-turbo-devel \
     openssl-devel \
-    libcurl-full \
     libffi-devel
 
 echo ">>> System packages installed"
