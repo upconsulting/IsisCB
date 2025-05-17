@@ -85,7 +85,7 @@ jobs:
         AWS_ENVIRONMENT: ${{ vars.AWS_ENVIRONMENT }}
       run: |
         # Initialize the Elastic Beanstalk command line app
-        eb init "$AWS_APP" --region $AWS_REGION 
+        eb init "$AWS_APP" --region $AWS_REGION --debug
         # Deploy the application to Elastic Beanstalk
         eb list
         #eb deploy $AWS_ENVIRONMENT
