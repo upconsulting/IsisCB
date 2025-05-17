@@ -87,4 +87,5 @@ jobs:
         # Initialize the Elastic Beanstalk command line app
         eb init "$AWS_APP" --region $AWS_REGION 
         # Deploy the application to Elastic Beanstalk
-        eb deploy $AWS_ENVIRONMENT
+        eb list
+        #eb deploy $AWS_ENVIRONMENT
