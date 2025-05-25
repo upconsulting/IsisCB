@@ -88,8 +88,6 @@ jobs:
         AWS_ENVIRONMENT: ${{ vars.AWS_ENVIRONMENT }}
       run: |
         # Initialize the Elastic Beanstalk command line app
-        eb status  Isiscb-staging-python312-env-1 --debug
         yes n | eb init --debug
         # Deploy the application to Elastic Beanstalk
-        eb list
-        #eb deploy $AWS_ENVIRONMENT
+        eb deploy $AWS_ENVIRONMENT
