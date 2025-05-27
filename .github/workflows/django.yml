@@ -88,6 +88,6 @@ jobs:
         AWS_ENVIRONMENT: ${{ vars.AWS_ENVIRONMENT }}
       run: |
         # Initialize the Elastic Beanstalk command line app
-        yes n | eb init --debug
+        yes n | eb init
         # Deploy the application to Elastic Beanstalk
         eb deploy $AWS_ENVIRONMENT
