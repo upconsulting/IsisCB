@@ -145,7 +145,7 @@
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
-        {% cache CACHE_TIMEOUT featured tenant_id %}
+        {% cache CACHE_TIMEOUT featured-auth tenant_id %}
         {% with citation=tenant_id|get_featured_citation %}
         {% with properties_map=citation|get_featured_citation_properties %}
         {% with featured_authority=tenant_id|get_featured_authorities %}

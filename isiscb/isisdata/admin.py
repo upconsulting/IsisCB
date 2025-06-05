@@ -140,8 +140,12 @@ class ACRelationInlineForm(forms.ModelForm):
         #  populate the ``authority`` field on the form.
         if 'authority' in self.initial:
             authority_pk = self.initial['authority']
-            authority = Authority.objects.get(pk=authority_pk)
-            self.fields['authority_name'].initial = authority.name
+            try:
+                authority = Authority.objects.get(pk=authority_pk)
+                self.fields['authority_name'].initial = authority.name
+            except:
+                authority = None
+            
 
 
 class CCRelationInline(admin.TabularInline):

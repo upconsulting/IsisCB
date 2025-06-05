@@ -20,7 +20,7 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # in seconds, default is a month (2629746)
-CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 1)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
@@ -62,7 +62,6 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     "elasticstack",
-    'oauth2_provider',
     'captcha',
     'corsheaders',
     'zotero',
@@ -278,9 +277,6 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
-}
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',

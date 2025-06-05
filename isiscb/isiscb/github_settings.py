@@ -62,7 +62,6 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     "elasticstack",
-    'oauth2_provider',
     'captcha',
     'corsheaders',
     'zotero',
@@ -256,10 +255,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
-}
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',

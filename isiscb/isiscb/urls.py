@@ -12,7 +12,6 @@ from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
-from oauth2_provider import views as oauth_views
 from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
