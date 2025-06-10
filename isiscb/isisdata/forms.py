@@ -4,7 +4,7 @@ from django import forms
 from django.db import models
 from django.apps import apps
 from django.utils.text import capfirst
-from django.utils.translation import ugettext_lazy as _
+#from django.utils.translation import ugettext_lazy as _
 
 from haystack import connections
 from haystack.constants import DEFAULT_ALIAS
@@ -24,13 +24,13 @@ from isisdata.utils import normalize
 import re
 
 try:
-    from django.utils.encoding import smart_text
+    from django.utils.encoding import smart_str
 except ImportError:
-    from django.utils.encoding import smart_unicode as smart_text
+    from django.utils.encoding import smart_unicode as smart_str
 
 
 def model_choices(using=DEFAULT_ALIAS):
-    choices = [(get_model_ct(m), capfirst(smart_text(m._meta.verbose_name_plural)))
+    choices = [(get_model_ct(m), capfirst(smart_str(m._meta.verbose_name_plural)))
                for m in connections[using].get_unified_index().get_indexed_models()]
     return sorted(choices, key=lambda x: x[1])
 

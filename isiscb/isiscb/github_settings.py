@@ -19,6 +19,9 @@ sys.path.append('..')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# in seconds, default is a month (2629746)
+CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
 
@@ -79,6 +82,7 @@ MIDDLEWARE= [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -175,30 +179,6 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'isiscb.wsgi.application'
-
-# in seconds, default is a month (2629746)
-CACHE_TIMEOUT = os.environ.get('CACHE_TIMEOUT', 2629746)
-
-LOGGING = {
-	"version": 1,
-	"disable_existing_loggers": False,
-	"formatters": {
-		"verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
-	},
-	"handlers": {
-		"app_analyzer": {
-			"level": "DEBUG",
-			"class": "logging.FileHandler",
-			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
-			"formatter": "verbose",
-		}
-	},
-	"loggers": {
-		"app_analyzer": {"handlers": ["app_analyzer"], "level": "DEBUG", "propagate": True}
-	},
-}
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
@@ -207,10 +187,10 @@ LOGGING = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb_new',
-        'USER': 'upconsulting',
-        'PASSWORD': 'upconsulting',
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': os.environ.get('DATABASE_HOST', 'db'),
         'PORT': '5432',
     }
 }
@@ -224,7 +204,8 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'http://search:9200/'),
         'INDEX_NAME': 'haystack1',
-        'TIMEOUT': os.environ.get('ES_TIMEOUT', 100),
+        #'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
+        'TIMEOUT': int(os.environ.get('ES_TIMEOUT', 100)),
         'HAYSTACK_ITERATOR_LOAD_PER_QUERY': 100,
     },
 }

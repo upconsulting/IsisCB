@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         datapath = options['datapath'][0]
 
-        with open(datapath, 'rU') as csvfile:
+        with open(datapath, 'r') as csvfile:
             filereader = csv.reader(csvfile, delimiter=',')
             for row in filereader:
                 acr_id = row[0]

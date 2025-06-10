@@ -69,9 +69,4 @@ data/logs/*
 !data/files/.gitkeep
 !data/logs/.gitkeep
 
-# Elastic Beanstalk Files
-#.elasticbeanstalk/*
-#!.elasticbeanstalk/*.cfg.yml
-#!.elasticbeanstalk/*.global.yml
-
 src

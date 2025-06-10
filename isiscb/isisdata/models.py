@@ -29,8 +29,6 @@ from markupfield.fields import MarkupField
 
 from simple_history.models import HistoricalRecords
 
-from oauth2_provider.models import AbstractApplication
-
 from isisdata.utils import *
 
 import copy, datetime, iso8601, pickle, uuid, urllib.parse, re, bleach, unidecode

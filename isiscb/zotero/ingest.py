@@ -41,7 +41,7 @@ GENERIC_ACRELATIONS = [
 ]
 
 
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../AuthorityIDmap.tab'), 'rU') as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../AuthorityIDmap.tab'), 'r') as f:
     reader = csv.reader(f, delimiter='\t')
     SUBJECT_ID_MAP = {int(row[1]): row[0] for row in reader}
 

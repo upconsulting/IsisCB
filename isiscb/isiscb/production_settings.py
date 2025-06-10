@@ -59,7 +59,6 @@ INSTALLED_APPS = (
     #'storages',
     'haystack',
     "elasticstack",
-    'oauth2_provider',
     'captcha',
     'corsheaders',
     'zotero',
@@ -79,6 +78,7 @@ MIDDLEWARE = (
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -226,10 +226,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
-}
-
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,
@@ -278,7 +274,12 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+#########################################
+
+# needed since Django 4/5 even when using S3 to copy static files to before upload to S3
+# before Django would copy directly to S3
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME', '')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY', '')
@@ -288,17 +289,24 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
-# STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#STATICFILES_STORAGE = 'isisdata.storage_backends.StaticStorage'
 
 STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
 # STATIC_URL ='/static/'
 
-MEDIA_URL = '/media/'
-
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#DEFAULT_FILE_STORAGE = 'isisdata.storage_backends.MediaStorage'
+
+# since django 4.2, storage is defined in this way
+STORAGES = {
+    "default": {
+        "BACKEND": "isisdata.storage_backends.MediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": 'isisdata.storage_backends.StaticStorage'
+    }
+}
 
 SITE_ID = 1
 
