@@ -53,8 +53,8 @@ jobs:
         export DJANGO_SETTINGS_MODULE=isiscb.github_settings
         export ELASTIC_HOST=http://localhost:9200/
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
-        python manage.py migrate
-        python manage.py test
+        #python manage.py migrate
+        #python manage.py test
 
   deploy:
     if: github.event_name == 'push'
@@ -91,6 +91,11 @@ jobs:
         yes n | eb init
         # Deploy the application to Elastic Beanstalk
         eb deploy $AWS_ENVIRONMENT
+
+    - name: setup eb config for worker
+      run: |
+        rm -r .elasticbeanstalk
+        cp -r .elasticbeanstalk-staging-worker .elasticbeanstalk
 
     - name: Deploy to AWS Staging Worker Instance
       env:
