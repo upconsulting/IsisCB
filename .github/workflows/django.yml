@@ -91,3 +91,17 @@ jobs:
         yes n | eb init
         # Deploy the application to Elastic Beanstalk
         eb deploy $AWS_ENVIRONMENT
+
+    - name: Deploy to AWS Staging Worker Instance
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ vars.AWS_REGION }}
+        AWS_PLATFORM_VERSION: ${{ secrets.AWS_PLATFORM_VERSION }}
+        AWS_APP: ${{ vars.AWS_WORKER_APP_NAME }}
+        AWS_ENVIRONMENT: ${{ vars.AWS_WORKER_ENVIRONMENT }}
+      run: |
+        # Initialize the Elastic Beanstalk command line app
+        yes n | eb init
+        # Deploy the application to Elastic Beanstalk
+        eb deploy $AWS_ENVIRONMENT
