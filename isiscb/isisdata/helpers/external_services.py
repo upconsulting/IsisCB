@@ -38,8 +38,11 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                     imgURL = settings.WIKIPEDIA_IMAGE_API_PATH.format(authorityName = authorityName)
                     introURL = settings.WIKIPEDIA_INTRO_API_PATH.format(authorityName = authorityName)
                     try:
-                        imgJSON = requests.get(imgURL).json()
+                        request_data = requests.get(imgURL)
+                        imgJSON = request_data.json()
                     except Exception as e:
+                        logger.error(request_data)
+                        logger.error("Wikipedia call failed. Proceedings without Wikipedia content.")
                         logger.exception(e)
                         imgJSON = None
 
