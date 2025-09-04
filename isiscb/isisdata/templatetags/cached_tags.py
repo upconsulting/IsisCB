@@ -52,11 +52,11 @@ def get_featured_citation_image(featured_citation):
 
 @register.filter
 def get_featured_citation_properties(featured_citation):
-    return list(featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True))
+    return list(featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)) if featured_citation else None
     
 @register.filter
 def get_featured_citation_authors(featured_citation):
-    return featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
+    return featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True) if featured_citation else None
      
 @register.filter
 def get_featured_authorities(tenant_id):
@@ -83,6 +83,9 @@ def get_featured_authorities(tenant_id):
 
 @register.filter
 def get_wiki_data(featured_authority):
+
+    if not featured_authority:
+        return ()
     #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
     sqs = SearchQuerySet().models(Citation)
 

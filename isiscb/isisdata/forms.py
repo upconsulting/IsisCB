@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from haystack.forms import FacetedSearchForm
 from django import forms
 from django.db import models
+from django.db.models import Q, Count
 from django.apps import apps
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
@@ -17,9 +18,11 @@ from allauth.account.forms import SignupForm
 
 import time
 from isisdata import helper_methods
-from isisdata.models import Citation, Authority, Tenant
+from isisdata.models import Citation, Authority, Tenant, ACRelation
 from openurl.models import *
 from isisdata.utils import normalize
+import logging
+logger = logging.getLogger(__name__)
 
 import re
 
@@ -275,3 +278,53 @@ class UserProfileForm(forms.Form):
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
     share_email = forms.BooleanField(required=False)
     resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), required=False)
+
+# def get_thesis_hosts():
+#     thesis_hosts = Authority.objects.filter(public=True, type_controlled=Authority.INSTITUTION, acrelation__type_controlled=ACRelation.SCHOOL).annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).filter(num_theses__gt=2).order_by('name')
+#     logger.error("LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===")
+#     logger.error(thesis_hosts)
+#     return thesis_hosts
+
+class ThesisMillForm(forms.Form):
+    TOP5 = 5
+    TOP10 = 10
+    TOP25 = 25
+    TOP50 = 50
+    CUSTOM = "CU"
+    TOP_CHOICES = [
+        (TOP5, "Top 5 Schools"),
+        (TOP10, "Top 10 Schools"),
+        (TOP25, "Top 25 Schools"),
+        (TOP50, "Top 50 Schools"),
+        (CUSTOM, "Custom"),
+    ]
+
+    NORMALIZED_AREA = "NA"
+    HEATGRID = "HG"
+    AREA = "AR"
+    STREAMGRAPH = "ST"
+    CHART_CHOICES = [
+        (NORMALIZED_AREA, "Normalized Area"),
+        (HEATGRID, "Heatgrid"),
+        (AREA, "Area"),
+        (STREAMGRAPH, "Streamgraph"),
+    ]
+
+    chart_type = forms.ChoiceField(
+        widget=forms.Select(attrs={'class':'form-control'}),
+        choices=CHART_CHOICES,
+        initial=STREAMGRAPH,
+        label='Chart Type',
+    )
+    top = forms.ChoiceField(
+        widget=forms.Select(attrs={'class':'form-control'}),
+        choices=TOP_CHOICES,
+        initial=TOP5,
+        label='Schools',
+    )
+    select_schools = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=Authority.objects.filter(public=True, type_controlled=Authority.INSTITUTION, acrelation__type_controlled=ACRelation.SCHOOL).annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).filter(num_theses__gt=2).order_by('name'),
+        required=False,
+        label='Select Schools',
+    )

@@ -81,8 +81,12 @@ urlpatterns = [
     url(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
     url(r'^termexplorer', views.term_explorer, name="term_explorer"),
     url(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
+    url(r'^genealogy', views.genealogy, name="genealogy"),
+    url(r'^theses_by_school', views.theses_by_school, name="theses_by_school"),
     url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
+
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

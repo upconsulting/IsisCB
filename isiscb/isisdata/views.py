@@ -17,6 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import connection
 from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
+from django.db.models.functions import TruncYear
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -48,7 +49,7 @@ from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
 from isisdata.models import *
-from isisdata.forms import UserRegistrationForm, UserProfileForm
+from isisdata.forms import UserRegistrationForm, UserProfileForm, ThesisMillForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
@@ -1624,6 +1625,95 @@ def get_ngram_data(authority_ids):
 
     return ngrams, max(all_years), min(all_years), max(all_ngrams)
 
+@ensure_csrf_cookie
+def genealogy(request, tenant_id=None):
+    context = {}
+
+    harvard_diss = ACRelation.objects.filter(public=True, type_controlled=ACRelation.SCHOOL, authority__id='CBA000114966')
+
+    if request.method == 'POST':
+        node_ids = set()
+        nodes = []
+        links = []
+        subjects = json.loads(request.body)['subjects']
+
+        for subject in subjects:
+            node_ids.add(subject) #add the CBA id of the selected subjects to node_ids
+
+            sqs =SearchQuerySet().models(Citation).facet('subject_ids', size=50)
+
+            word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=subject).filter_or(contributor_ids=subject) \
+                    .filter_or(editor_ids=subject).filter_or(subject_ids=subject).filter_or(institution_ids=subject) \
+                    .filter_or(category_ids=subject).filter_or(advisor_ids=subject).filter_or(translator_ids=subject) \
+                    .filter_or(publisher_ids=subject).filter_or(school_ids=subject).filter_or(meeting_ids=subject) \
+                    .filter_or(periodical_ids=subject).filter_or(book_series_ids=subject).filter_or(time_period_ids=subject) \
+                    .filter_or(geographic_ids=subject).filter_or(about_person_ids=subject).filter_or(other_person_ids=subject)
+
+            #add subjects to list of nodes
+            subject_ids_facets = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+            for subject_ids_facet in subject_ids_facets:
+                node_ids.add(subject_ids_facet[0])
+            #remove selected authority from facet results
+            subject_ids = [x for x in subject_ids_facets if x[0].upper() != subject.upper()]
+
+            #create links between selected authority and its related subjects
+            if subject_ids:
+                for subject_id in subject_ids:
+                    link = {}
+                    link['source'] = subject
+                    link['target'] = subject_id[0]
+                    link['value'] = subject_id[1]
+                    links.append(link)
+
+        authorities = Authority.objects.filter(pk__in=list(node_ids)).values('id', 'name', 'type_controlled')
+        if authorities:
+            for authority in authorities:
+                node = {}
+                node['id'] = authority['id']
+                node['name'] = authority['name']
+                node['type'] = authority['type_controlled']
+                node['selected'] = True if authority['id'] in subjects else False
+                nodes.append(node)
+
+        context = {
+            'nodes': json.dumps(nodes),
+            'links': json.dumps(links),
+            'subjects': subjects,
+        }
+
+        return JsonResponse(context)
+    return render(request, 'isisdata/genealogy.html', context)
+
+@ensure_csrf_cookie
+def theses_by_school(request, tenant_id=None):
+    form = ThesisMillForm()
+    years = list(range(datetime.datetime(1970,1,1).year, datetime.datetime.today().year))
+    top = form.fields['top'].initial
+    chart_type = form.fields['chart_type'].initial
+    chart_type_urls = {
+        "HG": "heatgrid",
+        "NA": "normalized-area",
+        "AR": "area",
+        "ST": "streamgraph",
+    }
+    select_schools = []
+    all_schools = Authority.objects.filter(public=True, type_controlled=Authority.INSTITUTION, acrelation__type_controlled=ACRelation.SCHOOL).values_list('id','name').annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).order_by('-num_theses')
+    all_thesis_school_acrs = ACRelation.objects.filter(public=True, citation__public=True, authority__public=True, citation__type_controlled=Citation.THESIS, citation__publication_date__year__in=years)
+    
+    if request.method == 'POST':
+        form = ThesisMillForm(request.POST)
+        if form.is_valid():
+            chart_type = form.cleaned_data["chart_type"]
+            top = form.cleaned_data["top"] if form.cleaned_data["top"] == "CU" else int(form.cleaned_data["top"]) 
+            select_schools = form.cleaned_data["select_schools"]
+
+    context = generate_theses_by_school_context(top, chart_type, select_schools, all_schools, years, all_thesis_school_acrs)       
+
+    context["form"] = form
+    context["top"] = top
+    context["chart_url"] = chart_type_urls[chart_type]
+        
+    return render(request, 'isisdata/theses_by_school.html', context)
 
 def clean_dates(date_facet):
     new_date_facet = []
@@ -1632,3 +1722,93 @@ def clean_dates(date_facet):
         if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)
     return new_date_facet
+
+def generate_theses_by_school_context(top, chart_type, select_schools, all_schools, years, all_thesis_school_acrs):
+    if top == "CU":
+        school_ids = select_schools.values_list('id', flat=True)
+        schools = all_schools.filter(id__in=[school_ids])
+    else:
+        schools = all_schools[:top]
+        school_ids = schools.values_list('id', flat=True)
+
+    school_names = list(schools.values_list('name', flat=True))
+    thesis_school_acrs = all_thesis_school_acrs.filter(authority__id__in=[school_ids])
+                                                            
+    if chart_type == "HG":
+        values = get_data_for_heatgrid(school_ids, years, thesis_school_acrs)
+        data = {
+            'values': values,
+            'names': school_names,
+            'years': years,
+        }
+    elif chart_type == "NA" or chart_type == "ST" or chart_type == "AR":
+        data = get_data_for_stacked_area(thesis_school_acrs, years, school_names)
+    
+    context = {
+        'data': data,
+    }
+
+    return context
+
+def get_data_for_heatgrid(authority_ids, years, acrs):
+    # this function takes a queryset of ACRs of theses 
+    # and converts them into a list of lists of the following form 
+    # (as desired by out-of-the-box D3 stacked area graphs):
+
+    # [
+    #   [<thesis-count-for-school1-year1>, <thesis-count-for-school1-year-2>, etc.],
+    #   [<thesis-count-for-school2-year1>, <thesis-count-for-school2-year-2>, etc.],
+    # ]
+
+    values = []
+    authority_values = []
+    for year in years:
+        authority_values.append(0)
+    for authority in authority_ids:
+        this_authority_values = authority_values.copy()
+        authority_acrs = acrs.filter(authority__id=authority)
+        for acr in authority_acrs:
+            this_authority_values[years.index(acr.citation.publication_date.year)] += 1
+        values.append(this_authority_values)
+    return values
+
+def get_data_for_stacked_area(acrs, years, schools):
+    # this function takes a queryset of ACRs of theses 
+    # and converts them into a list of objects of the following form 
+    # (as desired by out-of-the-box D3 stacked area graphs):
+
+    # {
+    #   "date": <date YYYY-MM-DD>,
+    #   "school": <str name-of-school>,
+    #   "theses": <int number-of-theses>
+    # }
+
+    schools_years = {}
+    for school in schools:
+        schools_years[school] = years.copy()
+
+    values = []
+    annotated_acrs = acrs.values("authority__id").annotate(year=TruncYear('citation__publication_date')).values('year', 'authority__id').annotate(num_theses=Count('citation__id')).values('year', 'authority__name', 'num_theses').order_by('authority__name', 'year')
+    for acr in annotated_acrs:
+        row = {}
+        row["date"] = acr['year']
+        row["school"] = acr['authority__name']
+        row["theses"] = acr['num_theses']
+        values.append(row)
+
+        # creating a list of all the years with no data for each school
+        schools_years[acr['authority__name']].remove(int(acr['year'].year))
+    
+    # adding a new record to the data for all empty rows
+    for school in schools_years: 
+        for year in schools_years[school]:
+            row = {}
+            row["date"] = datetime.date(year, 1, 1)
+            row["school"] = school
+            row["theses"] = 0
+            values.append(row)
+    
+    # sort list of thesis year-school thesis counts by year and then school
+    values = sorted(values, key=lambda k: (k['date'], k['school'].lower()))
+    
+    return values
