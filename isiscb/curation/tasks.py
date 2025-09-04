@@ -7,7 +7,7 @@ from builtins import str
 from celery import shared_task
 from django.http import QueryDict
 from django.db.models import Q
-from isisdata.models import Citation, CRUDRule, Authority, AsyncTask, Tenant
+from isisdata.models import Citation, CRUDRule, Authority, AsyncTask, Tenant, AuthorityTracking
 from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
 from django.contrib.auth.models import User
@@ -173,15 +173,6 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
     import math
 
     queryset, _ = _get_filtered_record_queryset(filter_params_raw, user_id, type=object_type)
-
-    # We should have already filtered out ineligible citations, but just in
-    #  case....
-    allowed_prior = TrackingWorkflow.allowed(target_state)
-
-    # bugfix ISISCB-1008: if None is in prior allowed states, we need to build a different filter
-    q = (Q(tracking_state__in=allowed_prior) | Q(tracking_state__isnull=True)) if None in allowed_prior else Q(tracking_state__in=allowed_prior)
-    queryset = queryset.filter(q)
-
     idents = list(queryset.values_list('id', flat=True))
     try:
         if target_state != Citation.HSTM_UPLOAD:
@@ -189,6 +180,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
         else:
             queryset.update(hstm_uploaded=Citation.IS_HSTM_UPLOADED, modified_by=user_id, modified_on=timezone.now())
         for ident in idents:
+            print(ident)
             if object_type == 'AUTHORITY':
                 AuthorityTracking.objects.create(authority_id=ident,
                                     type_controlled=target_state,

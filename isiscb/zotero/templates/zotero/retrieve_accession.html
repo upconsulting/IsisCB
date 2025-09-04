@@ -4,6 +4,7 @@
 {% load zotero_tags %}
 {% load app_filters %}
 {% load render_object %}
+{% load general_tags %}
 
 {% block content %}
 
@@ -402,7 +403,7 @@ $(document).ready(function() {
                                 </div>
                                 <div class="col-xs-10">
                                     <div class="h5">
-                                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                                        <a href="{{ ''|get_authority_uri:tenant.identifier }}`+suggestion.id+`/?tab=acrelations"
                                             class="search-authority-anchor"
                                             target="_blank"
                                             data-toggle="tooltip"
@@ -416,8 +417,15 @@ $(document).ready(function() {
                                             choice_elem += suggestion.name 
                                             + ` (` 
                                             + suggestion.citation_count 
-                                            + `)</a>
-                                    </div>
+                                            + `)</a>`
+                                    if (suggestion.belongs_to) {
+                                        choice_elem += ` <i class="fas fa-database" title="` + suggestion.belongs_to + `"></i>`
+                                    }
+                                    if (suggestion.can_edit == true) {
+                                        choice_elem += ` <a target="_blank" href="/curation/authority/` + suggestion.id + `/?tab=acrelations"><i class="far fa-edit" title="Edit record"></i></a>`
+                                    }
+                                        
+                                    choice_elem += `</div>
                                     <div>
                                         <span class="h5 text-danger">
                                             ` + suggestion.type_controlled + `

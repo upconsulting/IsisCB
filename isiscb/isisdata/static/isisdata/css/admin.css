@@ -1,3 +1,7 @@
+html {
+    font-size: 14px !important;
+  }
+
 #header {
     height: 80px;
     padding-top: 5px;
@@ -18,4 +22,8 @@
 
 .btn-cancel a {
     color: #fff;
+}
+
+.submit-row input {
+    height: initial;
 }

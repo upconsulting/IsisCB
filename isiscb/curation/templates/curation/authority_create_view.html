@@ -459,6 +459,19 @@ function searchService(url) {
               {{ form.classification_system_object|addcss:"form-control"}}
           </div>
 
+          <script>
+            //@ sourceURL=belongs.js
+            $().ready(function() {
+                datasets = $("select#id_authority-belongs_to option")
+                var dataset_ids = $.map(datasets ,function(ds) {
+                    return ds.value ? ds.value : null;
+                });
+                // if there is just one dataset, we want to use that one (IEXP-492)
+                if (dataset_ids.length == 1) {
+                    $('#id_authority-belongs_to').val(dataset_ids[0])
+                }
+            })
+          </script>
           {% for error in form.belongs_to.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}

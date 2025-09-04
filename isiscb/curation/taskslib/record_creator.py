@@ -1,10 +1,16 @@
 from __future__ import unicode_literals
 from isisdata.models import *
+import curation.curation_util as c_util
+import curation.permissions_util as p_util
+
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.db import transaction
 
 from datetime import datetime
 from dateutil.tz import tzlocal
 
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +27,8 @@ WARNING = 'WARNING'
 
 RECORD_HISTORY = 'record_history'
 
+LINKED_DATA_PREFIX = 'LinkedData::'
+    
 def _create_linkeddata(row, user_id, results, task_id, created_on):
     COL_LD_URN = 'LED URN'
     COL_LD_STATUS = 'LED Status'
@@ -98,20 +106,22 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     if not _add_type(row, COL_ACR_TYPE, ACRelation, results, properties):
         return
 
-    authority_id = row[COL_ACR_AUTHORITY_ID]
+    authority_id = row[COL_ACR_AUTHORITY_ID] if COL_ACR_AUTHORITY_ID in row else None
     if not authority_id:
         results.append((ERROR, "Authority missing", "", "There was no authority provided. Skipping."))
         return
-
+   
     try:
-        Authority.objects.get(pk=authority_id)
+        authority = _get_authority(authority_id, results, user_id)
+        if not authority:
+            return
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(authority_id)))
         return
 
     properties.update({
-        'authority_id': authority_id
+        'authority_id': authority.id
     })
 
     citation_id = row[COL_ACR_CITATION_ID]
@@ -120,14 +130,16 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
         return
 
     try:
-        Citation.objects.get(pk=citation_id)
+        citation = _get_citation(citation_id, results, user_id)
+        if not citation:
+            return
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(citation_id)))
         return
 
     properties.update({
-        'citation_id': citation_id,
+        'citation_id': citation.id,
     })
 
     _add_optional_simple_property(row, COL_ACR_NAME_DISPLAY, properties, 'name_for_display_in_citation')
@@ -144,10 +156,68 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     acr_relation = ACRelation(**properties)
     _create_record(acr_relation, user_id, results)
 
+def _get_linkeddata_prefix_and_urn(id):
+    """
+    Method to return prefix and id from a linkedata reference, e.g
+    LinkedData::URL::http://myid.org/id
+    will return
+    ("URL", "http://myid.org/id")
+    """
+    prefix_and_urn = id[len(LINKED_DATA_PREFIX):]
+    return prefix_and_urn.split("::")
+
+def _get_citation(citation_id, results, user_id):
+    if not citation_id.startswith(LINKED_DATA_PREFIX):
+        try:
+            return Citation.objects.get(pk=citation_id)
+        except Exception as e:
+            logger.error(e)
+            results.append((ERROR, e, "", "There was an issue with citation id %s. Skipping."%(citation_id)))
+            return None
+        
+    prefix, urn = _get_linkeddata_prefix_and_urn(citation_id)
+    return _get_linkeddata_subject(urn, prefix, results, user_id)  
+
+def _get_authority(authority_id, results, user_id):
+    if not authority_id.startswith(LINKED_DATA_PREFIX):
+        try:
+            return Authority.objects.get(pk=authority_id)
+        except Exception as e:
+            logger.error(e)
+            results.append((ERROR, e, "", "There was an issue with authority id %s. Skipping."%(authority_id)))
+            return None
+        
+    prefix, urn = _get_linkeddata_prefix_and_urn(authority_id) 
+    return _get_linkeddata_subject(urn, prefix, results, user_id)  
+    
+
+def _get_linkeddata_subject(urn, prefix, results, user_id):
+    try:
+        # there should be only one with the given id and of given type
+        linked_data_entry = LinkedData.objects.filter(universal_resource_name=urn, type_controlled__name=prefix)
+        if linked_data_entry.count() > 1:
+            logger.error("There are more than one linked data entry for %s and %s."%(prefix, urn))
+            results.append((ERROR, "More than one linked data entry.", "", "There are more than one linked data entry for %s. Skipping."%(prefix + "::" + urn)))
+            return None
+        
+        # TODO: check dataset for right permissions
+        belongs_to = linked_data_entry.first().subject.belongs_to
+        user = User.objects.get(pk=user_id)  
+
+        if not belongs_to in p_util.get_accessible_dataset_objects(user):
+            raise PermissionDenied("User cannot use authority %s from dataset %s."%(linked_data_entry.subject, belongs_to.name))
+        
+        return linked_data_entry.first().subject
+    except Exception as e:
+        logger.error(e)
+        results.append((ERROR, "Linked data entry does not exist", "", "There exists no authority with linked data %s and %s. Skipping."%(prefix, urn)))
+        return None
+        
+
 def _create_aarelation(row, user_id, results, task_id, created_on):
     COL_AAR_TYPE = 'AAR Type'
-    COL_AAR_OBJECT = 'AAR ID Cit Obj'
-    COL_AAR_SUBJECT = 'AAR ID Cit Subj'
+    COL_AAR_OBJECT = 'AAR ID Obj'
+    COL_AAR_SUBJECT = 'AAR ID Subj'
     COL_AAR_NOTES = 'AAR Notes'
     COL_AAR_STATUS = 'AAR Status'
     COL_AAR_EXPLANATION = 'AAR RecordStatusExplanation'
@@ -170,7 +240,11 @@ def _create_aarelation(row, user_id, results, task_id, created_on):
 
     subject_id = row[COL_AAR_SUBJECT]
     try:
-        Authority.objects.get(pk=subject_id)
+        authority = _get_authority(subject_id, results, user_id)
+        if not authority:
+            return
+        # if subject was referenced via linked data, we need the authority id
+        subject_id = authority.id
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(subject_id)))
@@ -182,7 +256,11 @@ def _create_aarelation(row, user_id, results, task_id, created_on):
 
     object_id = row[COL_AAR_OBJECT]
     try:
-        Authority.objects.get(pk=object_id)
+        authority = _get_authority(object_id, results, user_id)
+        if not authority:
+            return
+        # if subject was referenced via linked data, we need the authority id
+        object_id = authority.id
     except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(object_id)))
@@ -278,6 +356,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
     COL_EXPLANATION = 'CBB RecordStatusExplanation'
     COL_COMPLETE_CITATION = 'CBB CompleteCitation'
     COL_STUB_RECORD_STATUS = 'CBB StubRecordStatus'
+    COL_LINKED_DATA = 'CBB LinkedData'
 
     properties = {}
 
@@ -292,17 +371,14 @@ def _create_citation(row, user_id, results, task_id, created_on):
     _add_optional_simple_property(row, COL_COMPLETE_CITATION, properties, 'complete_citation')
     _add_optional_simple_property(row, COL_STUB_RECORD_STATUS, properties, 'stub_record_status')
 
-    _add_dataset(row, COL_DATASET, properties, results)
-
-    language = row[COL_LANGUAGE]
-    language_obj = None
-    if language:
-        try:
-            language_obj = Language.objects.filter(name=language).first()
-        except Exception as e:
-            logger.error(e)
-            results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
-
+    try:
+        _add_dataset(row, COL_DATASET, user_id, properties, results)
+    except PermissionDenied as e:
+        results.append((ERROR, repr(e), "", ""))
+        return
+    except ObjectDoesNotExist as e:
+        results.append((ERROR, "Dataset does not exist.", "", "The dataset %s does not exist."%(row[COL_DATASET])))
+        return
 
     # create properties for part details
     properties_part_details = {}
@@ -339,12 +415,28 @@ def _create_citation(row, user_id, results, task_id, created_on):
 
     _add_creation_note(properties, task_id, user_id, created_on)
 
-    citation = Citation(**properties)
-    _create_record(citation, user_id, results)
+    
+    with transaction.atomic():
+        citation = Citation(**properties)
+        _add_tenant(citation, user_id)
+        
+        linked_data_records, linked_data_identifiers = _add_linked_data(row, COL_LINKED_DATA, citation, results)
 
-    if language_obj:
-        citation.language.add(language_obj)
-        citation.save()
+        language = row[COL_LANGUAGE] if COL_LANGUAGE in row else None
+        language_obj = None
+        if language:
+            try:
+                language_obj = Language.objects.filter(name=language).first()
+            except Exception as e:
+                logger.error(e)
+                results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
+
+        _create_record(citation, user_id, results, alternate_ids=linked_data_identifiers)
+        
+        _save_linked_data_citation(linked_data_records, citation)
+        if language_obj:
+            citation.language.add(language_obj)
+            citation.save()
 
 def _create_authority(row, user_id, results, task_id, created_on):
     COL_TYPE = 'CBA Type'
@@ -362,6 +454,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
     COL_NOTES = 'CBA Notes'
     COL_STATUS = 'CBA Status'
     COL_EXPLANATION = 'CBA RecordStatusExplanation'
+    COL_LINKED_DATA = 'CBA LinkedData'
 
     properties = {}
 
@@ -369,7 +462,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         return
 
     auth_type = row[COL_TYPE]
-    redirect_to = row[COL_REDIRECT]
+    redirect_to = row[COL_REDIRECT] if COL_REDIRECT in row else None
     if redirect_to:
         try:
             Authority.objects.get(pk=redirect_to)
@@ -381,13 +474,13 @@ def _create_authority(row, user_id, results, task_id, created_on):
             results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(redirect_to)))
             return
 
-    name = row[COL_NAME]
+    name = row[COL_NAME] if COL_NAME in row else None
     if name:
         properties.update({
             'name': name,
         })
 
-    first_name = row[COL_FIRST]
+    first_name = row[COL_FIRST] if COL_FIRST in row else None
     if first_name:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -396,7 +489,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. First name will be ignored."%(name)))
 
-    last_name = row[COL_LAST]
+    last_name = row[COL_LAST] if COL_LAST in row else None
     if last_name:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -405,7 +498,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Last name will be ignored."%(name)))
 
-    suffix = row[COL_SUFFIX]
+    suffix = row[COL_SUFFIX] if COL_SUFFIX in row else None
     if suffix:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -414,7 +507,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Suffix will be ignored."%(name)))
 
-    preferred = row[COL_PREFERRED]
+    preferred = row[COL_PREFERRED] if COL_PREFERRED in row else None
     if preferred:
         if auth_type == Authority.PERSON:
             properties.update({
@@ -423,24 +516,26 @@ def _create_authority(row, user_id, results, task_id, created_on):
         else:
             results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Preferred name will be ignored."%(name)))
 
-    class_system = row[COL_CLASS_SYSTEM]
-    if class_system:
-        if class_system not in list(dict(Authority.CLASS_SYSTEM_CHOICES).keys()):
-            results.append((WARNING, "Classification System does not exist.", "", "The Classification System %s does not exist."%(class_system)))
-        else:
-            properties.update({
-                'classification_system': class_system,
-            })
-
+    
     _add_optional_simple_property(row, COL_CLASS_CODE, properties, 'classification_code')
     _add_optional_simple_property(row, COL_CLASS_HIERARCHY, properties, 'classification_hierarchy')
     _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
 
-    _add_dataset(row, COL_DATASET, properties, results)
-
+    try:
+        _add_dataset(row, COL_DATASET, user_id, properties, results)
+    except PermissionDenied as e:
+        results.append((ERROR, repr(e), "", ""))
+        return
+    except ObjectDoesNotExist as e:
+        results.append((ERROR, "Dataset does not exist.", "", "The dataset %s does not exist."%(row[COL_DATASET])))
+        return
+    
+    _add_classification_system(row, COL_CLASS_SYSTEM, properties, results)
+    
     _add_optional_simple_property(row, COL_NOTES, properties, 'administrator_notes')
     _add_status(row, COL_STATUS, properties, results)
     _add_optional_simple_property(row, COL_EXPLANATION, properties, 'record_status_explanation')
+
 
     # for whatever reason, no history object is created for authorities
     properties.update({
@@ -454,7 +549,84 @@ def _create_authority(row, user_id, results, task_id, created_on):
     else:
         authority = Authority(**properties)
 
-    _create_record(authority, user_id, results)
+    with transaction.atomic():
+        _add_tenant(authority, user_id)
+        # add new linked data entries if applicable
+        linked_data_records, linked_data_identifiers = _add_linked_data(row, COL_LINKED_DATA, authority, results)
+
+        _create_record(authority, user_id, results, alternate_ids=linked_data_identifiers)
+        _save_linked_data_authority(linked_data_records, authority)
+   
+
+def _add_tenant(record, user_id):
+    """
+    Method to set the owning tenant of an object. This function assumes that the
+    object has an "owning_tenant" property.
+    """
+    user = User.objects.get(pk=user_id)   
+    tenant = c_util.get_tenant(user)
+    record.owning_tenant = tenant
+
+def _save_linked_data_authority(linked_data_records, authority):
+    """
+    Save linked data records with correct authority.
+    """
+    if linked_data_records:
+        # we need to make sure the subjec type is authority, or the generic relations don't work
+        authority_obj = Authority.objects.get(pk=authority.id)
+        for ld in linked_data_records:
+            ld.subject = authority_obj
+            ld.save()
+
+def _save_linked_data_citation(linked_data_records, citation):
+    """
+    Save linked data records with correct citation.
+    """
+    if linked_data_records:
+        # we need to make sure the subjec type is authority, or the generic relations don't work
+        for ld in linked_data_records:
+            ld.subject = citation
+            ld.save()
+
+def _add_linked_data(row, col_type_heading, record, results):
+    """
+    Function to add linked data entries to an object. Entries should be of the form:
+    type::"urn"::"uri"::"description";type::"urn"::"uri"::"description";
+
+    This will not save the created linked data records but instead return them as array for the
+    calling function to save them when appropriate.
+    """
+    if col_type_heading not in row or not row[col_type_heading]:
+        return
+    
+    new_linked_data_entries = []
+    new_linked_data_identifiers = []
+    items = re.findall('(.+?)::"(.+?)"::"(.*?)"::"(.*?)"', row[col_type_heading])
+    
+    for item in items:
+        ld_type = item[0]
+        if not ld_type:
+            results.append((ERROR, "No type for linked data entry provided.. Skipping."))
+            continue
+        linked_data_type = LinkedDataType.objects.filter(name=ld_type).first()
+        if not linked_data_type:
+            results.append((ERROR, "%s type missing"%(ld_type), "", "There is no linked data type: %s. Skipping."%(ld_type)))
+            continue
+
+        urn = item[1]
+        uri = item[2]
+        description = item[3]
+
+        new_linked_data = LinkedData(type_controlled=linked_data_type, universal_resource_name=urn, url=uri, description=description)
+            
+        new_linked_data.subject = record
+        new_linked_data_entries.append(new_linked_data)
+
+        new_linked_data_identifier = "{0}{1}::{2}".format(LINKED_DATA_PREFIX, ld_type, urn)
+        new_linked_data_identifiers.append(new_linked_data_identifier)
+        
+    return new_linked_data_entries, new_linked_data_identifiers
+
 
 def _add_type(row, col_type_heading, obj_type, results, properties):
     auth_type = row[col_type_heading]
@@ -471,20 +643,39 @@ def _add_type(row, col_type_heading, obj_type, results, properties):
     })
     return True
 
-def _add_dataset(row, col_dataset_heading, properties, results):
-    dataset = row[col_dataset_heading]
+def _add_dataset(row, col_dataset_heading, user_id, properties, results):
+    dataset = row[col_dataset_heading] if col_dataset_heading in row else None
     if dataset:
+        belongs_to = Dataset.objects.filter(name=dataset).first()
+        user = User.objects.get(pk=user_id)  
+
+        if not belongs_to:
+            raise ObjectDoesNotExist("Dataset does not exist.") 
+
+        if not belongs_to in p_util.get_writable_dataset_objects(user):
+            raise PermissionDenied("User cannot write to dataset %s."%belongs_to.name)
+        
+        properties.update({
+            'belongs_to_id': belongs_to.id,
+        })
+    else:
+        raise PermissionDenied("Dataset is missing.")
+            
+
+def _add_classification_system(row, col_classsys_heading, properties, results):
+    class_system = row[col_classsys_heading] if col_classsys_heading in row else None
+    if class_system:
         try:
-            belongs_to = Dataset.objects.filter(name=dataset).first()
+            classification_system_object = Dataset.objects.filter(name=class_system).first()
             properties.update({
-                'belongs_to_id': belongs_to.id,
+                'classification_system_object_id': classification_system_object.id,
             })
         except:
-            results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
+            results.append((WARNING, "Classification System does not exist.", "", "The classificaiton system %s does not exist."%(class_system)))
 
 
 def _add_status(row, col_status_heading, properties, results):
-    status = row[col_status_heading]
+    status = row[col_status_heading] if col_status_heading in row else None
     if status:
         status_id = STATUS_MAP.get(status, None)
         if status_id:
@@ -498,7 +689,7 @@ def _add_status(row, col_status_heading, properties, results):
             results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(status)))
 
 def _add_optional_simple_property(row, col_heading, properties, field_name):
-    value = row[col_heading]
+    value = row[col_heading] if col_heading in row else None
     if value:
         properties.update({
             field_name: value,
@@ -513,6 +704,6 @@ def _add_creation_note(properties, task_id, user_id, created_on):
         'modified_by_id': user_id,
     })
 
-def _create_record(record, user_id, results):
+def _create_record(record, user_id, results, alternate_ids=[]):
     record.save()
-    results.append((SUCCESS, record.id, record.id, 'Added'))
+    results.append((SUCCESS, record.id, ", ".join(alternate_ids), 'Added'))

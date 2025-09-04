@@ -4,20 +4,50 @@
 {% block content %}
 <form class="form" action="." method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-
-    {% for field in form %}
-
-    {% for error in field.errors %}
+    
+    {% for error in form.name.errors %}
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
-        {% if not field.is_hidden %}
-        <label>{{ field.label }}</label>
+        {% if not form.name.is_hidden %}
+        <label>{{ form.name.label }}</label>
         {% endif %}
-        {{ field|addcss:"form-control" }}
+        {{ form.name|addcss:"form-control" }}
     </div>
 
+    {% for error in form.ingest_to.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
+    <script>
+        //@ sourceURL=belongs.js
+        $().ready(function() {
+            datasets = $("select#id_ingest_to option")
+            var dataset_ids = $.map(datasets ,function(ds) {
+                return ds.value ? ds.value : null;
+            });
+            // if there is just one dataset, we want to use that one (IEXP-492)
+            if (dataset_ids.length == 1) {
+                $('#id_ingest_to').val(dataset_ids[0])
+            }
+        })
+        
+    </script>
+    <div class="form-group">
+        <label>{{ form.ingest_to.label }}</label>
+        {{ form.ingest_to|addcss:"form-control" }}
+    </div>
+
+    {% for error in form.zotero_rdf.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        {% if not form.zotero_rdf.is_hidden %}
+        <label>{{ form.zotero_rdf.label }}</label>
+        {% endif %}
+        {{ form.zotero_rdf|addcss:"form-control" }}
+    </div>
+
+    {{ form.owning_tenant }}
 
     <input type="submit" value="Upload" class="btn btn-success" />
 </form>

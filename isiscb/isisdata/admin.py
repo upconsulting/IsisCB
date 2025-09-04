@@ -140,8 +140,12 @@ class ACRelationInlineForm(forms.ModelForm):
         #  populate the ``authority`` field on the form.
         if 'authority' in self.initial:
             authority_pk = self.initial['authority']
-            authority = Authority.objects.get(pk=authority_pk)
-            self.fields['authority_name'].initial = authority.name
+            try:
+                authority = Authority.objects.get(pk=authority_pk)
+                self.fields['authority_name'].initial = authority.name
+            except:
+                authority = None
+            
 
 
 class CCRelationInline(admin.TabularInline):
@@ -583,7 +587,7 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history', 'owning_tenant'),
+                       'record_history', 'owning_tenant', 'belongs_to'),
            'classes': ('extrapretty', 'collapse'),
         }),
     ]
@@ -988,6 +992,8 @@ class AARelationAdmin(SimpleHistoryAdmin,
 
     form = AARelationForm
 
+class AARelationTypeAdmin(SimpleHistoryAdmin):
+    list_display = ('pk', 'name', 'description')
 
 class LinkedDataTypeAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'pattern')
@@ -1201,7 +1207,7 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
 class TenantAdmin(admin.ModelAdmin):
     fields = ['name', 'title', 'description', 
             'identifier', 'home_page_template', 
-            'use_home_page_template', 'default_dataset', 'default_datasets_reading']
+            'use_home_page_template', 'default_dataset']
     exlude = ('attributes')
     readonly_fields = ["nr_of_citations", "nr_of_authorities", 
             "nr_of_class_systems", "unassigned_all_citations", 
@@ -1290,6 +1296,7 @@ admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
+admin.site.register(AARelationType, AARelationTypeAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(LinkedDataType, LinkedDataTypeAdmin)
 admin.site.register(PartDetails, PartDetailsAdmin)

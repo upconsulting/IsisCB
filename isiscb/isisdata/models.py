@@ -29,8 +29,6 @@ from markupfield.fields import MarkupField
 
 from simple_history.models import HistoricalRecords
 
-from oauth2_provider.models import AbstractApplication
-
 from isisdata.utils import *
 
 import copy, datetime, iso8601, pickle, uuid, urllib.parse, re, bleach, unidecode
@@ -2431,6 +2429,12 @@ class AttributeType(models.Model):
 
 
 class Attribute(ReferencedEntity, CuratedMixin):
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["source_instance_id"]),
+        ]
+
     ID_PREFIX = 'ATT'
     history = HistoricalRecords()
 
@@ -3016,6 +3020,17 @@ class IsisCBRole(models.Model):
     @property
     def tenant_rules(self):
         return TenantRule.objects.filter(role=self.pk)
+    
+    @property
+    def tenant(self):
+        # there should only be one tenant per role
+        tenant_rule = self.tenant_rules.first()
+        return tenant_rule.tenant if tenant_rule else None
+    
+    @property
+    def tenant_access_type(self):
+        update_roles = list(filter(lambda rule: rule.allowed_action == TenantRule.UPDATE, self.tenant_rules))
+        return TenantRule.UPDATE if update_roles else TenantRule.VIEW
 
     def __unicode__(self):
         return self.name
@@ -3056,7 +3071,7 @@ class CRUDRule(AccessRule):
     UPDATE = 'update'
     DELETE = 'delete'
     CRUD_CHOICES = (
-        (CREATE, 'Create'),
+        #(CREATE, 'Create'), # This does not seem to affect anything, so we can remove for now
         (VIEW, 'View'),
         (UPDATE, 'Update'),
         (DELETE, 'Delete'),

@@ -122,15 +122,15 @@ def add_role(request, user_id=None):
     context = {
         'curation_section': 'users',
     }
-
+    
     if request.method == 'GET':
         template = 'curation/add_role.html'
-        form = RoleForm()
+        form = RoleForm(user=request.user)
         context.update({
             'form': form,
         })
     elif request.method == 'POST':
-        form = RoleForm(request.POST)
+        form = RoleForm(request.user, request.POST)
 
         if form.is_valid():
             role = form.save()
@@ -181,6 +181,10 @@ def role(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
     template = 'curation/role.html'
+    
+    if not request.user.is_superuser and role.tenant and role.tenant != cutil.get_tenant(request.user):
+        template = 'curation/access_denied.html'
+
     context = {
         'curation_section': 'users',
         'role': role,
@@ -192,7 +196,11 @@ def role(request, role_id, user_id=None):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def roles(request):
-    roles = IsisCBRole.objects.all()
+    if request.user.is_superuser:
+        roles = IsisCBRole.objects.all()
+    else:
+        tenant_rules = TenantRule.objects.filter(tenant=cutil.get_tenant(request.user))
+        roles = set([rule.role for rule in tenant_rules])
 
     template = 'curation/roles.html'
     context = {
@@ -202,7 +210,7 @@ def roles(request):
 
     return render(request, template, context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 @check_rules('can_update_user_module')
 def add_tenant_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -244,6 +252,30 @@ def add_tenant_rule(request, role_id, user_id=None):
 
     return render(request, template, context)
 
+def modify_tenant_rule(request, role_id, rule_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = {
+        'curation_section': 'users',
+        'role': role,
+    }
+
+    tenant_access = cutil.get_tenant_access(request.user, cutil.get_tenant(request.user))
+
+    # Is user allowed to change tenant?
+    if request.method == 'POST' and tenant_access == TenantRule.UPDATE:
+        rule = get_object_or_404(TenantRule, pk=rule_id)
+        permission = request.POST.get('allowed_action', TenantRule.VIEW)
+        # we dont' just want to pass a random string through
+        if permission == TenantRule.UPDATE:
+            rule.allowed_action = TenantRule.UPDATE
+        else:
+            rule.allowed_action = TenantRule.VIEW
+        rule.save()
+
+    return redirect('curation:role', role_id=role.pk)
+
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_dataset_rule(request, role_id, user_id=None):
@@ -256,14 +288,14 @@ def add_dataset_rule(request, role_id, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_rule.html'
-        form = DatasetRuleForm(initial = { 'role': role })
+        form = DatasetRuleForm(request.user, initial = { 'role': role })
         header_template = get_template('curation/rule_dataset_header.html').render(context)
         context.update({
             'form': form,
             'header': header_template
         })
     elif request.method == 'POST':
-        form = DatasetRuleForm(request.POST)
+        form = DatasetRuleForm(request.user, request.POST)
 
         if form.is_valid():
             rule = form.save()
@@ -279,8 +311,6 @@ def add_dataset_rule(request, role_id, user_id=None):
                 'form': form,
                 'header': header_template,
             })
-
-        return redirect('curation:role', role_id=role.pk)
 
     return render(request, template, context)
 
@@ -432,18 +462,36 @@ def add_role_to_user(request, user_edit_id, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_role_to_user.html'
-        form = AddRoleForm(initial = { 'users': user })
+        form = AddRoleForm(user=request.user, initial = { 'users': user })
         context.update({
             'form': form,
         })
     elif request.method == 'POST':
-        form = AddRoleForm(request.POST)
+        form = AddRoleForm(request.user, request.POST)
 
         if form.is_valid():
             role_id = form.cleaned_data['role']
             role = get_object_or_404(IsisCBRole, pk=role_id)
-            if role.tenant_rules and cutils.get_tenants(user):
-                messages.add_message(request, messages.ERROR, "User already belongs to a tenant. You cannot add a second tenant role.")
+            if role.tenant_rules:
+                tenants = set([rule.tenant for rule in role.tenant_rules])
+                tenants_of_user = list(cutils.get_tenants(user))
+                tenant_to_add = None
+                
+                # if for some reason two tenant rules are being added for different tenants
+                if len(tenants) > 1:
+                    messages.add_message(request, messages.ERROR, "Users can only belong two one tenant.")
+                else:
+                    tenant_to_add = tenants.pop()
+
+                if tenant_to_add:
+                    # if user already belongs to another tenant
+                    if tenants_of_user and tenant_to_add not in tenants_of_user:
+                        messages.add_message(request, messages.ERROR, "User already belongs to a tenant. You cannot add a second tenant role.")
+                    else:
+                        role.users.add(user)
+                        role.save()
+                else:
+                    messages.add_message(request, messages.ERROR, "Tenant rule was submitted with a tenant.")
             else:
                 role.users.add(user)
                 role.save()

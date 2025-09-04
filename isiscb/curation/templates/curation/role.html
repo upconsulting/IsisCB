@@ -6,6 +6,7 @@
 {% block content %}
 
 {% test_rule 'can_update_user_module' user as update_module %}
+{% with role|can_change_role:user as can_change_role %}
 
 <div class="h3 text-warning">Role: {{ role.name }}</div>
 
@@ -31,15 +32,28 @@
   If you want a user to be able to have access to the user module, add a <strong>user module access rule</strong>. You can allow users to have either reading access (a user can see all registered users and their permissions but not change them), or update access, which allows them to modify users and their roles. Note that only administrators can grant administrator controls to the system.
 </p>
 
+<p style="margin-top: 35px;">
+  <a href="{% url 'curation:roles' %}"><i class="fas fa-chevron-circle-left"></i> Back to all roles</a>
+</p>
+
 {% if update_module %}
 <p style="margin-top: 35px;">
   <div class="btn-group">
+    {% if role.tenant_rules or user.is_superuser %}
     <a href="{% url 'curation:create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-files-o" aria-hidden="true"></i> Limit records by dataset</a>
+    {% else %}
+    <a disabled class="btn btn-sm btn-default"><i class="fa fa-files-o" aria-hidden="true"></i> Limit records by dataset</a>
+    {% endif %}
   </div>
   <div class="btn-group">
+    {% if role.tenant_rules or user.is_superuser %}
     <a href="{% url 'curation:create_rule_crud' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> Add allowed actions</a>
+    {% else %}
+    <a disabled class="btn btn-sm btn-default"><i class="fa fa-eye" aria-hidden="true"></i> Add allowed actions</a>
+    {% endif %}
   </div>
   <div class="btn-group">
+    {% if role.tenant_rules or user.is_superuser %}
     <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-bars" aria-hidden="true"></i> Add Field Access Rule
       <span class="caret"></span>
@@ -48,19 +62,34 @@
       <li><a href="{% url 'curation:create_rule_citation_field' role.pk 'citation' %}">Citation</a></li>
       <li><a href="{% url 'curation:create_rule_citation_field' role.pk 'authority'%}">Authority</a></li>
     </ul>
+    {% else %}
+    <a disabled class="btn btn-sm btn-default"><i class="fa fa-bars" aria-hidden="true"></i> Add Field Access Rule</a>
+    {% endif %}
   </div>
   <div class="btn-group">
+    {% if role.tenant_rules or user.is_superuser %}
     <a href="{% url 'curation:create_user_module_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-users" aria-hidden="true"></i> Add access to user module</a>
+    {% else %}
+    <a disabled class="btn btn-sm btn-default"><i class="fa fa-users" aria-hidden="true"></i> Add access to user module</a>
+    {% endif %}
   </div>
   <div class="btn-group">
+    {% if role.tenant_rules or user.is_superuser %}
     <form action="{% url 'curation:add_zotero_rule' role.pk %}" method="POST" style="margin: 0px;"> {% csrf_token %}
       <button title="Add acess to Zotero module" type="submit" class="btn btn-primary btn-sm"><i class="fa fa-book" aria-hidden="true"></i>
    Add access to Zotero module</button>
     </form>
+    {% else %}
+    <a disabled class="btn btn-sm btn-default"><i class="fa fa-book" aria-hidden="true"></i> Add access to Zotero module</a>
+    {% endif %}
   </div>
-  {% if not role.tenant_rules %}
+  {% if not role.tenant_rules and user.is_superuser %}
   <div class="btn-group">
     <a href="{% url 'curation:create_tenant_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
+  </div>
+  {% elif not user.is_superuser %}
+  <div class="btn-group">
+    <a class="btn btn-sm btn-default" disabled title="Tenant can only be changed by superadmins."><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
   </div>
   {% else %}
   <div class="btn-group">
@@ -91,7 +120,7 @@ It seems like you've granted update, create, or delete access to records but no 
       <tr>
         <td>Zotero Module Access</td>
         <td>User has access to Zotero module.</td>
-        <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+        <td>{% if update_module and can_change_role %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
       </tr>
   {% endfor %}
 
@@ -101,7 +130,7 @@ It seems like you've granted update, create, or delete access to records but no 
       <tr>
         <td>User Module Access</td>
         <td>User can <span class="label label-warning">{{ rule.get_module_action_display }}</span> user module.</td>
-        <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+        <td>{% if update_module and can_change_role %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
       </tr>
   {% endfor %}
   {% endif %}
@@ -110,8 +139,17 @@ It seems like you've granted update, create, or delete access to records but no 
   {% for rule in role.dataset_rules %}
     <tr>
       <td>Limited Dataset</td>
-      <td>User has access to records {% if rule.can_write %}and can <span class="label label-warning">create</span> new records{% endif %} in dataset '{{ rule.dataset|get_dataset_name }}'.</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>
+        {% if rule.can_write %}
+        {% if not rule.dataset|belongs_to_tenant:tenant %}<span class="label label-info">External</span>{% endif %} Dataset “{{ rule.dataset|get_dataset_name }}” is visible to user. User can create and update records in this dataset.
+        {% else %}
+        {% if not rule.dataset|belongs_to_tenant:tenant %}<span class="label label-info">External</span> {% endif %}Dataset "{{ rule.dataset|get_dataset_name }}" is visible to user. User <span class="label label-danger">cannot</span> create or update records in this dataset.
+        {% endif %}
+      <td>
+        {% if update_module and can_change_role %}
+        <form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
   {% endif %}
@@ -121,7 +159,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Permitted Action</td>
       <td>User can <span class="label label-warning">{{ rule.crud_action }}</span> records.</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>{% if update_module and can_change_role %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
   {% endfor %}
   {% endif %}
@@ -131,7 +169,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Field Access <span class="label label-info">{{ rule.get_object_type_display }}</span></td>
       <td>User <span class="label label-warning">{{ rule.get_field_action_display }}</span> field '{{ rule.field_name }}'.</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>{% if update_module and can_change_role %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
   {% endfor %}
   {% endif %}
@@ -141,7 +179,18 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Tenant Access </td>
       <td>Tenant: {% if rule.allowed_action == 'update' %} <span class="label label-danger">Administrator</span> {% else %}<span class="label label-info">Editor</span>{% endif %} {{ rule.tenant.name }}</td>
-      <td>{% if update_module %}<form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      <td>
+        {% if update_module and user.is_superuser %}
+        <form action="{% url 'curation:remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>
+        {% endif %}
+        {% if update_module or user.is_superuser %}
+        {% if rule.allowed_action == 'view' %}
+        <form action="{% url 'curation:modify_tenant_rule' role.id rule.id %}" method="POST" style="margin: 0px;"><input type="hidden" name="allowed_action" value="update"/> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fas fa-user-edit"></i> Make Administrator</small></button></form>
+        {% else %}
+        <form action="{% url 'curation:modify_tenant_rule' role.id rule.id %}" method="POST" style="margin: 0px;"><input type="hidden" name="allowed_action" value="view"/> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fas fa-user-edit"></i> Make Editor</small></button></form>
+        {% endif %}
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
   {% endif %}
@@ -161,10 +210,14 @@ It seems like you've granted update, create, or delete access to records but no 
 <tbody>
   {% for user in role.users.all %}
   <tr>
-    <td>{{ user.username }}</td>
+    <td><a href="{% url 'curation:user' user.pk %}">{{ user.username }}</a></td>
     <td>
       {% for role in user.pk|roles %}
+      {% if role.tenant == tenant %}
         <a href="{% url 'curation:role' role.pk %}">{{ role.name }}</a>,
+      {% else %}
+      {{ role.name }},
+      {% endif %}
       {% endfor %}
     </td>
   </tr>
@@ -172,4 +225,6 @@ It seems like you've granted update, create, or delete access to records but no 
 </tbody>
 </table>
 
+{% endwith %}
 {% endblock %}
+

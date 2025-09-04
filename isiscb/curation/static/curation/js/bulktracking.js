@@ -8,11 +8,7 @@ var settrackingstatus_extra = function(value) {
             return '';
         }
         var elem = '<div class="bulk-action-detail">';
-        if (state == to_transition) {
-            elem += '<span class="text-success">' + String(count) + ' <strong>' + labels[state] + '</strong> records will be transitioned to <strong>' + labels[value] + '</strong></span>';
-        } else {
-            elem += '<span class="text-muted">' + String(count) + ' <strong>' + labels[state] + '</strong> records will not be changed (not allowed)</span>';
-        }
+        elem += '<span class="text-success">' + String(count) + ' <strong>' + labels[state] + '</strong> records will be transitioned to <strong>' + labels[value] + '</strong></span>';
         elem += '</div>';
         return elem;
     }).join('');

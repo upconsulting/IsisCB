@@ -72,7 +72,8 @@ def get_google_books_image(citation, featured, api_key=None):
     bookGoogleId = ''
 
     for i in items:
-        if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
+        if "volumeInfo" in i and ("title" in i["volumeInfo"] and i["volumeInfo"]["title"].lower() in title.lower()) \
+            or ('authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"])):
             bookGoogleId = i["id"]
             break
 

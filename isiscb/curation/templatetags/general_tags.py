@@ -4,6 +4,7 @@ from isisdata.models import *
 from dateutil.relativedelta import relativedelta
 from isisdata.templatetags.app_filters import *
 from curation.utils import *
+import curation.curation_util as c_util
 
 register = template.Library()
 
@@ -82,6 +83,10 @@ def get_tenant(id):
     if id:
         return Tenant.objects.get(pk=id)
     return ""
+
+@register.filter
+def get_user_tenant(user):
+    return c_util.get_tenant(user)
 
 @register.filter
 def get_print_formatted_citation(id):

@@ -1,10 +1,14 @@
 import requests
 from isisdata.models import *
 from django.conf import settings
+import logging
 
+logger = logging.getLogger(__name__)
 
 def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
-        wikiImage = wikiCredit = wikiIntro = ''
+        wikiImage = ''
+        wikiCredit = ''
+        wikiIntro = ''
 
         if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and related_citations_count > 0 and author_contributor_count/related_citations_count > .9):
             wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
@@ -33,9 +37,16 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                 if authorityName:
                     imgURL = settings.WIKIPEDIA_IMAGE_API_PATH.format(authorityName = authorityName)
                     introURL = settings.WIKIPEDIA_INTRO_API_PATH.format(authorityName = authorityName)
-                    imgJSON = requests.get(imgURL).json()
+                    try:
+                        request_data = requests.get(imgURL)
+                        imgJSON = request_data.json()
+                    except Exception as e:
+                        logger.error(request_data)
+                        logger.error("Wikipedia call failed. Proceedings without Wikipedia content.")
+                        logger.exception(e)
+                        imgJSON = None
 
-                    if list(imgJSON['query']['pages'].items())[0][0] != '-1':
+                    if imgJSON and list(imgJSON['query']['pages'].items())[0][0] != '-1':
                         imgPage = list(imgJSON['query']['pages'].items())[0][1]
                         imgPageID = imgPage['pageid']
                         wikiCredit = f'{settings.WIKIPEDIA_PAGE_PATH}{imgPageID}'

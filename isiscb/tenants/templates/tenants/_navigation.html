@@ -7,7 +7,7 @@
 
         <div class="navbar-header col-md-3" style="padding-top: 5px;"><!--  width: 250px;"-->
             {% if tenant.logo %}
-            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
             {% endif %}
             {% if not tenant.settings.hide_title_in_navbar %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}">

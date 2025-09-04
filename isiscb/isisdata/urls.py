@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 from django.conf.urls.static import static
 from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
@@ -95,5 +96,5 @@ if settings.DEBUG:
 #if settings.DEBUG:
 #    import debug_toolbar
 #    urlpatterns = [
-#        url('__debug__/', include(debug_toolbar.urls)),
+#        re_path('__debug__/', include(debug_toolbar.urls)),
 #    ] + urlpatterns

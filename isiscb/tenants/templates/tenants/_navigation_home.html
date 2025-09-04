@@ -4,7 +4,7 @@
     <div class="container-fluid">
         <div class="navbar-header col-md-5">
             {% if tenant.logo %}
-            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" title="{{ tenant.title }}" style="max-height: 50px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img" title="{{ tenant.title }}" style="max-height: 50px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
             {% endif %}
             {% if not tenant.settings.hide_title_in_navbar %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><div style="line-height:50px; font-size: 22px; color: white">{{ tenant.title }}</div> </a>

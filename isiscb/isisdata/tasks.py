@@ -19,7 +19,8 @@ import csv
 import math, smart_open
 
 
-def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='CITATION'):
+# IEXP-569: Added permission level parameter
+def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='CITATION', permission_level=CRUDRule.UPDATE):
     """
 
     Parameters
@@ -39,7 +40,7 @@ def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='
     else:
         _qs = Citation.objects.all()
     if user_id:
-        _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
+        _qs = filter_queryset(User.objects.get(pk=user_id), _qs, permission_level)
     if object_type == 'AUTHORITY':
         queryset = AuthorityFilter(filter_params, queryset=_qs).qs
     else:
@@ -116,7 +117,7 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
         fields.append('modified-date')
         fields.append('created-date')
     if export_type == 'Citation':
-        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, permission_level=CRUDRule.VIEW)
         columns = [o for o in export.CITATION_COLUMNS if o.slug in fields]
     else:
         queryset, _ = _get_filtered_authority_queryset(filter_params_raw, user_id)
@@ -161,7 +162,7 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
 def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print('export to EBSCO csv:: %s' % str(task_id))
     if export_type == 'Citation':
-        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, permission_level=CRUDRule.VIEW)
         columns = export_ebsco.CITATION_COLUMNS
     else:
         print("Exporting authorities not supported in EBSCO format.")
@@ -173,7 +174,7 @@ def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, 
 def export_item_counts(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print('export item counts csv:: %s' % str(task_id))
     if export_type == 'Citation':
-        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, permission_level=CRUDRule.VIEW)
         columns = export_item_count_csv.CITATION_COLUMNS
     else:
         print("Exporting authorities not supported for item count.")
@@ -185,7 +186,7 @@ def export_item_counts(user_id, path, fields, filter_params_raw, task_id=None, e
 def export_swp_analysis(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print('export item counts csv:: %s' % str(task_id))
     if export_type == 'Citation':
-        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, permission_level=CRUDRule.VIEW)
         columns = export_swp_analysis_csv.CITATION_COLUMNS
     else:
         print("Exporting authorities not supported for item count.")
