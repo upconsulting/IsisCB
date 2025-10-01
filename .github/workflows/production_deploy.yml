@@ -1,0 +1,110 @@
+name: Test and deploy to production on tagging
+
+on:
+  push:
+    tags:        
+      - 'v*' 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        env:
+          discovery.type: single-node
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9200:9200
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.12]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install libgnutls for pycurl
+      run: sudo apt install -y libcurl4-openssl-dev libssl-dev libjpeg-dev zlib1g-dev
+    - name: Install Dependencies
+      run: |
+        python -m pip install pip==23.3.2
+        pip install -U six
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        cd isiscb
+        export DATABASE_HOST=localhost
+        export DJANGO_SETTINGS_MODULE=isiscb.github_settings
+        export ELASTIC_HOST=http://localhost:9200/
+        export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
+        python manage.py migrate
+        python manage.py test
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.12
+
+    - name: Install awsebcli
+      run: |
+        python -m pip install pip==23.3.2
+        pip install awsebcli==3.23.2
+
+    - name: setup eb config
+      run: cp -r .elasticbeanstalk-staging .elasticbeanstalk
+
+    - name: Deploy to AWS Production Web Instance
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        AWS_REGION: ${{ vars.AWS_REGION_PROD }}
+        AWS_PLATFORM_VERSION: ${{ secrets.AWS_PLATFORM_VERSION_PROD }}
+        AWS_APP: ${{ vars.AWS_APP_PROD }}
+        AWS_ENVIRONMENT: ${{ vars.AWS_ENVIRONMENT_PROD }}
+      run: |
+        # Initialize the Elastic Beanstalk command line app
+        yes n | eb init
+        # Deploy the application to Elastic Beanstalk
+        eb deploy $AWS_ENVIRONMENT
+
+    - name: setup eb config for worker
+      run: |
+        rm -r .elasticbeanstalk
+        cp -r .elasticbeanstalk-staging-worker .elasticbeanstalk
+
+    - name: Deploy to AWS Production Worker Instance
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        AWS_REGION: ${{ vars.AWS_REGION_PROD }}
+        AWS_PLATFORM_VERSION: ${{ secrets.AWS_PLATFORM_VERSION_PROD }}
+        AWS_APP: ${{ vars.AWS_WORKER_APP_NAME_PROD }}
+        AWS_ENVIRONMENT: ${{ vars.AWS_WORKER_ENVIRONMENT_PROD }}
+      run: |
+        # Initialize the Elastic Beanstalk command line app
+        yes n | eb init
+        # Deploy the application to Elastic Beanstalk
+        eb deploy $AWS_ENVIRONMENT
