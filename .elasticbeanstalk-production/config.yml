@@ -1,0 +1,10 @@
+branch-defaults:
+  master:
+    environment: Isiscb-production-python312-env
+  develop:
+    environment: Isiscb-production-python312-env
+global:
+  application_name: Isiscb-production-python312
+  default_platform: Python 3.12 running on 64bit Amazon Linux 2023/4.7.2
+  default_region: us-west-2
+  sc: git

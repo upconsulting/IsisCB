@@ -75,7 +75,7 @@ jobs:
         pip install awsebcli==3.23.2
 
     - name: setup eb config
-      run: cp -r .elasticbeanstalk-staging .elasticbeanstalk
+      run: cp -r .elasticbeanstalk-production .elasticbeanstalk
 
     - name: Deploy to AWS Production Web Instance
       env:
@@ -94,7 +94,7 @@ jobs:
     - name: setup eb config for worker
       run: |
         rm -r .elasticbeanstalk
-        cp -r .elasticbeanstalk-staging-worker .elasticbeanstalk
+        cp -r .elasticbeanstalk-production-worker .elasticbeanstalk
 
     - name: Deploy to AWS Production Worker Instance
       env:

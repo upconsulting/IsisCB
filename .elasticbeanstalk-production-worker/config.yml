@@ -1,0 +1,8 @@
+branch-defaults:
+  master:
+    environment: Isiscb-production-celery-p312-env 
+global:
+  application_name: isiscb-production-celery-p312
+  default_platform: Docker running on 64bit Amazon Linux 2023/4.7.1
+  default_region: us-west-2
+  sc: git
