@@ -2,6 +2,7 @@ name: Test and deploy to production on tagging
 
 on:
   push:
+    branches: [ "master" ]
     tags:        
       - 'v*' 
 
