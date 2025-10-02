@@ -1,0 +1,10 @@
+branch-defaults:
+  master:
+    environment: production
+  develop:
+    environment: Isiscb-staging-python312-env-1
+global:
+  application_name: isiscb-staging-python312
+  default_platform: Python 3.12 running on 64bit Amazon Linux 2023/4.5.1
+  default_region: us-west-2
+  sc: git

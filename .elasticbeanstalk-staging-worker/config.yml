@@ -1,0 +1,10 @@
+branch-defaults:
+  master:
+    environment: production
+  develop:
+    environment: isiscb-celery-staging-p3-webinst
+global:
+  application_name: IsisCB Celery Staging Python 3 (non worker)
+  default_platform: Docker running on 64bit Amazon Linux 2/3.8.3
+  default_region: us-west-2
+  sc: git

@@ -58,7 +58,6 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     "elasticstack",
-    'oauth2_provider',
     'captcha',
     'corsheaders',
     'zotero',
@@ -79,6 +78,7 @@ MIDDLEWARE= [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -257,10 +257,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
-}
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
