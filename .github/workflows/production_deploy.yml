@@ -1,9 +1,6 @@
 name: Test and deploy to production on tagging
 
-on:
-  push:
-    tags:        
-      - 'v*' 
+on: workflow_dispatch
 
 jobs:
   build:
