@@ -67,7 +67,7 @@ def get_google_books_image(citation, featured, api_key=None):
             return {}
 
         books = resp.json()
-        items = books["items"]
+        items = books["items"] if "items" in books else []
 
     bookGoogleId = ''
 
