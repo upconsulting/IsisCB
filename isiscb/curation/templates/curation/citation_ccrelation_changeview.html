@@ -116,16 +116,17 @@
           <div id="subject_info_container">
             <div id="subject_info">
               <strong>Citation record: </strong>
-              {% if form.instance.subject %}
-              <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                <a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+              
+              <strong class="text-warning"><span class="show_id">{% if form.instance.subject %}{{ form.instance.subject.id }}{% endif %}</span> &nbsp;&nbsp;
+                <a class="link_to_citation" href="{% if form.instance.subject %}{% url 'curation:curate_citation' form.instance.subject.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
               </strong>
 
               <p>
-                <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.subject %}{{ form.instance.subject.get_type_controlled_display }}{% endif %}</span>
                 <br>
-                <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
+                <em class="show_title">{% if form.instance.subject %}{{ form.instance.subject|get_citation_title }}{% endif %}</em>
                 <br>
+                {% if form.instance.subject %}
                 {% with form.instance.subject|get_authors_editors as authors_editors %}
                 <span class="show_authors">
                 {% if authors_editors %}
@@ -133,9 +134,8 @@
                 {% endif %}
                 </span>
                 {% endwith %}
-
+                {% endif %}
               </p>
-              {% endif %}
             </div>
           </div>
 
