@@ -329,7 +329,10 @@ def resolve_authority(request):
 @staff_member_required
 def draft_authority(request, accession_id, draftauthority_id):
     if request.method == 'DELETE':
+        # find the ac_relation this authority is part of
         draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+        draft_acrelation = get_object_or_404(DraftACRelation, authority=draftauthority)
+        draft_acrelation.delete()
         draftauthority.delete()
 
         return JsonResponse({'data': 'Success'})

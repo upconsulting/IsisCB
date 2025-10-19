@@ -152,7 +152,8 @@ But for now the list is stored as string :-p
                                           {% endif %}
                                           data-type="{{ authority.type_controlled }}">
                                           <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
-                                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                                        <span class="glyphicon glyphicon-chevron-right pull-right" style="margin-left: 20px;"></span>
+                                        <a href="#" class="deleteDraftAuthority pull-right" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
                                       </a>
                                       {% elif authority_resolution and authority.processed%}
                                       <span class="text-info">
