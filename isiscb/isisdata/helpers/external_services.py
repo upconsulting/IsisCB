@@ -37,11 +37,15 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                 if authorityName:
                     imgURL = settings.WIKIPEDIA_IMAGE_API_PATH.format(authorityName = authorityName)
                     introURL = settings.WIKIPEDIA_INTRO_API_PATH.format(authorityName = authorityName)
+                    headers = {
+                        'User-Agent': 'Explore Bibliography/1.0 (https://data.isiscb.org/)'
+                    }
                     try:
-                        request_data = requests.get(imgURL)
+                        request_data = requests.get(imgURL, headers=headers)
                         imgJSON = request_data.json()
                     except Exception as e:
                         logger.error(request_data)
+                        logger.error(imgURL)
                         logger.error("Wikipedia call failed. Proceedings without Wikipedia content.")
                         logger.exception(e)
                         imgJSON = None
@@ -53,7 +57,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                         if imgPage.get('original') and imgPage['original'].get('source'):
                             wikiImage = imgPage['original']['source']
 
-                        introJSON = requests.get(introURL).json()
+                        introJSON = requests.get(introURL, headers=headers).json()
                         extract = list(introJSON['query']['pages'].items())[0][1]['extract']
                         if extract.find('may refer to') < 0:
                             wikiIntro = extract
