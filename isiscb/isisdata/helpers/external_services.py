@@ -34,7 +34,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
         # if we already have wikipedia data cached and the cached data is less than
         # what is set as cache time, just use the cached data
         if wikipedia_data and (datetime.datetime.now(datetime.timezone.utc) - wikipedia_data.last_modified).days < settings.WIKIPEDIA_REFRESH_TIME:
-            return wikipedia_data.img_url, wikipedia_data.credit, wikipedia_data.intro
+            return wikipedia_data.img_url, wikipedia_data.intro, wikipedia_data.credit
 
         wikiImage = ''
         wikiIntro = ''
