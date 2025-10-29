@@ -17,20 +17,20 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
             - link for crediting wikipedia entry 
         """
         
-        # this logic was in here before, I just made the next if statement easier to read
-        # it's unclear to me what this is testing ¯\_(ツ)_/¯
-        def is_author():
+        # we don’t want to show images for people that have published but are not subject of any publications
+        # as the chance to get the image of a contemporary person with the same name is too high
+        # So we want to make sure the ratio of authored work to work about the person is big enough
+        def has_been_written_about():
             return authority.type_controlled == authority.PERSON \
                     and author_contributor_count != 0 \
                     and related_citations_count > 0 \
                     and author_contributor_count/related_citations_count > .9
-
-        if authority.type_controlled == Authority.SERIAL_PUBLICATION or is_author():
-            # apparently in that case, we don't want wikipedia data
+        
+        if authority.type_controlled == Authority.SERIAL_PUBLICATION or has_been_written_about():
+            # avoid getting too many wrong images from wikipedia
             return '', '', ''
         
         wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
-
         # if we already have wikipedia data cached and the cached data is less than
         # what is set as cache time, just use the cached data
         if wikipedia_data and (datetime.datetime.now(datetime.timezone.utc) - wikipedia_data.last_modified).days < settings.WIKIPEDIA_REFRESH_TIME:
@@ -40,7 +40,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
         wikiIntro = ''
         wikiCredit = ''
         authorityName = authority.name
-
+        
         # clean up the authority name to send to wikipedia
         if hasattr(authority, 'person'):
             authorityName = iutils.build_name_first_last(authorityName)
@@ -72,6 +72,25 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
             logger.error("Wikipedia call failed. Proceedings without Wikipedia content.")
             logger.exception(e)
 
+        # if successful, we get something like:
+        # {
+        #   'batchcomplete': '', 
+        #   'query': {
+        #        'pages': {
+        #           '29688374': {
+        #               'pageid': 29688374, 
+        #               'ns': 0, 
+        #               'title': 'Galileo Galilei', 
+        #               'original': {
+        #                   'source': 'img-url', 
+        #                   'width': 2964, 
+        #                   'height': 3765
+        #                }
+        #            }
+        #         }
+        #     }
+        # }
+        # it's unclear to me why we are testing for -1 here ¯\_(ツ)_/¯
         if imgJSON and list(imgJSON['query']['pages'].items())[0][0] != '-1':
             imgPage = list(imgJSON['query']['pages'].items())[0][1]
             imgPageID = imgPage['pageid']
