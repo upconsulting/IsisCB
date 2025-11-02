@@ -1,4 +1,4 @@
-import requests
+import requests, os
 from isisdata.models import *
 import isisdata.helpers.isiscb_utils as iutils
 from django.conf import settings
@@ -77,7 +77,12 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
             imgPageID = imgPage['pageid']
             wikiCredit = f'{settings.WIKIPEDIA_PAGE_PATH}{imgPageID}'
             if imgPage.get('original') and imgPage['original'].get('source'):
-                wikiImage = imgPage['original']['source']
+                filename, file_extension = os.path.splitext(imgPage['original']['source'])
+                # check if image type can be displayed in browser
+                if file_extension.lower() in [".png", ".jpg", ".jpeg", ".gif", ".svg"]:
+                    wikiImage = imgPage['original']['source']
+                else:
+                    logger.error(f"Cannot display {file_extension} images.")
 
             introJSON = requests.get(introURL, headers=headers).json()
             extract = list(introJSON['query']['pages'].items())[0][1]['extract']
