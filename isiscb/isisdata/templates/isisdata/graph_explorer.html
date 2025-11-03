@@ -358,7 +358,6 @@
                     subjects = data.subjects;
                     
                     forceGraph(nodes, links, subjects);
-
                 });
         }
 
@@ -573,7 +572,7 @@
                 .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
                 .attr("stroke", "gold")
                 .style("opacity", .9)
-                .on("mouseover", function(d) {
+                .on("mouseover", function(event, d) {
                     d3.selectAll("circle")
                         .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
                         .attr("stroke", "gold");	
@@ -588,10 +587,10 @@
                         .style("opacity", 1);		
                     tooltip.html(typeMap[d.type] + "<br><a href='https://data.isiscb.org/isis/authority/" + d.id + "' target='_blank'>" + d.name + "</a>");		
                     })					
-                .on("mouseout", function(d) {	
+                .on("mouseout", function(event, d) {	
                     d3.select(this).style("cursor", "default")	
                 })
-                .on("click", function(d){
+                .on("click", function(event, d){
                     subjects.push(d.id);
                     explodeConcept(subjects);
                 })

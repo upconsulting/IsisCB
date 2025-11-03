@@ -1972,12 +1972,7 @@ def quick_and_dirty_authority_search(request):
       each of these result sets is sorted by the number of linked citations
     """
 
-    logger.error("requestLOGGING===requestLOGGING===requestLOGGING===requestLOGGING===requestLOGGING===requestLOGGING===")
-    logger.error(request)
-
     q = request.GET.get('q', None)
-    logger.error("qLOGGING===qLOGGING===qLOGGING===qLOGGING===qLOGGING===qLOGGING===qLOGGING===qLOGGING===")
-    logger.error(q)
 
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     only_defaults = request.GET.get('only_defaults', 'false') == 'true'
@@ -1987,9 +1982,6 @@ def quick_and_dirty_authority_search(request):
     limit_active_types = request.GET.get('active_types', None)
     type_controlled = request.GET.get('type', None)
     exclude = request.GET.get('exclude', None)
-
-    logger.error("typeLOGGING===typeLOGGING===typeLOGGING===typeLOGGING===typeLOGGING===typeLOGGING===typeLOGGING===typeLOGGING===")
-    logger.error(request.GET.get('type', None))
 
     # In some cases, the curator wants to apply the system parameter only to
     #  specific authority types.
@@ -2009,7 +2001,7 @@ def quick_and_dirty_authority_search(request):
     else:
         query = Q()
 
-    query &= Q(classification_system_object__subject_search_searchable=True)
+    # query &= Q(classification_system_object__subject_search_searchable=True)
 
     if only_defaults:
         query &= Q(belongs_to__subject_search_default=True)
@@ -2025,7 +2017,7 @@ def quick_and_dirty_authority_search(request):
     if None in accessible_datasets:
         dataset_query = dataset_query | Q(belongs_to__isnull=True)
 
-    query &= dataset_query
+    # query &= dataset_query
 
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
@@ -2056,9 +2048,6 @@ def quick_and_dirty_authority_search(request):
     if not show_inactive:   # Don't show inactive records.
         query &= Q(record_status_value=CuratedMixin.ACTIVE)
 
-    logger.error("queryLOGGING===queryLOGGING===queryLOGGING===queryLOGGING===queryLOGGING===queryLOGGING===queryLOGGING===")
-    logger.error(query)
-
     queryset = Authority.objects.filter(query)
     queryset_sw = Authority.objects.filter(query)       # Starts with...
     queryset_exact = Authority.objects.filter(query)    # Exact match.
@@ -2084,12 +2073,6 @@ def quick_and_dirty_authority_search(request):
     # we don't need to duplicate results we've already captured with other queries
     #queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset = queryset.exclude(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
-
-    logger.error("querysetLOGGING===querysetLOGGING===querysetLOGGING===querysetLOGGING===querysetLOGGING===querysetLOGGING===")
-    logger.error(queryset_exact)
-    logger.error(queryset_sw)
-    logger.error(queryset_with_numbers)
-    logger.error(queryset)
 
     def _is_int(val):
         try:
@@ -2148,9 +2131,6 @@ def quick_and_dirty_authority_search(request):
                         queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
                         queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'))
 
-    # logger.error("chainedLOGGING===chainedLOGGING===chainedLOGGING===chainedLOGGING===chainedLOGGING===chainedLOGGING===")
-    # logger.error(list(chained))
-
     results = []
     result_ids = []
 
@@ -2184,9 +2164,6 @@ def quick_and_dirty_authority_search(request):
             'can_edit': rules.test_rule('is_generic_obj_accessible_by_tenant', User.objects.get(pk=request.user.id), obj),                
         })
 
-    logger.error("resultsLOGGING===resultsLOGGING===resultsLOGGING===resultsLOGGING===resultsLOGGING===resultsLOGGING===resultsLOGGING===")
-    logger.error(results)
-    logger.error(result_ids)
     return JsonResponse({'results': results})
 
 

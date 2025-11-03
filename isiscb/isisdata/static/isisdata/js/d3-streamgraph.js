@@ -2,9 +2,6 @@ const data = JSON.parse(
     document.currentScript.nextElementSibling.textContent
 );
 
-console.log(data);
-console.log(typeof data[0].date);
-
 data.map(d => {
     d.date = new Date(d.date);
 })

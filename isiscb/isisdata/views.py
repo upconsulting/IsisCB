@@ -1620,56 +1620,129 @@ def get_ngram_data(authority_ids):
 def genealogy(request, tenant_id=None):
     context = {}
 
-    harvard_diss = ACRelation.objects.filter(public=True, type_controlled=ACRelation.SCHOOL, authority__id='CBA000114966')
-
     if request.method == 'POST':
-        node_ids = set()
+        request = json.loads(request.body)
         nodes = []
         links = []
-        subjects = json.loads(request.body)['subjects']
+        node_associations_range = {}
+        subjects = request['subjects']
+        node_ids = set(subjects.copy())
+        next_year = datetime.datetime.today().year + 1
+        node_associations_min = 0
+        node_associations_max = 0
 
-        for subject in subjects:
-            node_ids.add(subject) #add the CBA id of the selected subjects to node_ids
+        subject_theses_ids = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, authority__id__in=subjects, citation__type_controlled=Citation.THESIS, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR]).values_list("citation__id", flat=True).distinct("citation__id")
 
-            sqs =SearchQuerySet().models(Citation).facet('subject_ids', size=50)
+        def generate_link(source, target, thesis, link_type):
+            def generate_link_value():
+                if link_type == "alma_mater":
+                    return next_year - thesis.publication_date.year if thesis.publication_date.year else 1
+                else:
+                    return 15
+                
+            thesis_title = thesis.title if thesis.title else None
+            thesis_year = thesis.publication_date.year if thesis.publication_date.year else None
+            thesis_id = thesis.id
 
-            word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=subject).filter_or(contributor_ids=subject) \
-                    .filter_or(editor_ids=subject).filter_or(subject_ids=subject).filter_or(institution_ids=subject) \
-                    .filter_or(category_ids=subject).filter_or(advisor_ids=subject).filter_or(translator_ids=subject) \
-                    .filter_or(publisher_ids=subject).filter_or(school_ids=subject).filter_or(meeting_ids=subject) \
-                    .filter_or(periodical_ids=subject).filter_or(book_series_ids=subject).filter_or(time_period_ids=subject) \
-                    .filter_or(geographic_ids=subject).filter_or(about_person_ids=subject).filter_or(other_person_ids=subject)
+            node_ids.add(source.id)
+            node_ids.add(target.id)
 
-            #add subjects to list of nodes
-            subject_ids_facets = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-            for subject_ids_facet in subject_ids_facets:
-                node_ids.add(subject_ids_facet[0])
-            #remove selected authority from facet results
-            subject_ids = [x for x in subject_ids_facets if x[0].upper() != subject.upper()]
+            link = {}
+            link['source'] = source.id
+            link['target'] = target.id
+            link['value'] = generate_link_value()
+            link['type'] = link_type
+            link['thesis_title'] = thesis_title
+            link['thesis_year'] = thesis_year
+            link['thesis_id'] = thesis_id
+            links.append(link)
 
-            #create links between selected authority and its related subjects
-            if subject_ids:
-                for subject_id in subject_ids:
-                    link = {}
-                    link['source'] = subject
-                    link['target'] = subject_id[0]
-                    link['value'] = subject_id[1]
-                    links.append(link)
+        subject_theses = Citation.objects.filter(id__in=[subject_theses_ids])
 
-        authorities = Authority.objects.filter(pk__in=list(node_ids)).values('id', 'name', 'type_controlled')
-        if authorities:
-            for authority in authorities:
+        if subject_theses:
+            for thesis in subject_theses:
+                acrs = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, citation__id=thesis.id, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR])
+                author_acr = acrs.filter(type_controlled=ACRelation.AUTHOR)
+                if author_acr:
+                    author = author_acr.first().authority
+                school_acr = acrs.filter(type_controlled=ACRelation.SCHOOL)
+                if school_acr:
+                    school = school_acr.first().authority
+                advisors_acrs = acrs.filter(type_controlled=ACRelation.ADVISOR)
+
+                # generate link(s) between thesis author and their advisor(s)
+                if advisors_acrs:
+                    for advisor_acr in advisors_acrs:
+                        generate_link(author, advisor_acr.authority, thesis, "advisor")
+                
+                # generate link between thesis author and their alma mater
+                if school:
+                    generate_link(author, school, thesis, "alma_mater")
+                        
+
+        node_authorities = Authority.objects.filter(pk__in=list(node_ids))
+        if node_authorities:
+            for authority in node_authorities:
+                associated_theses = ACRelation.objects.filter(public=True, citation__public=True, authority__public=True, authority__id=authority.id, citation__type_controlled=Citation.THESIS, type_controlled__in=[ACRelation.AUTHOR, ACRelation.SCHOOL, ACRelation.ADVISOR,]).order_by('citation__publication_date__year')
+                node_associations = associated_theses.count()
+                theses_hosted_by_school = None
+                theses_advised = None
+                thesis_earliest = 0
+                thesis_latest = 0
+                employers = set()
+                alma_mater = ''
+                thesis_title = ''
+                thesis_year = None
+                theses_advised_count = 0
+
+                if authority.type_controlled == Authority.PERSON:
+                    thesis_written = associated_theses.filter(citation__public=True, authority__public=True, authority__id=authority.id, type_controlled=ACRelation.AUTHOR).values_list('citation__id', flat=True)
+                    alma_mater_acr = ACRelation.objects.filter(public=True, citation__id__in=thesis_written, type_controlled=ACRelation.SCHOOL).first()
+                    if alma_mater_acr:
+                        alma_mater = alma_mater_acr.authority.name
+                        thesis_title = alma_mater_acr.citation.title
+                        thesis_year = alma_mater_acr.citation.publication_date.year
+                    theses_advised = associated_theses.filter(type_controlled=ACRelation.ADVISOR)
+                    thesis_earliest = theses_advised.first().citation.publication_date.year if theses_advised and theses_advised.first().citation.publication_date else 0
+                    thesis_latest = theses_advised.last().citation.publication_date.year if theses_advised and theses_advised.last().citation.publication_date else 0
+                    theses_advised_ids = theses_advised.values_list('id', flat=True) if theses_advised else []
+                    theses_advised_count = theses_advised.count()
+                    theses_advised_schools = ACRelation.objects.filter(public=True, type_controlled=ACRelation.SCHOOL, citation__in=theses_advised_ids) 
+                    for school in theses_advised_schools:
+                        employers.add(school.authority.name)
+                elif authority.type_controlled == Authority.INSTITUTION:
+                    theses_hosted_by_school = associated_theses.count()
+                    thesis_earliest = associated_theses.first().citation.publication_date.year
+                    thesis_latest = associated_theses.last().citation.publication_date.year
+            
                 node = {}
-                node['id'] = authority['id']
-                node['name'] = authority['name']
-                node['type'] = authority['type_controlled']
-                node['selected'] = True if authority['id'] in subjects else False
+                node['id'] = authority.id
+                node['name'] = authority.name
+                node['type'] = authority.type_controlled
+                node['selected'] = True if authority.id in subjects else False
+                node['theses_hosted_by_school'] = theses_hosted_by_school
+                node['theses_advised'] = theses_advised_count
+                node['employers'] = list(employers)
+                node['alma_mater'] = alma_mater
+                node['thesis_title'] = thesis_title
+                node['thesis_year'] = thesis_year
+                node['thesis_earliest'] = thesis_earliest
+                node['thesis_latest'] = thesis_latest
+                node['num_associations'] = node_associations
+                node_associations_min = node_associations if node_associations < node_associations_min else node_associations_min
+                node_associations_max = node_associations if node_associations > node_associations_max else node_associations_max
                 nodes.append(node)
+
+        node_associations_range = {
+            'min': node_associations_min,
+            'max': node_associations_max,
+        }
 
         context = {
             'nodes': json.dumps(nodes),
             'links': json.dumps(links),
             'subjects': subjects,
+            'node_associations_range': node_associations_range,
         }
 
         return JsonResponse(context)

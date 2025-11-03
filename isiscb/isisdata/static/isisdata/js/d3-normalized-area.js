@@ -3,8 +3,6 @@ const data = JSON.parse(
     document.currentScript.nextElementSibling.textContent
 );
 
-console.log(data);
-
 // convert date strings to type date
 data.map(d => {
     d.date = new Date(d.date);

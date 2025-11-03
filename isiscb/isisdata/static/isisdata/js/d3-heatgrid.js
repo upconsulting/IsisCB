@@ -2,8 +2,6 @@ const data = JSON.parse(
   document.currentScript.nextElementSibling.textContent
 );
 
-console.log(data);
-
 // Declare the chart dimensions and margins.
 const marginTop = 20;
 const marginRight = 11;
