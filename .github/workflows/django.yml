@@ -116,7 +116,6 @@ jobs:
         
     - name: setup eb config for worker
       run: |
-        rm -r .elasticbeanstalk
         cp -r .elasticbeanstalk-staging-worker .elasticbeanstalk
 
     - name: Deploy to AWS Staging Worker Instance
