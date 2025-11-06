@@ -245,7 +245,13 @@ def create_timeline(authority_id, timeline_id, tenant_id_to_filter):
     SHOWN_TITLES_COUNT = 3
 
     counted_citations = []
-    timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
+    try:
+        timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
+    except CachedTimeline.DoesNotExist as e:
+        # if there is no timeline, something is off, so we just return
+        print(f"Timeline does not exist: {timeline_id}")
+        print(e)
+
     cached_years = {}
     for acrel in acrelations:
         if acrel.citation.id in counted_citations or not acrel.citation.publication_date:
