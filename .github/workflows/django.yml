@@ -47,6 +47,13 @@ jobs:
         python -m pip install pip==23.3.2
         pip install -U six
         pip install -r requirements.txt
+
+  test:
+    if: "!contains(github.event.head_commit.message, '[skip tests]')"
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
     - name: Run Tests
       run: |
         cd isiscb
@@ -54,8 +61,8 @@ jobs:
         export DJANGO_SETTINGS_MODULE=isiscb.github_settings
         export ELASTIC_HOST=http://localhost:9200/
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
-        #python manage.py migrate
-        #python manage.py test
+        python manage.py migrate
+        python manage.py test
 
   prepare_deploy:
     if: "github.event_name == 'push'"
@@ -81,7 +88,7 @@ jobs:
 
   deploy_web:
     if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip web]')"
-    needs: build
+    needs: prepare_deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -101,7 +108,7 @@ jobs:
 
   deploy_worker:
     if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip worker]')"
-    needs: build
+    needs: prepare_deploy
     runs-on: ubuntu-latest
 
     steps:
