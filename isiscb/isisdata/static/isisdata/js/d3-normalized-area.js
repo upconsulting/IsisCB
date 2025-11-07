@@ -1,3 +1,5 @@
+// this script uses D3.js to generate a normalized area chart 
+// (e.g.: https://observablehq.com/@d3/normalized-stacked-area-chart/2)
 
 const data = JSON.parse(
     document.currentScript.nextElementSibling.textContent
@@ -79,7 +81,4 @@ data.map(d => {
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
           .text("↑ Theses per year"));
-
-  // Return the chart with the color scale as a property (for the legend).
-  //return Object.assign(svg.node(), {scales: {color}});
 

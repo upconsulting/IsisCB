@@ -2001,7 +2001,7 @@ def quick_and_dirty_authority_search(request):
     else:
         query = Q()
 
-    # query &= Q(classification_system_object__subject_search_searchable=True)
+    query &= Q(classification_system_object__subject_search_searchable=True)
 
     if only_defaults:
         query &= Q(belongs_to__subject_search_default=True)
@@ -2017,7 +2017,7 @@ def quick_and_dirty_authority_search(request):
     if None in accessible_datasets:
         dataset_query = dataset_query | Q(belongs_to__isnull=True)
 
-    # query &= dataset_query
+    query &= dataset_query
 
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]

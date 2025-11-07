@@ -279,12 +279,6 @@ class UserProfileForm(forms.Form):
     share_email = forms.BooleanField(required=False)
     resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), required=False)
 
-# def get_thesis_hosts():
-#     thesis_hosts = Authority.objects.filter(public=True, type_controlled=Authority.INSTITUTION, acrelation__type_controlled=ACRelation.SCHOOL).annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).filter(num_theses__gt=2).order_by('name')
-#     logger.error("LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===LOGGING===")
-#     logger.error(thesis_hosts)
-#     return thesis_hosts
-
 class ThesisMillForm(forms.Form):
     TOP5 = 5
     TOP10 = 10

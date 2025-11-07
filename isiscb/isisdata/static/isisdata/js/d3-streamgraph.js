@@ -1,3 +1,6 @@
+// this script uses D3.js to generate a streamgraph chart 
+// (e.g.: https://observablehq.com/@d3/streamgraph/2)
+
 const data = JSON.parse(
     document.currentScript.nextElementSibling.textContent
 );
@@ -78,6 +81,3 @@ data.map(d => {
       .attr("d", area)
     .append("title")
       .text(d => d.key);
-
-  // Return the chart with the color scale as a property (for the legend).
-  // return Object.assign(svg.node(), {scales: {color}});

@@ -1,10 +1,4 @@
 {% extends "isisdata/__base.html" %}
-{% load app_filters %}
-{% load citation_filters %}
-{% load facet_filters %}
-{% load static %}
-{% load metadata_filters %}
-{% load search_filters %}
 
 {% block extra_head %}
     <style>
@@ -59,11 +53,17 @@
             to { -webkit-transform: rotate(360deg); }
         }
     </style>
+    <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script>
 {% endblock %}
 
 {% block content %}
     <div>
         <div class='col-sm-12 col-md-3' id="control-column" style="padding: 0;">
+            <span><b>Domino chain-reaction?</b></span>
+            <div class="btn-group btn-toggle" id="domino-button" style="margin-bottom: 15px;"> 
+                <button class="btn btn-xs btn-default">ON</button>
+                <button class="btn btn-xs btn-danger active">OFF</button>
+            </div>
             <div id="addSubjects">
                 <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for school or scholar" style="height:3.8em">
                 </input>
@@ -112,6 +112,14 @@
     </div>
 
     <script>
+        $('.btn-toggle').click(function() {
+            $(this).find('.btn').toggleClass('active');
+            if ($(this).find('.btn-danger').size()>0) {
+                $(this).find('.btn').toggleClass('btn-danger');
+            }
+            $(this).find('.btn').toggleClass('btn-default');
+        });
+
         var subjects = [];
         var INITIAL_MAX_RESULTS = 10;
         var max_results = INITIAL_MAX_RESULTS;
@@ -323,22 +331,35 @@
             triggerSearchSubjects(false);
         }
 
+        function getDominoSelection() {
+            let dominoChainReactionToggle = $("#domino-button").children(".active").html();
+            let domino = false;
+            if (dominoChainReactionToggle == "ON") {
+                domino = true;
+            }
+            return domino;
+        }
+
         function addConcept(event) {
             let acRelId = $(event.target).data('id');
             subjects.push(acRelId);
-            let payload = {
-                'subjects': subjects
-            };
+            let domino = getDominoSelection();
 
+            let payload = {
+                'subjects': subjects,
+                'domino': domino
+            };
             getData(payload);
         }
 
         function explodeConcept(subjects) {
             //prevent multiple tooltips from getting generated with each explosion
             clearTooltip();
+            let domino = getDominoSelection();
 
             let payload = {
-                "subjects": subjects
+                "subjects": subjects,
+                "domino": domino
             };
             getData(payload);
         }
@@ -383,22 +404,6 @@
                         clearSubjects();
                     }
                 });
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
         }
 
         function clearSubjects() {
@@ -547,7 +552,21 @@
             clearTooltip();
 
             // populate legends
-            nodes.map(node => {
+
+            // a generic sorting function
+            cmp = function(x, y){
+                return x > y ? 1 : x < y ? -1 : 0; 
+            };
+
+            //sort nodes by number of associated theses descending then name ascending
+            let sorted_nodes = nodes.toSorted(function(a, b){
+                return cmp( 
+                    [-cmp(a.num_associations, b.num_associations), cmp(a.name, b.name)], 
+                    [-cmp(b.num_associations, a.num_associations), cmp(b.name, a.name)]
+                );
+            });
+
+            sorted_nodes.map(node => {
                 let li = document.createElement("li");
                 let dot = document.createElement("div");
                 dot.style.backgroundColor = colorScaler(node.type, node.theses_advised);
@@ -614,12 +633,14 @@
             //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link strength
             let linkForceScale = d3.scaleLinear()
                 .domain([Math.min(...linkValues), Math.max(...linkValues)])
-                .range([.1, .4]);
+                .range([.5, 1.5]);
             
             //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link thickness
+            /*
             let linkStrokeWidthScale = d3.scaleLinear()
                 .domain([Math.min(...linkValues), Math.max(...linkValues)])
                 .range([1,5])
+            */
 
             var width = 1000;
             var height = 700;
@@ -639,16 +660,16 @@
                 .data(links)
                 .enter().append("line")
                 .attr("stroke", "#999")
-                .attr("stroke-width", function(d) { return linkStrokeWidthScale(d.value); })
+                .attr("stroke-width", "2px")
                 .on("mouseover", function(event, d) {
                     d3.selectAll("circle")
                         .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
                         .attr("stroke", "gold");
                     d3.selectAll("line")
                         .attr("stroke", "#999")
-                        .attr("stroke-width", function(d) { return linkStrokeWidthScale(d.value); })
+                        .attr("stroke-width", "2px")
                     d3.select(this)
-                        .attr("stroke-width", "4px")
+                        .attr("stroke-width", "3px")
                         .attr("stroke", "#B7337A");
                     tooltip.transition()		
                         .duration(200)		
@@ -689,7 +710,7 @@
                 .on("mouseover", function(event, d) {
                     d3.selectAll("line")
                         .attr("stroke", "#999")
-                        .attr("stroke-width", function(d) { return linkStrokeWidthScale(d.value); })
+                        .attr("stroke-width", "2px")
                     d3.selectAll("circle")
                         .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
                         .attr("stroke", "gold");	

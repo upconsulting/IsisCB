@@ -1,3 +1,6 @@
+// this script uses D3.js to generate a heatgrid type chart 
+// (e.g.: https://observablehq.com/@d3/the-impact-of-vaccines)
+
 const data = JSON.parse(
   document.currentScript.nextElementSibling.textContent
 );
