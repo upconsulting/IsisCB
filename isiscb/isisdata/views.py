@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import connection
 from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
-from django.db.models.functions import TruncYear
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.conf import settings
@@ -1668,7 +1667,6 @@ def genealogy(request, tenant_id=None):
 @ensure_csrf_cookie
 def theses_by_school(request, tenant_id=None):
     form = ThesisMillForm()
-    years = list(range(datetime.datetime(1970,1,1).year, datetime.datetime.today().year))
     top = form.fields['top'].initial
     chart_type = form.fields['chart_type'].initial
     chart_type_urls = {
@@ -1678,8 +1676,6 @@ def theses_by_school(request, tenant_id=None):
         "ST": "streamgraph",
     }
     select_schools = []
-    all_schools = Authority.objects.filter(public=True, type_controlled=Authority.INSTITUTION, acrelation__type_controlled=ACRelation.SCHOOL).values_list('id','name').annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).order_by('-num_theses')
-    all_thesis_school_acrs = ACRelation.objects.filter(public=True, citation__public=True, authority__public=True, citation__type_controlled=Citation.THESIS, citation__publication_date__year__in=years)
     
     if request.method == 'POST':
         form = ThesisMillForm(request.POST)
@@ -1688,7 +1684,7 @@ def theses_by_school(request, tenant_id=None):
             top = form.cleaned_data["top"] if form.cleaned_data["top"] == "CU" else int(form.cleaned_data["top"]) 
             select_schools = form.cleaned_data["select_schools"]
 
-    context = generate_theses_by_school_context(top, chart_type, select_schools, all_schools, years, all_thesis_school_acrs)       
+    context = generate_theses_by_school_context(top, chart_type, select_schools)       
 
     context["form"] = form
     context["top"] = top

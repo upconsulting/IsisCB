@@ -1,18 +1,44 @@
+from django.db.models.functions import TruncYear
+from django.db.models import Count
+
 from isisdata.models import *
+
 import logging, datetime
 from haystack.query import SearchQuerySet
 
-def generate_theses_by_school_context(top, chart_type, select_schools, all_schools, years, all_thesis_school_acrs):
+logger = logging.getLogger(__name__)
+
+def generate_theses_by_school_context(top, chart_type, select_schools):
+    
     if top == "CU":
         school_ids = select_schools.values_list('id', flat=True)
-        schools = all_schools.filter(id__in=[school_ids])
+        schools = select_schools
     else:
+        all_schools = Authority.objects.filter(
+            public=True, 
+            type_controlled=Authority.INSTITUTION, 
+            acrelation__type_controlled=ACRelation.SCHOOL)
+    
+        # all schools ordered by how many theses there are for each
+        all_schools = all_schools.annotate(num_theses=Count('acrelation', filter=Q(acrelation__citation__type_controlled=Citation.THESIS))).order_by('-num_theses')
+        
         schools = all_schools[:top]
         school_ids = schools.values_list('id', flat=True)
 
+    
     school_names = list(schools.values_list('name', flat=True))
-    thesis_school_acrs = all_thesis_school_acrs.filter(authority__id__in=[school_ids])
-                                                            
+    years = list(range(datetime.datetime(1970,1,1).year, datetime.datetime.today().year))
+   
+    # we don't need to check if authority is public since that will have taken care above when querying
+    # for authorities
+    thesis_school_acrs = ACRelation.objects.filter(
+        public=True, 
+        citation__public=True, 
+        citation__type_controlled=Citation.THESIS, 
+        citation__publication_date__year__in=years,
+        authority__id__in=[school_ids])
+
+                                                      
     if chart_type == "HG":
         values = get_data_for_heatgrid(school_ids, years, thesis_school_acrs)
         data = {
@@ -23,11 +49,10 @@ def generate_theses_by_school_context(top, chart_type, select_schools, all_schoo
     elif chart_type == "NA" or chart_type == "ST" or chart_type == "AR":
         data = get_data_for_stacked_area(thesis_school_acrs, years, school_names)
     
-    context = {
-        'data': data,
+    return {
+        'data': data if data else [],
     }
 
-    return context
 
 def get_data_for_heatgrid(authority_ids, years, acrs):
     """
@@ -48,16 +73,19 @@ def get_data_for_heatgrid(authority_ids, years, acrs):
     :return: formatted data necessary for populating D3.js heatgrid graphs
     :rtype: list of lists
     """
+    citations_count_per_year = []
+    years_counts_template = [0] * len(years)
 
-    values = []
-    authority_values = [0] * len(years)
     for authority in authority_ids:
-        this_authority_values = authority_values.copy()
+        citations_per_year_for_authority = years_counts_template.copy()
         authority_acrs = acrs.filter(authority__id=authority)
+
         for acr in authority_acrs:
-            this_authority_values[years.index(acr.citation.publication_date.year)] += 1
-        values.append(this_authority_values)
-    return values
+            citations_per_year_for_authority[years.index(acr.citation.publication_date.year)] += 1
+
+        citations_count_per_year.append(citations_per_year_for_authority)
+
+    return citations_count_per_year
 
 def get_data_for_stacked_area(acrs, years, schools):
     """
@@ -80,30 +108,35 @@ def get_data_for_stacked_area(acrs, years, schools):
     :rtype: list of dicts
     """
 
-    schools_years = {}
-    for school in schools:
-        schools_years[school] = years.copy()
-
+    schools_years = { school : years.copy() for school in schools }
+    
     values = []
-    annotated_acrs = acrs.values("authority__id").annotate(year=TruncYear('citation__publication_date')).values('year', 'authority__id').annotate(num_theses=Count('citation__id')).values('year', 'authority__name', 'num_theses').order_by('authority__name', 'year')
-    for acr in annotated_acrs:
-        row = {}
-        row["date"] = acr['year']
-        row["school"] = acr['authority__name']
-        row["theses"] = acr['num_theses']
-        values.append(row)
+    theses_per_school_per_year = acrs.values("authority__id")\
+        .annotate(year=TruncYear('citation__publication_date'))\
+        .values('year', 'authority__id')\
+        .annotate(num_theses=Count('citation__id'))\
+        .values('year', 'authority__name', 'num_theses')\
+        .order_by('authority__name', 'year')
+   
+    for acr in theses_per_school_per_year:
+        values.append({
+            "date": acr['year'],
+            "school": acr['authority__name'],
+            "theses": acr['num_theses']
+        })
 
         # creating a list of all the years with no data for each school
-        schools_years[acr['authority__name']].remove(int(acr['year'].year))
+        if int(acr['year'].year) in schools_years[acr['authority__name']]:
+            schools_years[acr['authority__name']].remove(int(acr['year'].year))
     
     # adding a new record to the data for all empty rows
     for school in schools_years: 
         for year in schools_years[school]:
-            row = {}
-            row["date"] = datetime.date(year, 1, 1)
-            row["school"] = school
-            row["theses"] = 0
-            values.append(row)
+            values.append({
+                "date": datetime.date(year, 1, 1),
+                "school": school,
+                "theses": 0
+            })
     
     # sort list of thesis year-school thesis counts by year and then school
     values = sorted(values, key=lambda k: (k['date'], k['school'].lower()))
@@ -113,6 +146,7 @@ def get_data_for_stacked_area(acrs, years, schools):
 def clean_dates(date_facet):
     new_date_facet = []
     for date in date_facet:
+        logger.error(date_facet)
         date_pattern = re.compile("^[0-9]{4}$")
         if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)

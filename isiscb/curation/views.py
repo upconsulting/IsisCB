@@ -1973,7 +1973,6 @@ def quick_and_dirty_authority_search(request):
     """
 
     q = request.GET.get('q', None)
-
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     only_defaults = request.GET.get('only_defaults', 'false') == 'true'
 
