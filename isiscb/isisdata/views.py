@@ -1592,57 +1592,25 @@ def genealogy(request, tenant_id=None):
     node_associations_min = 0
     node_associations_max = 0
 
-    subject_theses_ids = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, authority__id__in=subjects, citation__type_controlled=Citation.THESIS, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR]).values_list("citation__id", flat=True).distinct("citation__id")
+    subject_theses_ids = ACRelation.objects.filter(
+            public=True, 
+            authority__public=True, 
+            citation__public=True, 
+            authority__id__in=subjects, 
+            citation__type_controlled=Citation.THESIS, 
+            type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR]
+            )\
+        .values_list("citation__id", flat=True).distinct("citation__id")
 
     subject_theses = Citation.objects.filter(id__in=[subject_theses_ids])
-
-    def extrapolate_thesis(thesis):
-        acrs = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, citation__id=thesis.id, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR])
-        author_acrs = acrs.filter(type_controlled=ACRelation.AUTHOR)
-        if author_acrs:
-            author = author_acrs.first().authority
-        else:
-            # because all links pass through the author, if a thesis lacks an author, we can skip it
-            return
-        school_acrs = acrs.filter(type_controlled=ACRelation.SCHOOL)
-        if school_acrs:
-            school = school_acrs.first().authority
-        advisors_acrs = acrs.filter(type_controlled=ACRelation.ADVISOR)
-
-        if advisors_acrs:
-            for advisor_acr in advisors_acrs:
-                # generate link(s) between thesis author and their advisor(s)
-                node_ids.add(author.id)
-                node_ids.add(advisor_acr.authority.id)
-                link_type = "advisor"
-                advisors_link = generate_genealogy_link(author, advisor_acr.authority, thesis, link_type)
-
-                links.append(advisors_link)
-
-                if domino_effect == True:
-                    # follow family tree upwards, checking if subject's advisor has a thesis in DB and linking to it, and so on and so forth
-                    if advisor_acr.authority.id not in subjects:
-                        advisor_thesis_acr = ACRelation.objects.filter(public=True, citation__public=True, type_controlled=ACRelation.AUTHOR, citation__type_controlled=Citation.THESIS, authority__id=advisor_acr.authority.id)
-                        if advisor_thesis_acr:
-                            advisor_thesis = Citation.objects.get(pk=advisor_thesis_acr.first().citation.id)
-                            extrapolate_thesis(advisor_thesis)
-        
-        # generate link between thesis author and their alma mater
-        if school:
-            node_ids.add(author.id)
-            node_ids.add(school.id)
-            link_type = "alma_mater"
-            school_link = generate_genealogy_link(author, school, thesis, link_type)
-            links.append(school_link)
-
+  
     if subject_theses:
         for thesis in subject_theses:
-            extrapolate_thesis(thesis)
+            extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects)
                     
     if node_ids:
         node_authorities = Authority.objects.filter(pk__in=list(node_ids))
         for authority in node_authorities:
-            node = {}
             associated_theses = ACRelation.objects.filter(public=True, citation__public=True, authority__public=True, authority__id=authority.id, citation__type_controlled=Citation.THESIS, type_controlled__in=[ACRelation.AUTHOR, ACRelation.SCHOOL, ACRelation.ADVISOR,]).order_by('citation__publication_date__year')
             node_associations = associated_theses.count()
             node_associations_min = node_associations if node_associations < node_associations_min else node_associations_min

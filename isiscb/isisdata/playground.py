@@ -247,22 +247,63 @@ def generate_genealogy_node(authority, associated_theses, subjects):
             employers.add(school.authority.name)
     elif authority.type_controlled == Authority.INSTITUTION:
         theses_hosted_by_school = associated_theses.count()
-        thesis_earliest = associated_theses.first().citation.publication_date.year
-        thesis_latest = associated_theses.last().citation.publication_date.year
+        if theses_hosted_by_school:
+            thesis_earliest = associated_theses.first().citation.publication_date.year
+            thesis_latest = associated_theses.last().citation.publication_date.year
 
-    node = {}
-    node['id'] = authority.id
-    node['name'] = authority.name
-    node['type'] = authority.type_controlled
-    node['selected'] = True if authority.id in subjects else False
-    node['theses_hosted_by_school'] = theses_hosted_by_school
-    node['theses_advised'] = theses_advised_count
-    node['employers'] = list(employers)
-    node['alma_mater'] = alma_mater
-    node['thesis_title'] = thesis_title
-    node['thesis_year'] = thesis_year
-    node['thesis_earliest'] = thesis_earliest
-    node['thesis_latest'] = thesis_latest
-    node['num_associations'] = node_associations
+    node = {
+        "id": authority.id,
+        "name": authority.name,
+        "type": authority.type_controlled,
+        "selected": authority.id in subjects,
+        "theses_hosted_by_school": theses_hosted_by_school,
+        "theses_advised": theses_advised_count,
+        "employers": list(employers),
+        "alma_mater": alma_mater,
+        "thesis_title": thesis_title,
+        "thesis_year": thesis_year,
+        "thesis_earliest": thesis_earliest,
+        "thesis_latest": thesis_latest,
+        "num_associations": node_associations,
+    }
 
     return node
+
+def extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects):
+    acrs = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, citation__id=thesis.id, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR])
+    author_acrs = acrs.filter(type_controlled=ACRelation.AUTHOR)
+    if author_acrs:
+        author = author_acrs.first().authority
+    else:
+        # because all links pass through the author, if a thesis lacks an author, we can skip it
+        return
+    school_acrs = acrs.filter(type_controlled=ACRelation.SCHOOL)
+    if school_acrs:
+        school = school_acrs.first().authority
+    advisors_acrs = acrs.filter(type_controlled=ACRelation.ADVISOR)
+
+    if advisors_acrs:
+        for advisor_acr in advisors_acrs:
+            # generate link(s) between thesis author and their advisor(s)
+            node_ids.add(author.id)
+            node_ids.add(advisor_acr.authority.id)
+            link_type = "advisor"
+            advisors_link = generate_genealogy_link(author, advisor_acr.authority, thesis, link_type)
+
+            links.append(advisors_link)
+
+            if domino_effect == True:
+                # follow family tree upwards, checking if subject's advisor has a thesis in DB and linking to it, and so on and so forth
+                if advisor_acr.authority.id not in subjects:
+                    advisor_thesis_acr = ACRelation.objects.filter(public=True, citation__public=True, type_controlled=ACRelation.AUTHOR, citation__type_controlled=Citation.THESIS, authority__id=advisor_acr.authority.id)
+                    if advisor_thesis_acr:
+                        advisor_thesis = Citation.objects.get(pk=advisor_thesis_acr.first().citation.id)
+                        extrapolate_thesis(advisor_thesis)
+    
+    # generate link between thesis author and their alma mater
+    if school:
+        node_ids.add(author.id)
+        node_ids.add(school.id)
+        link_type = "alma_mater"
+        school_link = generate_genealogy_link(author, school, thesis, link_type)
+        links.append(school_link)
