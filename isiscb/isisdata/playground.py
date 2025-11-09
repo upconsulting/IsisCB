@@ -146,7 +146,6 @@ def get_data_for_stacked_area(acrs, years, schools):
 def clean_dates(date_facet):
     new_date_facet = []
     for date in date_facet:
-        logger.error(date_facet)
         date_pattern = re.compile("^[0-9]{4}$")
         if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)
@@ -207,14 +206,15 @@ def generate_genealogy_link(source, target, thesis, link_type):
     thesis_year = thesis.publication_date.year if thesis.publication_date.year else None
     thesis_id = thesis.id
 
-    link = {}
-    link['source'] = source.id
-    link['target'] = target.id
-    link['value'] = generate_link_value()
-    link['type'] = link_type
-    link['thesis_title'] = thesis_title
-    link['thesis_year'] = thesis_year
-    link['thesis_id'] = thesis_id
+    link = {
+        "source": source.id,
+        "target": target.id,
+        "value": generate_link_value(),
+        "type": link_type,
+        "thesis_title": thesis_title,
+        "thesis_year": thesis_year,
+        "thesis_id": thesis_id,
+    }
 
     return link
 
