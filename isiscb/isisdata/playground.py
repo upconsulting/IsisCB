@@ -56,6 +56,7 @@ def generate_theses_by_school_context(top, chart_type, select_schools):
 
 def get_data_for_heatgrid(authority_ids, years, acrs):
     """
+    this function fetches and formats data in order to generate the heatgrid visualization.
     this function takes a queryset of ACRs of theses 
     and converts them into a list of lists of the following form 
     (as desired by out-of-the-box D3 heatgrid graph (https://observablehq.com/@d3/the-impact-of-vaccines)):
@@ -89,6 +90,7 @@ def get_data_for_heatgrid(authority_ids, years, acrs):
 
 def get_data_for_stacked_area(acrs, years, schools):
     """
+    this function fetches and formats data in order to generate the area visualizations (stacked, normalized, streamgraph).
     this function takes a queryset of ACRs of theses 
     and converts them into a list of objects of the following form 
     (as desired by out-of-the-box D3 stacked area graphs):
@@ -298,7 +300,7 @@ def extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects):
                     advisor_thesis_acr = ACRelation.objects.filter(public=True, citation__public=True, type_controlled=ACRelation.AUTHOR, citation__type_controlled=Citation.THESIS, authority__id=advisor_acr.authority.id)
                     if advisor_thesis_acr:
                         advisor_thesis = Citation.objects.get(pk=advisor_thesis_acr.first().citation.id)
-                        extrapolate_thesis(advisor_thesis)
+                        extrapolate_thesis(advisor_thesis, node_ids, links, domino_effect, subjects)
     
     # generate link between thesis author and their alma mater
     if school:
