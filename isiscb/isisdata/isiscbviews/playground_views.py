@@ -6,7 +6,6 @@ from isisdata.forms import ThesisMillForm
 
 from isisdata.playground import *
 
-
 import json
 
 
