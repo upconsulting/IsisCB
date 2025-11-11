@@ -1,0 +1,800 @@
+{% extends "isisdata/__base.html" %}
+
+{% block extra_head %}
+    <style>
+        .node circle {
+            cursor: pointer;
+            stroke: #3182bd;
+            stroke-width: 1.5px;
+        }
+        
+        .node text {
+            font: 10px sans-serif;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+        
+        line.link {
+            fill: none;
+            stroke: #9ecae1;
+            stroke-width: 1.5px;
+        }
+
+        #loading-blockade {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left:0; 
+            top:0;
+            z-index:1071;
+            background-color: rgba(0,0,0,.7);
+            display: none;
+        }
+
+        #loading-spinner {
+            position: fixed;
+            left: 50%;
+            top: 45%;
+        }
+
+        .glyphicon.spinning {
+            color: #012e64;
+            animation: spin 1s infinite linear;
+            -webkit-animation: spin2 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: scale(1) rotate(0deg); }
+            to { transform: scale(1) rotate(360deg); }
+        }
+
+        @-webkit-keyframes spin2 {
+            from { -webkit-transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <div class='col-sm-12 col-md-3' id="control-column" style="padding: 0;">
+            <span><b>Domino chain-reaction?</b></span>
+            <div class="btn-group btn-toggle" id="domino-button" style="margin-bottom: 15px;"> 
+                <button class="btn btn-xs btn-default">ON</button>
+                <button class="btn btn-xs btn-danger active">OFF</button>
+            </div>
+            <div id="addSubjects">
+                <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for school or scholar" style="height:3.8em">
+                </input>
+
+                <ul class="list-group" id="subjectSearchResultsContainer">
+                </ul>
+            </div>
+            <div id="tooltipContainer">
+            </div>
+            <div id="selectedTermsContainer" style="border: 2px solid #555; border-radius: 5px; padding: 15px; margin: 15px 0px 15px 0px;">
+                <h5 style="margin-top: 0;">Selected Terms <a class="float-right" href='javascript:;' onclick='clearSubjects();' style="margin-left: 30px; text-decoration: none;"><span class="label label-danger"><i class="fas fa-ban"></i> Clear All</span></a></h5>
+                <hr style="margin: 5px 0">
+                <ul id="selectedLegend" width="100%" height="1" style="list-style-type: none; padding: 0; margin: 0">
+                </ul>
+            </div>
+            <div id="allNodesContainer" style="border: 2px solid #555; border-radius: 5px; padding: 15px; margin: 15px 0px 15px 0px;">
+                <h5 style="margin-top: 0;">All Nodes</h5>
+                <hr style="margin: 5px 0">
+                <ul id="allNodesLegend" width="100%" height="1" style="list-style-type: none; padding: 0; margin: 0">
+                </ul>
+            </div>
+            <div class="well well-lg" style="border-left: 5px solid #337ab7">
+                <h3>Using this exploratory tool</h3>
+                <h4>This is a tool for exploring how different scholars and schools in the database are directly and indirectly connected through genealogical networks of theses, advisors, advisees, and alma maters, almas mater?, whatever.</h4>
+                <p>The search bar finds people and schools to explore. </p>
+                <p>The <i class="fas fa-broom"></i> icon adds the person you selected and their advisor and alma mater and/or their advisees and employer to the graph or adds the school you selected and its students and their advisors to the graph.</p>
+                <p>Nodes represent people or schools; links represent the theses that bind them.</p>
+                <p>Hovering over a node in the graph displays the subject type and name and provides a link to the subject's Authority page.</p>
+                <p>Clicking a node "explodes" that node to reveal more relationships (allowing you to "follow the breadcrumb trail" from node to node through the data).</p>
+                <p>Clicking a linkage between nodes opens the citation page for that thesis in a new tab.</p>
+            </div>
+        </div>
+        <div class='col-sm-12 col-md-9' id="graph-column" style="padding: 0;">
+            <div class="alert alert-warning" id="no-related-theses-warning" style="display: none; margin-left: 15px;" role="alert">Shucks, it looks like we don't have any theses connected to that authority . . .</div>
+            <svg id="graphContainer" style="width:100%; height: 0; position: fixed;">
+            </svg>
+        </div>
+    </div>
+
+    <div id="loading-blockade">
+        <div id="loading-spinner">
+            <button class="btn btn-lg">
+                <span class="glyphicon glyphicon-refresh spinning"></span>  
+            </button>
+        </div>
+    </div>
+
+    <script>
+        $('.btn-toggle').click(function() {
+            $(this).find('.btn').toggleClass('active');
+            if ($(this).find('.btn-danger').size()>0) {
+                $(this).find('.btn').toggleClass('btn-danger');
+            }
+            $(this).find('.btn').toggleClass('btn-default');
+        });
+
+        var subjects = [];
+        var INITIAL_MAX_RESULTS = 10;
+        var max_results = INITIAL_MAX_RESULTS;
+        var types = ['PE','IN'];
+        const typeMap = {
+                "CO": "Concept",
+                "TI": "Time Period",
+                "GE": "Place",
+                "PE": "Person",
+                "IN": "Institution",
+                "CT": "Category",
+                "SE": "Journal",
+                "PU": "Publisher",
+                "CR": "Cross-reference",
+            }
+
+        var searchTimerSubjects = 0;
+        function triggerSearchSubjects(force) {
+            $('#subjectSearchQuery').addClass('search-loading');
+            if (searchTimerSubjects) {
+                clearTimeout(searchTimerSubjects);
+            }
+
+            var query = $('#subjectSearchQuery').val();
+            searchTimerSubjects = setTimeout(function() {
+            $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+                success: function(result) {
+                    var resultsContainer = $('#subjectSearchResultsContainer');
+                    resultsContainer.empty();
+                    $('#subjectSearchQuery').removeClass('search-loading');
+                    result.results.forEach(function(r) {
+                        var newLi = $("<li></li>");
+                        newLi.addClass("list-group-item");
+                        newLi.attr('data-acrelation-id', r.name);
+                        var publicLink = $('<a></a>');
+                        publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+                        publicLink.attr('target', "_blank");
+                        publicLink.html(r.name);
+                        newLi.append(publicLink);
+                        newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+                        resultsContainer.append(newLi);
+
+                        var addBtn = $(`<a href="#" data-id="${r.id}"></a>`);
+                        addBtn.append(`<i class="fas fa-broom" data-id="${r.id}" aria-hidden="true" style="margin-right:10px;"></i>`);
+                        addBtn.click(addConcept);
+                        newLi.prepend(addBtn);
+                    });
+
+                    //redisplay results container if it had been hidden from previous search
+                    $("#subjectSearchResultsContainer").css("display", "block");
+
+                    if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+                    var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+                    resultsContainer.append(msg);
+                    } else if (result.results.length == 0 && !force && query.length < 3) {
+                    var msg = $('<p>Your query was too short. </p>');
+                    var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
+                    forceLink.click(function() {
+                        triggerSearchSubjects(true);
+                    });
+                    msg.append(forceLink);
+                    msg.append(" to force the search.");
+                    resultsContainer.append(msg);
+                    }
+
+                    if (result.results.length == max_results) {
+                    var load_more = `
+                        <li class="list-group-item search-result">
+                        <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+                        </li>
+                    `;
+                    resultsContainer.append(load_more);
+                    $('#load-more-subjects').click(function() {
+                        max_results += 10;
+                        triggerSearchSubjects(force);
+                    });
+                    }
+                }
+                });
+            }, 500);
+        }
+
+        // checkbox settings
+        var settings = {
+            on: {
+                icon: 'glyphicon glyphicon-check'
+            },
+            off: {
+                icon: 'glyphicon glyphicon-unchecked'
+            }
+        };
+
+        $(document).ready(function() {
+
+            $("#forceSearch").click(function() {
+            triggerSearchSubjects(true);
+            });
+
+            $('#subjectSearchQuery').on('click', function() {
+                $("#subjectSearchResultsContainer").css("display", "block");
+            });
+
+            $('#subjectSearchQuery').on('keyup', function() {
+            max_results = INITIAL_MAX_RESULTS;
+            triggerSearchSubjects(false);
+            });
+
+            // add checkbox search handlers
+            $("#filterConcepts").change(function() {
+            filterType("CO", $("#filterConcepts"));
+            });
+            $("#filterPersons").change(function() {
+            filterType("PE", $("#filterPersons"));
+            });
+            $("#filterInstitutions").change(function() {
+            filterType("IN", $("#filterInstitutions"));
+            });
+            $("#filterGeoTerms").change(function() {
+            filterType("GE", $("#filterGeoTerms"));
+            });
+            $("#filterTimePeriods").change(function() {
+            filterType("TI", $("#filterTimePeriods"));
+            });
+            $("#filterAll").click(function() {
+            $('.button-checkbox').each(function () {
+                var checkbox = $(this).find('input:checkbox');
+                checkbox.attr('checked', false);
+                updateDisplay(checkbox);
+            });
+            types = []
+            triggerSearchSubjects(false);
+            });
+
+            // checkbox styling
+            $('.button-checkbox').each(function () {
+                    // Settings
+                    var $widget = $(this),
+                        $button = $widget.find('button'),
+                        $checkbox = $widget.find('input:checkbox'),
+                        color = $button.data('color')
+
+
+                    // Event Handlers
+                    $button.on('click', function () {
+                        $checkbox.prop('checked', !$checkbox.is(':checked'));
+                        $checkbox.triggerHandler('change');
+                        updateDisplay($checkbox);
+                    });
+                    $checkbox.on('change', function () {
+                        updateDisplay($checkbox);
+                    });
+
+                    // Initialization
+                    function init() {
+
+                        updateDisplay($checkbox);
+
+                        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                        // Inject the icon if applicable
+                        if ($button.find('.state-icon').length == 0) {
+                            $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                        }
+                        }
+                    }
+                    init();
+                });
+        });
+
+        // checkbox update display
+        function updateDisplay($checkbox) {
+            var isChecked = $checkbox.is(':checked');
+            var $button = $checkbox.siblings('button')
+            var color = $button.data('color');
+
+            // Set the button's state
+            $button.data('state', (isChecked) ? "on" : "off");
+
+            if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+                // Set the button's icon
+                $button.find('.state-icon')
+                    .removeClass()
+                    .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+            }
+
+            // Update the button's color
+            if (isChecked) {
+                $button
+                    .removeClass('btn-default')
+                    .addClass('btn-' + color + ' active');
+            }
+            else {
+                $button
+                    .removeClass('btn-' + color + ' active')
+                    .addClass('btn-default');
+            }
+        }
+
+        function filterType(type, element) {
+            if (element.is(':checked')) {
+            types.push(type);
+            } else {
+            var typeIndex = types.indexOf(type);
+            if (typeIndex > -1) {
+                types.splice(typeIndex, 1);
+            }
+            }
+            triggerSearchSubjects(false);
+        }
+
+        function getDominoSelection() {
+            let dominoChainReactionToggle = $("#domino-button").children(".active").html();
+            let domino = false;
+            if (dominoChainReactionToggle == "ON") {
+                domino = true;
+            }
+            return domino;
+        }
+
+        function addConcept(event) {
+            let acRelId = $(event.target).data('id');
+            subjects.push(acRelId);
+            let domino = getDominoSelection();
+
+            let payload = {
+                'subjects': subjects,
+                'domino': domino
+            };
+            getData(payload);
+        }
+
+        function explodeConcept(subjects) {
+            //prevent multiple tooltips from getting generated with each explosion
+            clearTooltip();
+            let domino = getDominoSelection();
+
+            let payload = {
+                "subjects": subjects,
+                "domino": domino
+            };
+            getData(payload);
+        }
+
+        function getData(payload) {
+            // loading indicator turns on while data is fetched
+            $("#loading-blockade").css("display", "block");
+
+            const csrftoken = getCookie('csrftoken');
+
+            async function postData(url='', data = {}) {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  mode: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                  },
+                  body: JSON.stringify(data)
+                });
+                return response.json();
+            }
+
+            postData("{% url "genealogy"  %}", payload)
+                .then(data => {
+                    // loading indicator turns off once data is fetched
+                    $("#loading-blockade").css("display", "none");
+
+                    // search results hide to make more room for graph legend once data is fetched
+                    $("#subjectSearchResultsContainer").css("display", "none");
+
+                    links = JSON.parse(data.links);
+                    if (links.length) {
+                        $("#no-related-theses-warning").css("display", "none");
+                        nodes = JSON.parse(data.nodes);
+                        subjects = data.subjects;
+                        node_associations_range = data.node_associations_range;
+                        $('#graphContainer').css('height', 1000);
+                        forceGraph(nodes, links, subjects, node_associations_range);
+                    } else {
+                        $("#no-related-theses-warning").css("display", "block");
+                        clearSubjects();
+                    }
+                });
+        }
+
+        function clearSubjects() {
+            $('#graphContainer').css('height', 0);
+            clearLegends();
+            clearTooltip();
+
+            nodes = [];
+            links = [];
+            subjects = [];
+            node_associations_range = {};
+
+            forceGraph(nodes, links, subjects, node_associations_range);
+        }
+
+        function clearLegends() {
+            removeChildren(document.getElementById("selectedLegend"));
+            removeChildren(document.getElementById("allNodesLegend"));
+        }
+
+        function clearTooltip() {
+            let tooltipContainer = document.getElementById("tooltip");
+            if (tooltipContainer){
+                    tooltip.remove();
+            }
+        }
+
+        function removeChildren(elem) {
+            let child = elem.lastElementChild; 
+            while (child) {
+                elem.removeChild(child);
+                child = elem.lastElementChild;
+            }
+        }
+
+        function generate_link_tooltip_innerhtml(d) {
+            if (d.type == "alma_mater") {
+                return `${d.source.name} wrote their thesis <a href='https://data.isiscb.org/isis/citation/${d.thesis_id}' target='_blank'><i>${d.thesis_title}</i></a> at ${d.target.name} in ${d.thesis_year} [click linkage to open thesis in new tab]`; 
+            } else if (d.type == "advisor") {
+                return `${d.source.name} wrote their thesis <a href='https://data.isiscb.org/isis/citation/${d.thesis_id}' target='_blank'><i>${d.thesis_title}</i></a> under ${d.target.name} in ${d.thesis_year} [click linkage to open thesis in new tab]`;
+            }
+        }
+
+        function generate_node_tooltip_innerhtml(d) {
+            let extra = '';
+            if (d.type == 'IN') {
+                extra = `has hosted ${d.theses_hosted_by_school} ${d.theses_hosted_by_school > 1 ? 'theses' : 'thesis'} between ${d.thesis_earliest} & ${d.thesis_latest}<br>`;
+            } else if (d.type == 'PE') {
+                if (d.alma_mater != '') {
+                    extra = `completed their thesis at ${d.alma_mater} in ${d.thesis_year}<br>`;
+                }
+                if (d.theses_advised > 0) {
+                    extra += `has supervised ${d.theses_advised} ${d.theses_advised > 1 ? 'theses' : 'thesis'} between ${d.thesis_earliest} & ${d.thesis_latest}<br>`
+                }
+            }
+            return `${typeMap[d.type]} ${d.selected ? ' [already exploded]' : ' [click node to explode]'}<br><a href='https://data.isiscb.org/isis/authority/${d.id}' target='_blank'>${d.name}</a><br>${extra}`;
+        }
+
+        function highlight_node(event) {
+            document.body.style.cursor = "pointer";
+            event.target.style.backgroundColor = "#B7337A";
+            event.target.parentNode.parentNode.querySelector(".legend-dot").style.border = "3px solid #B7337A";
+            let authority_id = event.target.getAttribute('data-authorityid');
+            let node = d3.select(`#node-${authority_id}`);
+            d3.select("#tooltip")
+                .transition()		
+                .duration(200)		
+                .style("opacity", 0);
+            d3.selectAll("line")
+                .attr("stroke", "#999")
+            d3.selectAll("circle")
+                .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                .attr("stroke", "gold");	
+            node.style("cursor", function(d){ return d.selected ? "default" : "cell"})
+                .attr("stroke-width", "4px")
+                .attr("stroke", "#B7337A");
+            
+            
+        }
+
+        function dehighlight_node(event) {
+            event.target.style.backgroundColor = "#777";
+            event.target.parentNode.parentNode.querySelector(".legend-dot").style.border = event.target.dataset.selected === "true" ? "3px solid gold" : "0px";
+            d3.selectAll("circle")
+                .attr("stroke-width", function(d){ return d.selected ? "4px" : "0px"})
+                .attr("stroke", "gold");
+        }
+
+        // D3 network graph generator
+        // Released under the GNU General Public License, version 3.
+        // https://bl.ocks.org/mbostock/4062045
+
+        function forceGraph(nodes, links, subjects, node_associations_range) {
+            if (nodes.length === 0) {
+                return;
+            }
+            const labelHeight = 16;
+
+            const colorScale = {
+                "CO": "#1e6091",
+                "TI": "#52b69a",
+                "GE": "#168aad",
+                "PE": "#99d98c",
+                "IN": "#34a0a4",
+                "CT": "#184e77",
+                "SE": "#d9ed92",
+                "PU": "#1a759f"
+            }
+
+            function colorScaler(type, theses_advised) {
+                if (type === "PE") {
+                    // advisors get a different color from scholars who haven't supervised a dissertation
+                    return theses_advised > 0 ? "#1e6091" : "#99d98c";
+                } else {
+                    return "#34a0a4";
+                }
+            }
+
+            const fontColorScale = {
+                "CO": "#fff",
+                "TI": "#fff",
+                "GE": "#fff",
+                "PE": "#fff",
+                "IN": "#fff",
+                "CT": "#fff",
+                "SE": "#fff",
+                "PU": "#fff"
+            }
+
+            const nodeSizeScale = d3.scaleLog([node_associations_range.min + 1 , node_associations_range.max], [5, 15])
+
+            let typesPresent = [];
+            nodes.map(node => {
+                if (typesPresent.indexOf(node.type) < 0){
+                    typesPresent.push(node.type);
+                }
+            })
+
+            let subjectNodes = [];
+
+            subjects.map(subject => {
+                subjectNodes.push(nodes.find(node => node.id === subject));
+            });
+
+            clearLegends();
+            clearTooltip();
+
+            // populate legends
+
+            // a generic sorting function
+            cmp = function(x, y){
+                return x > y ? 1 : x < y ? -1 : 0; 
+            };
+
+            //sort nodes by number of associated theses descending then name ascending
+            let sorted_nodes = nodes.toSorted(function(a, b){
+                return cmp( 
+                    [-cmp(a.num_associations, b.num_associations), cmp(a.name, b.name)], 
+                    [-cmp(b.num_associations, a.num_associations), cmp(b.name, a.name)]
+                );
+            });
+
+            sorted_nodes.map(node => {
+                let li = document.createElement("li");
+                let dot = document.createElement("div");
+                dot.style.backgroundColor = colorScaler(node.type, node.theses_advised);
+                dot.style.width = "17px";
+                dot.style.height = "17px";
+                if (node.selected) {
+                    dot.style.border = "3px solid gold";
+                }
+                dot.style.borderRadius = "50%";
+                dot.style.display = "inline-block";
+                dot.style.verticalAlign = "middle";
+                dot.style.marginRight = "5px";
+                dot.setAttribute("class", "legend-dot");
+                li.appendChild(dot);
+                let span = document.createElement("span");
+                span.appendChild(document.createTextNode(node.name));
+                span.setAttribute("class", `label label-default legend-node-${node.id}`);
+                span.style.whiteSpace = "nowrap";
+                span.style.overflow = "hidden";
+                span.style.textOverflow = "ellipsis";
+                span.style.verticalAlign = "middle";
+                span.style.maxWidth = "89%";
+                span.style.display = "inline-block";
+                span.dataset.authorityid = node.id;
+                span.dataset.selected = node.selected;
+                span.dataset.associations = node.num_associations;
+                span.addEventListener("mouseover", (e) => {
+                    highlight_node(e);
+                })
+                span.addEventListener("mouseout", (e) => {
+                    dehighlight_node(e);
+                })
+
+                let linkLabel = document.createElement("a");
+                linkLabel.href = `{% url 'isis-index' %}authority/${node.id}`;
+                linkLabel.target = "_blank";
+                linkLabel.appendChild(span);
+
+                li.appendChild(linkLabel);
+
+                let liClone = li.cloneNode(true);
+
+                liClone.getElementsByTagName('span')[0].addEventListener("mouseover", (e) => {
+                    highlight_node(e);
+                })
+                liClone.getElementsByTagName('span')[0].addEventListener("mouseout", (e) => {
+                    dehighlight_node(e);
+                })
+
+                allNodesLegend.appendChild(li);
+                
+                if (node.selected) {
+                    selectedLegend.appendChild(liClone);
+                }
+            })
+
+            linkValues = [];
+            links.map(link => {
+                if (linkValues.indexOf(link.value) == -1) {
+                    linkValues.push(link.value);
+                }
+            });
+            
+            //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link strength
+            let linkForceScale = d3.scaleLinear()
+                .domain([Math.min(...linkValues), Math.max(...linkValues)])
+                .range([.5, 1.5]);
+            
+            //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link thickness
+            /*
+            let linkStrokeWidthScale = d3.scaleLinear()
+                .domain([Math.min(...linkValues), Math.max(...linkValues)])
+                .range([1,5])
+            */
+
+            var width = 1000;
+            var height = 700;
+
+            var svg = d3.select("#graphContainer");
+            svg.selectAll("*").remove();
+        
+            var simulation = d3.forceSimulation()
+                .force("boundary", forceBoundary(20, 20, width - 20, height - 20))
+                .force("link", d3.forceLink().strength(function(link){ return linkForceScale(link.value) }).id(function(d) { return d.id; }))
+                .force("charge", d3.forceManyBody())
+                .force("center", d3.forceCenter(width / 2, height / 2));
+        
+            var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("stroke", "#999")
+                .attr("stroke-width", "2px")
+                .on("mouseover", function(event, d) {
+                    d3.selectAll("circle")
+                        .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                        .attr("stroke", "gold");
+                    d3.selectAll("line")
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", "2px")
+                    d3.select(this)
+                        .attr("stroke-width", "3px")
+                        .attr("stroke", "#B7337A");
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", 0);
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", 1);		
+                    tooltip.html(generate_link_tooltip_innerhtml(d));
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this)
+                })
+                .on("click", function(event, d){
+                    window.open(`https://data.isiscb.org/isis/citation/${d.thesis_id}`, '_blank').focus();
+                });
+        
+            var tooltip = d3.select("#tooltipContainer").insert("div")
+                .attr("id", "tooltip")			
+                .style("opacity", 0)
+                .style("border", "2px solid #B7337A")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+                .style("margin-top", "15px")
+                .style("background-color", "#fff")
+                .style("color", "#000");
+        
+            var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(nodes)
+                .enter().append("circle")
+                .attr("r", function(d) { return nodeSizeScale(d.num_associations)})
+                .attr("fill", function(d) { return colorScaler(d.type, d.theses_advised); })
+                .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                .attr("stroke", "gold")
+                .attr("id", function(d) { return `node-${d.id}`})
+                .style("opacity", .9)
+                .on("mouseover", function(event, d) {
+                    d3.selectAll("line")
+                        .attr("stroke", "#999")
+                        .attr("stroke-width", "2px")
+                    d3.selectAll("circle")
+                        .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                        .attr("stroke", "gold");	
+                    d3.select(this).style("cursor", function(d){ return d.selected ? "default" : "cell"})
+                        .attr("stroke-width", "4px")
+                        .attr("stroke", "#B7337A");
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", 0);
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", 1);		
+                    tooltip.html(generate_node_tooltip_innerhtml(d));	
+                    
+                    legend_nodes = document.getElementsByClassName(`legend-node-${d.id}`);
+                    if (legend_nodes) {
+                        Array.prototype.forEach.call(legend_nodes, function(legend_node) {
+                            legend_node.style.backgroundColor = "#B7337A";
+                            legend_node.parentNode.parentNode.querySelector(".legend-dot").style.border = "3px solid #B7337A";
+                        });
+                    }
+                    })					
+                .on("mouseout", function(event, d) {	
+                    d3.select(this).style("cursor", "default")	
+
+                    legend_nodes = document.querySelectorAll(`[data-authorityid="${d.id}"]`);
+                    if (legend_nodes) {
+                        Array.prototype.forEach.call(legend_nodes, function(legend_node) {
+                            legend_node.style.backgroundColor = "#777";
+                            legend_node.parentNode.parentNode.querySelector(".legend-dot").style.border = legend_node.dataset.selected === "true" ? "3px solid gold" : "0px";
+                        });
+                    }
+                })
+                .on("click", function(event, d){
+                    if (!d.selected) {
+                        subjects.push(d.id);
+                        explodeConcept(subjects);
+                    }
+                })
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+        
+            simulation
+                .nodes(nodes)
+                .on("tick", ticked);
+        
+            simulation.force("link")
+                .links(links);
+        
+            function ticked() {
+                link
+                    .attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+        
+                node
+                    .attr("cx", function(d) { return d.x; })
+                    .attr("cy", function(d) { return d.y; });
+            }
+        
+            // Reheat the simulation when drag starts, and fix the subject position.
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            // Update the subject (dragged node) position during drag.
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            // Restore the target alpha so the simulation cools after dragging ends.
+            // Unfix the subject position now that it’s no longer being dragged.
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+        }
+
+    </script>
+{% endblock %}
