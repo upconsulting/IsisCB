@@ -10,7 +10,7 @@ from haystack.query import SearchQuerySet
 
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
-from isisdata.isiscbviews import publicsite_views, authority_views, citation_views
+from isisdata.isiscbviews import publicsite_views, authority_views, citation_views, playground_views
 
 from . import views
 from django.conf import settings
@@ -82,8 +82,8 @@ urlpatterns = [
     re_path(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
     re_path(r'^termexplorer', views.term_explorer, name="term_explorer"),
     re_path(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
-    re_path(r'^genealogy', views.genealogy, name="genealogy"),
-    re_path(r'^theses_by_school', views.theses_by_school, name="theses_by_school"),
+    re_path(r'^genealogy', playground_views.genealogy, name="genealogy"),
+    re_path(r'^theses_by_school', playground_views.theses_by_school, name="theses_by_school"),
     re_path(r'^curation/', include('curation.urls', namespace="curation")),
 ]
 

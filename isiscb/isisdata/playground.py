@@ -220,7 +220,16 @@ def generate_genealogy_link(source, target, thesis, link_type):
 
     return link
 
-def generate_genealogy_node(authority, associated_theses, subjects):
+def generate_genealogy_node(authority, subjects):
+    """
+    Method to build a geneology node.
+
+    FIXME: Paul please add details.
+
+    Returns:
+        - node: a JSON object containing the node properties.
+        - node_association_counts: count of associtated theses of node
+    """
     theses_hosted_by_school = None
     theses_advised = None
     thesis_earliest = 0
@@ -230,18 +239,38 @@ def generate_genealogy_node(authority, associated_theses, subjects):
     thesis_title = ''
     thesis_year = None
     theses_advised_count = 0
-    node_associations = associated_theses.count()
 
+    associated_theses = ACRelation.objects.filter(
+            public=True, 
+            citation__public=True, 
+            authority__public=True, 
+            authority__id=authority.id, 
+            citation__type_controlled=Citation.THESIS, 
+            type_controlled__in=[ACRelation.AUTHOR, ACRelation.SCHOOL, ACRelation.ADVISOR,])\
+        .order_by('citation__publication_date__year')
+    
+    
     if authority.type_controlled == Authority.PERSON:
-        thesis_written = associated_theses.filter(citation__public=True, authority__public=True, authority__id=authority.id, type_controlled=ACRelation.AUTHOR).values_list('citation__id', flat=True)
-        alma_mater_acr = ACRelation.objects.filter(public=True, citation__id__in=thesis_written, type_controlled=ACRelation.SCHOOL).first()
+        thesis_written = associated_theses.filter(
+            citation__public=True, 
+            authority__public=True, 
+            authority__id=authority.id, 
+            type_controlled=ACRelation.AUTHOR).values_list('citation__id', flat=True)
+       
+        alma_mater_acr = ACRelation.objects.filter(
+            public=True, 
+            citation__id__in=thesis_written, 
+            type_controlled=ACRelation.SCHOOL).first()
+        
         if alma_mater_acr:
             alma_mater = alma_mater_acr.authority.name
             thesis_title = alma_mater_acr.citation.title
             thesis_year = alma_mater_acr.citation.publication_date.year
+
         theses_advised = associated_theses.filter(type_controlled=ACRelation.ADVISOR)
         thesis_earliest = theses_advised.first().citation.publication_date.year if theses_advised and theses_advised.first().citation.publication_date else 0
         thesis_latest = theses_advised.last().citation.publication_date.year if theses_advised and theses_advised.last().citation.publication_date else 0
+        
         theses_advised_ids = theses_advised.values_list('id', flat=True) if theses_advised else []
         theses_advised_count = theses_advised.count()
         theses_advised_schools = ACRelation.objects.filter(public=True, type_controlled=ACRelation.SCHOOL, citation__in=theses_advised_ids) 
@@ -253,6 +282,7 @@ def generate_genealogy_node(authority, associated_theses, subjects):
             thesis_earliest = associated_theses.first().citation.publication_date.year
             thesis_latest = associated_theses.last().citation.publication_date.year
 
+    node_associations_count = associated_theses.count()
     node = {
         "id": authority.id,
         "name": authority.name,
@@ -266,24 +296,31 @@ def generate_genealogy_node(authority, associated_theses, subjects):
         "thesis_year": thesis_year,
         "thesis_earliest": thesis_earliest,
         "thesis_latest": thesis_latest,
-        "num_associations": node_associations,
+        "num_associations": node_associations_count,
     }
 
-    return node
+
+    return node, node_associations_count
 
 def extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects):
-    acrs = ACRelation.objects.filter(public=True, authority__public=True, citation__public=True, citation__id=thesis.id, type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR])
+    acrs = ACRelation.objects.filter(
+        public=True, 
+        authority__public=True, 
+        citation__public=True, 
+        citation__id=thesis.id)
+    
     author_acrs = acrs.filter(type_controlled=ACRelation.AUTHOR)
     if author_acrs:
         author = author_acrs.first().authority
     else:
         # because all links pass through the author, if a thesis lacks an author, we can skip it
         return
+    
     school_acrs = acrs.filter(type_controlled=ACRelation.SCHOOL)
     if school_acrs:
         school = school_acrs.first().authority
-    advisors_acrs = acrs.filter(type_controlled=ACRelation.ADVISOR)
 
+    advisors_acrs = acrs.filter(type_controlled=ACRelation.ADVISOR)
     if advisors_acrs:
         for advisor_acr in advisors_acrs:
             # generate link(s) between thesis author and their advisor(s)
