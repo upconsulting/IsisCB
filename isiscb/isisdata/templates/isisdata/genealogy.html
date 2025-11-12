@@ -633,7 +633,7 @@
             //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link strength
             let linkForceScale = d3.scaleLinear()
                 .domain([Math.min(...linkValues), Math.max(...linkValues)])
-                .range([.5, 1.5]);
+                .range([.3, 1]);
             
             //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link thickness
             /*
