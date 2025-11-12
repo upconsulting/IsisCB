@@ -200,12 +200,12 @@ def generate_genealogy_link(source, target, thesis, link_type):
 
     def generate_link_value():
         if link_type == "alma_mater":
-            return next_year - thesis.publication_date.year if thesis.publication_date.year else 1
+            return next_year - thesis.publication_date.year if thesis.publication_date and thesis.publication_date.year else 1
         else:
             return 15
         
     thesis_title = thesis.title if thesis.title else None
-    thesis_year = thesis.publication_date.year if thesis.publication_date.year else None
+    thesis_year = thesis.publication_date.year if thesis.publication_date and thesis.publication_date.year else None
     thesis_id = thesis.id
 
     link = {
@@ -265,7 +265,7 @@ def generate_genealogy_node(authority, subjects):
         if alma_mater_acr:
             alma_mater = alma_mater_acr.authority.name
             thesis_title = alma_mater_acr.citation.title
-            thesis_year = alma_mater_acr.citation.publication_date.year
+            thesis_year = alma_mater_acr.citation.publication_date.year if alma_mater_acr.citation.publication_date else 0
 
         theses_advised = associated_theses.filter(type_controlled=ACRelation.ADVISOR)
         thesis_earliest = theses_advised.first().citation.publication_date.year if theses_advised and theses_advised.first().citation.publication_date else 0
@@ -279,8 +279,8 @@ def generate_genealogy_node(authority, subjects):
     elif authority.type_controlled == Authority.INSTITUTION:
         theses_hosted_by_school = associated_theses.count()
         if theses_hosted_by_school:
-            thesis_earliest = associated_theses.first().citation.publication_date.year
-            thesis_latest = associated_theses.last().citation.publication_date.year
+            thesis_earliest = associated_theses.first().citation.publication_date.year if associated_theses.first().citation.publication_date else 0
+            thesis_latest = associated_theses.last().citation.publication_date.year if associated_theses.last().citation.publication_date else 0
 
     node_associations_count = associated_theses.count()
     node = {
