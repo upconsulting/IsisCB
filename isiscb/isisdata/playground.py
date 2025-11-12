@@ -303,6 +303,7 @@ def generate_genealogy_node(authority, subjects):
     return node, node_associations_count
 
 def extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects):
+    school = None
     acrs = ACRelation.objects.filter(
         public=True, 
         authority__public=True, 
