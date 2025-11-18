@@ -17,15 +17,45 @@ def genealogy(request, tenant_id=None):
         return render(request, 'isisdata/genealogy.html', context)
     
     request = json.loads(request.body) 
-    subjects = request['subjects']
+    selected_subjects = request['subjects']
     domino_effect = request['domino']
-    node_ids = set(subjects.copy())
+    display_subjects = set(selected_subjects.copy())
+
+    concept_or_geographic_subject_authority_ids = Authority.objects.filter(
+            pk__in=selected_subjects, 
+            type_controlled__in=[Authority.CONCEPT, Authority.GEOGRAPHIC_TERM]
+            )\
+        .values_list("id", flat=True)
+
+    display_subjects.difference_update(concept_or_geographic_subject_authority_ids)
+    node_ids = set(display_subjects.copy())
+    
+    if concept_or_geographic_subject_authority_ids:
+        concept_or_geographic_related_citation_ids = ACRelation.objects.filter(
+                public=True,
+                citation__public=True,
+                type_controlled=ACRelation.SUBJECT,
+                authority__id__in=concept_or_geographic_subject_authority_ids,
+                )\
+            .values_list("citation__id", flat=True).distinct("citation__id")
+    
+    if concept_or_geographic_related_citation_ids:
+        concept_or_geographic_related_authors = ACRelation.objects.filter(
+                public=True,
+                type_controlled=ACRelation.AUTHOR,
+                citation__id__in=[concept_or_geographic_related_citation_ids]
+                ).values('authority__id')\
+            .annotate(author=Count('authority__id')).order_by('-author')\
+            .values_list("authority__id", flat=True)[:299]
+    
+    if concept_or_geographic_related_authors:
+        display_subjects.update(concept_or_geographic_related_authors)
     
     subject_theses_ids = ACRelation.objects.filter(
             public=True, 
             authority__public=True, 
             citation__public=True, 
-            authority__id__in=subjects, 
+            authority__id__in=display_subjects, 
             citation__type_controlled=Citation.THESIS, 
             type_controlled__in=[ACRelation.SCHOOL, ACRelation.AUTHOR, ACRelation.ADVISOR]
             )\
@@ -38,7 +68,7 @@ def genealogy(request, tenant_id=None):
     
     if subject_theses:
         for thesis in subject_theses:
-            extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects)
+            extrapolate_thesis(thesis, node_ids, links, domino_effect, display_subjects)
 
     node_associations_min = 0
     node_associations_max = 0
@@ -46,7 +76,7 @@ def genealogy(request, tenant_id=None):
     if node_ids:
         node_authorities = Authority.objects.filter(pk__in=list(node_ids))
         for authority in node_authorities:
-            node, node_association_count = generate_genealogy_node(authority, subjects)
+            node, node_association_count = generate_genealogy_node(authority, display_subjects)
             node_associations_min = node_association_count if node_association_count < node_associations_min else node_associations_min
             node_associations_max = node_association_count if node_association_count > node_associations_max else node_associations_max
             nodes.append(node)
@@ -59,7 +89,7 @@ def genealogy(request, tenant_id=None):
     context = {
         'nodes': json.dumps(nodes),
         'links': json.dumps(links),
-        'subjects': subjects,
+        'subjects': list(display_subjects),
         'node_associations_range': node_associations_range,
     }
 

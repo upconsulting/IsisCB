@@ -88,9 +88,10 @@
             <div class="well well-lg" style="border-left: 5px solid #337ab7">
                 <h3>Using this exploratory tool</h3>
                 <h4>This is a tool for exploring how different scholars and schools in the database are directly and indirectly connected through genealogical networks of theses, advisors, advisees, and alma maters, almas mater?, whatever.</h4>
-                <p>The search bar finds people and schools to explore. </p>
-                <p>The <i class="fas fa-broom"></i> icon adds the person you selected and their advisor and alma mater and/or their advisees and employer to the graph or adds the school you selected and its students and their advisors to the graph.</p>
-                <p>Nodes represent people or schools; links represent the theses that bind them.</p>
+                <p>The search bar finds people, schools, concepts, and geographic terms to generate these genealogical networks. </p>
+                <p>If you search for people or schools, their directly related theses will be used to create the graph. If you search for a concept or geographic term, the graph will be generated from those scholars who have published work linked to that concept or place.</p>
+                <p>The <i class="fas fa-broom"></i> icon adds subjects to the graph.
+                <p>Nodes represent advisers, dissertators, or schools; links represent the theses that bind them.</p>
                 <p>Hovering over a node in the graph displays the subject type and name and provides a link to the subject's Authority page.</p>
                 <p>Clicking a node "explodes" that node to reveal more relationships (allowing you to "follow the breadcrumb trail" from node to node through the data).</p>
                 <p>Clicking a linkage between nodes opens the citation page for that thesis in a new tab.</p>
@@ -123,7 +124,7 @@
         var subjects = [];
         var INITIAL_MAX_RESULTS = 10;
         var max_results = INITIAL_MAX_RESULTS;
-        var types = ['PE','IN'];
+        var types = ['PE','IN', 'CO', 'GE'];
         const typeMap = {
                 "CO": "Concept",
                 "TI": "Time Period",
@@ -453,7 +454,13 @@
                 extra = `has hosted ${d.theses_hosted_by_school} ${d.theses_hosted_by_school > 1 ? 'theses' : 'thesis'} between ${d.thesis_earliest} & ${d.thesis_latest}<br>`;
             } else if (d.type == 'PE') {
                 if (d.alma_mater != '') {
-                    extra = `completed their thesis at ${d.alma_mater} in ${d.thesis_year}<br>`;
+                    extra = `completed their thesis at ${d.alma_mater} `;
+                }
+                if (d.advisor_name != '') {
+                    extra += `under the supervision of ${d.advisor_name} `
+                }
+                if (d.thesis_year) {
+                     extra += `in ${d.thesis_year}<br>`
                 }
                 if (d.theses_advised > 0) {
                     extra += `has supervised ${d.theses_advised} ${d.theses_advised > 1 ? 'theses' : 'thesis'} between ${d.thesis_earliest} & ${d.thesis_latest}<br>`
@@ -533,7 +540,7 @@
                 "PU": "#fff"
             }
 
-            const nodeSizeScale = d3.scaleLog([node_associations_range.min + 1 , node_associations_range.max], [5, 15])
+            const nodeSizeScale = d3.scaleLog([node_associations_range.min + 1 , node_associations_range.max], [5, 12])
 
             let typesPresent = [];
             nodes.map(node => {

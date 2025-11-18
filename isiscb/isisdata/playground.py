@@ -239,6 +239,7 @@ def generate_genealogy_node(authority, subjects):
     thesis_title = ''
     thesis_year = None
     theses_advised_count = 0
+    advisor_name = ''
 
     associated_theses = ACRelation.objects.filter(
             public=True, 
@@ -256,6 +257,14 @@ def generate_genealogy_node(authority, subjects):
             authority__public=True, 
             authority__id=authority.id, 
             type_controlled=ACRelation.AUTHOR).values_list('citation__id', flat=True)
+        
+        advisor_acr = ACRelation.objects.filter(
+            public=True,
+            citation__id__in=thesis_written,
+            type_controlled=ACRelation.ADVISOR).first()
+        
+        if advisor_acr:
+            advisor_name = advisor_acr.authority.name
        
         alma_mater_acr = ACRelation.objects.filter(
             public=True, 
@@ -292,6 +301,7 @@ def generate_genealogy_node(authority, subjects):
         "theses_advised": theses_advised_count,
         "employers": list(employers),
         "alma_mater": alma_mater,
+        "advisor_name": advisor_name,
         "thesis_title": thesis_title,
         "thesis_year": thesis_year,
         "thesis_earliest": thesis_earliest,
