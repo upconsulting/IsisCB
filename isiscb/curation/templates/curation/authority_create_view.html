@@ -247,7 +247,7 @@ $(function() {
     e.preventDefault();
     var searchTerm = $("#id_authority-name").val();
     if (searchTerm != null && searchTerm != '') {
-      var url = "http://viaf.org/viaf/search?query=local.names%20all%20%22" + searchTerm + "%22&sortKeys=holdingscount&recordSchema=BriefVIAF"
+      var url = "http://viaf.org/en/viaf/search?field=local%2Cnames&index=VIAF&searchTerms=" + searchTerm; 
       var win = window.open(url, '_blank');
       if (win) {
           win.focus();
