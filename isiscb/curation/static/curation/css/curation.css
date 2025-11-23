@@ -193,6 +193,10 @@ select.high_input {
   color: #00386b;
 }
 
+.text-info2 {
+  color:#634500
+}
+
 label {
   color: #747880;
   font-weight: normal;

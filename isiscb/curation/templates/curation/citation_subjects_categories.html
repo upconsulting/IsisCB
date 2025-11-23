@@ -84,7 +84,13 @@
        </div>
 
        <div class="col-md-12"  style="margin-top: 10px;">
-         <i>{{ instance.title }}</i>
+         <p><i>{{ instance.title }}</i></p>
+         {% if instance.book %}
+         <p><small>In: <span class="text-info2">{{ instance.book.subject.title }}</span></small></p>
+         {% endif %}
+         {% if instance.journal %}
+          <p><small>In: <span class="text-info2">{{ instance.journal.authority.name }}</span></small></p>
+         {% endif %}
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
