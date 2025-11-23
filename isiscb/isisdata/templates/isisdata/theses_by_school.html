@@ -1,0 +1,88 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block extra_head %}
+
+<style>
+    #chart_options_container {
+        height: 80vh;
+        overflow: hidden;
+        overflow-y: scroll;
+    }
+    #id_select_schools_container {
+        {% if top == "CU" %} display: inline-block; {% else %} display: none; {% endif %}
+    }
+    #id_select_schools {
+        list-style: none;
+        padding-left: 0;
+    }
+    #theses-by-school-chart-container {
+        height: 80vh;
+        padding: 10px;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-sm-12 col-md-3">
+            <div class="panel panel-default" id="chart_options_container">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Chart Options</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="{% url 'theses_by_school' %}" method="post">
+                        <input type="submit" value="Generate Chart" class="btn btn-success form-control">
+                        <hr>
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group" id="{{field.auto_id|add:'_container'}}">
+                                {{ field.errors }}
+                                <p>{{ field.label_tag }}</p>
+                                {% if field.auto_id == 'id_select_schools' %}
+                                    <button id="clearCheckboxesButton" type="button" class="btn btn-danger" onclick="clearCheckboxes();">Clear Checkboxes <i class="fa-solid fa-circle-xmark"></i></button>
+                                {% endif %}
+                                <p>{{ field }}</p>
+                            </div>
+                        {% endfor %}
+                        <hr>
+                        <input type="submit" value="Generate Chart" class="btn btn-success form-control">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-9">
+            <div id="theses-by-school-chart-container">
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'isisdata/js/'|add:'d3-'|add:chart_url|add:'.js' %}" defer></script>
+    {{ data|json_script:"theses-by-school-chart-data" }}
+    <script>
+        document.querySelector("#id_top").addEventListener("change", (event) => {
+            if (event.target.value == "CU") {
+                document.querySelector("#id_select_schools_container").style.display = 'inline-block';
+            } else {
+                document.querySelector("#id_select_schools_container").style.display = 'none';
+            }
+        });
+
+        function clearCheckboxes() {
+            let inputs = document.getElementsByTagName("input");
+            for(let i = 0; i < inputs.length; i++) {
+                if(inputs[i].type == "checkbox") {
+                    inputs[i].checked = false; 
+                }  
+            }
+        }
+    </script>
+
+{% endblock %}

@@ -32,38 +32,70 @@
     </div>
 </div>
 <div id="sandboxContainer">
-    <div class="col-sm-12 col-md-4">
-      <div class="thumbnail">
-        <a href="{% url 'graph_explorer' %}">
-            <img src="{% static "isisdata/images/graph_explorer.png" %}" alt="thumbnail depicting isis cb graph exploratory tool">
-        </a>
-        <div class="caption">
-          <a href="{% url 'graph_explorer' %}"><h3>Graph Explorer</h3></a>
-          <p>Explore the connections between terms with this interactive network graph. Search the whole database for terms or go down the rabbit hole by exploding nodes in the graph</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-12 col-md-4">
+    <div class="row">
+      <div class="col-sm-12 col-md-4">
         <div class="thumbnail">
-          <a href="{% url 'term_explorer' %}">
-            <img src="{% static "isisdata/images/table_explorer.png" %}" alt="thumbnail depicting isis cb table exploratory tool">
+          <a href="{% url 'graph_explorer' %}">
+              <img src="{% static "isisdata/images/graph_explorer.png" %}" alt="thumbnail depicting isis cb graph exploratory tool">
           </a>
           <div class="caption">
-            <a href="{% url 'term_explorer' %}"><h3>Table Explorer</h3></a>
-            <p>Compare individual terms or concoct term groups to make meaning from the database of terms. Want to see how the history of a field has changed from one time period to another? Or how the focus of one journal differs from another? -- then this tool is perfect for the job.</p>
+            <a href="{% url 'graph_explorer' %}"><h3>Graph Explorer</h3></a>
+            <p>Explore the connections between terms with this interactive network graph. Search the whole database for terms or go down the rabbit hole by exploding nodes in the graph</p>
           </div>
         </div>
-    </div>
-    <div class="col-sm-12 col-md-4">
-        <div class="thumbnail">
-            <a href="{% url 'ngram_explorer' %}">
-                <img src="{% static "isisdata/images/ngram_explorer.png" %}" alt="thumbnail depicting isis cb ngram exploratory tool">
-            </a>  
+      </div>
+      <div class="col-sm-12 col-md-4">
+          <div class="thumbnail">
+            <a href="{% url 'term_explorer' %}">
+              <img src="{% static "isisdata/images/table_explorer.png" %}" alt="thumbnail depicting isis cb table exploratory tool">
+            </a>
             <div class="caption">
-                <a href="{% url 'ngram_explorer' %}"><h3>Ngram Explorer</h3></a>
-                <p>Unlike many of the tools -- that display change in or difference between conceptual terms in the database -- this tool displays changes in citation timelines in relative terms.</p>
+              <a href="{% url 'term_explorer' %}"><h3>Table Explorer</h3></a>
+              <p>Compare individual terms or concoct term groups to make meaning from the database of terms. Want to see how the history of a field has changed from one time period to another? Or how the focus of one journal differs from another? -- then this tool is perfect for the job.</p>
             </div>
-        </div>
+          </div>
+      </div>
+      <div class="col-sm-12 col-md-4">
+          <div class="thumbnail">
+              <a href="{% url 'ngram_explorer' %}">
+                  <img src="{% static "isisdata/images/ngram_explorer.png" %}" alt="thumbnail depicting isis cb ngram exploratory tool">
+              </a>  
+              <div class="caption">
+                  <a href="{% url 'ngram_explorer' %}"><h3>Ngram Explorer</h3></a>
+                  <p>Unlike many of the tools -- that display change in or difference between conceptual terms in the database -- this tool displays changes in citation timelines in relative terms.</p>
+              </div>
+          </div>
+      </div>
     </div>
+    <div class="row">
+      {% if user.is_staff or user.is_superuser %}
+      <div class="col-sm-12 col-md-4">
+        <div class="thumbnail">
+          <a href="{% url 'theses_by_school' %}">
+              <img src="{% static "isisdata/images/theses_over_time.jpg" %}" alt="thumbnail depicting isis cb theses by school over time data visualization tool">
+          </a>
+          <div class="caption">
+            <a href="{% url 'theses_by_school' %}"><h3>Theses by School over Time</h3></a>
+            <p>Explore the family tree of the histories of science, technology, medicine, and allied fields with data visualizations of advisor/advisee relationships</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if user.is_staff or user.is_superuser %}
+      <div class="col-sm-12 col-md-4">
+        <div class="thumbnail">
+          <a href="{% url 'genealogy' %}">
+              <img src="{% static "isisdata/images/genealogy_explorer.png" %}" alt="thumbnail depicting isis cb genealogy network data visualization tool">
+          </a>
+          <div class="caption">
+            <a href="{% url 'genealogy' %}"><h3>Genealogy</h3></a>
+            <p>Explore the family tree of the histories of science, technology, medicine, and allied fields with data visualizations of advisor/advisee/school relationships</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    
 </div>
 {% endblock %}

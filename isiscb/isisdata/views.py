@@ -15,6 +15,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.db import connection
+from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.conf import settings
@@ -51,9 +53,10 @@ from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata.twitter_methods import get_featured_tweet
 import isisdata.helpers.isiscb_utils as isiscb_utils
 
+from isisdata.playground import *
 
 from unidecode import unidecode
-import logging
+import logging, datetime
 
 standard_library.install_aliases()
 logger = logging.getLogger(__name__)
@@ -1570,54 +1573,3 @@ def ngram_explorer(request, tenant_id=None):
         return JsonResponse(context)
 
     return render(request, 'isisdata/ngram_explorer.html', context)
-
-def get_ngram_data(authority_ids):
-    sqs_all =SearchQuerySet().models(Citation).auto_query('*').facet('publication_date')
-    all_facet_results = sqs_all.all().exclude(public="false")
-    all_pub_date_facet = all_facet_results.facet_counts()['fields']['publication_date'] if 'fields' in all_facet_results.facet_counts() else []
-    all_pub_date_facet = clean_dates(all_pub_date_facet)
-    all_dates_map = {}
-    citations = 0
-    for facet in all_pub_date_facet:
-        all_dates_map[facet[0]] = facet[1]
-        citations = citations + facet[1]
-
-    sqs =SearchQuerySet().models(Citation).facet('publication_date', size=200)
-
-    facet_results = sqs.all().exclude(public="false").filter_or(author_ids__in=authority_ids).filter_or(contributor_ids__in=authority_ids) \
-            .filter_or(editor_ids__in=authority_ids).filter_or(subject_ids__in=authority_ids).filter_or(institution_ids__in=authority_ids) \
-            .filter_or(category_ids__in=authority_ids).filter_or(advisor_ids__in=authority_ids).filter_or(translator_ids__in=authority_ids) \
-            .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
-            .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
-            .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
-
-    pub_date_facet = facet_results.facet_counts()['fields']['publication_date'] if 'fields' in facet_results.facet_counts() else []
-
-    pub_date_facet = clean_dates(pub_date_facet)
-
-    ngrams = []
-    all_years = []
-    all_ngrams = []
-
-    for facet in pub_date_facet:
-        all_years.append(int(facet[0]))
-        date_facet = {}
-        date_facet['year'] = facet[0]
-        ngram = 100 * facet[1]/all_dates_map[facet[0]] if facet[0] in all_dates_map else 0
-        ngram = round(ngram, 4)
-        all_ngrams.append(ngram)
-        date_facet['ngram'] = ngram
-        ngrams.append(date_facet)
-
-    ngrams = sorted(ngrams, key = lambda ngram: int(ngram['year']))
-
-    return ngrams, max(all_years), min(all_years), max(all_ngrams)
-
-
-def clean_dates(date_facet):
-    new_date_facet = []
-    for date in date_facet:
-        date_pattern = re.compile("^[0-9]{4}$")
-        if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
-            new_date_facet.append(date)
-    return new_date_facet

@@ -203,20 +203,20 @@
 
 
 <script type="text/javascript">
+  //# sourceURL=pic.js
   //wikipedia abstract text toggler
   let textHolder = document.getElementById("wikiIntro");
-  let btn = document.querySelector('.readMore');
-
   function toggleText() {
     textHolder.classList.toggle("truncate");
   }
 
+  let btn = document.querySelector('.readMore');
   btn.addEventListener('click', toggleText);
 
   //gets wikimedia image and synopsis where possible
   let wikiImage = "{{ wikiImage|safe }}";
   let wikiIntro = `{{ wikiIntro }}`;
-  let wikiCredit = "{{ wikiCredit|safe }}";
+  let wikiCredit = `{{ wikiCredit|safe }}`;
   let type = "{{display_type}}";
 
   let default_image_map = {
@@ -247,13 +247,13 @@
     document.getElementById('wikiImageCredit').style.display = "block";
     document.getElementById('wikiImageCredit').href = wikiCredit;
     document.getElementById('wikiImage').style.display = "block";
-  } else if (type !== "Serial Publication" && type !== "Creative Work" && type !== "Cross-reference" && type !== "Bibliographic List"){
+  } else if (!["Serial Publication", "Creative Work", "Cross-reference", "Bibliographic List"].includes(type)){
     document.getElementById('wikiImageContainer').style.display = 'block';
     document.getElementById('wikiImageContainer').style.height = '200px';
     document.getElementById('wikiImageContainer').style.width = '200px';
     document.getElementById('imageCaption').style.display = 'block';
-    document.getElementById('wikiImageContainer').style.backgroundColor = default_background_map[type];
-    document.getElementById('wikiImage').src = default_image_map[type];
+    document.getElementById('wikiImageContainer').style.backgroundColor = type in default_background_map ? default_background_map[type] : default_background_map["Concept"] ;
+    document.getElementById('wikiImage').src = type in default_image_map ? default_image_map[type] : default_image_map["Concept"];
     document.getElementById('wikiImage').style.height = "200px";
     document.getElementById('wikiImage').style.width = "200px";
     document.getElementById('wikiImage').style.display = "block";
@@ -273,12 +273,11 @@
         } else {
           backgroundColor = backgroundColors[2];
         }
-    }
+    } 
 
     document.getElementById("placeholderImage").style.display = "block";
     document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
-  }
-
+  } 
 
   document.getElementById('wikiImageBorder').style.display = "block";
 
@@ -299,6 +298,5 @@
       toggleText(); //to truncate at first time
     }
   }
-
 </script>
 {% endcache %}

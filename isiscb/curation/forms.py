@@ -1005,11 +1005,11 @@ class AARelationTypeForm(forms.ModelForm):
         fields = ['name', 'description', 'relation_type_controlled', 'base_type', 'aarset']
 
 class SelectCitationCollectionForm(forms.Form):
-    collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
+    collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all().order_by("-created"))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
 class SelectAuthorityCollectionForm(forms.Form):
-    collection = forms.ModelChoiceField(queryset=AuthorityCollection.objects.all())
+    collection = forms.ModelChoiceField(queryset=AuthorityCollection.objects.all().order_by("-created"))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
 class ExportCitationsForm(forms.Form):

@@ -292,7 +292,7 @@ function toggleLinkRecordsBtn() {
               {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
             </option>
             {% endfor %}
-          <select>
+          </select>
           <p style="margin-top: 20px;">Or enter a citation ID:</p>
           <input type="text" class="form-control" name="pastedCitationId" id="pastedSubjectId" />
 
@@ -334,6 +334,41 @@ function toggleLinkRecordsBtn() {
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal-loading">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="loading-spinner mb-2"></div>
+        <div>
+          Linking Citations<br>
+          <small>This may take some time.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- style for spinner -->
+<style>
+  .loading-spinner{
+  width:30px;
+  height:30px;
+  border:2px solid indigo;
+  border-radius:50%;
+  border-top-color:#0001;
+  display:inline-block;
+  animation:loadingspinner .7s linear infinite;
+}
+@keyframes loadingspinner{
+  0%{
+    transform:rotate(0deg)
+  }
+  100%{
+    transform:rotate(360deg)
+  }
+}
+</style>
 
 <script>
 //# sourceURL=modals.js
@@ -523,6 +558,8 @@ function toggleLinkRecordsBtn() {
     });
 
     function submitCCR() {
+      $("#modal-loading").modal('show');
+      $('#linkRecordsModal').modal('hide');
       data = new FormData(document.querySelector("form#link_citations_form"));
       $.ajax({
         url: '{% url 'curation:bulk-create-ccr' %}',
@@ -532,7 +569,6 @@ function toggleLinkRecordsBtn() {
 	      enctype: 'multipart/form-data',
         type: 'POST',
         success: function ( data ) {
-            $('#linkRecordsModal').modal('hide');
             if (data["failed"] == null || data["failed"].length > 0) {
               var failed = $("<div></div>");
               var failedText = "CCRelation creation failed for the following citations (all other succeeded): " + data["failed"];
@@ -545,14 +581,17 @@ function toggleLinkRecordsBtn() {
             }
         },
         error: function (xhr) {
-          $('#linkRecordsModal').modal('hide');
           var failed = $("<div></div>");
           var failedText = "An error occured: " + $.parseJSON(xhr.responseText)["msg"];
           failed.text(failedText);
           $("#msgBoxErrorText").append(failed);
           $("#msgBoxError").show();
+        },
+        complete: function() {
+          $("#modal-loading").modal('hide');
         }
       });
+      
     }
 
   });

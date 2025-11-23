@@ -1,4 +1,4 @@
-name: Test and deploy to production on tagging
+name: Production Deploy (Manually)
 
 on: workflow_dispatch
 

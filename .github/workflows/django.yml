@@ -1,6 +1,7 @@
 name: Test and deploy to staging on push
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "develop" ]
   pull_request:
@@ -46,18 +47,20 @@ jobs:
         python -m pip install pip==23.3.2
         pip install -U six
         pip install -r requirements.txt
+        
     - name: Run Tests
+      if: "!contains(github.event.head_commit.message, '[skip tests]')"
       run: |
         cd isiscb
         export DATABASE_HOST=localhost
         export DJANGO_SETTINGS_MODULE=isiscb.github_settings
         export ELASTIC_HOST=http://localhost:9200/
         export API_KEY_STORAGE_KEY='eUa9GpdbdmvH8shDh_ofOd9Wt9uFT5REIWMwPjLi6OM='
-        #python manage.py migrate
-        #python manage.py test
+        python manage.py migrate
+        python manage.py test
 
-  deploy:
-    if: github.event_name == 'push'
+  deploy-web:
+    if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip web]')"
     needs: build
     runs-on: ubuntu-latest
 
@@ -92,9 +95,27 @@ jobs:
         # Deploy the application to Elastic Beanstalk
         eb deploy $AWS_ENVIRONMENT
 
+  deploy-worker:
+    if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip worker]')"
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.12
+
+    - name: Install awsebcli
+      run: |
+        python -m pip install pip==23.3.2
+        pip install awsebcli==3.23.2
+        
     - name: setup eb config for worker
       run: |
-        rm -r .elasticbeanstalk
         cp -r .elasticbeanstalk-staging-worker .elasticbeanstalk
 
     - name: Deploy to AWS Staging Worker Instance
