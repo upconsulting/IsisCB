@@ -253,9 +253,24 @@ def get_categories(obj):
 
 
 @register.filter
-def get_subjects(obj):
-    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=obj.id)
+def get_other_subjects(obj):
+    return ACRelation.objects.\
+        filter(type_controlled=ACRelation.SUBJECT, citation_id=obj.id).\
+        exclude(authority__type_controlled__in=[
+            Authority.TIME_PERIOD, Authority.GEOGRAPHIC_TERM, Authority.PERSON, Authority.INSTITUTION
+        ])
 
+@register.filter
+def get_time_and_place_subjects(obj):
+    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.TIME_PERIOD, Authority.GEOGRAPHIC_TERM], citation_id=obj.id)
+
+@register.filter
+def get_person_subjects(obj):
+    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON], citation_id=obj.id)
+
+@register.filter
+def get_person_and_institutions_subjects(obj):
+    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON, Authority.INSTITUTION], citation_id=obj.id)
 
 TRACKING_STATES = dict(Citation.TRACKING_CHOICES)
 CITATION_TYPES = dict(Citation.TYPE_CHOICES)

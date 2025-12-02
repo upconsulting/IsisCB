@@ -5,6 +5,7 @@
 {% load permission_tags %}
 {% load search_filters %}
 {% load general_tags %}
+{% load static %}
 
 {% block content %}
 
@@ -139,9 +140,55 @@
     </div>
 
     <div class="col-md-12" style="margin-top: 10px;">
+      <h5><b>Time and Place</b></h5>
+      <ul id="time-place-subject-list-group" class="list-group">
+        {% for acrel in instance|get_time_and_place_subjects %}
+           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
+             {% if acrel.authority %}
+             <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             {% else %}
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             {% endif %}
+             {% if can_update %}
+             <span class="button-group button-group-xs">
+                 <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                     acrelation-id="{{ acrel.id }}"
+                     data-acrelation-type="subject"
+                     acrelation-title="{{ acrel.authority.name }}"></a>
+             </span>
+             {% endif %}
+           </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-12" style="margin-top: 10px;">
+      <h5><b>Persons and Institutions</b></h5>
+      <ul id="person-institution-subject-list-group" class="list-group">
+        {% for acrel in instance|get_person_and_institutions_subjects %}
+           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
+             {% if acrel.authority %}
+             <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             {% else %}
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             {% endif %}
+             {% if can_update %}
+             <span class="button-group button-group-xs">
+                 <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                     acrelation-id="{{ acrel.id }}"
+                     data-acrelation-type="subject"
+                     acrelation-title="{{ acrel.authority.name }}"></a>
+             </span>
+             {% endif %}
+           </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-12" style="margin-top: 10px;">
       <h5><b>Subjects</b></h5>
       <ul id="subject-list-group" class="list-group">
-        {% for acrel in instance|get_subjects %}
+        {% for acrel in instance|get_other_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
              <a href="{% if acrel.authority|is_external_tenant:instance.owning_tenant %}{% url 'tenants:authority' instance.owning_tenant.identifier acrel.authority.id %}{% else %}{% url 'curation:curate_authority' acrel.authority.id %}{% endif %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
@@ -263,6 +310,8 @@
   <!-- END add subject/category column -->
 
 </div>
+
+<script src="{% static "curation/js/subjects_categories.js" %}" type="text/javascript"></script>
 
 <script>
 $('#subjectsTab a').click(function (e) {
@@ -581,37 +630,13 @@ function filterType(type, element) {
 }
 
 function addConcept(event) {
-  var link = event.target.closest('a');
-  var acRelId = $(link).data('id');
-
-  var payload = {
-      'citation_id': "{{ instance.id }}",
-      'authority_id': acRelId,
-      'type_controlled': 'SU',    // subject.
-      'type_broad_controlled': 'SC',    // subject content.
-  };
-
-  $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
-    var ul = $('#subject-list-group');
-    var newId = result.acrelation.id;
-    var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
-
-    var linkText = result.acrelation.authority.name;
-    if (result.acrelation.authority.owning_tenant != {{ instance.owning_tenant.id }}) {
-      linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
-      url = "{% url 'tenants:authority-base' instance.owning_tenant.identifier %}" + result.acrelation.authority.id;
-    }
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + linkText + '</a></li>');
-    ul.append(li);
-    {% if can_update %}
-    var span = $('<span class="button-group button-group-xs"></span>');
-    li.append(span);
-
-    var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
-    span.append(a);
-    a.click(delete_handler);
-    {% endif %}
-  });
+  addConceptToList(event, 
+    "{{ instance.id }}",
+    "{% url "curation:quick_create_acrelation"  %}", 
+    '{% url 'curation:authority_list' %}', 
+    '{% url 'tenants:authority-base' instance.owning_tenant.identifier %}',
+    "{{instance.owning_tenant.id}}", 
+    "{{can_update}}")
 }
 </script>
 
