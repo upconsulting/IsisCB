@@ -1417,7 +1417,8 @@ class Citation(ReferencedEntity, CuratedMixin):
     @property
     def ccrelations(self):
         """
-        Provides access to related :class:`.CCRelation` instances directly.
+        Provides access to related :class:`.CCRelation` instances directly
+        that are public.
         """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return CCRelation.objects.filter(public=True).filter(query)
@@ -1426,6 +1427,23 @@ class Citation(ReferencedEntity, CuratedMixin):
     def all_ccrelations(self):
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return CCRelation.objects.filter(query)
+    
+    @property
+    def book(self):
+        """
+        Returns the public parent book object (which should only return something if this is a chapter)
+        """
+        return self.ccrelations.filter(object_id=self.id, type_controlled__in=[CCRelation.INCLUDES_CHAPTER]).first()
+    
+    @property
+    def journal(self):
+        """
+        Returns the public periodical if this is an article or essay review.
+        """
+        if self.type_controlled not in [Citation.ARTICLE, Citation.ESSAY_REVIEW]:
+            return None
+        
+        return self.acrelations.filter(type_controlled=ACRelation.PERIODICAL).first()
 
 
     @property
