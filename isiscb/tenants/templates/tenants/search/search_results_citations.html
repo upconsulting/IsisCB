@@ -14,17 +14,19 @@
 {% if query %}
 <div class="row">
   <div class='col-sm-12 col-md-4' style="padding-right: 0;">
+
+    <!-- BEGIN sort and filter box -->
     <div class="panel-group hidden-print" id="type_panel">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion"
-              href=".collapseCitationTypes" class="accordion-toggle">
+              href=".collapseFilters" class="accordion-toggle">
               Sort & Filter
             </a>
           </h4>
         </div>
-        <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse in" aria-expanded="true">
+        <div id="collapseFilters" class="collapseFilters panel-collapse collapse" aria-expanded="true">
           <div class="facet_panel panel-body">
             <div class="row panel-row" style="margin-bottom:10px;">
               <div class="col-md-12 panel-cell" style="padding-top:4px">
@@ -50,78 +52,6 @@
               </div>
             </div>
             <hr style="margin-top: 4px; margin-bottom: 4px;">
-
-            <div class="row panel-row">
-              <div class="col-md-12 panel-cell">
-                <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
-              </div>
-            </div>
-
-            <div class="row panel-row ">
-              {% if facets_citation.fields.type %}
-                <div class="col-md-12">
-                  {% for type in selected_facets.citation_type %}
-                  {% with type|create_facet_string:'citation_type' as encoded_type %}
-                  <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ type }}
-                  </div>
-                  {% endwith %}
-                  {% endfor %}
-
-                  {% for type in facets_citation.fields.type %}
-                  {% if type.0 %}
-                  {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
-                  <div class="col-md-12">
-                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i></a> {{ type.0 }} ({{ type.1 }})
-                  </div>
-                  {% endif %}
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              {% else %}
-              <div class="row panel-row">
-                <div class="col-md-12 panel-cell">
-                  <p>No type facets.</p>
-                </div>
-              </div>
-            {% endif %}
-            </div>
-
-            <div class="row panel-row">
-              <div class="col-md-12 panel-cell">
-                <h5 style="margin:4px 0"><small>Select the publication language(s) you would like to see.</small></h5>
-              </div>
-            </div>
-
-            <div class="row panel-row ">
-              {% if facets_citation.fields.language %}
-                <div class="col-md-12">
-                  {% for language in selected_facets.citation_language %}
-                  {% with language|create_facet_string:'citation_language' as encoded_language %}
-                  <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ language }}
-                  </div>
-                  {% endwith %}
-                  {% endfor %}
-
-                  {% for language in facets_citation.fields.language %}
-                  {% if language.0 %}
-                  {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
-                  <div class="col-md-12">
-                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
-                  </div>
-                  {% endif %}
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              {% else %}
-              <div class="row panel-row">
-                <div class="col-md-12 panel-cell">
-                  <p>No language facets.</p>
-                </div>
-              </div>
-            {% endif %}
-            </div>
 
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
@@ -167,6 +97,170 @@
         </div>
       </div>
     </div>
+    <!-- END sort and filter box -->
+
+    <!-- BEGIN publication type facet -->
+     <div class="panel-group hidden-print" id="type_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href=".collapseCitationTypes" class="accordion-toggle">
+              Filter by publication type
+            </a>
+          </h4>
+        </div>
+        <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse {% if "citation_type" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row">
+              <div class="col-md-12 panel-cell">
+                <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
+              </div>
+            </div>
+
+            <div class="row panel-row ">
+              {% if facets_citation.fields.type %}
+                <div class="col-md-12">
+                  {% for type in selected_facets.citation_type %}
+                  {% with type|create_facet_string:'citation_type' as encoded_type %}
+                  <div class="col-md-12">
+                    <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ type }}
+                  </div>
+                  {% endwith %}
+                  {% endfor %}
+
+                  {% for type in facets_citation.fields.type %}
+                  {% if type.0 %}
+                  {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
+                  <div class="col-md-12">
+                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i></a> {{ type.0 }} ({{ type.1 }})
+                  </div>
+                  {% endif %}
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              {% else %}
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <p>No type facets.</p>
+                </div>
+              </div>
+            {% endif %}
+            </div>
+    </div>
+        </div>
+      </div>
+    </div>
+    <!-- END publication type facet -->
+
+    <!-- BEGIN languages facet -->
+    <div class="panel-group hidden-print" id="type_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href=".collapseLanguages" class="accordion-toggle">
+              Filter by language
+            </a>
+          </h4>
+        </div>
+        <div id="collapseLanguages" class="collapseLanguages panel-collapse {% if "citation_language" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row">
+              <div class="col-md-12 panel-cell">
+                <h5 style="margin:4px 0"><small>Select the publication language(s) you would like to see.</small></h5>
+              </div>
+            </div>
+
+            <div class="row panel-row ">
+              {% if facets_citation.fields.language %}
+                <div class="col-md-12">
+                  {% for language in selected_facets.citation_language %}
+                  {% with language|create_facet_string:'citation_language' as encoded_language %}
+                  <div class="col-md-12">
+                    <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ language }}
+                  </div>
+                  {% endwith %}
+                  {% endfor %}
+
+                  {% for language in facets_citation.fields.language %}
+                  {% if language.0 %}
+                  {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
+                  <div class="col-md-12">
+                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
+                  </div>
+                  {% endif %}
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              {% else %}
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <p>No language facets.</p>
+                </div>
+              </div>
+            {% endif %}
+            </div>
+          </div>
+      </div>
+    </div>
+    </div>
+    <!-- END language facet -->
+
+    <!-- BEGIN dataset facet-->
+    <div class="panel-group hidden-print" id="type_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href=".collapseDatasets" class="accordion-toggle">
+              Filter by datasets
+            </a>
+          </h4>
+        </div>
+        <div id="collapseDatasets" class="collapseDatasets panel-collapse {% if "citation_dataset_typed_names" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
+          <div class="facet_panel panel-body">
+            
+            <div class="row panel-row">
+              <div class="col-md-12 panel-cell">
+                <h5 style="margin:4px 0"><small>Select the dataset you would like see.</small></h5>
+              </div>
+            </div>
+
+            <div class="row panel-row ">
+              {% if facets_citation.fields.dataset_typed_names %}
+                <div class="col-md-12">
+                  {% for dataset_name in selected_facets.citation_dataset_typed_names %}
+                  {% with dataset_name|create_facet_string:'citation_dataset_typed_names' as encoded_dataset_typed_names %}
+                  <div class="col-md-12">
+                    <a href="{{ request.get_full_path|remove_facet:encoded_dataset_typed_names|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ dataset_name }}
+                  </div>
+                  {% endwith %}
+                  {% endfor %}
+
+                  {% for dataset_name in facets_citation.fields.dataset_typed_names %}
+                  {% if dataset_name.0 %}
+                  {% if "citation_dataset_typed_names" not in selected_facets.keys or dataset_name.0 not in selected_facets.citation_dataset_typed_names %}
+                  <div class="col-md-12">
+                    <a title="Add Dataset facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_dataset_typed_names:{{ dataset_name.0|urlencode }}"><i class="far fa-square"></i></a> {{ dataset_name.0 }} ({{ dataset_name.1 }})
+                  </div>
+                  {% endif %}
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              {% else %}
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <p>No dataset facets.</p>
+                </div>
+              </div>
+            {% endif %}
+            </div>
+          </div>
+      </div>
+    </div>
+    </div>
+    <!-- END dataset facet -->
 
     {% include "tenants/search/search_results_authorities.html" %}
   </div>
