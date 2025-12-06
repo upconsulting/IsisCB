@@ -7,7 +7,10 @@ from isisdata.templatetags.app_filters import *
 import urllib.request, urllib.parse, urllib.error
 import re
 
+import logging
+
 register = template.Library()
+logger = logging.getLogger(__name__)
 
 @register.filter
 def get_authority_name(id):
@@ -29,7 +32,30 @@ def set_excluded_facets(url, available_facets):
 
 @register.filter
 def remove_url_part(url, arg):
-    return urllib.parse.unquote(url).replace(arg, "").replace("&&", "&")
+    qs = urllib.parse.parse_qsl(url)
+    if not len(arg.split("=")) == 2:
+        return url
+    
+    logger.error("remove url part")
+    logger.error(qs)
+    
+    key = arg.split("=")[0]
+    value = arg.split("=")[1]
+
+    logger.error(key)
+    logger.error(value)
+    for para in qs:
+        if para[0] == key and para[1] == value:
+            qs.remove(para)
+        # this is a hack but not sure a better way to do this at this point
+        # if we didn't just delete the value with a '&' in it, then we need to quote the '&' to
+        # make cases work in which a fact has an ampersand in the value
+        # for some reason the facetting doesn't work if we don't do this
+        if para in qs and "&" in para[1]:
+            qs.remove(para)
+            qs.append((para[0], urllib.parse.quote(para[1])))
+
+    return "&".join([f"{para[0]}={para[1]}" for para in qs])
 
 @register.filter
 def add_selected_facet(url, facet):
@@ -69,6 +95,15 @@ def create_facet_with_field(facet, field):
 @register.filter
 def are_reviews_excluded(url):
     return 'excluded_facets=citation_type:Review' in urllib.parse.unquote(url)
+
+@register.filter
+def is_limited_to_tech_culture(url):
+    return 'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography' in urllib.parse.unquote(url)
+
+@register.filter
+def limit_to_tech_culture_facet(url):
+    return (url + "&selected_facets=citation_dataset_typed_names:Technology%20%26%20Culture%20Bibliography")
+
 
 @register.filter
 def are_stubs_excluded(url):

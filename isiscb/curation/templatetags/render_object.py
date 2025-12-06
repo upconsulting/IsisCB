@@ -265,10 +265,6 @@ def get_time_and_place_subjects(obj):
     return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.TIME_PERIOD, Authority.GEOGRAPHIC_TERM], citation_id=obj.id)
 
 @register.filter
-def get_person_subjects(obj):
-    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON], citation_id=obj.id)
-
-@register.filter
 def get_person_and_institutions_subjects(obj):
     return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON, Authority.INSTITUTION], citation_id=obj.id)
 

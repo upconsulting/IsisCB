@@ -3,15 +3,16 @@
 {% load search_filters %}
 
 {% if query %}
+<div class="panel-group hidden-print" id="type_panel">
   <div class='panel panel-default'>
     <div class='panel-heading'>
       <h4 class='panel-title'>
-        <a data-toggle="collapse" data-parent="#accordion" href=".collapseAuthorityResults" class="accordion-toggle">
+        <a id="authoritiesHeading" data-toggle="collapse" data-parent="#accordion" href="#" class="accordion-toggle">
           All Authorities
         </a>
       </h4>
     </div>
-    <div id="collapseAuthorityResults" class="collapseAuthorityResults panel-collapse collapse" style='height: 0px;'>
+    <div id="collapseAuthorityResults" class="collapseAuthorityResults panel-collapse" >
       <div class='panel-body'>
         <div class="row" style="margin-bottom:10px;">
           <div class="col-md-12 panel-cell" style="padding-top:4px">
@@ -150,7 +151,7 @@
       </div>
     </div>
   </div>
-
+</div>
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}

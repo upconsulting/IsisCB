@@ -20,8 +20,8 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion"
-              href=".collapseFilters" class="accordion-toggle">
+            <a id="collapseFiltersHeading" data-toggle="collapse" data-parent="#accordion"
+              href="#" class="accordion-toggle">
               Sort & Filter
             </a>
           </h4>
@@ -56,13 +56,21 @@
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
                 {% if request.get_full_path|are_reviews_excluded %}
-                <input type="checkbox" name="exclude_reviews" >
-
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"> Book Reviews are excluded</a>
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"><i class="far fa-square"></i>  Include book reviews</a>
                 {% endif %}
                 {% if not request.get_full_path|are_reviews_excluded %}
-                <input type="checkbox" name="exclude_reviews" checked>
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"> Book Reviews are included</a>
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Include book reviews</a>
+                {% endif %}
+              </small>
+            </div>
+
+            <div class="col-md-12" style="padding-top: 10px;">
+              <small>
+                {% if request.get_full_path|is_limited_to_tech_culture %}
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Limit to just Technology and Culture data</a>
+                {% endif %}
+                {% if not request.get_full_path|is_limited_to_tech_culture %}
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|limit_to_tech_culture_facet|add_facet_or_operator }}"><i class="far fa-square"></i> Limit to just Technology and Culture data</a>
                 {% endif %}
               </small>
             </div>
@@ -70,13 +78,10 @@
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
                 {% if request.get_full_path|are_stubs_excluded %}
-                <input type="checkbox" name="exclude_stubs" >
-
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Incomplete records are excluded</a>
+                   <span style="color: #555"><i class="far fa-square"></i>  Include incomplete records</span>
                 {% endif %}
                 {% if not request.get_full_path|are_stubs_excluded %}
-                <input type="checkbox" name="exclude_stubs" checked>
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Incomplete records are included</a>
+                <span style="color: #555"><i class="fa fa-check-square"></i>  Include incomplete records</span>
                 {% endif %}
               </small>
             </div>
@@ -84,11 +89,9 @@
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
                 {% if request.GET.owning_tenant %}
-                <input type="checkbox" name="include_all_projects" >
-                <a href="{{ request.get_full_path|remove_tenant }}">Include all projects</a>
+                <span style="color: #555"><i class="far fa-square"></i> Include all projects</span>
                 {% else %}
-                <input type="checkbox" name="include_all_projects" checked>
-                <a href="{{ request.get_full_path|add_tenant:tenant_id}}">All projects included</a>
+                <span style="color: #555"><i class="far fa-square"></i>All projects included</span>
                 {% endif %}
               </small>
             </div>
@@ -104,13 +107,13 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion"
-              href=".collapseCitationTypes" class="accordion-toggle">
-              Filter by publication type
+            <a id="publicationTypeHeading" data-toggle="collapse" data-parent="#accordion"
+              href="#" class="accordion-toggle">
+              Limit by publication type
             </a>
           </h4>
         </div>
-        <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse {% if "citation_type" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
+        <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse" aria-expanded="true">
           <div class="facet_panel panel-body">
             <div class="row panel-row">
               <div class="col-md-12 panel-cell">
@@ -158,13 +161,13 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion"
-              href=".collapseLanguages" class="accordion-toggle">
-              Filter by language
+            <a id="languageFilterHeading" data-toggle="collapse" data-parent="#accordion"
+              href="#" class="accordion-toggle">
+              Limit by language
             </a>
           </h4>
         </div>
-        <div id="collapseLanguages" class="collapseLanguages panel-collapse {% if "citation_language" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
+        <div id="collapseLanguages" class="collapseLanguages panel-collapse" aria-expanded="true">
           <div class="facet_panel panel-body">
             <div class="row panel-row">
               <div class="col-md-12 panel-cell">
@@ -187,7 +190,9 @@
                   {% if language.0 %}
                   {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
                   <div class="col-md-12">
-                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
+                    {% with 'citation_language:'|add:language.0 as facet_string %}
+                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:facet_string}}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
+                    {% endwith %}
                   </div>
                   {% endif %}
                   {% endif %}
@@ -206,61 +211,6 @@
     </div>
     </div>
     <!-- END language facet -->
-
-    <!-- BEGIN dataset facet-->
-    <div class="panel-group hidden-print" id="type_panel">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion"
-              href=".collapseDatasets" class="accordion-toggle">
-              Filter by datasets
-            </a>
-          </h4>
-        </div>
-        <div id="collapseDatasets" class="collapseDatasets panel-collapse {% if "citation_dataset_typed_names" not in selected_facets.keys  %}collapse{% else %}in{%endif%}" aria-expanded="true">
-          <div class="facet_panel panel-body">
-            
-            <div class="row panel-row">
-              <div class="col-md-12 panel-cell">
-                <h5 style="margin:4px 0"><small>Select the dataset you would like see.</small></h5>
-              </div>
-            </div>
-
-            <div class="row panel-row ">
-              {% if facets_citation.fields.dataset_typed_names %}
-                <div class="col-md-12">
-                  {% for dataset_name in selected_facets.citation_dataset_typed_names %}
-                  {% with dataset_name|create_facet_string:'citation_dataset_typed_names' as encoded_dataset_typed_names %}
-                  <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_dataset_typed_names|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ dataset_name }}
-                  </div>
-                  {% endwith %}
-                  {% endfor %}
-
-                  {% for dataset_name in facets_citation.fields.dataset_typed_names %}
-                  {% if dataset_name.0 %}
-                  {% if "citation_dataset_typed_names" not in selected_facets.keys or dataset_name.0 not in selected_facets.citation_dataset_typed_names %}
-                  <div class="col-md-12">
-                    <a title="Add Dataset facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_dataset_typed_names:{{ dataset_name.0|urlencode }}"><i class="far fa-square"></i></a> {{ dataset_name.0 }} ({{ dataset_name.1 }})
-                  </div>
-                  {% endif %}
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              {% else %}
-              <div class="row panel-row">
-                <div class="col-md-12 panel-cell">
-                  <p>No dataset facets.</p>
-                </div>
-              </div>
-            {% endif %}
-            </div>
-          </div>
-      </div>
-    </div>
-    </div>
-    <!-- END dataset facet -->
 
     {% include "tenants/search/search_results_authorities.html" %}
   </div>
@@ -470,48 +420,39 @@
   </div>
 </div>
 
-<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
-<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
 <script>
-$("input[name='exclude_reviews']").bootstrapSwitch({
-  'size':'mini',
-  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
-  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
-});
 
-$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
-  if (includeReviews) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+  function addToggleEventListener(boxId, contentBoxId, storageKey) {
+    const box = document.getElementById(boxId);
+    box.addEventListener('click', function() {
+      localStorage.setItem(storageKey, (localStorage.getItem(storageKey) || "false") == "true" ? "false" : "true");
+      toggleBox(contentBoxId, storageKey);
+    })
   }
-});
 
-$("input[name='exclude_stubs']").bootstrapSwitch({
-  'size':'mini',
-  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
-  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
-});
-
-$('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
-  if (includeStubs) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
+  function toggleBox(contentBoxId, storageKey) {
+    const isBoxOpen = localStorage.getItem(storageKey) || "false";
+    if (isBoxOpen == "true") {
+        document.getElementById(contentBoxId).classList.remove('collapse');
+        document.getElementById(contentBoxId).classList.add('show');
+    } else {
+        document.getElementById(contentBoxId).classList.remove('show');
+        document.getElementById(contentBoxId).classList.add('collapse');
+    }
   }
-});
 
-$("input[name='include_all_projects']").bootstrapSwitch({
-  'size':'mini',
-  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
-  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
-});
+  document.addEventListener('DOMContentLoaded', (event) => {
 
-$('input[name="include_all_projects"]').on('switchChange.bootstrapSwitch', function(event, includeProjects) {
-  if (!includeProjects) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|add_tenant:tenant_id|safe}}"
-  } else {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|remove_tenant|safe }}"
-  }
-});
+      addToggleEventListener("collapseFiltersHeading", 'collapseFilters', "isSortOpen");
+      addToggleEventListener("publicationTypeHeading", 'collapseCitationTypes', "isPublicationTypeOpen");
+      addToggleEventListener("languageFilterHeading", 'collapseLanguages', "isLanguagesOpen");
+      // authorities are in search_results_authorities.html
+      addToggleEventListener("authoritiesHeading", 'collapseAuthorityResults', "isAuthoritiesOpen");
+
+      // set initial box states
+      toggleBox('collapseFilters', "isSortOpen");
+      toggleBox('collapseCitationTypes', "isPublicationTypeOpen");
+      toggleBox('collapseLanguages', "isLanguagesOpen");
+      toggleBox('collapseAuthorityResults', "isAuthoritiesOpen");
+  });
 </script>
