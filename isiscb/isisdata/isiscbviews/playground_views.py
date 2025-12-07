@@ -21,15 +21,25 @@ def genealogy(request, tenant_id=None):
     domino_effect = request['domino']
     display_subjects = set(selected_subjects.copy())
 
+    # When users select subjects of type concept or geographic term, 
+    # the process for producing the network graph data is different 
+    # than that for people and institutions. 
+
+    # get selected subject authority objects for concepts and places
     concept_or_geographic_subject_authority_ids = Authority.objects.filter(
             pk__in=selected_subjects, 
             type_controlled__in=[Authority.CONCEPT, Authority.GEOGRAPHIC_TERM]
             )\
         .values_list("id", flat=True)
 
+    # remove any concepts/places from the display subjects because we don't want them
+    # in the graph we want to create genealogies from, we want the people who write about them
     display_subjects.difference_update(concept_or_geographic_subject_authority_ids)
+
     node_ids = set(display_subjects.copy())
     
+    # get ACRs for citations that have selected concept/place as subject
+    concept_or_geographic_related_citation_ids = None
     if concept_or_geographic_subject_authority_ids:
         concept_or_geographic_related_citation_ids = ACRelation.objects.filter(
                 public=True,
@@ -39,6 +49,8 @@ def genealogy(request, tenant_id=None):
                 )\
             .values_list("citation__id", flat=True).distinct("citation__id")
     
+    # get the top authors of citations about that concept/place
+    concept_or_geographic_related_authors = None
     if concept_or_geographic_related_citation_ids:
         concept_or_geographic_related_authors = ACRelation.objects.filter(
                 public=True,
@@ -48,9 +60,11 @@ def genealogy(request, tenant_id=None):
             .annotate(author=Count('authority__id')).order_by('-author')\
             .values_list("authority__id", flat=True)[:299]
     
+    # add those authors to the display subjects
     if concept_or_geographic_related_authors:
         display_subjects.update(concept_or_geographic_related_authors)
     
+    # fetch all ACRs of theses related to our display subjects
     subject_theses_ids = ACRelation.objects.filter(
             public=True, 
             authority__public=True, 
@@ -61,6 +75,7 @@ def genealogy(request, tenant_id=None):
             )\
         .values_list("citation__id", flat=True).distinct("citation__id")
 
+    # get the theses linked to those ACRs
     subject_theses = Citation.objects.filter(id__in=[subject_theses_ids])
   
     nodes = []

@@ -56,23 +56,23 @@ def generate_theses_by_school_context(top, chart_type, select_schools):
 
 def get_data_for_heatgrid(authority_ids, years, acrs):
     """
-    this function fetches and formats data in order to generate the heatgrid visualization.
-    this function takes a queryset of ACRs of theses 
-    and converts them into a list of lists of the following form 
-    (as desired by out-of-the-box D3 heatgrid graph (https://observablehq.com/@d3/the-impact-of-vaccines)):
+    This function fetches and formats data in order to generate the heatgrid visualization.
+    This function takes a queryset of ACRs of theses 
+        and converts them into a list of lists of the following form 
+        (as desired by out-of-the-box D3 heatgrid graph (https://observablehq.com/@d3/the-impact-of-vaccines)):
 
-    [
-      [<thesis-count-for-school1-year1>, <thesis-count-for-school1-year-2>, etc.],
-      [<thesis-count-for-school2-year1>, <thesis-count-for-school2-year-2>, etc.],
-    ]
+        [
+            [<thesis-count-for-school1-year1>, <thesis-count-for-school1-year-2>, etc.],
+            [<thesis-count-for-school2-year1>, <thesis-count-for-school2-year-2>, etc.],
+        ] ...
 
     py:function:: get_data_for_heatgrid(authority_ids, years, acrs)
 
     :param list authority_ids: a list of school ids
     :param list years: range of years which will serve as the domain of the graph
     :param queryset acrs: a queryset containing the ACRelations of each thesis for each of the schools
-    :return: formatted data necessary for populating D3.js heatgrid graphs
-    :rtype: list of lists
+    :return: formatted data necessary for populating D3.js heatgrid graphs as seen above
+    :rtype: list
     """
     citations_count_per_year = []
     years_counts_template = [0] * len(years)
@@ -90,24 +90,25 @@ def get_data_for_heatgrid(authority_ids, years, acrs):
 
 def get_data_for_stacked_area(acrs, years, schools):
     """
-    this function fetches and formats data in order to generate the area visualizations (stacked, normalized, streamgraph).
-    this function takes a queryset of ACRs of theses 
-    and converts them into a list of objects of the following form 
-    (as desired by out-of-the-box D3 stacked area graphs):
+    This function fetches and formats data in order to generate the area 
+        visualizations (stacked, normalized, streamgraph).
+    This function takes a queryset of ACRs of theses 
+        and converts them into a list of objects of the following form 
+        (as desired by out-of-the-box D3 stacked area graphs):
 
-    {
-      "date": <date YYYY-MM-DD>,
-      "school": <str name-of-school>,
-      "theses": <int number-of-theses>
-    }
+        {
+        "date": <date YYYY-MM-DD>,
+        "school": <str name-of-school>,
+        "theses": <int number-of-theses>
+        }
 
     py:function:: get_data_for_stacked_area(acrs, years, schools)
 
-    :param date date: a year
-    :param str school: name of school that hosts theses
-    :param int theses: the number of theses produced at each school in each year
-    :return: formatted data necessary for populating D3.js area-type graphs
-    :rtype: list of dicts
+    :param queryset acrs: a queryset of thesis ACRs
+    :param list years: a list representing the date range for the data
+    :param list schools: a list of school names
+    :return: list of dicts of formatted data necessary for populating D3.js area-type graphs
+    :rtype: list
     """
 
     schools_years = { school : years.copy() for school in schools }
@@ -154,6 +155,16 @@ def clean_dates(date_facet):
     return new_date_facet
 
 def get_ngram_data(authority_ids):
+    """
+    Method for generating data necessary to produce ngram playground visualizations
+    
+    :param list authority_ids: list of CBA IDs selected by user
+    :returns:
+        -ngrams (:py:class:`list`) - A list of objects containing a year and frequency count representing an ngram 
+        -max_year (:py:class:`int`) - The latest year in the date range
+        -min_year (:py:class:`int`) - The earliest year in the date range
+        -max_frequency (:py:class:`int`) - The highest frequency count of any ngram graphed
+    """
     sqs_all = SearchQuerySet().models(Citation).auto_query('*').facet('publication_date')
     all_facet_results = sqs_all.all().exclude(public="false")
     all_pub_date_facet = all_facet_results.facet_counts()['fields']['publication_date'] if 'fields' in all_facet_results.facet_counts() else []
@@ -224,11 +235,12 @@ def generate_genealogy_node(authority, subjects):
     """
     Method to build a geneology node.
 
-    FIXME: Paul please add details.
+    py:function:: generate_genealogy_node(authority, subjects)
 
-    Returns:
-        - node: a JSON object containing the node properties.
-        - node_association_counts: count of associtated theses of node
+    :param authority: a queryset object representing the authority (PERSON or INSTITUTION) that will form the node
+    :param list subjects: a list of CBA IDs representing the selected subjects
+    :return: a dict containing the metadata necessary to properly generate, label, and style a node
+    :rtype: dict
     """
     theses_hosted_by_school = None
     theses_advised = None
@@ -313,6 +325,25 @@ def generate_genealogy_node(authority, subjects):
     return node, node_associations_count
 
 def extrapolate_thesis(thesis, node_ids, links, domino_effect, subjects):
+    """
+    Method to expand the family tree by extrapolating from relations.
+    For any given thesis, it's advisor, author, and host school are added to the
+        masterlist of nodes, if not already present, and links connecting these 
+        nodes are added to the masterlist of links, if not already present.
+    When the "domino chain reaction" toggle is activated, this method instantiates
+        nodes of upstream relations until a leaf is reached, not just instantiating the 
+        nodes that are direct neighbors to the given thesis
+
+    py:function:: extrapoloate_thesis(thesis, node_ids, links, domino_effect, subjects)
+
+    :param thesis: a queryset object representing a thesis to be extrapolated from
+    :param list node_ids: a list of CBA IDs for all nodes in the graph
+    :param list links: a list of dicts containing the metadata for all links in the graph
+    :param bool domino_effect: the result of user choice to activate domino_effect
+    :param list subjects: a list of CBA IDs representing the selected subjects
+    :return: None
+    """
+
     school = None
     acrs = ACRelation.objects.filter(
         public=True, 
