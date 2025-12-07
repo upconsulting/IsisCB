@@ -11,7 +11,6 @@
 
 {% endblock %}
 
-{% if query %}
 <div class="row">
   <div class='col-sm-12 col-md-4' style="padding-right: 0;">
 
@@ -53,49 +52,16 @@
             </div>
             <hr style="margin-top: 4px; margin-bottom: 4px;">
 
-            <div class="col-md-12" style="padding-top: 10px;">
-              <small>
-                {% if request.get_full_path|are_reviews_excluded %}
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"><i class="far fa-square"></i>  Include book reviews</a>
-                {% endif %}
-                {% if not request.get_full_path|are_reviews_excluded %}
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Include book reviews</a>
-                {% endif %}
-              </small>
-            </div>
+            
 
             <div class="col-md-12" style="padding-top: 10px;">
-              <small>
                 {% if request.get_full_path|is_limited_to_tech_culture %}
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Limit to just Technology and Culture data</a>
+                  <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Limit to SHOT Data</a>
                 {% endif %}
                 {% if not request.get_full_path|is_limited_to_tech_culture %}
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|limit_to_tech_culture_facet|add_facet_or_operator }}"><i class="far fa-square"></i> Limit to just Technology and Culture data</a>
+                <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|limit_to_tech_culture_facet|add_facet_or_operator }}"><i class="far fa-square"></i> Limit to SHOT Data</a>
                 {% endif %}
-              </small>
             </div>
-
-            <div class="col-md-12" style="padding-top: 10px;">
-              <small>
-                {% if request.get_full_path|are_stubs_excluded %}
-                   <span style="color: #555"><i class="far fa-square"></i>  Include incomplete records</span>
-                {% endif %}
-                {% if not request.get_full_path|are_stubs_excluded %}
-                <span style="color: #555"><i class="fa fa-check-square"></i>  Include incomplete records</span>
-                {% endif %}
-              </small>
-            </div>
-
-            <div class="col-md-12" style="padding-top: 10px;">
-              <small>
-                {% if request.GET.owning_tenant %}
-                <span style="color: #555"><i class="far fa-square"></i> Include all projects</span>
-                {% else %}
-                <span style="color: #555"><i class="far fa-square"></i>All projects included</span>
-                {% endif %}
-              </small>
-            </div>
-
           </div>
         </div>
       </div>
@@ -149,6 +115,17 @@
                 </div>
               </div>
             {% endif %}
+
+            <div class="col-md-12" style="padding-top: 10px;">
+              <small>
+                {% if request.get_full_path|are_reviews_excluded %}
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"><i class="far fa-square"></i>  Include book reviews</a>
+                {% endif %}
+                {% if not request.get_full_path|are_reviews_excluded %}
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Include book reviews</a>
+                {% endif %}
+              </small>
+            </div>
             </div>
     </div>
         </div>
@@ -217,7 +194,7 @@
   <div class="col-sm-12 col-md-8 menuContainer">
     <div class="row" style="margin: 0 0 15px 0; border-radius: 4px; padding: 5px 10px; color: #fff; background-color: #337ab7;">
       <strong>Citations</strong>
-      <span class='pull-right'>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }}</span>
+      <span class='pull-right'>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} {% if count_citation == 10000%}(maximum results shown){% endif %}</span>
     </div>
 
     {% for result in page.citation.object_list %}
@@ -414,9 +391,7 @@
         </ul>
       </nav>
       {% endif %}
-{% else %}
-    {# Show some example queries to run, maybe query syntax, something else? #}
-{% endif %}
+
   </div>
 </div>
 

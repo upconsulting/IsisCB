@@ -36,14 +36,9 @@ def remove_url_part(url, arg):
     if not len(arg.split("=")) == 2:
         return url
     
-    logger.error("remove url part")
-    logger.error(qs)
-    
     key = arg.split("=")[0]
     value = arg.split("=")[1]
 
-    logger.error(key)
-    logger.error(value)
     for para in qs:
         if para[0] == key and para[1] == value:
             qs.remove(para)
@@ -60,6 +55,22 @@ def remove_url_part(url, arg):
 @register.filter
 def add_selected_facet(url, facet):
     return (url + "&selected_facets=" + urllib.parse.unquote(facet)).replace("&&", "&")
+
+@register.filter
+def remove_query(url):
+    # we will probably have the path prefix before the query string
+    parsed_url = urllib.parse.urlparse(url)
+    query_string = parsed_url.query   
+    path = parsed_url.path      
+    
+    qs = urllib.parse.parse_qsl(query_string)
+    for para in qs:
+        if para[0] == "q":
+            qs.remove(para)
+        
+    full_qs = "&".join([f"{para[0]}={para[1]}" for para in qs])
+    return path + "?" + full_qs if path else full_qs
+
 
 @register.filter
 def add_facet_or_operator(url):
@@ -98,7 +109,15 @@ def are_reviews_excluded(url):
 
 @register.filter
 def is_limited_to_tech_culture(url):
-    return 'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography' in urllib.parse.unquote(url)
+    parsed_url = urllib.parse.urlparse(url)
+    query_string = parsed_url.query   
+    path = parsed_url.path      
+    
+    qs = urllib.parse.parse_qsl(query_string)
+    for para in qs:
+        if para[0] == "selected_facets" and para[1]=="citation_dataset_typed_names:Technology & Culture Bibliography":
+            return True
+    return False 
 
 @register.filter
 def limit_to_tech_culture_facet(url):

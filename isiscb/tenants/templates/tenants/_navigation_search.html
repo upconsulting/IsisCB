@@ -1,0 +1,156 @@
+{% load static %}
+{% load addcss %}
+{% load app_filters %}
+{% load facet_filters %}
+
+<nav class="navbar navbar-inverse navbar-home" style="background-color:{{tenant.settings.navigation_color}}">
+    <div class="container-fluid">
+
+        <div class="navbar-header col-md-3" style="padding-top: 5px;"><!--  width: 250px;"-->
+            {% if tenant.logo %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
+            {% endif %}
+            {% if not tenant.settings.hide_title_in_navbar %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}">
+                <div style="line-height:50px; font-size: 22px; color: white">
+                    {{ tenant.title }}
+                </div> 
+            </a>
+            {% endif %}
+            {% if notifications %}
+            <div class="navbar-brand" style="margin-left: 0px; color: #f3c11d; padding-top: 5px;">
+            <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
+            <script>
+                $(function() {
+                    $("#notifications-icon").click(function() {
+                        $("#notifications-panel").show();
+                    });
+                   
+                    $("#notifications-close-btn").click(function() {
+                        $("#notifications-panel").hide();
+                    })
+                });
+            </script>
+            </div>
+            {% endif %}
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="col-md-4" style='padding: 0;'>
+            <div class='form-inline'>
+                <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
+                    <form method="get" action="/{{ PORTAL_PREFIX }}/{{tenant_id}}/search" style='width: 100%'>
+                        <div class="input-group" style='width: 100%'>
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the {{ tenant.title }}...">
+                            <span class="input-group-btn" style='width: 20px;'>
+                                <button  class="btn btn-default" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input name="owning_tenant" type="hidden" value="{{ tenant_id }}" />
+                            <input name="tenant_portal" type="hidden" value="{{ tenant_id }}" />
+                            {% if facets_citation.fields.type %}
+                            {% for type in selected_facets.citation_type %}
+                            <input type="hidden" name="selected_facets" value="citation_type:{{type}}" />
+                            {% endfor %}
+                            {% endif %}
+                            {% if facets_citation.fields.language %}
+                            {% for lang in selected_facets.citation_language %}
+                            <input type="hidden" name="selected_facets" value="citation_language:{{lang}}" />
+                            {% endfor %}
+                            {% endif %}
+                            {% if request.get_full_path|is_limited_to_tech_culture %}
+                            <input type="hidden" name="selected_facets" value="citation_dataset_typed_names:Technology & Culture Bibliography" />
+                            {% endif %}
+                            {% if request.get_full_path|are_reviews_excluded %}
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5" style="padding-right: 0;">
+            <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
+                <ul class="nav navbar-nav navbar-nav-home">
+                    <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
+                    <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "tenants:about" tenant_id %}">About</a></li>
+                    {% if tenant.blog_url %}<li><a href="{{tenant.blog_url}}" target="_blank">Blog</a></li>{% endif %}
+                    <li><a href="mailto:{{tenant.contact_email}}" target="_blank">Contact</a></li>
+                    <!--<li><a id="includeAllTenantsNavItem" title="" href="#">
+                        <input style="padding-top: 20px;" type="checkbox" name="site_include_all_projects" checked> <span id="includeAllToggleText">View all off</span>
+                    </a></li>-->
+                    
+                    {% if user.is_authenticated %}
+                    <li class="{% if active == 'user' %}active{% endif %}">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
+                            <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                            <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
+                            <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                            <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                            <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                            <li>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}"/>
+                                    <button type="submit" class="btn btn-li">Log out</button>
+                                  </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    {% if notifications %}
+    <div class="col-sm-12">
+        <div id="notifications-panel" class="panel panel-default" style="display:none; margin-top: 10px">
+            <div class="panel-heading">
+              <h3 class="panel-title">
+                <button id="notifications-close-btn" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                System Notifications
+              </h3>
+            </div>
+            <div class="panel-body">
+            {% for notification in notifications %}
+            <div class="alert alert-{{notification.level|get_alert_class}}" role="alert">
+                <b><i class="fas fa-exclamation-triangle"></i> {{notification.title}}</b>: {{notification.text|bleach_safe}}
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% include "tenants/fragment_toggle_switch.html" %}
+
+    <script type="text/javascript">
+        $(function() {
+            if(includeAllTenants) {
+                $("input[name='owning_tenant']").remove();
+            }
+        });
+    </script>
+</nav>
