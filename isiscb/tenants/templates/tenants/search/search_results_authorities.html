@@ -4,11 +4,11 @@
 
 {% if query %}
 <div class="panel-group hidden-print" id="type_panel">
-  <div class='panel panel-default'>
+  <div class='panel panel-info'>
     <div class='panel-heading'>
       <h4 class='panel-title'>
         <a id="authoritiesHeading" data-toggle="collapse" data-parent="#accordion" href="#" class="accordion-toggle">
-          All Authorities
+          Authorities containing search term
         </a>
       </h4>
     </div>
@@ -17,13 +17,16 @@
         <div class="row" style="margin-bottom:10px;">
           <div class="col-md-12 panel-cell" style="padding-top:4px">
             <div class="dropdown">
+                <div class="btn-group btn-group-sm" role="group">
                 {% if sort_order_dir_authority == 'descend' %}
                 <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
                 {% else %}
                 <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
                 {% endif %}
+                </div>
 
-                <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+                <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
                   Sort: {{ sort_order_authority|get_current_sort_order_authority }}
                     <span class="caret"></span>
                 </button>
@@ -31,6 +34,8 @@
                   <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:name'|set_index_model:'models:isisdata.authority' }}">Name</a></li>
                   <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:citation_count'|set_index_model:'models:isisdata.authority' }}">Count</a></li>
                 </ul>
+                </div>
+                
             </div>
           </div>
         </div>
@@ -73,12 +78,11 @@
         <div class="authority-search-result">
           <p style="padding-left: 8px; margin-bottom: 15px;">
                 <span class="label label-default">{{ result.authority_type }}</span>
-                {% url 'tenants:authority' tenant_id result.id|get_pk as authority_url %}
-                <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
+                {{ result.name }}
                 {% with result.dates as dates %}
                 {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
                 {% endwith %}
-                ({{ result.citation_count }})
+                ({{ result.citation_count }}) <a href="{% url 'tenants:authority' tenant_id result.id|get_pk%}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}"><i class="fas fa-external-link-alt"></i></a>
 
                 <span class="visible-print-inline">({{ authority_url }})</span>
 
