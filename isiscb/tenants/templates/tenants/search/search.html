@@ -91,7 +91,7 @@ $(document).ready(function() {
         <div class='row' style='padding-left: 15px'>
           {{ query|format_query_preamble }}{{query|format_query}}
         </div>
-        {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
+        {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids or request.get_full_path|is_limited_to_tech_culture %}
           <hr style="margin-top:5px; margin-bottom:5px;">
 
           <ol class="breadcrumb" style='margin-bottom: 0;'>
@@ -173,6 +173,10 @@ $(document).ready(function() {
                 <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|remove_facet:encoded_publisher|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class='label citation-type-label filter-label'>{{publisher|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
+            {% endif %}
+
+            {% if request.get_full_path|is_limited_to_tech_culture %}
+              <li class="search-breadcrumb-item"> <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography'|add_facet_or_operator }}"><span class='label citation-type-label filter-label'>Technology & Culture<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
             {% endif %}
 
             <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|remove_all_facets|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class='label label-danger'>remove all filters</span></a></li>
