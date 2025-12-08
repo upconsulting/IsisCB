@@ -139,7 +139,12 @@ def remove_facet(url, arg):
 
 @register.filter
 def remove_all_facets(path):
-    return re.sub(r"&selected_facets=[a-z_]*:[A-za-z0-9_]*", "", path)
+    qs = urllib.parse.parse_qsl(path)
+    for para in qs:
+        if para[0] == "selected_facets":
+            qs.remove(para)
+    
+    return "&".join([f"{para[0]}={para[1]}" for para in qs])
 
 @register.filter
 def create_facet_string(facet, field):

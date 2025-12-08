@@ -1035,7 +1035,8 @@ class IsisSearchView(FacetedSearchView):
             extra['count_citation'] = len(self.queryset['citation'])
             extra['count_authority'] = len(self.queryset['authority'])
 
-        extra['models'] = self.request.GET.getlist('models')
+        # I don't think we need this anymore, since we always search for both models (IEXP-595)
+        #extra['models'] = self.request.GET.getlist('models')
         extra['sort_order_citation'] = self.request.GET.get('sort_order_citation')
         extra['sort_order_authority'] = self.request.GET.get('sort_order_authority')
         extra['sort_order_dir_citation'] = self.request.GET.get('sort_order_dir_citation')
