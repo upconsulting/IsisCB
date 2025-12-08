@@ -31,9 +31,9 @@
               <div class="col-md-12 panel-cell" style="padding-top:4px">
                 <div class="dropdown hidden-print">
                   {% if sort_order_dir_citation == 'descend' %}
-                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                  <a href="{{ request.get_full_path|set_status_retain|set_sort_direction:'sort_order_dir_citation:ascend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
                   {% else %}
-                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                  <a href="{{ request.get_full_path|set_status_retain|set_sort_direction:'sort_order_dir_citation:descend' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
                   {% endif %}
                   <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
                     Sort: {{ sort_order_citation|get_current_sort_order_citation }}
@@ -41,13 +41,11 @@
                   </button>
 
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
-                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
-                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
-                    <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
+                    <li><a href="{{ request.get_full_path|set_status_retain|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort' }}">Title</a></li>
+                    <li><a href="{{ request.get_full_path|set_status_retain|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort' }}">First Author</a></li>
+                    <li><a href="{{ request.get_full_path|set_status_retain|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort' }}">Publication Date</a></li>
                   </ul>
                 </div>
-                <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
               </div>
             </div>
             <hr style="margin-top: 4px; margin-bottom: 4px;">
@@ -55,11 +53,11 @@
             
 
             <div class="col-md-12" style="padding-top: 10px;">
-                {% if request.get_full_path|is_limited_to_tech_culture %}
-                  <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_dataset_typed_names:Technology & Culture Bibliography'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Limit to SHOT Data</a>
+                {% if request.get_full_path|set_status_retain|is_limited_to_tech_culture %}
+                  <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_status_retain|set_page_to_one|remove_tech_culture_facet|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Limit to SHOT Data</a>
                 {% endif %}
-                {% if not request.get_full_path|is_limited_to_tech_culture %}
-                <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|limit_to_tech_culture_facet|add_facet_or_operator }}"><i class="far fa-square"></i> Limit to SHOT Data</a>
+                {% if not request.get_full_path|set_status_retain|is_limited_to_tech_culture %}
+                <a title="Bibliography of the Society for the History of Technology ed. by Bruce Seely" href="{{ request.get_full_path|set_status_retain|set_page_to_one|limit_to_tech_culture_facet|add_facet_or_operator }}"><i class="far fa-square"></i> Limit to SHOT Data</a>
                 {% endif %}
             </div>
           </div>
@@ -91,9 +89,9 @@
               {% if facets_citation.fields.type %}
                 <div class="col-md-12">
                   {% for type in selected_facets.citation_type %}
-                  {% with type|create_facet_string:'citation_type' as encoded_type %}
+                  {% with 'citation_type:'|add:type as encoded_type %}
                   <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ type }}
+                    <a href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_type|set_page_to_one}}"><i class="fa fa-check-square"></i></a> {{ type }}
                   </div>
                   {% endwith %}
                   {% endfor %}
@@ -102,7 +100,7 @@
                   {% if type.0 %}
                   {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
                   <div class="col-md-12">
-                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i></a> {{ type.0 }} ({{ type.1 }})
+                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_status_retain|set_page_to_one }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i></a> {{ type.0 }} ({{ type.1 }})
                   </div>
                   {% endif %}
                   {% endif %}
@@ -118,11 +116,11 @@
 
             <div class="col-md-12" style="padding-top: 10px;">
               <small>
-                {% if request.get_full_path|are_reviews_excluded %}
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"><i class="far fa-square"></i>  Include book reviews</a>
+                {% if request.get_full_path|set_status_retain|are_reviews_excluded %}
+                <a href="{{ request.get_full_path|set_status_retain|set_page_to_one|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"><i class="far fa-square"></i>  Include book reviews</a>
                 {% endif %}
-                {% if not request.get_full_path|are_reviews_excluded %}
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Include book reviews</a>
+                {% if not request.get_full_path|set_status_retain|are_reviews_excluded %}
+                <a href="{{ request.get_full_path|set_status_retain|set_page_to_one|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"><i class="fa fa-check-square"></i> Include book reviews</a>
                 {% endif %}
               </small>
             </div>
@@ -156,9 +154,9 @@
               {% if facets_citation.fields.language %}
                 <div class="col-md-12">
                   {% for language in selected_facets.citation_language %}
-                  {% with language|create_facet_string:'citation_language' as encoded_language %}
+                  {% with 'citation_language:'|add:language as encoded_language %}
                   <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ language }}
+                    <a href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_language|set_page_to_one }}"><i class="fa fa-check-square"></i></a> {{ language }}
                   </div>
                   {% endwith %}
                   {% endfor %}
@@ -168,7 +166,7 @@
                   {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
                   <div class="col-md-12">
                     {% with 'citation_language:'|add:language.0 as facet_string %}
-                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:facet_string}}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
+                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_status_retain|set_page_to_one|add_selected_facet:facet_string}}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
                     {% endwith %}
                   </div>
                   {% endif %}
@@ -222,7 +220,7 @@
 
           {% url 'tenants:citation' tenant_id result.id|get_pk as citation_url %}
           {% if result.title == 'Title missing' and result.complete_citation %}
-            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|set_status_retain|encode_query }}">
               {{result.complete_citation}}
             </a>
           {% else %}
@@ -232,16 +230,16 @@
             {% if result.publication_date.0 and result.authors %}
               ({{ result.publication_date.0 }})
               <br>
-              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|set_status_retain|encode_query }}">
                 {{ result.title|bleach_safe }}.
               </a>
             {% elif result.publication_date.0 and not result.authors %}
-              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|set_status_retain|encode_query }}">
                 {{ result.title|bleach_safe }}
               </a>
               ({{ result.publication_date.0 }}).
             {% else %}
-            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|set_status_retain|encode_query }}">
               {{ result.title|bleach_safe }}
             </a>
             {% endif %}
@@ -327,7 +325,7 @@
           <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
             {% with ppage="page_citation:"|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -337,7 +335,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s"  %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -352,13 +350,13 @@
           {% with page.citation.paginator.page_range|last as last %}
           {% with page.citation.paginator.page_range|first as first %}
             {% if page.citation.number >= 4 and p == first %}
-              <li {% if page.citation.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ first }}</a></li>
+              <li {% if page.citation.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}">{{ first }}</a></li>
               <li class="disabled"><span>...</span></li>
             {% elif page.citation.number <= p|add:"2" and page.citation.number >= p|add:"-4" %}
-              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
+              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}">{{ p }}</a></li>
             {% elif p == last %}
               <li class="disabled"><span>...</span></li>
-              <li {% if page.citation.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ last }}</a></li>
+              <li {% if page.citation.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}">{{ last }}</a></li>
             {% endif %}
           {% endwith %}
           {% endwith %}
@@ -371,7 +369,7 @@
           <li>
             {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
@@ -381,7 +379,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
@@ -408,12 +406,20 @@
   function toggleBox(contentBoxId, storageKey) {
     const isBoxOpen = localStorage.getItem(storageKey) || "false";
     if (isBoxOpen == "true") {
-        document.getElementById(contentBoxId).classList.remove('collapse');
-        document.getElementById(contentBoxId).classList.add('show');
+      openBox(contentBoxId);
     } else {
-        document.getElementById(contentBoxId).classList.remove('show');
-        document.getElementById(contentBoxId).classList.add('collapse');
+      closeBox(contentBoxId);
     }
+  }
+
+  function closeBox(contentBoxId) {
+      document.getElementById(contentBoxId).classList.remove('show');
+      document.getElementById(contentBoxId).classList.add('collapse');
+  }
+
+  function openBox(contentBoxId) {
+      document.getElementById(contentBoxId).classList.remove('collapse');
+      document.getElementById(contentBoxId).classList.add('show');
   }
 
   document.addEventListener('DOMContentLoaded', (event) => {
@@ -424,10 +430,57 @@
       // authorities are in search_results_authorities.html
       addToggleEventListener("authoritiesHeading", 'collapseAuthorityResults', "isAuthoritiesOpen");
 
-      // set initial box states
-      toggleBox('collapseFilters', "isSortOpen");
-      toggleBox('collapseCitationTypes', "isPublicationTypeOpen");
-      toggleBox('collapseLanguages', "isLanguagesOpen");
-      toggleBox('collapseAuthorityResults', "isAuthoritiesOpen");
+      const hasSelectedFilters = {% if request.get_full_path|set_status_retain|is_limited_to_tech_culture %} true {% else %} false {% endif %};
+      const hasSelectedPublicationFacet = {% if selected_facets.citation_type %} true {% else %} false {% endif %};
+      const hasSelectedLanguageFacet = {% if selected_facets.citation_language %} true {% else %} false {% endif %};
+
+      const params = new URLSearchParams(window.location.search);
+      const state = params.get("state") || "reset";
+
+      if (state == "retain") {
+        // set initial box states
+        toggleBox('collapseFilters', "isSortOpen");
+        toggleBox('collapseCitationTypes', "isPublicationTypeOpen");
+        toggleBox('collapseLanguages', "isLanguagesOpen");
+        toggleBox('collapseAuthorityResults', "isAuthoritiesOpen");
+      } else if (state == 'refresh') {
+        // open only boxes with selected facets
+        if (hasSelectedFilters) {
+          localStorage.setItem("isSortOpen", "true");
+          openBox('collapseFilters');
+        } else {
+          localStorage.setItem("isSortOpen", "false");
+          closeBox('collapseFilters');
+        }
+
+        if (hasSelectedPublicationFacet) {
+          localStorage.setItem("isPublicationTypeOpen", "true");
+          openBox('collapseCitationTypes');
+        } else {
+          localStorage.setItem("isPublicationTypeOpen", "false");
+          closeBox('collapseCitationTypes');
+        }
+
+        if (hasSelectedLanguageFacet) {
+          localStorage.setItem("isLanguagesOpen", "true");
+          openBox('collapseLanguages');
+        } else {
+          localStorage.setItem("isLanguagesOpen", "false");
+          closeBox('collapseLanguages');
+        }
+      } else {
+        // close all boxes also, state = reset
+        localStorage.setItem("isSortOpen", "false")
+        closeBox('collapseFilters')
+
+        localStorage.setItem("isPublicationTypeOpen", "false")
+        closeBox('collapseCitationTypes')
+
+        localStorage.setItem("isLanguagesOpen", "false")
+        closeBox('collapseLanguages')
+
+        localStorage.setItem("isAuthoritiesOpen", "false")
+        closeBox('collapseAuthorityResults')
+      } 
   });
 </script>

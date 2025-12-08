@@ -31,6 +31,16 @@ def set_excluded_facets(url, available_facets):
     return (url+ '&' + exclude_str).replace("&&", "&")
 
 @register.filter
+def remove_selected_facet(url, arg):
+    path, qs = _get_path_and_qs(url)
+    for para in qs:
+        if para[0] == "selected_facets" and para[1] == arg:
+            qs.remove(para)
+        
+    return _build_final_url(path, qs)
+
+
+@register.filter
 def remove_url_part(url, arg):
     qs = urllib.parse.parse_qsl(url)
     if not len(arg.split("=")) == 2:
@@ -58,18 +68,13 @@ def add_selected_facet(url, facet):
 
 @register.filter
 def remove_query(url):
-    # we will probably have the path prefix before the query string
-    parsed_url = urllib.parse.urlparse(url)
-    query_string = parsed_url.query   
-    path = parsed_url.path      
-    
-    qs = urllib.parse.parse_qsl(query_string)
+    path, qs = _get_path_and_qs(url)
+
     for para in qs:
         if para[0] == "q":
             qs.remove(para)
         
-    full_qs = "&".join([f"{para[0]}={para[1]}" for para in qs])
-    return path + "?" + full_qs if path else full_qs
+    return _build_final_url(path, qs)
 
 
 @register.filter
@@ -109,11 +114,7 @@ def are_reviews_excluded(url):
 
 @register.filter
 def is_limited_to_tech_culture(url):
-    parsed_url = urllib.parse.urlparse(url)
-    query_string = parsed_url.query   
-    path = parsed_url.path      
-    
-    qs = urllib.parse.parse_qsl(query_string)
+    path, qs = _get_path_and_qs(url)
     for para in qs:
         if para[0] == "selected_facets" and para[1]=="citation_dataset_typed_names:Technology & Culture Bibliography":
             return True
@@ -121,8 +122,35 @@ def is_limited_to_tech_culture(url):
 
 @register.filter
 def limit_to_tech_culture_facet(url):
-    return (url + "&selected_facets=citation_dataset_typed_names:Technology%20%26%20Culture%20Bibliography")
+    path, qs = _get_path_and_qs(url)
+    if not any(para[0] == "selected_facets" and \
+           para[1]=="citation_dataset_typed_names:Technology & Culture Bibliography" \
+           for para in qs
+        ):
+        qs.append(("selected_facets","citation_dataset_typed_names:Technology & Culture Bibliography"))
+    return _build_final_url(path, qs)
 
+@register.filter
+def remove_tech_culture_facet(url):
+    path, qs = _get_path_and_qs(url)
+    for para in qs:
+        if para[0] == "selected_facets" and para[1]=="citation_dataset_typed_names:Technology & Culture Bibliography":
+            qs.remove(para)
+    return _build_final_url(path, qs)
+
+@register.filter
+def set_status_retain(url):
+    """
+    If this parameter is set, the search should maintain all panel statuses (which filters are open
+    and selected and which ones are not).
+    """
+    path, qs = _get_path_and_qs(url)
+    for para in qs:
+        if para[0] == 'state':
+            qs.remove(para)
+    qs.append(('state', 'retain'))
+
+    return _build_final_url(path, qs)
 
 @register.filter
 def are_stubs_excluded(url):
@@ -135,3 +163,24 @@ def add_excluded_stub_record_status_facet(url, facet):
         url = url.replace('selected_facets=' + facet_str, '')
     url = url + '&excluded_facets=' + facet_str
     return url.replace('&&', '&')
+
+def _get_path_and_qs(url):
+    # we will probably have the path prefix before the query string
+    parsed_url = urllib.parse.urlparse(url)
+    query_string = parsed_url.query   
+    path = parsed_url.path      
+    
+    qs = urllib.parse.parse_qsl(query_string)
+    return path, qs
+
+def _build_final_url(path, qs):
+    """
+    Build a full url from a path prefix and a query string list.
+    E.g.:
+    path: /p/isiscb
+    qs: [('state', 'retain'), ('selected_facets', 'Review')]
+    becomes
+    /p/isiscb?state=retain&selected_facets=Review
+    """
+    full_qs = "&".join([f"{para[0]}={urllib.parse.quote(para[1])}" for para in qs])
+    return path + "?" + full_qs if path else full_qs

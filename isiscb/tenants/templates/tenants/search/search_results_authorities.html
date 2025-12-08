@@ -1,6 +1,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load search_filters %}
+{% load facet_filters %}
 
 
 <div class="panel-group hidden-print" id="type_panel">
@@ -19,9 +20,9 @@
             <div class="dropdown">
                 <div class="btn-group btn-group-sm" role="group">
                 {% if sort_order_dir_authority == 'descend' %}
-                <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                <a href="{{ request.get_full_path|set_status_retain|set_sort_direction:'sort_order_dir_authority:ascend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
                 {% else %}
-                <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                <a href="{{ request.get_full_path|set_status_retain|set_sort_direction:'sort_order_dir_authority:descend' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
                 {% endif %}
                 </div>
 
@@ -31,8 +32,8 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                  <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:name'|set_index_model:'models:isisdata.authority' }}">Name</a></li>
-                  <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:citation_count'|set_index_model:'models:isisdata.authority' }}">Count</a></li>
+                  <li><a href="{{ request.get_full_path|set_status_retain|set_page_to_one|set_sort_order:'sort_order_authority:name' }}">Name</a></li>
+                  <li><a href="{{ request.get_full_path|set_status_retain|set_page_to_one|set_sort_order:'sort_order_authority:citation_count' }}">Count</a></li>
                 </ul>
                 </div>
                 
@@ -52,7 +53,7 @@
                 {% for auth_type in selected_facets.authority_authority_type %}
                 {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><i class="far fa-check-square"></i> {{ auth_type }}</a>
+                  <a href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_auth_type|set_page_to_one }}"><i class="far fa-check-square"></i> {{ auth_type }}</a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -61,7 +62,7 @@
                 {% if auth_type.0 %}
                 {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="far fa-square"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})
+                  <a href="{{ request.get_full_path|set_status_retain|set_page_to_one }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="far fa-square"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})
                 </div>
                 {% endif %}
                 {% endif %}
@@ -82,7 +83,7 @@
                 {% with result.dates as dates %}
                 {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
                 {% endwith %}
-                ({{ result.citation_count }}) <a href="{% url 'tenants:authority' tenant_id result.id|get_pk%}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}"><i class="fas fa-external-link-alt"></i></a>
+                ({{ result.citation_count }}) <a href="{% url 'tenants:authority' tenant_id result.id|get_pk%}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|set_status_retain|encode_query }}"><i class="fas fa-external-link-alt"></i></a>
 
                 <span class="visible-print-inline">({{ authority_url }})</span>
 
@@ -102,7 +103,7 @@
               <li>
                 {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
                 {% with ppage='page_authority:'|add:pagenr %}
-                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+                <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Previous">
                   <span aria-hidden="true">&laquo;</span>
                 </a>
                 {% endwith %}
@@ -112,7 +113,7 @@
               <li class="disabled">
                 {% with pagenr=page.authority.number|stringformat:"s"  %}
                 {% with ppage='page_authority:'|add:pagenr %}
-                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+                <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Previous">
                   <span aria-hidden="true">&laquo;</span>
                 </a>
                 {% endwith %}
@@ -123,7 +124,7 @@
               {% for p in page.authority.paginator.page_range %}
               {% with pagenr=forloop.counter|stringformat:"s" %}
               {% with ppage='page_authority:'|add:pagenr %}
-                  <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
+                  <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}">{{ p }}</a></li>
               {% endwith %}
               {% endwith %}
               {% endfor %}
@@ -132,7 +133,7 @@
               <li>
                 {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
                 {% with ppage='page_authority:'|add:pagenr %}
-                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+                <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Next">
                   <span aria-hidden="true">&raquo;</span>
                 </a>
                 {% endwith %}
@@ -142,7 +143,7 @@
               <li class="disabled">
                 {% with pagenr=page.authority.number|stringformat:"s" %}
                 {% with ppage='page_authority:'|add:pagenr %}
-                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+                <a href="{{ request.get_full_path|set_status_retain|set_page:ppage }}" aria-label="Next">
                   <span aria-hidden="true">&raquo;</span>
                 </a>
                 {% endwith %}
