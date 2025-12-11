@@ -850,7 +850,8 @@ class IsisSearchView(FacetedSearchView):
             form.cleaned_data['q'] = unidecode(q)
 
         owning_tenant = form.cleaned_data.get('owning_tenant', None)
-        tenant_portal = self.request.GET.get('tenant_portal', None)
+        tenant_portal = self.request.GET.get('tenant_portal', settings.DEFAULT_TENANT)
+        
         # if we are searching within a tenant portal, we want only
         # active projects to be included if user checks "search all projects"
         # if user searches from old site (no tenant_portal given)
@@ -928,7 +929,10 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
-        if self.request.GET.get('tenant_portal', None):
+        if tenant_portal:
+            context.update({
+                'tenant_id': tenant_portal
+            })
             self.template_name = 'tenants/search/search.html'
 
         return self.render_to_response(context)
