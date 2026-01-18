@@ -97,80 +97,80 @@ $(document).ready(function() {
           <ol class="breadcrumb" style='margin-bottom: 0;'>
             {% if selected_facets.citation_type %}
               {% for type in selected_facets.citation_type %}
-              {% with type|create_facet_string:'citation_type' as encoded_type %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_type|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{type}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_type:'|add:type as encoded_type %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_type|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{type}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_language %}
               {% for language in selected_facets.citation_language %}
-              {% with language|create_facet_string:'citation_language' as encoded_language %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_language|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{language}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_language:'|add:language as encoded_language %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_language|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{language}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_persons_ids %}
               {% for author in selected_facets.citation_persons_ids %}
-              {% with author|create_facet_string:'citation_persons_ids' as encoded_author %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_author|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{author|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_persons_ids:'|add:author as encoded_author %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_author|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{author|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_concepts_by_subject_ids_exact %}
               {% for concept in selected_facets.citation_concepts_by_subject_ids_exact %}
-              {% with concept|create_facet_string:'citation_concepts_by_subject_ids_exact' as encoded_concept %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_concept|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{concept|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_concepts_by_subject_ids_exact:'|add:concept as encoded_concept %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_concept|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{concept|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_time_period_ids_exact %}
               {% for time in selected_facets.citation_time_period_ids_exact %}
-              {% with time_period|create_facet_string:'citation_time_period_ids_exact' as encoded_time_period %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_time_period|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{time|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_time_period_ids_exact:'|add:time as encoded_time_period %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_time_period|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{time|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_geographic_ids_exact %}
               {% for place in selected_facets.citation_geographic_ids_exact %}
-              {% with geographic|create_facet_string:'citation_geographic_ids_exact' as encoded_geographic %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_geographic|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{place|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_geographic_ids_exact:'|add:place as encoded_geographic %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_geographic|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{place|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_institutions_by_subject_ids_exact %}
               {% for institution in selected_facets.citation_institutions_by_subject_ids_exact %}
-              {% with institution|create_facet_string:'citation_institutions_by_subject_ids_exact' as encoded_institution %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_institution|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{institution|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_institutions_by_subject_ids_exact:'|add:institution as encoded_institution %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_institution|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{institution|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_people_by_subject_ids %}
               {% for person in selected_facets.citation_people_by_subject_ids %}
-              {% with person|create_facet_string:'citation_people_by_subject_ids' as encoded_person %}
-              <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_person|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{person|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_people_by_subject_ids:'|add:person as encoded_person %}
+              <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_person|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{person|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_periodical_ids %}
               {% for periodical in selected_facets.citation_periodical_ids %}
-              {% with periodical|create_facet_string:'citation_periodical_ids' as encoded_periodical %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_periodical|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{periodical|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_periodical_ids:'|add:periodical as encoded_periodical %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_periodical|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{periodical|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
 
             {% if selected_facets.citation_publisher_ids %}
               {% for publisher in selected_facets.citation_publisher_ids %}
-              {% with publisher|create_facet_string:'citation_publisher_ids' as encoded_publisher %}
-                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_facet:encoded_publisher|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{publisher|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
+              {% with 'citation_publisher_ids:'|add:publisher as encoded_publisher %}
+                <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|set_status_retain|remove_selected_facet:encoded_publisher|set_page_to_one }}"><span class='label citation-type-label filter-label'>{{publisher|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}
             {% endif %}
