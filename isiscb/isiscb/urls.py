@@ -17,6 +17,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from isisdata import views, account_views
+from isisdata.isiscbviews import saved_search_views
 
 router = routers.SimpleRouter()
 router.register('authority', views.AuthorityViewSet)
@@ -42,8 +43,11 @@ urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^zotero/', include('zotero.urls')),
     re_path(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
-    re_path(r'^history/', views.search_history, name='search_history'),
-    re_path(r'^history/saved/', views.search_saved, name='search_saved'),
+    re_path(r'^history/$', saved_search_views.search_history, name='search_history'),
+    re_path(r'^history/clear$', saved_search_views.clear_history, name='clear_search_history'),
+    re_path(r'^history/saved/', saved_search_views.searches_saved, name='search_saved'),
+    re_path(r'^history/search/(?P<pk>[0-9]+[^/]+)$', saved_search_views.save_search, name='save_search'),
+    re_path(r'^history/search/(?P<pk>[0-9]+[^/]+)/remove$', saved_search_views.remove_saved_search, name='remove_saved_search'),
     re_path(r'^$', views.home, name='home'),
     re_path(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     re_path(r'^robots\.txt', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
