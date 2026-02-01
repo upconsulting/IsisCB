@@ -81,3 +81,18 @@ def search_history(request):
         'tenants': Tenant.objects.all()
     }
     return render(request, 'isisdata/search_history.html', context)
+
+@login_required
+@require_http_methods(["POST"])
+def clear_history(request):
+    """
+    Deletes all the search queries that have not been saved for a logged-in user.
+    """
+
+    # If the user is Anonymous, redirect them to the login view.
+    if type(request.user._wrapped) is not User:
+        return HttpResponseRedirect(reverse('login'))
+
+    request.user.searches.filter(saved=False).delete()
+
+    return redirect('search_history')
