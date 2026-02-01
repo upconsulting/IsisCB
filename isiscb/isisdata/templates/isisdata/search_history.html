@@ -65,10 +65,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </a>
                 {% endif %}
             </td>
-            <td>
-                <a href="{% url 'search_saved' %}?save={{ searchquery.id }}">
-                    <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-                </a>
+            <td style="text-align: center">
+                {% if searchquery.saved %}
+                <form method="POST" action="{% url 'save_search' searchquery.id  %}">
+                     {% csrf_token %}
+                    <button class="btn-link"> <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> </button>
+                </form>
+                {% else %}
+                <i class="fas fa-star text-info" title="Search has already been saved."></i>
+                {% endif %}
             </td>
 
         </tr>

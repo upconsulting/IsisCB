@@ -9,14 +9,12 @@ from future import standard_library
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
+from django.core.paginator import Paginator, InvalidPage
 from django.core.cache import caches
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.db import connection
-from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
+
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.conf import settings
@@ -727,84 +725,6 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
     return count
 
 
-
-
-
-
-
-@login_required
-def search_saved(request):
-    """
-    Provides saved searches for a logged-in user.
-    """
-
-    # If the user is Anonymous, redirect them to the login view.
-    if type(request.user._wrapped) is not User:
-        return HttpResponseRedirect(reverse('login'))
-
-    save = request.GET.get('save', None)
-    remove = request.GET.get('remove', None)
-    if save:
-        instance = SearchQuery.objects.get(pk=save)
-        instance.saved = True
-        instance.save()
-    if remove:
-        instance = SearchQuery.objects.get(pk=remove)
-        instance.saved = False
-        instance.save()
-
-    searchqueries = request.user.searches.filter(saved=True).order_by('-created_on')
-
-    paginator = Paginator(searchqueries, 10)
-
-    page = request.GET.get('page')
-    try:
-        searchqueries = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        searchqueries = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        searchqueries = paginator.page(paginator.num_pages)
-
-    context = {
-        'searchqueries': searchqueries,
-        'tenants': Tenant.objects.all()
-    }
-    return render(request, 'isisdata/search_saved.html', context)
-
-
-@login_required
-def search_history(request):
-    """
-    Provides the search history for a logged-in user.
-    """
-
-    # If the user is Anonymous, redirect them to the login view.
-    if type(request.user._wrapped) is not User:
-        return HttpResponseRedirect(reverse('login'))
-
-    searchqueries = request.user.searches.order_by('-created_on')
-
-    paginator = Paginator(searchqueries, 10)
-
-    page = request.GET.get('page')
-    try:
-        searchqueries = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        searchqueries = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        searchqueries = paginator.page(paginator.num_pages)
-
-    context = {
-        'searchqueries': searchqueries,
-        'tenants': Tenant.objects.all()
-    }
-    return render(request, 'isisdata/search_history.html', context)
-
-
 class IsisSearchView(FacetedSearchView):
     """
     Provides the search view at /isis/.
@@ -877,7 +797,8 @@ class IsisSearchView(FacetedSearchView):
                 search_models = search_models,
                 selected_facets = selected_facets,
                 owning_tenant_id = owning_tenant,
-                tenant_portal = tenant_portal
+                tenant_portal = tenant_portal,
+                saved=False
             )
             searchquery.save()
             # make sure we have a session key
