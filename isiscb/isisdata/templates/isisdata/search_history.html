@@ -56,6 +56,48 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             $("#delete-history-modal").modal('hide');
             window.location.reload();
         });
+
+        $('#delete-search-modal').modal({
+            backdrop: true,
+            show: false
+        })
+
+        $(".delete_search-btn").on('click', function(e) {
+            e.preventDefault();
+            const action = $(this).closest("form").attr('action');
+            $("#delete-search-modal").attr("data-query-id", action);
+
+            const saved = $(this).closest("form").attr("data-saved-search");
+            if (saved === "True") {
+                $("#saved_search_warning").removeClass("hide");
+            } else {
+                $("#saved_search_warning").addClass("hide");
+            }
+
+            $("#delete-search-modal").modal('show');
+        });
+
+        $("#confirm-delete-search").on('click', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: $("#delete-search-modal").attr("data-query-id"), 
+                type: 'POST',      
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token }}" // Include the token in the header
+                },
+                dataType: 'json', // The type of data you're expecting back
+                error: function(xhr, status, error) {
+                    // Code to run if the request fails
+                    console.error("An error occurred: " + status + "\nError: " + error);
+                }
+            });
+
+            $("#delete-search-modal").attr("data-query-id", "")
+            $("#delete-history-modal").modal('hide');
+            window.location.reload();
+        });
     });
 </script>
 
@@ -67,25 +109,54 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         
       </div>
       <div class="modal-body">
-        <p>Are you sure that you want to delete all search history? This action cannot be undone.</p>
+        <p>Are you sure that you want to delete all search history?</p>
+        <p><i class="fas fa-exclamation-triangle text-info" ></i> <b>This action cannot be undone.</b></p>
+        <p><i class="fas fa-clock text-info"></i> Please be aware that deleting a very long search history might take a while. Please do not close the window or navigate away.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" id="confirm-delete-history" class="btn btn-primary">Yes, delete!</button>
+        <button type="button" data-query-id="" id="confirm-delete-history" class="btn btn-primary">Yes, delete!</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
-    <div class="alert alert-info headerbox" role="alert">My Recent Searches</div>
+<div class="modal" id="delete-search-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Search</h5>
+        
+      </div>
+      <div class="modal-body">
+        <p>Are you sure that you want to delete the search?</p>
+        <p><i class="fas fa-exclamation-triangle text-info"></i> <b>This action cannot be undone.</b></p>
 
+        <p id="saved_search_warning" class="hide"><i class="fas fa-exclamation-triangle text-info"></i> This is a saved search. Deleting it here will also delete it from your saved searches list.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" id="confirm-delete-search" class="btn btn-primary">Yes, delete!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-offset-2 col-md-offset-1 col-sm-7 col-md-9">
+    <div class="alert alert-info headerbox" role="alert">My Recent Searches</div>
+</div>
+    <div class="col-md-offset-1 col-md-6">
     <form method="POST" action="">
         {% csrf_token %}
         <button id="clear-history-btn" class="btn-link"> <i class="fas fa-trash-alt"></i> Clear all search history</button> (Prior saved searches will not be deleted.)
     </form>
-    <p></p>
+    </div>
+    <div class="col-md-3 " style="text-align: right;">
+        <a href="{% url 'search_saved' %}"><i class="far fa-arrow-alt-circle-right"></i> Go to Saved Searches</a>
+    </div>
 
+<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
+    <p></p>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -95,7 +166,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 <td>Facets</td>
                 <td>Performed On</td>
                 <td>Results</td>
-                <td>Save</td>
+                <td></td>
             </tr>
         </thead>
         {% for searchquery in searchqueries %}
@@ -133,6 +204,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {% else %}
                 <i class="fas fa-star text-info" title="Search has already been saved."></i>
                 {% endif %}
+                <form method="POST" action="{% url 'delete_search_object' searchquery.id  %}" data-saved-search="{{ searchquery.saved }}">
+                    {% csrf_token %}
+                    <button title="Delete Search" class="btn-link delete_search-btn"> <i class="fas fa-trash-alt" ></i></button>
+                </form>
             </td>
 
         </tr>
