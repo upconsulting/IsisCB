@@ -177,11 +177,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <td>{{ searchquery.created_on }}</td>
             <td>
                 {% if searchquery.tenant_portal %}
-                <a href="{% url 'tenants:index' searchquery.tenant_portal %}?log=False&tenant_portal={{searchquery.tenant_portal}}&owning_tenant={{searchquery.owning_tenant_id}}&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
+                <a href="{% url 'tenants:index' searchquery.tenant_portal %}?log=False&tenant_portal={{searchquery.tenant_portal}}&owning_tenant={{searchquery.owning_tenant_id}}&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.raw_search %}&raw_search=True{% endif %}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </a>
                 {% else %}
-                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
+                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.raw_search %}&raw_search=True{% endif %}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </a>
                 {% endif %}
