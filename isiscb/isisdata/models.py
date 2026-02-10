@@ -2922,6 +2922,8 @@ class SearchQuery(models.Model):
     owning_tenant_id = models.CharField(max_length=500, null=True, blank=True)
     # tenant in which search was run
     tenant_portal = models.CharField(max_length=500, null=True, blank=True)
+    # is this a raw search
+    raw_search = models.CharField(max_length=256, null=True, blank=True)
 
 
     saved = models.BooleanField(default=False)

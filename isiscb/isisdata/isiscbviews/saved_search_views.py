@@ -15,7 +15,7 @@ def searches_saved(request):
     """
     Provides saved searches for a logged-in user.
     """
-
+    
     searchqueries = request.user.searches.filter(saved=True).order_by('-created_on')
     
     paginator = Paginator(searchqueries, 10)
@@ -42,7 +42,7 @@ def save_search(request, pk):
     instance = SearchQuery.objects.get(pk=pk)
     instance.saved = True
     instance.save()
-    return redirect('search_saved')
+    return redirect('search_history')
 
 @login_required
 @require_http_methods(["POST"])
@@ -57,7 +57,7 @@ def search_history(request):
     """
     Provides the search history for a logged-in user.
     """
-
+    
     # If the user is Anonymous, redirect them to the login view.
     if type(request.user._wrapped) is not User:
         return HttpResponseRedirect(reverse('login'))
@@ -95,4 +95,30 @@ def clear_history(request):
 
     request.user.searches.filter(saved=False).delete()
 
+    return redirect('search_history')
+
+@login_required
+@require_http_methods(["POST"])
+def delete_all_saved_searches(request):
+    """
+    Deletes all the search queries that have been saved for a logged-in user.
+    """
+    
+    # If the user is Anonymous, redirect them to the login view.
+    if type(request.user._wrapped) is not User:
+        return HttpResponseRedirect(reverse('login'))
+
+    request.user.searches.filter(saved=True).delete()
+
+    return redirect('search_saved')
+
+@login_required
+@require_http_methods(["POST"])
+def delete_search_object(request, pk):
+    next = request.GET.get('next', '')
+    instance = SearchQuery.objects.get(pk=pk)
+    instance.delete()
+    if next == "saved":
+        return redirect('search_saved')
+    
     return redirect('search_history')
