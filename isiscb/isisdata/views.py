@@ -761,6 +761,9 @@ class IsisSearchView(FacetedSearchView):
         # These are used to generate a SearchQuery instance.
         parameters = self.request.GET.get('q', None)
 
+        raw_search = self.request.GET.get('raw_search', None)
+
+
         # The search query should be ASCII-normalized.
         # TODO: this could be tightened up.
         if parameters:
@@ -798,7 +801,8 @@ class IsisSearchView(FacetedSearchView):
                 selected_facets = selected_facets,
                 owning_tenant_id = owning_tenant,
                 tenant_portal = tenant_portal,
-                saved=False
+                saved=False, 
+                raw_search=raw_search
             )
             searchquery.save()
             # make sure we have a session key
