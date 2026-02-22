@@ -141,12 +141,21 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div>
 
 
-<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
+<div class="col-sm-offset-2 col-md-offset-1 col-sm-7 col-md-9">
     <div class="alert alert-info headerbox" role="alert">My Saved Searches</div>
+</div>
+
+<div class="col-md-offset-1 col-md-6">
     <form method="POST" action="">
         {% csrf_token %}
         <button id="clear-history-btn" class="btn-link"> <i class="fas fa-trash-alt"></i> Delete all saved searches</button> (This will remove all saved searches from your search history as well.)
     </form>
+</div>
+<div class="col-md-3 " style="text-align: right;">
+        <a href="{% url 'search_history' %}"><i class="far fa-arrow-alt-circle-right"></i> Go to Search History</a>
+</div>
+   
+<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
     <p></p>
     <table class="table table-bordered table-striped">
         <thead>

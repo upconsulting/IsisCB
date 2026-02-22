@@ -98,7 +98,33 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             $("#delete-history-modal").modal('hide');
             window.location.reload();
         });
+
+        $(".save-search-btn").on('click', function(e) {
+                e.preventDefault();
+                
+                var that = this;
+                $.ajax({
+                    url: $(that).closest("form").attr("action"), 
+                    type: 'POST',      
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': "{{ csrf_token }}" 
+                    },
+                    dataType: 'json', 
+                    success: function(response) {
+                        var form = $(that).closest("form");
+                        var parent = form.parent();
+                        $(that).closest("form").remove();
+                        $(parent).prepend($('<i class="fas fa-star text-info" title="Search has already been saved."></i>'));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("An error occurred: " + status + "\nError: " + error);
+                    }
+                });
+
+        });
     });
+
 </script>
 
 <div class="modal" id="delete-history-modal" tabindex="-1">
@@ -145,15 +171,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <div class="col-sm-offset-2 col-md-offset-1 col-sm-7 col-md-9">
     <div class="alert alert-info headerbox" role="alert">My Recent Searches</div>
 </div>
-    <div class="col-md-offset-1 col-md-6">
+<div class="col-md-offset-1 col-md-6">
     <form method="POST" action="">
         {% csrf_token %}
         <button id="clear-history-btn" class="btn-link"> <i class="fas fa-trash-alt"></i> Clear all search history</button> (Prior saved searches will not be deleted.)
     </form>
-    </div>
-    <div class="col-md-3 " style="text-align: right;">
-        <a href="{% url 'search_saved' %}"><i class="far fa-arrow-alt-circle-right"></i> Go to Saved Searches</a>
-    </div>
+</div>
+<div class="col-md-3 " style="text-align: right;">
+    <a href="{% url 'search_saved' %}"><i class="far fa-arrow-alt-circle-right"></i> Go to Saved Searches</a>
+</div>
 
 <div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
     <p></p>
@@ -199,7 +225,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {% if not searchquery.saved %}
                 <form method="POST" action="{% url 'save_search' searchquery.id  %}">
                      {% csrf_token %}
-                    <button class="btn-link"> <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> </button>
+                    <button class="save-search-btn btn-link"> <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> </button>
                 </form>
                 {% else %}
                 <i class="fas fa-star text-info" title="Search has already been saved."></i>

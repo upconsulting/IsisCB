@@ -5,7 +5,7 @@
 
 <nav class="navbar navbar-inverse navbar-home" style="background-color:{{tenant.settings.navigation_color}}">
     <div class="container-fluid">
-
+        <div class="row">
         <div class="navbar-header col-md-3" style="padding-top: 5px;"><!--  width: 250px;"-->
             {% if tenant.logo %}
             <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
@@ -19,18 +19,18 @@
             {% endif %}
             {% if notifications %}
             <div class="navbar-brand" style="margin-left: 0px; color: #f3c11d; padding-top: 5px;">
-            <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
-            <script>
-                $(function() {
-                    $("#notifications-icon").click(function() {
-                        $("#notifications-panel").show();
+                <i id="notifications-icon" style="cursor:pointer" class="fas fa-exclamation-triangle"></i>
+                <script>
+                    $(function() {
+                        $("#notifications-icon").click(function() {
+                            $("#notifications-panel").show();
+                        });
+                    
+                        $("#notifications-close-btn").click(function() {
+                            $("#notifications-panel").hide();
+                        })
                     });
-                   
-                    $("#notifications-close-btn").click(function() {
-                        $("#notifications-panel").hide();
-                    })
-                });
-            </script>
+                </script>
             </div>
             {% endif %}
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -40,7 +40,7 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-4" style='padding: 0;'>
+        <div class="col-md-5" style='padding: 0;'>
             <div class='form-inline'>
                 <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
                     <form method="get" action="/{{ PORTAL_PREFIX }}/{{tenant_id}}/search" style='width: 100%'>
@@ -80,7 +80,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5" style="padding-right: 0;">
+        <div class="col-md-4" style="padding-right: 0;">
             <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
                 <ul class="nav navbar-nav navbar-nav-home">
                     <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
@@ -121,9 +121,12 @@
             </div>
 
         </div>
+        </div>
     </div>
 
+
     {% if notifications %}
+    <div class="row">
     <div class="col-sm-12">
         <div id="notifications-panel" class="panel panel-default" style="display:none; margin-top: 10px">
             <div class="panel-heading">
@@ -140,6 +143,7 @@
             {% endfor %}
         </div>
         </div>
+    </div>
     </div>
     {% endif %}
 
