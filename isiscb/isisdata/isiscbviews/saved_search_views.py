@@ -1,7 +1,7 @@
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from rest_framework.reverse import reverse
 from isisdata.models import SearchQuery, Tenant
 from django.contrib.auth.models import User
@@ -42,7 +42,7 @@ def save_search(request, pk):
     instance = SearchQuery.objects.get(pk=pk)
     instance.saved = True
     instance.save()
-    return redirect('search_history')
+    return JsonResponse({'search_id': pk, 'status': 'success'})
 
 @login_required
 @require_http_methods(["POST"])
