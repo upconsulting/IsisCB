@@ -24,17 +24,149 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% block title %}Search History{% endblock %}
 
 {% block content %}
-<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
+<script>
+    //# sourceURL=dlete.js
+    $(document).ready(function() {
+        $('#delete-history-modal').modal({
+            backdrop: true,
+            show: false
+        })
+
+        $("#clear-history-btn").on('click', function(e) {
+            e.preventDefault();
+            $("#delete-history-modal").modal('show');
+        });
+
+        $("#confirm-delete-history").on('click', function() {
+            $.ajax({
+                url: '{% url 'delete_all_saved' %}', 
+                type: 'POST',      
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token }}" 
+                },
+                dataType: 'json', 
+                error: function(xhr, status, error) {
+                    console.log("An error occurred: " + status + "\nError: " + error);
+                }
+            });
+
+            $("#delete-history-modal").modal('hide');
+            window.location.reload();
+        });
+
+        $('#delete-search-modal').modal({
+            backdrop: true,
+            show: false
+        })
+
+        $(".delete_search-btn").on('click', function(e) {
+            e.preventDefault();
+            const action = $(this).closest("form").attr('action');
+            $("#delete-search-modal").attr("data-query-id", action);
+
+            const saved = $(this).closest("form").attr("data-saved-search");
+            if (saved === "True") {
+                $("#saved_search_warning").removeClass("hide");
+            } else {
+                $("#saved_search_warning").addClass("hide");
+            }
+
+            $("#delete-search-modal").modal('show');
+        });
+
+        $("#confirm-delete-search").on('click', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: $("#delete-search-modal").attr("data-query-id"), 
+                type: 'POST',      
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': "{{ csrf_token }}" // Include the token in the header
+                },
+                dataType: 'json', // The type of data you're expecting back
+                error: function(xhr, status, error) {
+                    // Code to run if the request fails
+                    console.error("An error occurred: " + status + "\nError: " + error);
+                }
+            });
+
+            $("#delete-search-modal").attr("data-query-id", "")
+            $("#delete-history-modal").modal('hide');
+            window.location.reload();
+        });
+    });
+</script>
+
+<div class="modal" id="delete-history-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete All Saved Searches</h5>
+        
+      </div>
+      <div class="modal-body">
+        <p>Are you sure that you want to delete all saved searches?</p>
+        <p><i class="fas fa-exclamation-triangle text-info" ></i> <b>This action cannot be undone.</b></p>
+        <p><i class="fas fa-clock text-info"></i> Please be aware that deleting many saved searches can take a while. Please do not close the window or navigate away.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" data-query-id="" id="confirm-delete-history" class="btn btn-primary">Yes, delete!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="delete-search-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Search</h5>
+        
+      </div>
+      <div class="modal-body">
+        <p>Are you sure that you want to delete the search?</p>
+        <p><i class="fas fa-exclamation-triangle text-info"></i> <b>This action cannot be undone.</b></p>
+
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" id="confirm-delete-search" class="btn btn-primary">Yes, delete!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="col-sm-offset-2 col-md-offset-1 col-sm-7 col-md-9">
     <div class="alert alert-info headerbox" role="alert">My Saved Searches</div>
+</div>
+
+<div class="col-md-offset-1 col-md-6">
+    <form method="POST" action="">
+        {% csrf_token %}
+        <button id="clear-history-btn" class="btn-link"> <i class="fas fa-trash-alt"></i> Delete all saved searches</button> (This will remove all saved searches from your search history as well.)
+    </form>
+</div>
+<div class="col-md-3 " style="text-align: right;">
+        <a href="{% url 'search_history' %}"><i class="far fa-arrow-alt-circle-right"></i> Go to Search History</a>
+</div>
+   
+<div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
+    <p></p>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <td>Query</td>
                 <td>Type</td>
+                <td>Tenant</td>
                 <td>Facets</td>
                 <td>Performed On</td>
                 <td>Results</td>
-                <td>Delete</td>
+                <td></td>
             </tr>
         </thead>
         {% for searchquery in searchqueries %}
@@ -46,18 +178,33 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {{ searchquery.search_models }}
             </td>
             <td>
+                {% if searchquery.tenant_portal %} {{ searchquery.tenant_portal }}{% endif %}
+            </td>
+            <td>
                 {{ searchquery.selected_facets }}
             </td>
             <td>{{ searchquery.created_on }}</td>
             <td>
-                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
+                {% if searchquery.tenant_portal %}
+                <a href="{% url 'tenants:index' searchquery.tenant_portal %}?log=False&tenant_portal={{searchquery.tenant_portal}}&owning_tenant={{searchquery.owning_tenant_id}}&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.raw_search %}&raw_search=True{% endif %}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </a>
+                {% else %}
+                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.raw_search %}&raw_search=True{% endif %}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                </a>
+                {% endif %}
             </td>
             <td>
-                <a href="{% url 'search_saved' %}?remove={{ searchquery.id }}">
-                    <span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span>
-                </a>
+                 <form method="POST" action="{% url 'remove_saved_search' searchquery.id  %}">
+                     {% csrf_token %}
+                    <button class="btn-link" title="Remove from saved searches."> <span class="glyphicon glyphicon-floppy-remove" aria-hidden="true"></span> </button>
+                </form>
+                <form method="POST" action="{% url 'delete_search_object' searchquery.id  %}" data-saved-search="{{ searchquery.saved }}">
+                    {% csrf_token %}
+                    <button title="Delete search forever" class="btn-link delete_search-btn"> <i class="fas fa-trash-alt" ></i></button>
+                </form>
+            </td>
             </td>
 
         </tr>
