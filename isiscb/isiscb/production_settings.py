@@ -67,6 +67,7 @@ INSTALLED_APPS = (
     'tenants',
     'rules.apps.AutodiscoverRulesConfig',
     'django_celery_results',
+    'jsonimport',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -71,6 +71,7 @@ INSTALLED_APPS = (
     'rules.apps.AutodiscoverRulesConfig',
     #'dj_pagination',
     #'debug_toolbar',
+    'jsonimport',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -124,6 +124,12 @@
                   <li><a href="{% url "curation:timeline_tasks" %}">Timelines</a></li>
                 </ul>
               </li>
+              <li{% if curation_section == "bulk" %} class="active"{% endif %}>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Import <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{% url "curation:import_json" %}">Import Records</a></li>
+                </ul>
+              </li>
               {% if tenant_access == 'update' or user.is_superuser %}
               <li{% if curation_section == "tenants" %} class="active"{% endif %}>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>
