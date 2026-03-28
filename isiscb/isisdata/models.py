@@ -1562,6 +1562,7 @@ class ClassificationSystem(models.Model):
     Marks a classification system as being included in the subject search.
     """))
 
+    # we're not using this
     available_to_all = models.BooleanField(default=False, help_text=help_text("""
     Marks a classification system as available to all tenants.
     """))

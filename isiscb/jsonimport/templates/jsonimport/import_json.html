@@ -10,6 +10,14 @@
  
 </script>
 
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" id="file" class="inputfile" />
+    {{ form.file.errors }}
+    <button type="submit">Upload</button>
+</form>
+
+
 <table>
     <th></th>
     <tr></tr>

@@ -7,6 +7,18 @@ from django.contrib.postgres import fields as pg_fields
 
 from isisdata.models import Authority, Citation, Tenant, CCRelation, ACRelation
 
+class ImportedDataset(models.Model):
+    """
+    A model representing a dataset that has been imported. This is not meant to be a permanent record of the import, but just a way to group together records that were imported together and to track some basic information about the import.
+    """
+    created_on = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    dataset_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    dataset_creator = models.CharField(max_length=255, blank=True, null=True)
+    dataset_date = models.CharField(max_length=255, blank=True, null=True)
+
 
 class ImportedRecord(models.Model):
     class Meta(object):
@@ -22,6 +34,7 @@ class ImportedAuthority(ImportedRecord):
         verbose_name = 'authority record'
 
     name = models.CharField(max_length=1000, db_index=True)
+    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
 
     owning_tenant = models.ForeignKey(
         Tenant,
@@ -102,7 +115,8 @@ class ImportedCitation(ImportedRecord):
     """
     An imported bibliographic record.
     """
-    
+    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
+
     # Allowing blank values is not ideal, but many existing records lack titles.
     title = models.CharField(max_length=2000, blank=True)
 
@@ -115,7 +129,6 @@ class ImportedCitation(ImportedRecord):
 
     created_native = models.DateTimeField(blank=True, null=True)
     
-    # CHECK: Had to add on_delete so chose cascade -> JD: deleting subtype shouldn't delete citation
     subtype = models.ForeignKey('isisdata.CitationSubtype', blank=True, null=True, on_delete=models.SET_NULL)
 
     complete_citation =  models.TextField(blank=True, null=True,
@@ -320,47 +333,13 @@ class ImportedAttribute(models.Model):
 
     description = models.TextField(blank=True)
 
-    # This is different than in the main model. We just have different fields for the 
-    # different possible value types.
-    value_int = models.IntegerField(default=0)
-    value_float = models.FloatField()
-    value_text = models.TextField(blank=True, null=True)
-    value_char = models.CharField(max_length=2000)
-    value_date_time = models.DateTimeField()
-    value_date_range_start = pg_fields.ArrayField(
-        models.DateField(),
-        size=2,
-    )
+    # we'll just use one string here and worry about turning it into a controlled value later
+    value = models.TextField(blank=True)
+
     value_citation = models.ForeignKey('ImportedCitation', on_delete=models.CASCADE)
     value_authority = models.ForeignKey('ImportedAuthority', on_delete=models.CASCADE)
 
-    # Generic relation.
-    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    source_instance_id = models.CharField(max_length=200)
-    source = GenericForeignKey('source_content_type', 'source_instance_id')
-
-    VALUE_TYPE_INT = "INT"
-    VALUE_TYPE_STRING = "STRING"
-    VALUE_TYPE_CHAR = "CHAR"
-    VALUE_TYPE_DATE_TIME = "DATETIME"
-    VALUE_TYPE_FLOAT = "FLOAT"
-    VALUE_TYPE_CITATION = "CITATION"
-    VALUE_TYPE_AUTHORITY = "AUTHORITY"
-
-    VALUE_TYPE_CHOICES = {
-        'Integer': VALUE_TYPE_INT,
-        'String': VALUE_TYPE_STRING,
-        'Char': VALUE_TYPE_CHAR,
-        'Datetime': VALUE_TYPE_DATE_TIME,
-        'Float': VALUE_TYPE_FLOAT,
-        "Citation": VALUE_TYPE_CITATION,
-        'Authority': VALUE_TYPE_AUTHORITY
-    }
-    type_controlled = models.CharField(choices=VALUE_TYPE_CHOICES,
-                                           max_length=255,
-                                           blank=True,
-                                           null=True,
-                                           db_index=True)
+    attribute_type = models.ForeignKey('isisdata.AttributeType', blank=True, null=True, on_delete=models.SET_NULL)  
 
     
 class ImportedLinkedData(models.Model):
