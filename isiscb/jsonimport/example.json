@@ -1,0 +1,68 @@
+{
+  "format": "isiscb_import",
+  "version": "1.0",
+  "dataset": {
+    "dataset_id":          "DS-001",
+    "dataset_name":        "Isis Cumulative Bibliography 1975-1985",
+    "dataset_creator":     "History of Science, Technology, and Medicine, University of Oklahoma",
+    "dataset_date":        "2024-11-15",
+    "dataset_description": "Legacy cumulative bibliography data migrated from the IsisCB print volumes."
+  },
+  "record_count": 2,
+  "records": [ 
+	{
+  		"record_type":      "authority",
+ 		 "local_dataset_id": "DS-001-AUTH-00001",
+ 		 "authority_type":   "PE",
+ 		 "name":             "Shapiro, Lisa",
+ 		 "description":      "",
+ 		 "attributes": [
+ 		   { "type": "birth_year",  "value": "1964" },
+ 		   { "type": "nationality", "value": "Canadian" }
+ 		 ],
+ 		 "linked_data": [
+ 		   { "type": "viaf", "value": "https://viaf.org/viaf/12345678" },
+  		   { "type": "orcid", "value": "0000-0000-0000-0000" }
+  		]
+	},
+	{
+	  "record_type":         "citation",
+	  "local_dataset_id":    "DS-001-CIT-00042",
+	  "citation_type":       "AR",
+	  "title":               "The Role of Women in Early Modern Natural Philosophy",
+	  "abstract":            "An examination of the contributions of women...",
+	  "description":         "",
+	  "edition_details":     "",
+	  "full_citation":       "Shapiro, Lisa. Isis 112 (2021): 450-478.",
+	  "stub_record":         false,
+	  "related_authorities": [
+		{
+		  "authority_id":      null,
+		  "local_dataset_id":  "DS-001-AUTH-00001",
+		  "relationship_type": "author",
+		  "display_name":      "Shapiro, Lisa",
+		  "order":             1
+		},
+		{
+		  "authority_id":      "ISB-PER-9901",
+		  "local_dataset_id":  null,
+		  "relationship_type": "periodical",
+		  "display_name":      "Isis",
+		  "order":             null
+		}
+	  ],
+	  "related_citations": null,
+	  "linked_citations":    [],
+	  "linked_data": [
+		{ "type": "doi",  "value": "10.1086/715432" },
+		{ "type": "issn", "value": "0021-1753" }
+	  ],
+	  "attributes": [
+		{ "type": "publication_date", "value": "2021" },
+		{ "type": "volume",           "value": "112" },
+		{ "type": "issue",            "value": "3" },
+		{ "type": "pages",            "value": "450-478" }
+	  ]
+	}
+ ]
+}
