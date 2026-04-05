@@ -13,7 +13,7 @@
 	{
   		"record_type":      "authority",
  		 "local_dataset_id": "DS-001-AUTH-00001",
- 		 "authority_type":   "PE",
+ 		 "authority_type":   "person",
  		 "name":             "Shapiro, Lisa",
  		 "description":      "",
  		 "attributes": [
@@ -28,7 +28,7 @@
 	{
 	  "record_type":         "citation",
 	  "local_dataset_id":    "DS-001-CIT-00042",
-	  "citation_type":       "AR",
+	  "citation_type":       "article",
 	  "title":               "The Role of Women in Early Modern Natural Philosophy",
 	  "abstract":            "An examination of the contributions of women...",
 	  "description":         "",
@@ -44,11 +44,11 @@
 		  "order":             1
 		},
 		{
-		  "authority_id":      "ISB-PER-9901",
+		  "authority_id":      "CBA984782187",
 		  "local_dataset_id":  null,
 		  "relationship_type": "periodical",
 		  "display_name":      "Isis",
-		  "order":             null
+		  "order":             1
 		}
 	  ],
 	  "related_citations": null,

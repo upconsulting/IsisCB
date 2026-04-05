@@ -19,6 +19,11 @@ class ImportedDataset(models.Model):
     dataset_creator = models.CharField(max_length=255, blank=True, null=True)
     dataset_date = models.CharField(max_length=255, blank=True, null=True)
 
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        null=True
+    )
 
 class ImportedRecord(models.Model):
     class Meta(object):
@@ -26,7 +31,9 @@ class ImportedRecord(models.Model):
 
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-    # TODO: part_of = models.ForeignKey('ImportAccession', on_delete=models.CASCADE)
+
+    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
+    local_dataset_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   
 
 class ImportedAuthority(ImportedRecord):
     class Meta(object):
@@ -34,16 +41,7 @@ class ImportedAuthority(ImportedRecord):
         verbose_name = 'authority record'
 
     name = models.CharField(max_length=1000, db_index=True)
-    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
-
-    owning_tenant = models.ForeignKey(
-        Tenant,
-        on_delete=models.SET_NULL,
-        related_name="owned_json_authorities",
-        null=True
-    )
-    tenants = models.ManyToManyField(Tenant)
-
+    
     @property
     def label(self):
         return self.name
@@ -54,11 +52,6 @@ class ImportedAuthority(ImportedRecord):
                                        choices=Authority.TYPE_CHOICES,
                                        verbose_name="type",
                                        db_index=True)
-
-    classification_system = models.CharField(max_length=4, blank=True,
-                                             null=True, default=Authority.SPWC,
-                                             choices=Authority.CLASS_SYSTEM_CHOICES,
-                                             db_index=True)
 
     classification_system_object = models.ForeignKey('isisdata.ClassificationSystem', 
                                             blank=True, 
@@ -115,8 +108,7 @@ class ImportedCitation(ImportedRecord):
     """
     An imported bibliographic record.
     """
-    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
-
+    
     # Allowing blank values is not ideal, but many existing records lack titles.
     title = models.CharField(max_length=2000, blank=True)
 
@@ -134,25 +126,9 @@ class ImportedCitation(ImportedRecord):
     complete_citation =  models.TextField(blank=True, null=True,
                                          help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
 
-    owning_tenant = models.ForeignKey(
-        Tenant,
-        on_delete=models.SET_NULL,
-        related_name="owned_imported_citations",
-        null=True
-    )
-
-    tenants = models.ManyToManyField(Tenant)
-
     stub_record_status = models.CharField(max_length=3, null=True, blank=True,
                                        choices=Citation.RECORD_STATUS_CHOICES)
 
-    
-    @property
-    def tenant_ids(self):
-        tenant_ids = [t.id for t in self.tenants.all()]
-        if self.owning_tenant:
-            tenant_ids.append(self.owning_tenant.id)
-        return tenant_ids
 
     @property
     def label(self):
@@ -265,6 +241,7 @@ class ImportedACRelation(ImportedRecord):
     citation = models.ForeignKey('ImportedCitation', blank=True, null=True, on_delete=models.SET_NULL)
 
     authority = models.ForeignKey('ImportedAuthority', blank=True, null=True, on_delete=models.SET_NULL)
+    existing_authority = models.ForeignKey(Authority, blank=True, null=True, on_delete=models.SET_NULL) 
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
@@ -303,6 +280,7 @@ class ImportedACRelation(ImportedRecord):
                 self.type_broad_controlled = ACRelation.INSTITUTIONAL_HOST
             elif self.type_controlled in ACRelation.PUBLICATION_HOST_TYPES:
                 self.type_broad_controlled = ACRelation.PUBLICATION_HOST
+        super(ImportedACRelation, self).save(*args, **kwargs)
 
 class ImportedCCRelation(ImportedRecord):
     
