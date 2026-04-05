@@ -7,6 +7,7 @@ from django.contrib.postgres import fields as pg_fields
 
 from isisdata.models import Authority, Citation, Tenant, CCRelation, ACRelation
 
+
 class ImportedDataset(models.Model):
     """
     A model representing a dataset that has been imported. This is not meant to be a permanent record of the import, but just a way to group together records that were imported together and to track some basic information about the import.
@@ -18,6 +19,7 @@ class ImportedDataset(models.Model):
     dataset_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     dataset_creator = models.CharField(max_length=255, blank=True, null=True)
     dataset_date = models.CharField(max_length=255, blank=True, null=True)
+    task = models.ForeignKey('isisdata.AsyncTask', blank=True, null=True, on_delete=models.SET_NULL)
 
     owning_tenant = models.ForeignKey(
         Tenant,

@@ -3166,12 +3166,15 @@ class AsyncTask(models.Model):
     Represents an user-initiated asynchronous job, such as a bulk update.
     """
 
+    ASYNC_TASK_TYPE = "JSON_IMPORT"
+
     async_uuid = models.CharField(max_length=255, blank=True, null=True)
 
     max_value = models.FloatField(default=0.0)
     current_value = models.FloatField(default=0.0)
     state = models.CharField(max_length=10, blank=True, null=True)
     label = models.TextField(default="")
+    task_type = models.CharField(max_length=255, blank=True, null=True)
 
     # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep this around
     created_by = models.ForeignKey(User, related_name='tasks', null=True, on_delete=models.SET_NULL)

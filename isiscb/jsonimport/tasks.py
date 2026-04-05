@@ -36,6 +36,9 @@ def import_records(file_path, error_path, task_id, user_id):
         logging.exception('Could not find AsyncTask with id %s' % task_id)
         return
 
+    task.state = 'PROCESSING'
+    task.save()
+
     results = []
   
     tenant = cutil.get_tenant(User.objects.filter(pk=user_id).first())
@@ -63,7 +66,7 @@ def import_records(file_path, error_path, task_id, user_id):
             task.save()
         return
     
-    dataset = _create_dataset(user_id, tenant, data.get('dataset_info') or {})
+    dataset = _create_dataset(user_id, tenant, task, data.get('dataset') or {})
 
     authorities = []
     citations = []
@@ -265,7 +268,7 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
         task.current_value = task.current_value + 1
         task.save()
 
-def _create_dataset(user_id, tenant, dataset_info):
+def _create_dataset(user_id, tenant, task, dataset_info):
     user = User.objects.filter(pk=user_id).first()
     dataset = ImportedDataset.objects.create(
         name=dataset_info.get('dataset_name'),
@@ -274,7 +277,8 @@ def _create_dataset(user_id, tenant, dataset_info):
         description=dataset_info.get('dataset_description'),
         dataset_id=dataset_info.get('dataset_id'),
         dataset_creator=dataset_info.get('dataset_creator'),
-        dataset_date=dataset_info.get('dataset_date')
+        dataset_date=dataset_info.get('dataset_date'),
+        task=task
     )
     dataset.save()
     return dataset

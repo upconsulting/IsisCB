@@ -223,9 +223,10 @@ def _subjects(obj, extra, config={}):
     _authority_types = [
         Authority.TIME_PERIOD, Authority.GEOGRAPHIC_TERM, Authority.INSTITUTION
     ]
+    # subjects are all authorities that are in _authority_types or that are related as
+    # type subject, but not schools
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & (Q(authority__type_controlled__in=_authority_types) \
-            | Q(type_controlled=ACRelation.SUBJECT)) \
+         & (Q(authority__type_controlled__in=_authority_types) | Q(type_controlled=ACRelation.SUBJECT)) \
          & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import user_passes_test
 from django.conf import settings
 
@@ -7,6 +7,9 @@ import logging
 
 from jsonimport.forms import UploadJsonDataForm
 from jsonimport.tasks import import_records
+from jsonimport.models import ImportedDataset, ImportedAuthority, ImportedCitation
+
+from curation import curation_util as cutil
 
 from isisdata.models import AsyncTask
 
@@ -21,6 +24,37 @@ def import_json(request):
 
     template = 'jsonimport/import_json.html'
     return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def list_imported_datasets(request):
+    tenant = cutil.get_tenant(request.user)
+    datasets = ImportedDataset.objects.filter(owning_tenant=tenant).order_by('-created_on')
+
+    context = {
+        'curation_section': 'import',
+        'datasets': datasets
+    }
+
+    template = 'jsonimport/list_imported_datasets.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def view_imported_dataset(request, dataset_id):
+    tenant = cutil.get_tenant(request.user)
+    dataset = ImportedDataset.objects.filter(pk=dataset_id, owning_tenant=tenant).first()
+    authorities = ImportedAuthority.objects.filter(dataset=dataset)
+    citations = ImportedCitation.objects.filter(dataset=dataset)
+    
+    context = {
+        'curation_section': 'import',
+        'dataset': dataset,
+        'authorities': authorities,
+        'citations': citations,
+    }
+
+    template = 'jsonimport/view_imported_dataset.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def upload_file(request):
@@ -56,13 +90,13 @@ def upload_file(request):
             task = AsyncTask.objects.create()
             task.value = _results_name
             task.created_by = request.user
+            task.task_type = AsyncTask.ASYNC_TASK_TYPE
+            task.state = 'PENDING'
             task.save()
 
             import_records.delay(s3_path, s3_error_path, task.pk, request.user.id)
             
-            return render(request, "jsonimport/import_json.html", {
-                "filename": "filename"
-            })
+            return redirect('curation:list_import_tasks')
     else:
         form = UploadJsonDataForm()
 

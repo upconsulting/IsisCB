@@ -1,0 +1,42 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Imported Dataset: {{ dataset.name }}</h2>
+<small></small>
+
+<script>
+ 
+</script>
+
+<p>{{ dataset.description }}</p>
+
+{{ authorities|length }} total authorities.<br>
+{{ citations|length }} total citations.
+
+<h3>Citations</h3>
+<table class="table table-striped">
+    {% for citation in citations %}
+        <tr>
+            <td>{{ citation.get_type_controlled_display }}</td>
+            <td>{{ citation.title }}</td>
+        </tr>
+    {% endfor %}
+    <th></th>
+    <tr></tr>
+</table>
+
+<h3>Authorities</h3>
+<table class="table table-striped">
+    {% for authority in authorities %}
+        <tr>
+            <td>{{ authority.get_type_controlled_display }}</td>
+            <td>{{ authority.name }}</td>
+        </tr>
+    {% endfor %}
+    <th></th>
+    <tr></tr>
+</table>
+
+{% endblock %}

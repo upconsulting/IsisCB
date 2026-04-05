@@ -1,0 +1,26 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Imported Records from JSON</h2>
+<small></small>
+
+<script>
+ 
+</script>
+{{ datasets.count }} total imports.
+<table class="table table-striped">
+    {% for dataset in datasets %}
+        <tr>
+            <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.created_on }}</a></td>
+            <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.name }}</a></td>
+            <td>{{ dataset.description }}</td>
+            <td>{{ dataset.task.state }}</td>
+        </tr>
+    {% endfor %}
+    <th></th>
+    <tr></tr>
+</table>
+
+{% endblock %}
