@@ -159,7 +159,7 @@ class ImportedCitation(ImportedRecord):
                                                related_name='citations_related')
     related_authorities = models.ManyToManyField('ImportedAuthority',
                                                  through='ImportedACRelation',
-                                                 related_name='authorities_related')
+                                                 related_name='citations_related')
 
 
     # Generic reverse relations. These do not create new fields on the model.
@@ -190,6 +190,14 @@ class ImportedCitation(ImportedRecord):
     def all_ccrelations(self):
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return ImportedCCRelation.objects.filter(query)
+
+    @property
+    def get_new_authorities(self):
+        return ImportedACRelation.objects.filter(citation=self, authority__isnull=False) 
+
+    @property
+    def get_existing_authorities(self):
+        return ImportedACRelation.objects.filter(citation=self, existing_authority__isnull=False) 
     
     @property
     def book(self):
@@ -283,6 +291,10 @@ class ImportedACRelation(ImportedRecord):
             elif self.type_controlled in ACRelation.PUBLICATION_HOST_TYPES:
                 self.type_broad_controlled = ACRelation.PUBLICATION_HOST
         super(ImportedACRelation, self).save(*args, **kwargs)
+
+    @property
+    def get_existing_authority(self):
+        return Authority.objects.filter(pk=self.existing_authority_id).first()
 
 class ImportedCCRelation(ImportedRecord):
     

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import user_passes_test
 from django.conf import settings
+from django.core.paginator import Paginator
 
 import smart_open, tempfile, os, datetime
 import logging
@@ -44,12 +45,24 @@ def view_imported_dataset(request, dataset_id):
     dataset = ImportedDataset.objects.filter(pk=dataset_id, owning_tenant=tenant).first()
     authorities = ImportedAuthority.objects.filter(dataset=dataset)
     citations = ImportedCitation.objects.filter(dataset=dataset)
+
+    citation_paginator = Paginator(citations, 25)
+    page_number = request.GET.get('page')
+    citations_page = citation_paginator.get_page(page_number)
+    total_citations = citations.count()
     
+    authority_paginator = Paginator(authorities, 25)
+    page_number = request.GET.get('page')
+    authorities_page = authority_paginator.get_page(page_number)
+    total_authorities = authorities.count()
+
     context = {
         'curation_section': 'import',
         'dataset': dataset,
-        'authorities': authorities,
-        'citations': citations,
+        'authorities': authorities_page,
+        'citations': citations_page,
+        'total_citations': total_citations,
+        'total_authorities': total_authorities,
     }
 
     template = 'jsonimport/view_imported_dataset.html'
