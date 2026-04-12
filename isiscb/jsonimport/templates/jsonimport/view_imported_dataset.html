@@ -52,6 +52,21 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                <br>
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Referenced {{ citation.ccrelations|length }} citations.</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        {% for cc_relation in citation.ccrelations %}
+                            <div>{{ cc_relation.get_type_controlled_display }}: 
+                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}){% else %} {{ cc_relation.existing_subject.title }} (ID: {{ cc_relation.existing_subject.pk }}) {% endif %} 
+                                to 
+                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} {{ cc_relation.existing_object.title }} (ID: {{ cc_relation.existing_object.pk }}) {% endif %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 
             </td>
         </tr>

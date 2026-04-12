@@ -27,6 +27,36 @@
 	},
 	{
 	  "record_type":         "citation",
+	  "local_dataset_id":    "DS-001-CIT-00043",
+	  "citation_type":       "book",
+	  "title":               "My favorite book",
+	  "abstract":            "Something fun...",
+	  "description":         "",
+	  "edition_details":     "",
+	  "full_citation":       "",
+	  "stub_record":         false
+	},
+	{
+	  "record_type":         "citation",
+	  "local_dataset_id":    "DS-001-CIT-00044",
+	  "citation_type":       "chapter",
+	  "title":               "My favorite chapter",
+	  "abstract":            "A chapter about horses and ponies.",
+	  "description":         "",
+	  "edition_details":     "",
+	  "full_citation":       "",
+	  "stub_record":         false,
+	  "related_citations": [
+	  	{
+	  		"citation_id": null,
+	  		"local_dataset_id": "DS-001-CIT-00043",
+	  		"relationship_type": "includes chapter",
+	  		"related_citation_role": "subject"
+	  	}
+	  ]
+	},
+	{
+	  "record_type":         "citation",
 	  "local_dataset_id":    "DS-001-CIT-00042",
 	  "citation_type":       "article",
 	  "title":               "The Role of Women in Early Modern Natural Philosophy",
@@ -51,8 +81,15 @@
 		  "order":             1
 		}
 	  ],
-	  "related_citations": null,
-	  "linked_citations":    [],
+	  "related_citations": [
+	  	{
+	  		"citation_id": "CBB56787890",
+	  		"local_dataset_id": null,
+	  		"relationship_type": "associated with",
+            "related_citation_role": "object"
+	  	}
+	  
+	  ],
 	  "linked_data": [
 		{ "type": "doi",  "value": "10.1086/715432" },
 		{ "type": "issn", "value": "0021-1753" }

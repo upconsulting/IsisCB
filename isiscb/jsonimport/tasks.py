@@ -88,7 +88,7 @@ def import_records(file_path, error_path, task_id, user_id):
 
     # maps from local id to created instance
     auth_map = {}
-    cit_map = {}
+    citations_by_id = {}
 
     user = User.objects.filter(username=user_id).first()
     
@@ -96,17 +96,24 @@ def import_records(file_path, error_path, task_id, user_id):
     for authority_info in authorities:
         _create_imported_authority(user, task, tenant, results, dataset, auth_map, authority_info)
         
-
+    
     # create citations
     for citation_data in citations:
-        citation = _create_imported_citation(task, tenant, results, dataset, cit_map, citation_data)
+        citation = _create_imported_citation(task, results, dataset, citations_by_id, citation_data)
         if citation:
             for ac_data in citation_data.get('related_authorities') or []:
                 _create_ac_relation(ac_data, auth_map, citation, results)
         else:
             results.append((ERROR, 'Citation', citation_data.get('local_dataset_id') or '', 'Failed to create citation, so related authorities could not be linked.'))
             
-        # TODO: ccrelations
+    # create ccrelations; we first have to have them all before we can link them
+    for citation_data in citations:
+        citation = citations_by_id.get(citation_data.get('local_dataset_id'))
+        if not citation:
+            results.append((ERROR, 'CCRelation', citation_data.get('local_dataset_id') or '', 'Failed to find citation for ccrelation with citation local id reference: %s. Ccrelation could not be created.' % citation_data.get('local_dataset_id')))
+            continue
+        for cc_data in citation_data.get('related_citations') or []:
+            _create_cc_relation(results, citations_by_id, cc_data, citation)  
 
 
     # write results
@@ -116,7 +123,7 @@ def import_records(file_path, error_path, task_id, user_id):
         task.state = 'SUCCESS'
         task.save()
 
-def _create_imported_citation(task, tenant, results, dataset, cit_map, citation_data):
+def _create_imported_citation(task, results, dataset, cit_map, citation_data):
     try:
         title = citation_data.get('title') or ''
         local_id = citation_data.get('local_dataset_id')
@@ -384,7 +391,6 @@ def _create_ac_relation(data, authority_map, citation, results):
             results.append(('ERROR', 'ACRelation', '', f'Could not find authority for ACRelation with references: {data.get("authority_id")} or {data.get("local_dataset_id")}'))
             return None
 
-        print(new_ac_rel_data)
         ac_rel = ImportedACRelation(**new_ac_rel_data)
         ac_rel.save()
         results.append(('SUCCESS', 'ACRelation', ac_rel.pk, 'Created'))
@@ -432,29 +438,78 @@ def _get_acrelation_type(acr_type):
     }
     return roles.get(acr_type.lower(), "")
 
-def _create_cc_relation(results, cit_map,data):
+def _create_cc_relation(results, citations_by_id, data, citation):
+        """ 
+        {
+	  		"citation_id": null,
+	   		"local_dataset_id": "DS-001-CIT-00043",
+	  		"relationship_type": "includes chapter",
+	  		"related_citation_role": "subject"
+	  	}
+        """
         try:
-            subj = data.get('subject_id') or data.get('subject')
-            obj = data.get('object_id') or data.get('object')
-            subj_obj = cit_map.get(subj) or ImportedCitation.objects.filter(pk=subj).first()
-            obj_obj = cit_map.get(obj) or ImportedCitation.objects.filter(pk=obj).first()
-            if not subj_obj or not obj_obj:
-                return results.append(('WARNING', 'CCRelation', '', 'Missing citations for ccrelation'))
+            related_citation_id = None
+            related_citation = None
+            existing_related_citation = None
+            if data.get('citation_id'):
+                related_citation_id = data['citation_id']
+                if not related_citation_id:
+                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
 
+                existing_related_citation = Citation.objects.filter(pk=related_citation_id).first()  # verify that citation exists
+            
+            else:
+                related_citation_id = data.get('local_dataset_id')
+                if not related_citation_id:
+                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
+
+                related_citation = citations_by_id.get(related_citation_id)
+                if not related_citation:
+                    return results.append(('ERROR', 'CCRelation', '', f'Could not find citation for CCRelation with local_dataset_id reference: {related_citation_id}'))    
+            
+            subject = None
+            object = None
+            existing_object = None
+            existing_subject = None
+            if data.get('related_citation_role') == "object":
+                object = related_citation
+                existing_object = existing_related_citation
+                subject = citation
+            elif data.get('related_citation_role') == "subject":
+                subject = related_citation
+                existing_subject = existing_related_citation
+                object = citation
+            else:
+                return results.append(('ERROR', 'CCRelation', '', f'Missing or invalid related_citation_role for CCRelation: {data.get("related_citation_role")}'))
+            
+            type_controlled = _get_ccrelation_type(data.get('relationship_type'))  # validate relationship type
+            if not type_controlled:
+                return results.append(('ERROR', 'CCRelation', '', f'Missing or invalid relationship type for CCRelation: {data.get("relationship_type")}'))
+            
             ccr = ImportedCCRelation.objects.create(
-                subject=subj_obj,
-                object=obj_obj,
-                name=data.get('name') or '',
-                description=data.get('description') or '',
-                type_controlled=data.get('type_controlled') or None,
-                type_free=data.get('type_free') or None,
-                data_display_order=data.get('data_display_order') or 1.0
+                subject=subject,
+                existing_subject=existing_subject,
+                object=object,
+                existing_object=existing_object,
+                type_controlled=type_controlled
             )
             ccr.save()
-            results.append(('SUCCESS', 'CCRelation', ccr.pk, 'Created'))
+            return results.append(('SUCCESS', 'CCRelation', ccr.pk, 'Created'))
         except Exception as e:
             logging.exception(e)
-            results.append(('ERROR', 'CCRelation', '', 'Error creating ccrelation: %s' % repr(e)))
+            return results.append(('ERROR', 'CCRelation', '', 'Error creating ccrelation: %s' % repr(e)))
+
+def _get_ccrelation_type(ccr_type):
+    types = {
+        "includes chapter": CCRelation.INCLUDES_CHAPTER,
+        "includes series article": CCRelation.INCLUDES_SERIES_ARTICLE,
+        "includes citation object": CCRelation.INCLUDES_CITATION_OBJECT,
+        "review of": CCRelation.REVIEW_OF,
+        "reviewed by": CCRelation.REVIEWED_BY,
+        "responds to": CCRelation.RESPONDS_TO,
+        "associated with": CCRelation.ASSOCIATED_WITH
+    }
+    return types.get(ccr_type.lower(), "")
 
 def _save_results(path, results, headings):
     with smart_open.smart_open(path, 'w') as f:

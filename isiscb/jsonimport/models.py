@@ -184,7 +184,7 @@ class ImportedCitation(ImportedRecord):
         that are public.
         """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
-        return ImportedCCRelation.objects.filter(public=True).filter(query)
+        return ImportedCCRelation.objects.filter(query)
 
     @property
     def all_ccrelations(self):
@@ -199,6 +199,14 @@ class ImportedCitation(ImportedRecord):
     def get_existing_authorities(self):
         return ImportedACRelation.objects.filter(citation=self, existing_authority__isnull=False) 
     
+    @property
+    def get_ccrels_to_existing_citations(self):
+        return self.ccrelations.filter(Q(existing_subject__isnull=False) | Q(existing_object__isnull=False))
+
+    @property
+    def get_ccrels_to_imported_citations(self):
+        return self.ccrelations.filter(subject__isnull=False, object__isnull=False)
+
     @property
     def book(self):
         """
@@ -306,18 +314,15 @@ class ImportedCCRelation(ImportedRecord):
     description = models.TextField(blank=True)
 
     type_controlled = models.CharField(max_length=3, null=True, blank=True,
-                                       choices=ACRelation.TYPE_CHOICES)
+                                       choices=CCRelation.TYPE_CHOICES)
 
     type_free = models.CharField(max_length=255, blank=True)
 
     subject = models.ForeignKey('ImportedCitation', related_name='relations_from', null=True, blank=True, on_delete=models.SET_NULL)
+    existing_subject = models.ForeignKey(Citation, related_name='imported_relations_from', null=True, blank=True, on_delete=models.SET_NULL)
 
     object = models.ForeignKey('ImportedCitation', related_name='relations_to', null=True, blank=True, on_delete=models.SET_NULL)
-
-    linkeddata_entries = GenericRelation('ImportedLinkedData',
-                                         related_query_name='cc_relations',
-                                         content_type_field='subject_content_type',
-                                         object_id_field='subject_instance_id')
+    existing_object = models.ForeignKey(Citation, related_name='imported_relations_to', null=True, blank=True, on_delete=models.SET_NULL)
 
     data_display_order = models.FloatField(default=1.0)
 
