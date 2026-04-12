@@ -5,7 +5,7 @@ import smart_open, json, csv
 
 from django.contrib.auth.models import User
 from jsonimport.models import (
-    ImportedAuthority, ImportedCitation, ImportedACRelation,
+    ImportedAuthority, ImportedAuthorityStatus, ImportedCitation, ImportedACRelation,
     ImportedCCRelation, ImportedDataset, ImportedPartDetails,
     ImportedLinkedData
 )
@@ -228,7 +228,7 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
         local_dataset_id = authority_data.get('local_dataset_id') or ''
         
         if not type_controlled:
-            results.append(('ERROR', 'Authority', local_dataset_id, f'Missing or invalid authority type: {authority_data.get("authority_type")}'))
+            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create authority: {name}. Missing or invalid authority type: {authority_data.get("authority_type")}', results, None)
             return None
         
         if authority_data.get('classification_system_name'):
@@ -237,7 +237,7 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
             class_system =_get_default_classification_system(user, type_controlled)
             print(f'No classification system specified for authority {name} with local id {local_dataset_id}. Using default classification system {class_system} for authority type {type_controlled}.')
         if not class_system:
-            results.append(('ERROR', 'Authority', local_dataset_id, f'Invalid classification system or no default classification system: {authority_data.get("classification_system_name")}'))
+            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create authority {name}. Invalid classification system specified: {authority_data.get("classification_system_name")}, and no default classification system found for authority type {type_controlled}.', results, auth)
             return None
         
         auth = ImportedAuthority.objects.create(
@@ -267,13 +267,23 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
 
         auth_map[local_dataset_id] = auth
 
-        results.append(('SUCCESS', 'Authority', local_dataset_id or '', 'Created'))
+        _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.SUCCESS, f'Created authority {name} with local id {local_dataset_id}.', results, auth)
     except Exception as e:
         logging.exception(e)
-        results.append(('ERROR', 'Authority', authority_data.get('local_dataset_id') or '', 'Error creating authority: %s' % repr(e)))
+        _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Error creating authority {name} with local id {authority_data.get("local_dataset_id") or ""}: {repr(e)}', results, None)
     if task:
         task.current_value = task.current_value + 1
         task.save()
+
+def _create_imported_authority_status(dataset, status, message, results, authority):
+    ImportedAuthorityStatus.objects.create(
+        dataset=dataset,
+        status=status,
+        message=message,
+        authority=authority
+    )
+    results.append((status, 'Authority', message))
+            
 
 def _create_dataset(user_id, tenant, task, dataset_info):
     user = User.objects.filter(pk=user_id).first()

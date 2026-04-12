@@ -384,5 +384,27 @@ class ImportedLinkedData(models.Model):
                   self.universal_resource_name)
         return u'{0}: {1}'.format(*values)
     
+class ImportedRecordStatus(models.Model):
+    class Status(models.TextChoices):
+        SUCCESS = 'SUCCESS', 'Success'
+        WARNING = 'WARNING', 'Warning'
+        ERROR = 'ERROR', 'Error'
+
+    dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=Status.choices)
+    message = models.TextField(blank=True, null=True)
+
+
+class ImportedAuthorityStatus(ImportedRecordStatus):
+    authority = models.ForeignKey(ImportedAuthority, on_delete=models.CASCADE, blank=True, null=True)
+
+class ImportedCitationStatus(ImportedRecordStatus):
+    citation = models.ForeignKey(ImportedCitation, on_delete=models.CASCADE, blank=True, null=True)    
+
+class ImportedACRelationStatus(ImportedRecordStatus):
+    acrelation = models.ForeignKey(ImportedACRelation, on_delete=models.CASCADE, blank=True, null=True)    
+
+class ImportedCCRelationStatus(ImportedRecordStatus):
+    ccrelation = models.ForeignKey(ImportedCCRelation, on_delete=models.CASCADE, blank=True, null=True)
 
     

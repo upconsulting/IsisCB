@@ -8,7 +8,7 @@ import logging
 
 from jsonimport.forms import UploadJsonDataForm
 from jsonimport.tasks import import_records
-from jsonimport.models import ImportedDataset, ImportedAuthority, ImportedCitation
+from jsonimport.models import ImportedDataset, ImportedAuthority, ImportedCitation, ImportedAuthorityStatus
 
 from curation import curation_util as cutil
 
@@ -63,6 +63,8 @@ def view_imported_dataset(request, dataset_id):
         'citations': citations_page,
         'total_citations': total_citations,
         'total_authorities': total_authorities,
+        'authority_import_status_success_count': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.SUCCESS).count(),
+        'authority_import_status_error': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR),
     }
 
     template = 'jsonimport/view_imported_dataset.html'
