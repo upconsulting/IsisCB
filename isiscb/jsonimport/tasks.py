@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from celery import shared_task
 import logging
 
@@ -5,8 +7,8 @@ import smart_open, json, csv
 
 from django.contrib.auth.models import User
 from jsonimport.models import (
-    ImportedAuthority, ImportedAuthorityStatus, ImportedCitation, ImportedACRelation,
-    ImportedCCRelation, ImportedDataset, ImportedPartDetails,
+    ImportedAttribute, ImportedAuthority, ImportedAuthorityStatus, ImportedCitation, ImportedACRelation,
+    ImportedCCRelation, ImportedCitationStatus, ImportedDataset, ImportedPartDetails,
     ImportedLinkedData
 )
 
@@ -21,9 +23,9 @@ from curation import curation_util as cutil
 logger = logging.getLogger(__name__)
 
 @shared_task
-def import_records(file_path, error_path, task_id, user_id):
+def import_records(authorities_file_path, citations_file_path, error_path, dataset_id, task_id, user_id):
    
-    logging.info('Importing JSON records from %s.' % file_path)
+    logging.info('Importing JSON records from %s and %s.' % (citations_file_path, authorities_file_path))
 
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
@@ -39,6 +41,7 @@ def import_records(file_path, error_path, task_id, user_id):
     task.state = 'PROCESSING'
     task.save()
 
+    
     results = []
   
     tenant = cutil.get_tenant(User.objects.filter(pk=user_id).first())
@@ -54,33 +57,55 @@ def import_records(file_path, error_path, task_id, user_id):
     
     # read JSON
     try:
-        with smart_open.smart_open(file_path, 'r') as f:
+        with smart_open.smart_open(authorities_file_path, 'r') as f:
             content = f.read()
-            data = json.loads(content)
+            authorities_data = json.loads(content)
     except Exception as e:
         logging.exception(e)
-        results.append((ERROR, 'file', '', 'Could not read or parse JSON: %s' % repr(e)))
+        results.append((ERROR, 'file', '', 'Could not read or parse authorities JSON: %s' % repr(e)))
         _save_results(error_path, results, ('Type', 'Title', 'Ids', 'Message'))
         if task:
             task.state = 'ERROR'
             task.save()
         return
     
-    dataset = _create_dataset(user_id, tenant, task, data.get('dataset') or {})
+    try:
+        with smart_open.smart_open(citations_file_path, 'r') as f:
+            content = f.read()
+            citations_data = json.loads(content)    
+    except Exception as e:
+        logging.exception(e)
+        results.append((ERROR, 'file', '', 'Could not read or parse citations JSON: %s' % repr(e)))
+        _save_results(error_path, results, ('Type', 'Title', 'Ids', 'Message'))
+        if task:
+            task.state = 'ERROR'
+            task.save()
+        return
+    
+    dataset = ImportedDataset.objects.filter(pk=dataset_id).first()
+    dataset.authorities_imported_on = datetime.now()
+    dataset.citations_imported_on = datetime.now()
+
+    # let's first check if dataset info in both files are the same
+    authorities_dataset_info = authorities_data.get('dataset') or {}
+    citations_dataset_info = citations_data.get('dataset') or {}
+
+    if authorities_dataset_info != citations_dataset_info:
+        results.append((ERROR, 'Dataset', '', 'Dataset info in authorities and citations files do not match'))
+        _save_results(error_path, results, ('Type', 'Title', 'Ids', 'Message'))
+        if task:
+            task.state = 'ERROR'
+            task.save()
+        return
 
     authorities = []
     citations = []
 
-    items = data.get('records') or []
-    for item in items:
-        if 'record_type' in item and item['record_type'] == 'authority':
-            authorities.append(item)
-        elif 'record_type' in item and item['record_type'] == 'citation':
-            citations.append(item)
-        else:
-            results.append((ERROR, 'Record', item.get('id') or '', 'Missing or invalid record_type field'))
+    authority_items = authorities_data.get('records') or []
+    citation_items = citations_data.get('records') or []
+    
+    total = len(authority_items) + len(citation_items)
 
-    total = len(authorities) + len(citations)
     if task:
         task.max_value = total
         task.current_value = 0
@@ -93,24 +118,36 @@ def import_records(file_path, error_path, task_id, user_id):
     user = User.objects.filter(username=user_id).first()
     
     # create authorities
-    for authority_info in authorities:
+    for authority_info in authority_items:
         _create_imported_authority(user, task, tenant, results, dataset, auth_map, authority_info)
         
     
     # create citations
-    for citation_data in citations:
+    for citation_data in citation_items:
         citation = _create_imported_citation(task, results, dataset, citations_by_id, citation_data)
         if citation:
-            for ac_data in citation_data.get('related_authorities') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results)
+            for ac_data in citation_data.get('author') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.AUTHOR)
+            for ac_data in citation_data.get('editor') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.EDITOR)
+            for ac_data in citation_data.get('advisor') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.ADVISOR)
+            for ac_data in citation_data.get('school') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SCHOOL)
+            for ac_data in citation_data.get('publisher') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.PUBLISHER)
+            for ac_data in citation_data.get('subject') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SUBJECT)
+            for ac_data in citation_data.get('category') or []:
+                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.CATEGORY)
         else:
-            results.append((ERROR, 'Citation', citation_data.get('local_dataset_id') or '', 'Failed to create citation, so related authorities could not be linked.'))
+            results.append((ERROR, 'Citation', citation_data.get('local_citation_id') or '', 'Failed to create citation, so related authorities could not be linked.'))
             
     # create ccrelations; we first have to have them all before we can link them
-    for citation_data in citations:
-        citation = citations_by_id.get(citation_data.get('local_dataset_id'))
+    for citation_data in citation_items:
+        citation = citations_by_id.get(citation_data.get('local_citation_id'))
         if not citation:
-            results.append((ERROR, 'CCRelation', citation_data.get('local_dataset_id') or '', 'Failed to find citation for ccrelation with citation local id reference: %s. Ccrelation could not be created.' % citation_data.get('local_dataset_id')))
+            results.append((ERROR, 'CCRelation', citation_data.get('local_citation_id') or '', 'Failed to find citation for ccrelation with citation local id reference: %s. Ccrelation could not be created.' % citation_data.get('local_citation_id')))
             continue
         for cc_data in citation_data.get('related_citations') or []:
             _create_cc_relation(results, citations_by_id, cc_data, citation)  
@@ -120,27 +157,31 @@ def import_records(file_path, error_path, task_id, user_id):
     _save_results(error_path, results, ('Type', 'Title', 'Ids', 'Message'))
 
     if task:
-        task.state = 'SUCCESS'
+        task.state = SUCCESS
         task.save()
 
 def _create_imported_citation(task, results, dataset, cit_map, citation_data):
     try:
         title = citation_data.get('title') or ''
-        local_id = citation_data.get('local_dataset_id')
+        local_id = citation_data.get('local_citation_id')
         
         type_controlled = _get_citation_type(citation_data.get('citation_type'))
         if not type_controlled:
-            results.append(('ERROR', 'Citation', local_id, f'Missing or invalid citation type: {citation_data.get("citation_type")}'))
+            _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Could not create citation: \"{title}\" with local id {local_id}. Missing or invalid citation type: {citation_data.get("citation_type")}', results, None)
             return None
 
         subtype = None
+        create_subtype_warning = False
+        subtype_warning_message = ''
         if citation_data.get('subtype_name'):
             subtype = CitationSubtype.objects.filter(name=citation_data.get('subtype_name')).first()
             if not subtype:
-                results.append(('WARNING', 'Citation', local_id, f'Invalid citation subtype: {citation_data.get("subtype_name")}'))
+                create_subtype_warning = True
+                subtype_warning_message = f'Citation subtype {citation_data.get("subtype_name")} not found. Citation will be created without subtype.'
             else:
                 if subtype.related_citation_type != type_controlled:
-                    results.append(('WARNING', 'Citation', local_id, f'Citation subtype {citation_data.get("subtype_name")} is not a subtype of citation type {citation_data.get("type_controlled")}'))  
+                    create_subtype_warning = True
+                    subtype_warning_message = f'Citation subtype {citation_data.get("subtype_name")} is not a subtype of citation type {citation_data.get("type_controlled")}. Citation will be created without subtype.'
                     subtype = None      
             
         cit = ImportedCitation.objects.create(
@@ -155,6 +196,9 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
             edition_details=citation_data.get('edition_details') or '',
             physical_details=citation_data.get('physical_details') or '',
         )
+
+        if create_subtype_warning:
+            _create_imported_citation_status(dataset, ImportedCitationStatus.Status.WARNING, subtype_warning_message, results, cit)
 
         # part details
         part = citation_data.get('part_details') or None
@@ -177,10 +221,8 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
             cit.part_details = pd
         
         for attr in citation_data.get('attributes') or []:
-            attribute = _create_attribute(attr.get('type'), attr.get('value'))
-            if attribute:
-                cit.attributes.add(attribute)
-
+            _create_citation_attribute(attr.get('type'), attr.get('value'), cit, dataset, results)
+            
         cit.save()
 
         for linked_data in citation_data.get('linked_data') or []:
@@ -188,8 +230,7 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
 
         cit_map[local_id] = cit
 
-        results.append(('SUCCESS', 'Citation', f"{local_id}: {title}", 'Created'))
-
+        _create_imported_citation_status(dataset, ImportedCitationStatus.Status.SUCCESS, f'Created citation {title} with local id {local_id}.', results, cit)
         if task:
             task.current_value = task.current_value + 1
             task.save()
@@ -197,7 +238,7 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
         return cit
     except Exception as e:
         logging.exception(e)
-        results.append(('ERROR', 'Citation', citation_data.get('id') or '', 'Error creating citation: %s' % repr(e)))
+        _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Error creating citation {title} with local id {local_id}: {repr(e)}', results, None)
         return None
 
 def _get_citation_type(cit_type):
@@ -225,7 +266,7 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
     try:
         name = authority_data.get('name', '')
         type_controlled = _get_authority_type(authority_data.get('authority_type'))
-        local_dataset_id = authority_data.get('local_dataset_id') or ''
+        local_dataset_id = authority_data.get('local_authority_id') or ''
         
         if not type_controlled:
             _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create authority: {name}. Missing or invalid authority type: {authority_data.get("authority_type")}', results, None)
@@ -235,9 +276,9 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
             class_system =_get_classifcation_system(user, authority_data.get('classification_system_name'))
         else:
             class_system =_get_default_classification_system(user, type_controlled)
-            print(f'No classification system specified for authority {name} with local id {local_dataset_id}. Using default classification system {class_system} for authority type {type_controlled}.')
+            print(f'No classification system specified for authority \"{name}\" with local id {local_dataset_id}. Using default classification system {class_system} for authority type {type_controlled}.')
         if not class_system:
-            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create authority {name}. Invalid classification system specified: {authority_data.get("classification_system_name")}, and no default classification system found for authority type {type_controlled}.', results, auth)
+            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create authority \"{name}\". Invalid classification system specified: {authority_data.get("classification_system_name")}, and no default classification system found for authority type {type_controlled}.', results, None)
             return None
         
         auth = ImportedAuthority.objects.create(
@@ -256,9 +297,7 @@ def _create_imported_authority(user, task, tenant, results, dataset, auth_map, a
             )
 
         for attr in authority_data.get('attributes') or []:
-            attribute = _create_attribute(attr.get('type'), attr.get('value'))
-            if attribute:
-                auth.attributes.add(attribute)
+            _create_authority_attribute(attr.get('type'), attr.get('value'), auth, dataset, results)
 
         auth.save()
 
@@ -283,6 +322,15 @@ def _create_imported_authority_status(dataset, status, message, results, authori
         authority=authority
     )
     results.append((status, 'Authority', message))
+
+def _create_imported_citation_status(dataset, status, message, results, citation):
+    ImportedCitationStatus.objects.create(
+        dataset=dataset,
+        status=status,
+        message=message,
+        citation=citation
+    )
+    results.append((status, 'Citation', message))
             
 
 def _create_dataset(user_id, tenant, task, dataset_info):
@@ -327,25 +375,32 @@ def _get_authority_type(auth_type):
 
 def _get_classifcation_system(user, class_system_name):
     classification_systems = cutil.get_classification_systems(user)
-    for cs in classification_systems:
-        if cs.name == class_system_name:
-            print(class_system_name)
-            print(cs)
-            print(cs.name)
-            return cs
+    return next((cs for cs in classification_systems if cs.name == class_system_name), None)
 
 def _get_default_classification_system(user, authority_type):
     class_system = ClassificationSystem.objects.filter(default_for__contains=[authority_type])
-    if class_system.exists():
-        return class_system.first()
-    return None
+    return class_system.first() if class_system.exists() else None
 
-def _create_attribute(type, value):
+def _create_authority_attribute(type, value, authority, dataset, results):
     attr_type = AttributeType.objects.filter(name=type).first()
     if not attr_type:
+        _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Invalid attribute type specified: {type}', results, authority)
         return None
     
-    return ImportedAuthority.objects.create(
+    return ImportedAttribute.objects.create(
+        value_authority=authority,
+        attribute_type=attr_type,
+        value=str(value),
+    )
+
+def _create_citation_attribute(type, value, citation, dataset, results):
+    attr_type = AttributeType.objects.filter(name=type).first()
+    if not attr_type:
+        _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Invalid attribute type specified: {type}', results, citation)
+        return None
+    
+    return ImportedAttribute.objects.create(
+        value_citation=citation,
         attribute_type=attr_type,
         value=str(value),
     )
@@ -353,44 +408,54 @@ def _create_attribute(type, value):
 def _create_linkeddata(data, subject):
     # { "type": "viaf", "value": "https://viaf.org/viaf/12345678" },
     ldtype = LinkedDataType.objects.filter(name=data.get('type')).first()
+    if not ldtype:
+        if type(subject) == ImportedAuthority:
+            _create_imported_authority_status(subject.dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create linked data for authority {subject.name} with local id {subject.local_dataset_id}. Invalid linked data type specified: {data.get("type")}. Linked data not created.', [], subject)
+            return
+        elif type(subject) == ImportedCitation:
+            _create_imported_citation_status(subject.dataset, ImportedCitationStatus.Status.ERROR, f'Could not create linked data for citation {subject.title} with local id {subject.local_dataset_id}. Invalid linked data type specified: {data.get("type")}. Linked data not created.', [], subject)
+            return
+    
     ImportedLinkedData.objects.create(
         subject = subject,
         universal_resource_name = data.get("value"),
         type_controlled = ldtype
     )
 
-def _create_ac_relation(data, authority_map, citation, results):
+def _create_ac_relation(data, authority_map, citation, results, type_controlled=None):
     # data = {
 	#	  "authority_id":      null,
-	#	  "local_dataset_id":  "DS-001-AUTH-00001",
+	#	  "local_authority_id":  "DS-001-AUTH-00001",
 	#	  "relationship_type": "author",
 	#	  "display_name":      "Shapiro, Lisa",
-	#	  "order":             1
+	#	  "order":             1,
+    #     "cba_id":             "CBA000044928
 	#	}
     try:
         existing_authority = None
         new_authority = None
-        if data.get('authority_id', None):
-            auth_ref = data['authority_id']
+        if data.get('cba_id', None):
+            auth_ref = data['cba_id']
             existing_authority = Authority.objects.filter(pk=auth_ref).first()  
         else:
-            new_auth_ref = data.get('local_dataset_id', None)
+            new_auth_ref = data.get('local_authority_id', None)
             if new_auth_ref and new_auth_ref in authority_map:
                 new_authority = authority_map[new_auth_ref]
             else:
-                results.append(('ERROR', 'ACRelation', '', f'Missing authority reference for ACRelation: {data.get("authority_id")} or {data.get("local_dataset_id")}'))
+                _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Missing authority reference for ACRelation for citation {citation.title} with local id {citation.local_dataset_id}: Missing authority reference for ACRelation: {data.get("cba_id")} or {data.get("local_authority_id")}. ACRelation could not be created.', results, citation)
                 return None
-            
-        type_controlled = _get_acrelation_type(data.get('relationship_type'))
+
+        if not type_controlled:  
+            type_controlled = _get_acrelation_type(data.get('relationship_type'))
         if not type_controlled:
-            results.append(('ERROR', 'ACRelation', '', f'Missing or invalid relationship type: {data.get("relationship_type")}'))
+            _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Missing or invalid relationship type for ACRelation for citation {citation.title} with local id {citation.local_dataset_id}: {data.get("relationship_type")}. ACRelation could not be created.', results, citation)
             return None
         
         new_ac_rel_data = {
             'citation': citation,
             'type_controlled': type_controlled,
             'name_for_display_in_citation': data.get('display_name') or None,
-            'data_display_order': float(data.get('order')) or 1.0
+            'data_display_order': float(data.get('order', 1)) or 1.0
         }
 
         if existing_authority:
@@ -398,7 +463,7 @@ def _create_ac_relation(data, authority_map, citation, results):
         elif new_authority:
             new_ac_rel_data['authority'] = new_authority
         else:
-            results.append(('ERROR', 'ACRelation', '', f'Could not find authority for ACRelation with references: {data.get("authority_id")} or {data.get("local_dataset_id")}'))
+            _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Could not find authority for ACRelation with references: {data.get("authority_id")} or {data.get("local_dataset_id")}', results, citation)
             return None
 
         ac_rel = ImportedACRelation(**new_ac_rel_data)
@@ -407,7 +472,7 @@ def _create_ac_relation(data, authority_map, citation, results):
         print("Created ACRelation with id {id}".format(id=ac_rel.pk))
     except Exception as e:
         logging.exception(e)
-        results.append(('ERROR', 'ACRelation', '', 'Error creating acrelation: %s' % repr(e)))
+        _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Error creating ACRelation for citation {citation.title} with local id {citation.local_dataset_id}: {repr(e)}', results, citation) 
 
 def _get_acrelation_type(acr_type):
     roles = {
@@ -452,7 +517,7 @@ def _create_cc_relation(results, citations_by_id, data, citation):
         """ 
         {
 	  		"citation_id": null,
-	   		"local_dataset_id": "DS-001-CIT-00043",
+	   		"local_citation_id": "DS-001-CIT-00043",
 	  		"relationship_type": "includes chapter",
 	  		"related_citation_role": "subject"
 	  	}
@@ -461,15 +526,15 @@ def _create_cc_relation(results, citations_by_id, data, citation):
             related_citation_id = None
             related_citation = None
             existing_related_citation = None
-            if data.get('citation_id'):
-                related_citation_id = data['citation_id']
+            if data.get('cbb_id'):
+                related_citation_id = data['cbb_id']
                 if not related_citation_id:
                     return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
 
                 existing_related_citation = Citation.objects.filter(pk=related_citation_id).first()  # verify that citation exists
             
             else:
-                related_citation_id = data.get('local_dataset_id')
+                related_citation_id = data.get('local_citation_id', None)
                 if not related_citation_id:
                     return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
 

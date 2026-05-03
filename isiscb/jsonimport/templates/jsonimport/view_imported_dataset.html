@@ -3,26 +3,108 @@
 {% load general_tags %}
 {% load imported_json_tags %}
 
+{% block extrahead %}
+<style>
+   .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.11/dist/cdn.min.js"></script>
 
 <h2>Imported Dataset: {{ dataset.name }}</h2>
 <small></small>
 
-<p>{{ dataset.description }}</p>
+{% if dataset.description %}
+    <p>{{ dataset.description }}</p>
+{% endif %}
 
-{{ total_authorities }} total authorities.<br>
-{{ total_citations }} total citations.
+<p>Status: 
+    {% if dataset.task.state == 'SUCCESS' %}
+        <span class="label label-success">{{ dataset.task.state }}</span>
+    {% elif dataset.task.state == 'ERROR' %}
+        <span class="label label-danger">{{ dataset.task.state }}</span>
+    {% else %}
+        <span class="label label-primary">{{ dataset.task.state }}</span>
+    {% endif %}
+</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    Citations: <input type="file" name="citations_file" id="file" class="btn inputfile" />
+    Authorities: <input type="file" name="authorities_file" id="file" class="btn inputfile" />
+    {{ form.file.errors }}
+    <br>
+    <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
+</form>
+
 
 <div>
-    <div class="panel panel-success small">
-        <div class="panel-heading">{{authority_import_status_success_count}} authorities succesfully imported.</div>
+    <div class="panel panel-info small">
+        <div class="panel-heading">
+            <i class="fas fa-check-double"></i> Imported {{authority_import_status_success_count}} total authorities.
+            <br>
+            <i class="fas fa-check-double"></i> Imported {{citation_import_status_success_count}} total citations.
+        </div>
     </div>
 </div>
+{% if failed_citation_imports.count > 0 %}
 <div x-data="{ open: false }" class="panel panel-danger small">
-    <div x-on:click="open = ! open" class="panel-heading">Authority Import Errors</div>       
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-dumpster-fire"></i> Failed to import {{ failed_citation_imports.count }} citations.
+    </div>
+    <div x-show="open" >
+        <div class="panel-body">
+            {% for status in failed_citation_imports %}
+                <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if citation_import_status_error.count > 0 %}
+<div x-data="{ open: false }" class="panel panel-danger small">
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-exclamation-circle"></i> {{ citation_import_status_error|length }} errors when importing citations.
+    </div>       
     <div x-show="open" >
         
+        <div class="panel-body">
+            {% for status in citation_import_status_error %}
+                <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if failed_authority_imports.count > 0 %}
+<div x-data="{ open: false }" class="panel panel-danger small">
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-dumpster-fire"></i> Failed to import {{ failed_authority_imports.count }} authorities.
+    </div>
+    <div x-show="open" >
+        <div class="panel-body">
+            {% for status in failed_authority_imports %}
+                <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if authority_import_status_error.count > 0 %}
+<div x-data="{ open: false }" class="panel panel-danger small">
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-exclamation-circle"></i> {{ authority_import_status_error|length }} errors when importing authorities.
+    </div>       
+    <div x-show="open" >
         <div class="panel-body">
             {% for status in authority_import_status_error %}
                 <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
@@ -30,14 +112,53 @@
         </div>
     </div>
 </div>
+{% endif %}
+
 
 
 <h3>Citations</h3>
 <table class="table table-striped small">
     {% for citation in citations %}
         <tr>
-            <td>{{ citation.get_type_controlled_display }}</td>
-            <td>
+            <td width="40px">
+                <div x-data="{ isOpen: false }">
+                {% if citation.import_errors %}
+                <a @click="isOpen = true"><i class="fas fa-exclamation-triangle"></i> </a>
+                
+                <div class="modal-dialog" x-show="isOpen" x-transition.opacity.duration.300ms
+                    @keydown.escape.window="isOpen = false" x-cloak>
+                   
+                
+                <div class="modal-backdrop">
+                    
+                    <!-- Modal Dialog -->
+                    <div 
+                        x-show="isOpen" 
+                        x-transition.scale.95.duration.300ms
+                        @click.away="isOpen = false"
+                        class="modal-content" style="width: 600px; margin: 100px auto; padding: 20px; background-color: white; border-radius: 5px;">
+                        
+                        <div class="modal-header">
+                            <h3>Errors for {{ citation.title }}</h3>
+                        </div>
+
+                        <div class="modal-body">
+                            {% for error in citation.import_errors %}
+                                <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="modal-footer">
+                            <button @click="isOpen = false">Close</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                {% endif %}
+                </div>
+            </td>
+            <td width="40px">{{ citation.get_type_controlled_display }}</td>
+            <td width="500px">
                 {{ citation.title }}
                 <div x-data="{ open: false }">
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Details</a>
@@ -97,8 +218,58 @@
 <table class="table table-striped small">
     {% for authority in authorities %}
         <tr>
-            <td>{{ authority.get_type_controlled_display }}</td>
-            <td>{{ authority.name }}</td>
+            <td width="40px">
+                <div x-data="{ isOpen: false }">
+                {% if authority.import_errors %}
+                <a @click="isOpen = true"><i class="fas fa-exclamation-triangle"></i> </a>
+                
+                <div class="modal-dialog" x-show="isOpen" x-transition.opacity.duration.300ms
+                    @keydown.escape.window="isOpen = false" x-cloak>
+                   
+                
+                <div class="modal-backdrop">
+                    
+                    <!-- Modal Dialog -->
+                    <div 
+                        x-show="isOpen" 
+                        x-transition.scale.95.duration.300ms
+                        @click.away="isOpen = false"
+                        class="modal-content" style="width: 600px; margin: 100px auto; padding: 20px; background-color: white; border-radius: 5px;">
+                        
+                        <div class="modal-header">
+                            <h3>Errors for {{ authority.name }}</h3>
+                        </div>
+
+                        <div class="modal-body">
+                            {% for error in authority.import_errors %}
+                                <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="modal-footer">
+                            <button @click="isOpen = false">Close</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                {% endif %}
+                </div>
+            </td>
+            <td width="40px">{{ authority.get_type_controlled_display }}</td>
+            <td>
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }}</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        Classification system: {{ authority.get_classification_system_display }}<br>
+                        Last name: {{ authority.personal_last_name }}<br>
+                        First name: {{ authority.personal_first_name }}<br>
+                        {% for attribute in authority.get_attributes %}
+                            {{ attribute.get_type_controlled_display }}: {{ attribute.value }}<br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </td>
         </tr>
     {% endfor %}
     <th></th>

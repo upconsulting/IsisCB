@@ -173,7 +173,7 @@ urlpatterns = [
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/image/(?P<image_id>[0-9]+?)/save$', settings_views.tenant_add_save_image, name='tenant_add_save_image'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/content$', settings_views.tenant_content_page, name='tenant_content_page'),
     
-    re_path(r'^import/json$', import_views.upload_file , name='import_json'),
+    re_path(r'^import/dataset/create', import_views.create_imported_dataset, name='create_imported_dataset'),
     re_path(r'^import/datasets$', import_views.list_imported_datasets , name='list_import_tasks'),
     re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)$', import_views.view_imported_dataset , name='view_imported_dataset'), 
 ]

@@ -1,4 +1,5 @@
 from django import forms
 
 class UploadJsonDataForm(forms.Form):
-    file = forms.FileField()
+    citations_file = forms.FileField()
+    authorities_file = forms.FileField()

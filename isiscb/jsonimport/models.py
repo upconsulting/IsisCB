@@ -17,9 +17,13 @@ class ImportedDataset(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     dataset_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    dataset_name = models.CharField(max_length=255, blank=True, null=True)
     dataset_creator = models.CharField(max_length=255, blank=True, null=True)
     dataset_date = models.CharField(max_length=255, blank=True, null=True)
     task = models.ForeignKey('isisdata.AsyncTask', blank=True, null=True, on_delete=models.SET_NULL)
+
+    authorities_imported_on = models.DateTimeField(blank=True, null=True)
+    citations_imported_on = models.DateTimeField(blank=True, null=True)
 
     owning_tenant = models.ForeignKey(
         Tenant,
@@ -80,11 +84,6 @@ class ImportedAuthority(ImportedRecord):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation(
-        'ImportedAttribute',
-        related_query_name='authorities',
-        content_type_field='source_content_type',
-        object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation(
         'ImportedLinkedData',
         related_query_name='authorities',
@@ -104,7 +103,13 @@ class ImportedAuthority(ImportedRecord):
         """
         query = Q(authority_id=self.id)
         return ImportedACRelation.objects.filter(public=True).filter(query)
+
+    @property
+    def import_errors(self):
+        return self.importedauthoritystatus_set.filter(status=ImportedAuthorityStatus.Status.ERROR)
     
+    def get_attributes(self):
+        return ImportedAttribute.objects.filter(value_authority=self)
 
 class ImportedCitation(ImportedRecord):
     """
@@ -151,8 +156,6 @@ class ImportedCitation(ImportedRecord):
 
     language = models.ManyToManyField('isisdata.Language', blank=True, null=True)
 
-    part_details = models.OneToOneField('ImportedPartDetails', null=True, blank=True, on_delete=models.SET_NULL)
-
     publication_date = models.DateField(blank=True, null=True)
 
     related_citations = models.ManyToManyField('ImportedCitation', through='ImportedCCRelation',
@@ -162,20 +165,15 @@ class ImportedCitation(ImportedRecord):
                                                  related_name='citations_related')
 
 
-    # Generic reverse relations. These do not create new fields on the model.
-    #  Instead, they provide an API for lookups back onto their respective
-    #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation(
-        'ImportedAttribute',
-        related_query_name='citations',
-        content_type_field='source_content_type',
-        object_id_field="source_instance_id")
-
     linkeddata_entries = GenericRelation(
         'ImportedLinkedData',
         related_query_name='citations',
         content_type_field='subject_content_type',
         object_id_field="subject_instance_id")
+
+    @property
+    def import_errors(self):
+        return self.importedcitationstatus_set.filter(status=ImportedCitationStatus.Status.ERROR)
 
     @property
     def ccrelations(self):
@@ -224,6 +222,9 @@ class ImportedCitation(ImportedRecord):
         
         return self.acrelations.filter(type_controlled=ACRelation.PERIODICAL).first()
 
+    def get_attributes(self):
+        return ImportedAttribute.objects.filter(value_citation=self)
+
 class ImportedPartDetails(models.Model):
     volume = models.CharField(max_length=255, null=True, blank=True)
     volume_free_text = models.CharField(max_length=255, null=True, blank=True)
@@ -240,6 +241,8 @@ class ImportedPartDetails(models.Model):
 
     extent = models.PositiveIntegerField(blank=True, null=True)
     extent_note = models.TextField(blank=True, null=True)
+
+    citation = models.ForeignKey(ImportedCitation, related_name='part_details', on_delete=models.CASCADE, default=None)
 
     @property
     def pages(self):
@@ -258,7 +261,7 @@ class ImportedACRelation(ImportedRecord):
 
     citation = models.ForeignKey('ImportedCitation', blank=True, null=True, on_delete=models.SET_NULL)
 
-    authority = models.ForeignKey('ImportedAuthority', blank=True, null=True, on_delete=models.SET_NULL)
+    authority = models.ForeignKey('ImportedAuthority', blank=True, null=True, on_delete=models.CASCADE)
     existing_authority = models.ForeignKey(Authority, blank=True, null=True, on_delete=models.SET_NULL) 
 
     name = models.CharField(max_length=255, blank=True)
@@ -318,7 +321,7 @@ class ImportedCCRelation(ImportedRecord):
 
     type_free = models.CharField(max_length=255, blank=True)
 
-    subject = models.ForeignKey('ImportedCitation', related_name='relations_from', null=True, blank=True, on_delete=models.SET_NULL)
+    subject = models.ForeignKey('ImportedCitation', related_name='relations_from', null=True, blank=True, on_delete=models.CASCADE)
     existing_subject = models.ForeignKey(Citation, related_name='imported_relations_from', null=True, blank=True, on_delete=models.SET_NULL)
 
     object = models.ForeignKey('ImportedCitation', related_name='relations_to', null=True, blank=True, on_delete=models.SET_NULL)
@@ -333,7 +336,7 @@ class ImportedAttribute(models.Model):
     # we'll just use one string here and worry about turning it into a controlled value later
     value = models.TextField(blank=True)
 
-    value_citation = models.ForeignKey('ImportedCitation', on_delete=models.CASCADE)
+    value_citation = models.ForeignKey('ImportedCitation', null=True, blank=True, on_delete=models.CASCADE)
     value_authority = models.ForeignKey('ImportedAuthority', on_delete=models.CASCADE)
 
     attribute_type = models.ForeignKey('isisdata.AttributeType', blank=True, null=True, on_delete=models.SET_NULL)  

@@ -1,0 +1,18 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Create a new dataset</h2>
+<small></small>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="ds-name">Name</label>
+        <input type="text" class="form-control" id="ds-name" name="ds-name" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% endblock %}
