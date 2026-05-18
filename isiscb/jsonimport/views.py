@@ -92,14 +92,18 @@ def view_imported_dataset(request, dataset_id):
     authorities = ImportedAuthority.objects.filter(dataset=dataset)
     citations = ImportedCitation.objects.filter(dataset=dataset)
 
+    if request.GET.get("status") == "error":
+        authorities = authorities.filter(importedauthoritystatus__status=ImportedAuthorityStatus.Status.ERROR)
+        citations = citations.filter(importedcitationstatus__status=ImportedCitationStatus.Status.ERROR)
+
     citation_paginator = Paginator(citations, 25)
-    page_number = request.GET.get('page')
-    citations_page = citation_paginator.get_page(page_number)
+    citation_page_number = request.GET.get('citation_page')
+    citations_page = citation_paginator.get_page(citation_page_number)
     total_citations = citations.count()
     
     authority_paginator = Paginator(authorities, 25)
-    page_number = request.GET.get('page')
-    authorities_page = authority_paginator.get_page(page_number)
+    authority_page_number = request.GET.get('authority_page')
+    authorities_page = authority_paginator.get_page(authority_page_number)
     total_authorities = authorities.count()
 
     context = {

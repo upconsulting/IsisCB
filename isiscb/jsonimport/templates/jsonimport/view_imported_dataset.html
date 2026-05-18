@@ -115,6 +115,33 @@
 {% endif %}
 
 
+<div class="panel panel-default small" x-data="{
+    paramName: 'status', // The name of your URL parameter
+    
+    handleReload(event) {
+        // 1. Get the current URL
+        let url = new URL(window.location.href);
+        
+        // 2. Add or remove the parameter based on the checkbox state
+        if (event.target.checked) {
+            url.searchParams.set(this.paramName, 'error');
+        } else {
+            url.searchParams.delete(this.paramName);
+        }
+        
+        // 3. Reload the page by navigating to the new URL
+        window.location.href = url.toString();
+    }
+}">
+    <div class="panel-heading">
+        <label>
+            <input type="checkbox" 
+                :checked="new URLSearchParams(window.location.search).has(paramName)"
+                @change="handleReload($event)">
+            Show only records with errors
+        </label>
+    </div>
+</div>
 
 <h3>Citations</h3>
 <table class="table table-striped small">
@@ -123,37 +150,7 @@
             <td width="40px">
                 <div x-data="{ isOpen: false }">
                 {% if citation.import_errors %}
-                <a @click="isOpen = true"><i class="fas fa-exclamation-triangle"></i> </a>
-                
-                <div class="modal-dialog" x-show="isOpen" x-transition.opacity.duration.300ms
-                    @keydown.escape.window="isOpen = false" x-cloak>
-                   
-                
-                <div class="modal-backdrop">
-                    
-                    <!-- Modal Dialog -->
-                    <div 
-                        x-show="isOpen" 
-                        x-transition.scale.95.duration.300ms
-                        @click.away="isOpen = false"
-                        class="modal-content" style="width: 600px; margin: 100px auto; padding: 20px; background-color: white; border-radius: 5px;">
-                        
-                        <div class="modal-header">
-                            <h3>Errors for {{ citation.title }}</h3>
-                        </div>
-
-                        <div class="modal-body">
-                            {% for error in citation.import_errors %}
-                                <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="modal-footer">
-                            <button @click="isOpen = false">Close</button>
-                        </div>
-                    </div>
-                </div>
-                </div>
+                <i class="fas fa-exclamation-triangle" title="There were {{ citation.import_errors|length }} errors importing this citation."></i>
                 {% endif %}
                 </div>
             </td>
@@ -176,7 +173,7 @@
                 
                     <div x-show="open" style="background-color: white;">
                         {% for ac_relation in citation.get_new_authorities %}
-                            <div>{{ ac_relation.get_type_controlled_display }}: {{ ac_relation.authority.name }}</div>
+                            <div>{{ ac_relation.get_type_controlled_display }}: {{ ac_relation.authority.name }} ({{ ac_relation.authority.local_dataset_id }})</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -206,11 +203,39 @@
                     </div>
                 </div>
 
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Errors ({{ citation.import_errors|length }})</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        {% for error in citation.import_errors %}
+                                <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
+                            {% endfor %}
+                    </div>
+                </div>
+
                 
             </td>
         </tr>
     {% endfor %}
-    <th></th>
+    <th colspan="3">
+        <div class="pagination">
+            <span class="step-links">
+                {% if citations.has_previous %}
+                    <a href="?authority_page={{ authorities.number }}&citation_page=1">&laquo; first</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ citations.number }} of {{ citations.paginator.num_pages }}.
+                </span>
+
+                {% if citations.has_next %}
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.next_page_number }}">next</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </th>
     <tr></tr>
 </table>
 
@@ -219,61 +244,49 @@
     {% for authority in authorities %}
         <tr>
             <td width="40px">
-                <div x-data="{ isOpen: false }">
                 {% if authority.import_errors %}
-                <a @click="isOpen = true"><i class="fas fa-exclamation-triangle"></i> </a>
-                
-                <div class="modal-dialog" x-show="isOpen" x-transition.opacity.duration.300ms
-                    @keydown.escape.window="isOpen = false" x-cloak>
-                   
-                
-                <div class="modal-backdrop">
-                    
-                    <!-- Modal Dialog -->
-                    <div 
-                        x-show="isOpen" 
-                        x-transition.scale.95.duration.300ms
-                        @click.away="isOpen = false"
-                        class="modal-content" style="width: 600px; margin: 100px auto; padding: 20px; background-color: white; border-radius: 5px;">
-                        
-                        <div class="modal-header">
-                            <h3>Errors for {{ authority.name }}</h3>
-                        </div>
-
-                        <div class="modal-body">
-                            {% for error in authority.import_errors %}
-                                <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="modal-footer">
-                            <button @click="isOpen = false">Close</button>
-                        </div>
-                    </div>
-                </div>
-                </div>
+                <i class="fas fa-exclamation-triangle" title="There were {{authority.import_errors|length}} errors importing this authority."></i> 
                 {% endif %}
                 </div>
             </td>
             <td width="40px">{{ authority.get_type_controlled_display }}</td>
             <td>
                 <div x-data="{ open: false }">
-                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }}</a>
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }} ({{ authority.local_dataset_id }})</a>
                 
                     <div x-show="open" style="background-color: white;">
                         Classification system: {{ authority.get_classification_system_display }}<br>
                         Last name: {{ authority.personal_last_name }}<br>
                         First name: {{ authority.personal_first_name }}<br>
                         {% for attribute in authority.get_attributes %}
-                            {{ attribute.get_type_controlled_display }}: {{ attribute.value }}<br>
+                            {{ attribute.attribute_type.name }}: {{ attribute.value }}<br>
                         {% endfor %}
                     </div>
                 </div>
             </td>
         </tr>
     {% endfor %}
-    <th></th>
+    <th colspan="3">
+        <div class="pagination">
+            <span class="step-links">
+                {% if authorities.has_previous %}
+                    <a href="?citation_page={{ citations.number }}&authority_page=1">&laquo; first</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ authorities.number }} of {{ authorities.paginator.num_pages }}.
+                </span>
+
+                {% if authorities.has_next %}
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.next_page_number }}">next</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </th>
     <tr></tr>
 </table>
+
 
 {% endblock %}

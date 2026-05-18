@@ -22,6 +22,8 @@ from curation import curation_util as cutil
 
 logger = logging.getLogger(__name__)
 
+NEW_RECORD_ACTION = "add new record"
+
 @shared_task
 def import_records(authorities_file_path, citations_file_path, error_path, dataset_id, task_id, user_id):
    
@@ -119,29 +121,33 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
     
     # create authorities
     for authority_info in authority_items:
-        _create_imported_authority(user, task, tenant, results, dataset, auth_map, authority_info)
+        # we only add new records for now
+        if authority_info.get("action") == NEW_RECORD_ACTION:
+            _create_imported_authority(user, task, tenant, results, dataset, auth_map, authority_info)
         
     
     # create citations
     for citation_data in citation_items:
-        citation = _create_imported_citation(task, results, dataset, citations_by_id, citation_data)
-        if citation:
-            for ac_data in citation_data.get('author') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.AUTHOR)
-            for ac_data in citation_data.get('editor') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.EDITOR)
-            for ac_data in citation_data.get('advisor') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.ADVISOR)
-            for ac_data in citation_data.get('school') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SCHOOL)
-            for ac_data in citation_data.get('publisher') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.PUBLISHER)
-            for ac_data in citation_data.get('subject') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SUBJECT)
-            for ac_data in citation_data.get('category') or []:
-                _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.CATEGORY)
-        else:
-            results.append((ERROR, 'Citation', citation_data.get('local_citation_id') or '', 'Failed to create citation, so related authorities could not be linked.'))
+        # we only create new records for now
+        if citation_data.get("action") == NEW_RECORD_ACTION:
+            citation = _create_imported_citation(task, results, dataset, citations_by_id, citation_data)
+            if citation:
+                for ac_data in citation_data.get('author') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.AUTHOR)
+                for ac_data in citation_data.get('editor') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.EDITOR)
+                for ac_data in citation_data.get('advisor') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.ADVISOR)
+                for ac_data in citation_data.get('school') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SCHOOL)
+                for ac_data in citation_data.get('publisher') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.PUBLISHER)
+                for ac_data in citation_data.get('subject') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.SUBJECT)
+                for ac_data in citation_data.get('category') or []:
+                    _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.CATEGORY)
+            else:
+                results.append((ERROR, 'Citation', citation_data.get('local_citation_id') or '', 'Failed to create citation, so related authorities could not be linked.'))
             
     # create ccrelations; we first have to have them all before we can link them
     for citation_data in citation_items:
@@ -407,7 +413,7 @@ def _create_citation_attribute(type, value, citation, dataset, results):
 
 def _create_linkeddata(data, subject):
     # { "type": "viaf", "value": "https://viaf.org/viaf/12345678" },
-    ldtype = LinkedDataType.objects.filter(name=data.get('type')).first()
+    ldtype = LinkedDataType.objects.filter(name=data.get('type').upper()).first()
     if not ldtype:
         if type(subject) == ImportedAuthority:
             _create_imported_authority_status(subject.dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create linked data for authority {subject.name} with local id {subject.local_dataset_id}. Invalid linked data type specified: {data.get("type")}. Linked data not created.', [], subject)
@@ -455,7 +461,7 @@ def _create_ac_relation(data, authority_map, citation, results, type_controlled=
             'citation': citation,
             'type_controlled': type_controlled,
             'name_for_display_in_citation': data.get('display_name') or None,
-            'data_display_order': float(data.get('order', 1)) or 1.0
+            'data_display_order': float(data.get('order', 1) or 1.0)
         }
 
         if existing_authority:
@@ -463,7 +469,7 @@ def _create_ac_relation(data, authority_map, citation, results, type_controlled=
         elif new_authority:
             new_ac_rel_data['authority'] = new_authority
         else:
-            _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Could not find authority for ACRelation with references: {data.get("authority_id")} or {data.get("local_dataset_id")}', results, citation)
+            _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Could not find authority for ACRelation with references: {data.get("cba_id")} or {data.get("local_authority_id")}', results, citation)
             return None
 
         ac_rel = ImportedACRelation(**new_ac_rel_data)
@@ -529,18 +535,18 @@ def _create_cc_relation(results, citations_by_id, data, citation):
             if data.get('cbb_id'):
                 related_citation_id = data['cbb_id']
                 if not related_citation_id:
-                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
+                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no cbb_id or local_citation_id provided'))
 
                 existing_related_citation = Citation.objects.filter(pk=related_citation_id).first()  # verify that citation exists
             
             else:
                 related_citation_id = data.get('local_citation_id', None)
                 if not related_citation_id:
-                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no citation_id or local_dataset_id provided'))
+                    return results.append(('ERROR', 'CCRelation', '', 'Missing citation reference for CCRelation: no cbb_id or local_citation_id provided'))
 
                 related_citation = citations_by_id.get(related_citation_id)
                 if not related_citation:
-                    return results.append(('ERROR', 'CCRelation', '', f'Could not find citation for CCRelation with local_dataset_id reference: {related_citation_id}'))    
+                    return results.append(('ERROR', 'CCRelation', '', f'Could not find citation for CCRelation with local_citation_id reference: {related_citation_id}'))    
             
             subject = None
             object = None
