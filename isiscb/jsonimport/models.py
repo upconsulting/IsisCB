@@ -7,6 +7,9 @@ from django.contrib.postgres import fields as pg_fields
 
 from isisdata.models import Authority, Citation, Tenant, CCRelation, ACRelation
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ImportedDataset(models.Model):
     """
@@ -221,6 +224,10 @@ class ImportedCitation(ImportedRecord):
             return None
         
         return self.acrelations.filter(type_controlled=ACRelation.PERIODICAL).first()
+
+    @property
+    def part_detail(self):
+        return ImportedPartDetails.objects.filter(citation_id=self.pk).first()
 
     def get_attributes(self):
         return ImportedAttribute.objects.filter(value_citation=self)

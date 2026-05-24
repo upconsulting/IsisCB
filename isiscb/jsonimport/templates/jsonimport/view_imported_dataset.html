@@ -39,8 +39,8 @@
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    Citations: <input type="file" name="citations_file" id="file" class="btn inputfile" />
-    Authorities: <input type="file" name="authorities_file" id="file" class="btn inputfile" />
+    Citations: <input required type="file" name="citations_file" id="file" class="btn inputfile" />
+    Authorities: <input required type="file" name="authorities_file" id="file" class="btn inputfile" />
     {{ form.file.errors }}
     <br>
     <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
@@ -166,6 +166,12 @@
                         Physical details: {{citation.physical_details}}
                         <br>
                         Full citation: {{citation.complete_citation}}
+                        <br>
+                        Volume: {{citation.part_detail.volume|default:""}}
+                        <br>
+                        Issue: {{ citation.part_detail.issue_free_text|default:""}}
+                        <br>
+                        Pages: {{ citation.part_detail.pages_free_text|default:"" }}
                     </div>
                 </div>
             </td>
@@ -258,8 +264,10 @@
                 
                     <div x-show="open" style="background-color: white;">
                         Classification system: {{ authority.get_classification_system_display }}<br>
-                        Last name: {{ authority.personal_last_name }}<br>
-                        First name: {{ authority.personal_first_name }}<br>
+                        {% if authority.type_controlled == "PE" %}
+                            Last name: {{ authority.personal_last_name }}<br>
+                            First name: {{ authority.personal_first_name }}<br>
+                        {% endif %}
                         {% for attribute in authority.get_attributes %}
                             {{ attribute.attribute_type.name }}: {{ attribute.value }}<br>
                         {% endfor %}

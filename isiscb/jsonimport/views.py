@@ -89,8 +89,8 @@ def view_imported_dataset(request, dataset_id):
     # otherwise, show details about the dataset and the authorities/citations that were imported as part of it
     tenant = cutil.get_tenant(request.user)
     dataset = ImportedDataset.objects.filter(pk=dataset_id, owning_tenant=tenant).first()
-    authorities = ImportedAuthority.objects.filter(dataset=dataset)
-    citations = ImportedCitation.objects.filter(dataset=dataset)
+    authorities = ImportedAuthority.objects.filter(dataset=dataset).order_by('name')
+    citations = ImportedCitation.objects.filter(dataset=dataset).order_by('title')
 
     if request.GET.get("status") == "error":
         authorities = authorities.filter(importedauthoritystatus__status=ImportedAuthorityStatus.Status.ERROR)

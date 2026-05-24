@@ -207,24 +207,22 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
             _create_imported_citation_status(dataset, ImportedCitationStatus.Status.WARNING, subtype_warning_message, results, cit)
 
         # part details
-        part = citation_data.get('part_details') or None
-        if part:
-            pd = ImportedPartDetails.objects.create(
-                    volume=part.get('volume'),
-                    volume_free_text=part.get('volume_free_text'),
-                    volume_begin=part.get('volume_begin'),
-                    volume_end=part.get('volume_end'),
-                    issue_free_text=part.get('issue_free_text'),
-                    issue_begin=part.get('issue_begin'),
-                    issue_end=part.get('issue_end'),
-                    pages_free_text=part.get('pages_free_text'),
-                    page_begin=part.get('page_begin'),
-                    page_end=part.get('page_end'),
-                    extent=part.get('extent'),
-                    extent_note=part.get('extent_note')
-                )
-            pd.save()
-            cit.part_details = pd
+        pd = ImportedPartDetails.objects.create(
+                volume=citation_data.get('volume', ''),
+                volume_free_text=citation_data.get('volume', ''),
+                volume_begin=citation_data.get('volume_begin',0),
+                volume_end=citation_data.get('volume_end',0),
+                issue_free_text=citation_data.get('issue',''),
+                issue_begin=citation_data.get('issue_begin',0),
+                issue_end=citation_data.get('issue_end',0),
+                pages_free_text=citation_data.get('pages',''),
+                page_begin=citation_data.get('page_begin',0),
+                page_end=citation_data.get('page_end',0),
+                extent=citation_data.get('extent',0),
+                extent_note=citation_data.get('extent_note',''),
+                citation=cit
+            )
+        
         
         for attr in citation_data.get('attributes') or []:
             _create_citation_attribute(attr.get('type'), attr.get('value'), cit, dataset, results)
