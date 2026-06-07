@@ -34,6 +34,10 @@ class ImportedDataset(models.Model):
         null=True
     )
 
+    dataset_imported = models.BooleanField(default=False)
+    import_task = models.ForeignKey('isisdata.AsyncTask', related_name='imported_dataset', blank=True, null=True, on_delete=models.SET_NULL)
+    dataset_import_errors = models.TextField(blank=True, null=True)
+    
 class ImportedRecord(models.Model):
     class Meta(object):
         abstract = True
@@ -159,8 +163,6 @@ class ImportedCitation(ImportedRecord):
 
     language = models.ManyToManyField('isisdata.Language', blank=True, null=True)
 
-    publication_date = models.DateField(blank=True, null=True)
-
     related_citations = models.ManyToManyField('ImportedCitation', through='ImportedCCRelation',
                                                related_name='citations_related')
     related_authorities = models.ManyToManyField('ImportedAuthority',
@@ -181,11 +183,17 @@ class ImportedCitation(ImportedRecord):
     @property
     def ccrelations(self):
         """
-        Provides access to related :class:`.CCRelation` instances directly
-        that are public.
+        Provides access to related :class:`.CCRelation` instances.
         """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return ImportedCCRelation.objects.filter(query)
+    
+    @property
+    def acrelations(self):
+        """
+        Provides access to related :class:`.ACRelation` instances.
+        """
+        return ImportedACRelation.objects.filter(citation_id=self.id)
 
     @property
     def all_ccrelations(self):
@@ -344,7 +352,7 @@ class ImportedAttribute(models.Model):
     value = models.TextField(blank=True)
 
     value_citation = models.ForeignKey('ImportedCitation', null=True, blank=True, on_delete=models.CASCADE)
-    value_authority = models.ForeignKey('ImportedAuthority', on_delete=models.CASCADE)
+    value_authority = models.ForeignKey('ImportedAuthority', null=True, blank=True, on_delete=models.CASCADE)
 
     attribute_type = models.ForeignKey('isisdata.AttributeType', blank=True, null=True, on_delete=models.SET_NULL)  
 

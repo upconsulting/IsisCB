@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.admin.views.decorators import user_passes_test
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
+from django.db import transaction
 
 import smart_open, tempfile, os, datetime
 import logging
@@ -9,10 +11,11 @@ import logging
 from jsonimport.forms import UploadJsonDataForm
 from jsonimport.tasks import import_records
 from jsonimport.models import ImportedACRelation, ImportedCCRelation, ImportedDataset, ImportedAuthority, ImportedCitation, ImportedAuthorityStatus, ImportedCitationStatus, ImportedPartDetails
+from jsonimport.import_tasks import import_cb_records
 
 from curation import curation_util as cutil
 
-from isisdata.models import AsyncTask
+from isisdata.models import AsyncTask, Authority, Citation, Citation
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +121,8 @@ def view_imported_dataset(request, dataset_id):
         'citation_import_status_success_count': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.SUCCESS).count(),
         'citation_import_status_error': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=False),
         'failed_citation_imports': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=True),
-        'failed_authority_imports': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=True)
+        'failed_authority_imports': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=True),
+        'imported': Authority.objects.filter(json_import_dataset=dataset).exists() or Citation.objects.filter(json_import_dataset=dataset).exists()
     }
 
     template = 'jsonimport/view_imported_dataset.html'
@@ -162,4 +166,23 @@ def _process_files(citations_file, authorities_file, dataset, user):
 
     logger.error("Authorities file: %s, Citations file: %s" % (authorities_s3_path, citations_s3_path))
     import_records.delay(authorities_s3_path, citations_s3_path, s3_error_path, dataset.id, task.pk, user.id)
-    
+
+@require_POST
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def start_record_creation(request, dataset_id):
+
+    dataset = get_object_or_404(ImportedDataset, pk=dataset_id)
+            
+    task = AsyncTask.objects.create()
+    task.value = dataset.name
+    task.created_by = request.user
+    task.task_type = AsyncTask.ASYNC_TASK_TYPE
+    task.state = AsyncTask.STATE_PENDING
+    task.save()
+
+    dataset.import_task = task
+    dataset.save()
+
+    transaction.on_commit(lambda: import_cb_records.delay(task.pk, dataset_id))
+
+    return redirect('curation:view_imported_dataset', dataset_id=dataset_id)

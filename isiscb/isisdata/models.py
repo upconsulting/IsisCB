@@ -38,6 +38,9 @@ from urllib.parse import urlsplit
 
 from openurl.models import Institution
 
+import logging
+logger = logging.getLogger(__name__)
+
 #from isisdata.templatetags.app_filters import linkify
 
 class TenantSettings(models.Model):
@@ -450,10 +453,23 @@ class ISODateRangeValue(Value):
 
     @staticmethod
     def convert(value):
+        # we need to couch YYYY-YYYY into ISODateRangeValue
+        # preserve negative first year
+        if type(value) is str:
+            pre = u''
+            if value.startswith('-'):
+                value = value[1:]
+                pre = u'-'
+            
+            value = value.split('-')
+            value[0] = pre + value[0]
+        
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
             for i in range(2):
                 value[i] = ISODateValue.convert(value[i])
+            #value = ISODateRangeValue(value)
+
         elif type(value) in [tuple, list] and len(value) == 1 and type(value[0]) in [tuple, list]:
             try:
                 value = ISODateValue.convert(value[0])
@@ -464,6 +480,7 @@ class ISODateRangeValue(Value):
                 value = ISODateValue.convert(value)
             except:
                 raise ValidationError('Not a valid ISO8601 date range')
+        
         return value
 
     def __unicode__(self):
@@ -663,6 +680,7 @@ class ISODateValue(Value):
         else:
             raise ValidationError('Not a valid ISO8601 date')
 
+        logger.error('Converting value to ISODateValue: %s' % value.__repr__())
         if len(value) > 0:
             if int(value[0]) > 0 and (type(value[0]) in [str, str] and len(value[0]) > 4):
                 raise ValidationError('Not a valid ISO8601 date')
@@ -950,10 +968,12 @@ class CuratedMixin(models.Model):
     Value of ModifiedOn from the original FM database."""))
 
     dataset_literal = models.CharField(max_length=255, blank=True, null=True)
-    # CHECK: Had to add on_delete so chose cascade -> JD: deleting of a datasets should not delete the object
+    
     belongs_to = models.ForeignKey('Dataset', null=True, on_delete=models.SET_NULL)
-    # CHECK: Had to add on_delete so chose cascade -> JD: same as above
+    
     zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True, on_delete=models.SET_NULL)
+
+    json_import_dataset = models.ForeignKey('jsonimport.ImportedDataset', blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
     def _history_user(self):
@@ -3167,6 +3187,11 @@ class AsyncTask(models.Model):
     """
 
     ASYNC_TASK_TYPE = "JSON_IMPORT"
+
+    STATE_PENDING = 'PENDING'
+    STATE_PROCESSING = 'PROCESSING'
+    STATE_COMPLETED = 'COMPLETED'
+    STATE_FAILED = 'FAILED'
 
     async_uuid = models.CharField(max_length=255, blank=True, null=True)
 

@@ -21,22 +21,53 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.11/dist/cdn.min.js"></script>
 
 <h2>Imported Dataset: {{ dataset.name }}</h2>
-<small></small>
+<table class="table table-striped small">
+    <tr>
+        <td>Name:</td>
+        <td>{{ dataset.dataset_name|default:"" }}</td>
+    </tr>
+    <tr>
+        <td>Creator:</td>
+        <td>{{ dataset.dataset_creator|default:"" }}</td>
+    </tr>
+    <tr>
+        <td>Date:</td>
+        <td>{{ dataset.dataset_date|default:"" }}</td>
+    </tr>
+    <tr>
+        <td>Description:</td>
+        <td>{{ dataset.description|default:"" }}</td>
+    </tr>
+    <tr>
+        <td>Status</td>
+        <td>
+            {% if dataset.task.state == 'SUCCESS' %}
+                <span class="label label-success">{{ dataset.task.state }}</span>
+            {% elif dataset.task.state == 'ERROR' %}
+                <span class="label label-danger">{{ dataset.task.state }}</span>
+            {% else %}
+                <span class="label label-primary">{{ dataset.task.state }}</span>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td width="250">Records Creation Status</td>
+        <td>
+            {% if dataset.import_task.state == 'COMPLETED' %}
+                <span class="label label-success">{{ dataset.import_task.state }}</span>
+            {% elif dataset.import_task.state == 'ERROR' %}
+                <span class="label label-danger">{{ dataset.import_task.state }}</span>
+            {% else %}
+                <span class="label label-primary">{{ dataset.import_task.state }}</span>
+            {% endif %}
+        </td>
+    </tr>
+</table>
 
-{% if dataset.description %}
-    <p>{{ dataset.description }}</p>
-{% endif %}
-
-<p>Status: 
-    {% if dataset.task.state == 'SUCCESS' %}
-        <span class="label label-success">{{ dataset.task.state }}</span>
-    {% elif dataset.task.state == 'ERROR' %}
-        <span class="label label-danger">{{ dataset.task.state }}</span>
-    {% else %}
-        <span class="label label-primary">{{ dataset.task.state }}</span>
-    {% endif %}
-</p>
-
+<div class="alert alert-info">
+    
+<div style="padding-bottom: 10px;"><b>Step 1: Upload Files</b></div>
+{% if not dataset.import_task or dataset.import_task.state == 'FAILED' %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     Citations: <input required type="file" name="citations_file" id="file" class="btn inputfile" />
@@ -45,6 +76,10 @@
     <br>
     <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
 </form>
+{% else %}
+    <i class="fas fa-check-double"></i> Files have been imported into Explore. Please create a new dataset to import more records. <br>
+{% endif %}
+</div>
 
 
 <div>
@@ -114,6 +149,36 @@
 </div>
 {% endif %}
 
+<div class="panel panel-warning">
+    <div class="panel-heading">
+        <div style="padding-bottom: 10px;"><b>Step 2: Create Records</b></div>
+        {% if dataset.import_task and dataset.import_task.state == 'PENDING' %}
+            Records are queued for import into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.
+        {% elif dataset.import_task and dataset.import_task.state == 'PROCESSING' %}
+            Records are being imported into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.
+        {% elif dataset.import_task and dataset.import_task.state == 'COMPLETED' %}
+            <i class="fas fa-exclamation-triangle"></i> Records have been imported for this dataset. <br>
+            <div class="panel-body">
+                <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported authorities.</a><br>
+                <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported citations.</a>
+            </div>
+        {% else %}
+            {% if dataset.import_task and dataset.import_task.state == 'FAILED' %}
+            <i class="fas fa-exclamation-circle"></i> There were errors importing this dataset:
+            <div class="small" style="padding-top: 10px; padding-bottom: 10px;">{{ dataset.dataset_import_errors }}</div>
+            <p>Try again?</p>
+            {% else %}
+            <p>
+                All looking good? Click the button below to start creating records in the system based on this imported dataset. 
+            </p>
+            {% endif %}
+            <form method="post" action="{% url 'curation:start_record_creation' dataset.id %}">
+                {% csrf_token %}
+                <button class="btn btn-success btn-sm" type="submit">Start Importing Records</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
 
 <div class="panel panel-default small" x-data="{
     paramName: 'status', // The name of your URL parameter
@@ -172,6 +237,13 @@
                         Issue: {{ citation.part_detail.issue_free_text|default:""}}
                         <br>
                         Pages: {{ citation.part_detail.pages_free_text|default:"" }}
+                        <br>
+                        {% for attribute in citation.get_attributes %}
+                            {{ attribute.attribute_type.name }}: {{ attribute.value }}<br>
+                        {% endfor %}
+                        {% for linked_data in citation.linkeddata_entries.all %}
+                            {{ linked_data.type_controlled.name }}: {{ linked_data.universal_resource_name }}<br>
+                        {% endfor %}
                     </div>
                 </div>
             </td>
@@ -211,6 +283,7 @@
                     </div>
                 </div>
 
+                {% if citation.import_errors|length > 0 %}
                 <div x-data="{ open: false }">
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Errors ({{ citation.import_errors|length }})</a>
                 
@@ -220,6 +293,7 @@
                             {% endfor %}
                     </div>
                 </div>
+                {% endif %}
 
                 
             </td>
@@ -258,7 +332,7 @@
                 </div>
             </td>
             <td width="40px">{{ authority.get_type_controlled_display }}</td>
-            <td>
+            <td width="400px">
                 <div x-data="{ open: false }">
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }} ({{ authority.local_dataset_id }})</a>
                 
@@ -271,8 +345,25 @@
                         {% for attribute in authority.get_attributes %}
                             {{ attribute.attribute_type.name }}: {{ attribute.value }}<br>
                         {% endfor %}
+                        {% for linked_data in authority.linkeddata_entries.all %}
+                            {{ linked_data.type_controlled.name }}: {{ linked_data.universal_resource_name }}<br>
+                        {% endfor %}
                     </div>
                 </div>
+            </td>
+            <td>
+                {% if authority.import_errors|length > 0 %}
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Errors ({{ authority.import_errors|length }})</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        {% for error in authority.import_errors %}
+                            <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
             </td>
         </tr>
     {% endfor %}

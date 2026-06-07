@@ -87,6 +87,7 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
     dataset = ImportedDataset.objects.filter(pk=dataset_id).first()
     dataset.authorities_imported_on = datetime.now()
     dataset.citations_imported_on = datetime.now()
+    
 
     # let's first check if dataset info in both files are the same
     authorities_dataset_info = authorities_data.get('dataset') or {}
@@ -99,10 +100,14 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
             task.state = 'ERROR'
             task.save()
         return
-
-    authorities = []
-    citations = []
-
+    
+    dataset.dataset_name = authorities_dataset_info.get('dataset_name')
+    dataset.dataset_id = authorities_dataset_info.get('dataset_id')
+    dataset.dataset_creator = authorities_dataset_info.get('dataset_creator')
+    dataset.dataset_date = authorities_dataset_info.get('dataset_date')
+    dataset.description = authorities_dataset_info.get('dataset_description')
+    dataset.save()
+    
     authority_items = authorities_data.get('records') or []
     citation_items = citations_data.get('records') or []
     
@@ -223,6 +228,8 @@ def _create_imported_citation(task, results, dataset, cit_map, citation_data):
                 citation=cit
             )
         
+        if citation_data.get('publication_date'):
+            _create_citation_attribute("PublicationDate", citation_data.get('publication_date'), cit, dataset, results)
         
         for attr in citation_data.get('attributes') or []:
             _create_citation_attribute(attr.get('type'), attr.get('value'), cit, dataset, results)

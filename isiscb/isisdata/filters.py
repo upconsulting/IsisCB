@@ -90,6 +90,8 @@ class CitationFilter(django_filters.FilterSet):
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
+    json_import_dataset = django_filters.CharFilter(widget=forms.HiddenInput())
+    
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
 
     READY_FOR_PRINT_CLASS = 'RFPC'
@@ -400,6 +402,8 @@ class AuthorityFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
+    json_import_dataset = django_filters.CharFilter(widget=forms.HiddenInput())
+    
     tracking_state = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
     created_on_from = django_filters.CharFilter(method='filter_created_on_from')
