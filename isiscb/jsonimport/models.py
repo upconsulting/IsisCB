@@ -34,9 +34,16 @@ class ImportedDataset(models.Model):
         null=True
     )
 
+    authority_file_name = models.CharField(max_length=255, blank=True, null=True)
+    citation_file_name = models.CharField(max_length=255, blank=True, null=True)
+    s3_authority_file_path = models.CharField(max_length=255, blank=True, null=True)
+    s3_citation_file_path = models.CharField(max_length=255, blank=True, null=True)
+    s3_results_file_path = models.CharField(max_length=255, blank=True, null=True)
+
     dataset_imported = models.BooleanField(default=False)
     import_task = models.ForeignKey('isisdata.AsyncTask', related_name='imported_dataset', blank=True, null=True, on_delete=models.SET_NULL)
     dataset_import_errors = models.TextField(blank=True, null=True)
+
     
 class ImportedRecord(models.Model):
     class Meta(object):
@@ -115,6 +122,10 @@ class ImportedAuthority(ImportedRecord):
     def import_errors(self):
         return self.importedauthoritystatus_set.filter(status=ImportedAuthorityStatus.Status.ERROR)
     
+    @property
+    def import_warnings(self):
+        return self.importedauthoritystatus_set.filter(status=ImportedAuthorityStatus.Status.WARNING)
+
     def get_attributes(self):
         return ImportedAttribute.objects.filter(value_authority=self)
 
@@ -179,6 +190,10 @@ class ImportedCitation(ImportedRecord):
     @property
     def import_errors(self):
         return self.importedcitationstatus_set.filter(status=ImportedCitationStatus.Status.ERROR)
+
+    @property
+    def import_warnings(self):
+        return self.importedcitationstatus_set.filter(status=ImportedCitationStatus.Status.WARNING)
 
     @property
     def ccrelations(self):

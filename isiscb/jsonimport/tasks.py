@@ -107,7 +107,7 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
     dataset.dataset_date = authorities_dataset_info.get('dataset_date')
     dataset.description = authorities_dataset_info.get('dataset_description')
     dataset.save()
-    
+
     authority_items = authorities_data.get('records') or []
     citation_items = citations_data.get('records') or []
     
@@ -398,6 +398,16 @@ def _create_authority_attribute(type, value, authority, dataset, results):
         _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Invalid attribute type specified: {type}', results, authority)
         return None
     
+    try:
+        logger.error(f'Converted value for attribute type {type}: {value}')
+        vctype = attr_type.value_content_type
+        avmodel_class = vctype.model_class()
+        avmodel_class.convert(str(value))
+    except Exception as e:
+        _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create attribute for authority {authority.name} with local id {authority.local_dataset_id}. Error: {e}', [], authority)
+        logger.error("Error occurred while creating authority attribute: %s", e)
+        return None
+    
     return ImportedAttribute.objects.create(
         value_authority=authority,
         attribute_type=attr_type,
@@ -410,6 +420,16 @@ def _create_citation_attribute(type, value, citation, dataset, results):
         _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Invalid attribute type specified: {type}', results, citation)
         return None
     
+    try:
+        logger.error(f'Converted value for attribute type {type}: {value}')
+        vctype = attr_type.value_content_type
+        avmodel_class = vctype.model_class()
+        avmodel_class.convert(str(value))
+    except Exception as e:
+        _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Could not create attribute for citation {citation.title} with local id {citation.local_dataset_id}. Error: {e}', [], citation)
+        logger.error("Error occurred while creating citation attribute: %s", e)
+        return None
+
     return ImportedAttribute.objects.create(
         value_citation=citation,
         attribute_type=attr_type,

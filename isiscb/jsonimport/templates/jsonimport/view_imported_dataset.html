@@ -120,6 +120,21 @@
     </div>
 </div>
 {% endif %}
+{% if citation_import_status_warnings|length > 0 %}
+<div x-data="{ open: false }" class="panel panel-warning small">
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-exclamation-circle"></i> {{ citation_import_status_warnings|length }} warnings when importing citations.
+    </div>       
+    <div x-show="open" >
+        
+        <div class="panel-body">
+            {% for status in citation_import_status_warnings %}
+                <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% if failed_authority_imports.count > 0 %}
 <div x-data="{ open: false }" class="panel panel-danger small">
     <div x-on:click="open = ! open" class="panel-heading">
@@ -148,6 +163,20 @@
     </div>
 </div>
 {% endif %}
+{% if authority_import_status_warnings.count > 0 %}
+<div x-data="{ open: false }" class="panel panel-warning small">
+    <div x-on:click="open = ! open" class="panel-heading">
+        <i class="fas fa-exclamation-circle"></i> {{ authority_import_status_warnings|length }} warnings when importing authorities.
+    </div>       
+    <div x-show="open" >
+        <div class="panel-body">
+            {% for status in authority_import_status_warnings %}
+                <div><i class="fas fa-exclamation-triangle"></i> {{ status.message }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <div class="panel panel-warning">
     <div class="panel-heading">
@@ -160,8 +189,10 @@
             <i class="fas fa-exclamation-triangle"></i> Records have been imported for this dataset. <br>
             <div class="panel-body">
                 <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported authorities.</a><br>
-                <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported citations.</a>
+                <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported citations.</a><br>
+                {% if results_download_path %}<a href="{{ results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download import results.</a>{% endif %}
             </div>
+
         {% else %}
             {% if dataset.import_task and dataset.import_task.state == 'FAILED' %}
             <i class="fas fa-exclamation-circle"></i> There were errors importing this dataset:

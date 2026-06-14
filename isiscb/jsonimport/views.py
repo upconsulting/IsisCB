@@ -118,11 +118,15 @@ def view_imported_dataset(request, dataset_id):
         'total_authorities': total_authorities,
         'authority_import_status_success_count': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.SUCCESS).count(),
         'authority_import_status_error': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=False),
+        'authority_import_status_warnings': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.WARNING, authority__isnull=False),
         'citation_import_status_success_count': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.SUCCESS).count(),
         'citation_import_status_error': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=False),
+        'citation_import_status_warnings': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.WARNING, citation__isnull=False),
         'failed_citation_imports': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=True),
         'failed_authority_imports': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=True),
-        'imported': Authority.objects.filter(json_import_dataset=dataset).exists() or Citation.objects.filter(json_import_dataset=dataset).exists()
+        'imported': Authority.objects.filter(json_import_dataset=dataset).exists() or Citation.objects.filter(json_import_dataset=dataset).exists(),
+        'results_download_path': dataset.s3_results_file_path if dataset.s3_results_file_path else None
+    
     }
 
     template = 'jsonimport/view_imported_dataset.html'
@@ -136,6 +140,12 @@ def _process_files(citations_file, authorities_file, dataset, user):
     citations_s3_path = settings.UPLOAD_BULK_CHANGE_PATH + _citations_file_name
     _authorities_file_name = '%s--%s' % (_datestamp, authorities_file.name)
     authorities_s3_path = settings.UPLOAD_BULK_CHANGE_PATH + _authorities_file_name
+
+    dataset.citation_file_name = citations_file.name
+    dataset.authority_file_name = authorities_file.name
+    dataset.s3_citation_file_path = citations_s3_path
+    dataset.s3_authority_file_path = authorities_s3_path
+    dataset.save()
 
     _results_name = '%s--%s' % (_datestamp, 'import_results.csv')
     s3_error_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
@@ -181,8 +191,15 @@ def start_record_creation(request, dataset_id):
     task.save()
 
     dataset.import_task = task
+    
+    _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    _results_name = '%s--%s-%s' % (_datestamp, dataset.id, '_record_creation_results.csv')
+    s3_results_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
+
+    dataset.s3_results_file_path = s3_results_path
     dataset.save()
 
-    transaction.on_commit(lambda: import_cb_records.delay(task.pk, dataset_id))
+
+    transaction.on_commit(lambda: import_cb_records.delay(task.pk, dataset_id, s3_results_path))
 
     return redirect('curation:view_imported_dataset', dataset_id=dataset_id)

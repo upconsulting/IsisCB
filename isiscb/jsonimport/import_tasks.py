@@ -27,12 +27,14 @@ logger = logging.getLogger(__name__)
 NEW_RECORD_ACTION = "add new record"
 
 @shared_task
-def import_cb_records(task_id, dataset_id):
+def import_cb_records(task_id, dataset_id, results_path):
     task = AsyncTask.objects.get(pk=task_id)
     dataset = ImportedDataset.objects.get(pk=dataset_id)
 
     task.state = AsyncTask.STATE_PROCESSING
     task.save()
+
+    results = []
 
     try:
         with transaction.atomic():
@@ -44,8 +46,74 @@ def import_cb_records(task_id, dataset_id):
 
             # import authorities
             for imported_authority in ImportedAuthority.objects.filter(dataset=dataset):
-                if imported_authority.type_controlled == Authority.PERSON:
-                    authority = Person.objects.create(
+                _create_authority(dataset, tenant, user, authority_mapping, imported_authority, results)
+
+            # import citations
+            for imported_citation in ImportedCitation.objects.filter(dataset=dataset):
+                _create_citation(dataset, tenant, user, authority_mapping, citation_mapping, imported_citation, results)
+            
+            task.state = AsyncTask.STATE_COMPLETED
+            task.save()
+
+            dataset.dataset_imported = True
+            dataset.save()
+
+            _save_results(results_path, results, ('Local ID', 'CB Id', 'Type', 'Name/Title', 'Message'))
+        
+    except Exception as e:
+        logger.error(f"Error importing dataset {dataset_id}: {str(e)}", exc_info=True)
+        task.state = AsyncTask.STATE_FAILED
+        task.save()
+        dataset.dataset_import_errors = str(e)
+        dataset.save()
+        return
+
+def _create_citation(dataset, tenant, user, authority_mapping, citation_mapping, imported_citation, results):
+    citation = Citation.objects.create(
+                    title=imported_citation.title,
+                    type_controlled=imported_citation.type_controlled,
+                    subtype=imported_citation.subtype,
+                    modified_by=user,
+                    owning_tenant=tenant,
+                    physical_details=imported_citation.physical_details,
+                    json_import_dataset=dataset
+                )
+    citation_mapping[imported_citation.id] = citation
+
+    citation.language.add(*imported_citation.language.all())
+    citation.save()
+
+    _add_record_history_note(citation, imported_citation.local_dataset_id, Citation)
+    
+    ctype = ContentType.objects.get_for_model(Citation)
+    for attribute in imported_citation.get_attributes():
+        _create_attribute(attribute, ctype, citation.id)
+
+    # create ACRelations
+    for acrelation in imported_citation.acrelations.all():
+        if acrelation.existing_authority:
+            ACRelation.objects.create(
+                            citation=citation_mapping[imported_citation.id],
+                            authority=acrelation.existing_authority,
+                            type_controlled=acrelation.type_controlled,
+                            data_display_order=acrelation.data_display_order,
+                            name_for_display_in_citation=acrelation.name_for_display_in_citation
+                        )
+        elif acrelation.authority:
+            ACRelation.objects.create(
+                            citation=citation_mapping[imported_citation.id],
+                            authority=authority_mapping[acrelation.authority.id],
+                            type_controlled=acrelation.type_controlled,
+                            data_display_order=acrelation.data_display_order,
+                            name_for_display_in_citation=acrelation.name_for_display_in_citation
+                        )
+            
+    
+    results.append((imported_citation.local_dataset_id, citation.id, 'Citation', citation.title, 'Created successfully'))   
+
+def _create_authority(dataset, tenant, user, authority_mapping, imported_authority, results):
+    if imported_authority.type_controlled == Authority.PERSON:
+        authority = Person.objects.create(
                         name=imported_authority.name,
                         type_controlled=imported_authority.type_controlled,
                         personal_name_first=imported_authority.personal_name_first,
@@ -55,8 +123,8 @@ def import_cb_records(task_id, dataset_id):
                         owning_tenant=tenant,
                         json_import_dataset=dataset
                     )
-                else: 
-                    authority = Authority.objects.create(
+    else: 
+        authority = Authority.objects.create(
                         name=imported_authority.name,
                         type_controlled=imported_authority.type_controlled,
                         classification_system_object=imported_authority.classification_system_object,
@@ -65,73 +133,26 @@ def import_cb_records(task_id, dataset_id):
                         json_import_dataset=dataset
                     )
 
-                authority_mapping[imported_authority.id] = authority
+    _add_record_history_note(authority, imported_authority.local_dataset_id, Authority)
+    
+    authority_mapping[imported_authority.id] = authority
 
-                # get source content type (authority in this case)
-                ctype = ContentType.objects.get_for_model(Authority)
-                for attribute in imported_authority.get_attributes():
-                    _create_attribute(attribute, ctype, authority.id)
+    # get source content type (authority in this case)
+    ctype = ContentType.objects.get_for_model(Authority)
+    for attribute in imported_authority.get_attributes():
+        _create_attribute(attribute, ctype, authority.id)
 
-                for linked_data in imported_authority.linkeddata_entries.all():
-                    linked_data_obj = LinkedData.objects.create(
+    for linked_data in imported_authority.linkeddata_entries.all():
+        linked_data_obj = LinkedData.objects.create(
                         type_controlled=linked_data.type_controlled,
                         subject_content_type=ctype,
                         subject_instance_id=authority.id,
                         universal_resource_name=linked_data.universal_resource_name
                     )
-                    linked_data_obj.save()
+        linked_data_obj.save()
 
-            # import citations
-            for imported_citation in ImportedCitation.objects.filter(dataset=dataset):
-                
-                citation = Citation.objects.create(
-                    title=imported_citation.title,
-                    type_controlled=imported_citation.type_controlled,
-                    subtype=imported_citation.subtype,
-                    modified_by=user,
-                    owning_tenant=tenant,
-                    physical_details=imported_citation.physical_details,
-                    json_import_dataset=dataset
-                )
-                citation_mapping[imported_citation.id] = citation
+    results.append((imported_authority.local_dataset_id, authority.id, 'Authority', authority.name, 'Created successfully'))
 
-                citation.language.add(*imported_citation.language.all())
-                citation.save()
-
-                ctype = ContentType.objects.get_for_model(Citation)
-                for attribute in imported_citation.get_attributes():
-                    _create_attribute(attribute, ctype, citation.id)
-
-                # create ACRelations
-                for acrelation in imported_citation.acrelations.all():
-                    if acrelation.existing_authority:
-                        ACRelation.objects.create(
-                            citation=citation_mapping[imported_citation.id],
-                            authority=acrelation.existing_authority,
-                            type_controlled=acrelation.type_controlled,
-                            data_display_order=acrelation.data_display_order,
-                            name_for_display_in_citation=acrelation.name_for_display_in_citation
-                        )
-                    elif acrelation.authority:
-                        ACRelation.objects.create(
-                            citation=citation_mapping[imported_citation.id],
-                            authority=authority_mapping[acrelation.authority.id],
-                            type_controlled=acrelation.type_controlled,
-                            data_display_order=acrelation.data_display_order,
-                            name_for_display_in_citation=acrelation.name_for_display_in_citation
-                        )
-            task.state = AsyncTask.STATE_COMPLETED
-            task.save()
-
-            dataset.dataset_imported = True
-            dataset.save()
-    except Exception as e:
-        logger.error(f"Error importing dataset {dataset_id}: {str(e)}")
-        task.state = AsyncTask.STATE_FAILED
-        task.save()
-        dataset.dataset_import_errors = str(e)
-        dataset.save()
-        return
             
 def _create_attribute(attribute, ctype, source_id):
     # content type of value
@@ -153,3 +174,24 @@ def _create_attribute(attribute, ctype, source_id):
     attribute_obj.save()
     value_obj.attribute = attribute_obj
     value_obj.save()
+
+def _add_record_history_note(record, local_id, record_type):
+    if record.record_history is None:
+        record.record_history = ""
+    else:
+        record.record_history = record.record_history + "\n"
+    
+    if record_type == Authority:
+        record.record_history = record.record_history + f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Authority record created via JSON import from file {record.json_import_dataset.authority_file_name } for local ID {local_id}."
+    elif record_type == Citation:
+        record.record_history = record.record_history + f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Citation record created via JSON import from file {record.json_import_dataset.citation_file_name } for local ID {local_id}."
+    else:
+        record.record_history = record.record_history + f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Record created via JSON import for local ID {local_id}."
+    record.save()
+
+def _save_results(path, results, headings):
+    with smart_open.smart_open(path, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(headings)
+        for result in results:
+            writer.writerow(result)

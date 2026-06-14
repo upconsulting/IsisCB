@@ -361,6 +361,10 @@ class TextValue(Value):
     class Meta(object):
         verbose_name = 'text (long)'
 
+    @staticmethod
+    def convert(value):
+        return value
+
 
 class CharValue(Value):
     """
@@ -661,7 +665,7 @@ class ISODateValue(Value):
 
         if type(value) in [tuple, list]:
             value = list(value)
-        elif type(value) in [str, str]:
+        elif type(value) in [str]:
 
             pre = u''
             if value.startswith('-'):   # Preserve negative years.
@@ -682,12 +686,13 @@ class ISODateValue(Value):
 
         logger.error('Converting value to ISODateValue: %s' % value.__repr__())
         if len(value) > 0:
-            if int(value[0]) > 0 and (type(value[0]) in [str, str] and len(value[0]) > 4):
+            logger.error('Checking value: %s' % type(value[0]))
+            if (type(value[0]) in [str] and len(value[0]) > 4) and int(value[0]) > 0:
                 raise ValidationError('Not a valid ISO8601 date')
-            elif int(value[0]) < 0 and (type(value[0]) in [str, str] and len(value[0]) > 5):
+            elif (type(value[0]) in [str] and len(value[0]) > 5) and int(value[0]) < 0:
                 raise ValidationError('Not a valid ISO8601 date')
             for v in value[1:]:
-                if type(v) in [str, str] and len(v) != 2:
+                if type(v) in [str] and len(v) != 2:
                     raise ValidationError('Not a valid ISO8601 date')
         try:
 
@@ -833,7 +838,6 @@ VALUE_MODELS = [
     (datetime.datetime, DateTimeValue),
     (datetime.date,     ISODateValue),
     (str,               CharValue),
-    (str,           CharValue),
     (tuple,             DateRangeValue),
     (list,              DateRangeValue),
 ]
