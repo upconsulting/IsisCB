@@ -14,11 +14,49 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 9998;
     }
+
+    .cc-label {
+        display: inline-block;    
+        margin: 3px;     
+        padding: 1px 4px 1px 4px;     
+        color: #333333;   
+        background-color: #f0e9b2;
+        border-radius: 3px;
+        }
+
+    .ac-label {
+        display: inline-block;    
+        margin: 3px;     
+        padding: 1px 4px 1px 4px;     
+        color: #333333;   
+        background-color: #eedef3;
+        border-radius: 3px;
+        }
+
+    .ac-label-ex {
+        display: inline-block;    
+        margin: 3px;     
+        padding: 1px 4px 1px 4px;     
+        color: #333333;   
+        background-color: #def3e3;
+        border-radius: 3px;
+        }
 </style>
 {% endblock %}
 
 {% block content %}
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.11/dist/cdn.min.js"></script>
+
+{% if dataset.import_task.state == 'PROCESSING' or dataset.task.state == 'PROCESSING' %}
+<div x-data="{
+    init() {
+        setInterval(() => {
+            location.reload();
+        }, 1500);
+    }
+}">
+</div>
+{% endif %}
 
 <h2>Imported Dataset: {{ dataset.name }}</h2>
 <table class="table table-striped small">
@@ -47,6 +85,9 @@
                 <span class="label label-danger">{{ dataset.task.state }}</span>
             {% else %}
                 <span class="label label-primary">{{ dataset.task.state }}</span>
+                {% if dataset.task.value %}
+                <small>Imported {{ dataset.task.current_value|floatformat:0 }} records.</small>
+            {% endif %}
             {% endif %}
         </td>
     </tr>
@@ -59,6 +100,9 @@
                 <span class="label label-danger">{{ dataset.import_task.state }}</span>
             {% else %}
                 <span class="label label-primary">{{ dataset.import_task.state }}</span>
+            {% endif %}
+            {% if dataset.import_task.value %}
+                <small>{{ dataset.import_task.value }}</small>
             {% endif %}
         </td>
     </tr>
@@ -75,6 +119,10 @@
     {{ form.file.errors }}
     <br>
     <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
+    {% if processing_results_download_path %}
+    &nbsp;&nbsp;
+    <small><a href="{{ processing_results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a></small>
+{% endif %}
 </form>
 {% else %}
     <i class="fas fa-check-double"></i> Files have been imported into Explore. Please create a new dataset to import more records. <br>
@@ -190,7 +238,9 @@
             <div class="panel-body">
                 <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported authorities.</a><br>
                 <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported citations.</a><br>
+                {% if processing_results_download_path %}<br><a href="{{ processing_results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results.</a><br>{% endif %}
                 {% if results_download_path %}<a href="{{ results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download import results.</a>{% endif %}
+                
             </div>
 
         {% else %}
@@ -267,6 +317,8 @@
                         <br>
                         Issue: {{ citation.part_detail.issue_free_text|default:""}}
                         <br>
+                        Explore Dataset: {{ citation.belongs_to.name|default:""}}
+                        <br>
                         Pages: {{ citation.part_detail.pages_free_text|default:"" }}
                         <br>
                         {% for attribute in citation.get_attributes %}
@@ -283,34 +335,77 @@
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Created {{ citation.get_new_authorities|length }} new authorities.</a>
                 
                     <div x-show="open" style="background-color: white;">
+                        <ul>
                         {% for ac_relation in citation.get_new_authorities %}
-                            <div>{{ ac_relation.get_type_controlled_display }}: {{ ac_relation.authority.name }} ({{ ac_relation.authority.local_dataset_id }})</div>
+                            <li>
+                                <span class="ac-label">{{ ac_relation.get_type_controlled_display }}</span> {{ ac_relation.authority.name }} ({{ ac_relation.authority.local_dataset_id }})
+                            </li>
                         {% endfor %}
+                        </ul>
                     </div>
                 </div>
 
-                <br>
+              
                 <div x-data="{ open: false }">
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Referenced {{ citation.get_existing_authorities|length }} existing authorities.</a>
                 
                     <div x-show="open" style="background-color: white;">
+                        <ul>
                         {% for ac_relation in citation.get_existing_authorities %}
-                            <div>{{ ac_relation.get_type_controlled_display }}: {{ ac_relation.get_existing_authority.name }} (ID: {{ ac_relation.get_existing_authority.pk }})</div>
+                            <li>
+                                <span class="ac-label-ex">{{ ac_relation.get_type_controlled_display }}</span> {{ ac_relation.get_existing_authority.name }} (ID: {{ ac_relation.get_existing_authority.pk }})
+                            </li>
                         {% endfor %}
+                        </ul>
                     </div>
                 </div>
 
-                <br>
+                
                 <div x-data="{ open: false }">
-                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Referenced {{ citation.ccrelations|length }} citations.</a>
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Referenced {{ citation.get_ccrelations_existing_citations|length }} existing citations.</a>
                 
                     <div x-show="open" style="background-color: white;">
-                        {% for cc_relation in citation.ccrelations %}
-                            <div>{{ cc_relation.get_type_controlled_display }}: 
-                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}){% else %} {{ cc_relation.existing_subject.title }} (ID: {{ cc_relation.existing_subject.pk }}) {% endif %} 
-                                to 
-                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} {{ cc_relation.existing_object.title }} (ID: {{ cc_relation.existing_object.pk }}) {% endif %}</div>
+                        <ul>
+                        {% for cc_relation in citation.get_ccrelations_existing_citations %}
+                        {% if cc_relation.object == citation %}
+                            <li>
+                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
+                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
+                            </li>
+                        {% endif %}
+                        {% if cc_relation.subject == citation %}
+                            <li>
+                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.title_for_display }}</a> (ID: {{ cc_relation.existing_object.pk }}) {% endif %} 
+                                <span class="cc-label">{{ cc_relation.get_type_controlled_display }}</span> this citation
+                                
+                            </li>
+                        {% endif %}
                         {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Referenced {{ citation.get_ccrelations_new_citations|length }} new citations.</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        <ul>
+                        {% for cc_relation in citation.get_ccrelations_new_citations %}
+                        {% if cc_relation.object == citation %}
+                            <li>
+                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
+                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
+                            </li>
+                        {% endif %}
+                        {% if cc_relation.subject == citation %}
+                            <li>
+                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.title_for_display }}</a> (ID: {{ cc_relation.existing_object.pk }}) {% endif %}
+                                <span class="cc-label">{{ cc_relation.get_type_controlled_display }}</span> this citation
+                                
+                            </li>
+                        {% endif %}
+                        {% endfor %}
+                        </ul>
                     </div>
                 </div>
 
@@ -321,6 +416,18 @@
                     <div x-show="open" style="background-color: white;">
                         {% for error in citation.import_errors %}
                                 <div style="padding-bottom: 5px"><i class="fas fa-exclamation-triangle"></i> {{ error.message }}</div>
+                            {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if citation.import_infos|length > 0 %}
+                <div x-data="{ open: false }">
+                    <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> Information ({{ citation.import_infos|length }})</a>
+                
+                    <div x-show="open" style="background-color: white;">
+                        {% for info in citation.import_infos %}
+                                <div style="padding-bottom: 5px"><i class="fas fa-info-circle"></i> {{ info.message }}</div>
                             {% endfor %}
                     </div>
                 </div>
@@ -368,7 +475,10 @@
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }} ({{ authority.local_dataset_id }})</a>
                 
                     <div x-show="open" style="background-color: white;">
-                        Classification system: {{ authority.get_classification_system_display }}<br>
+                        Classification system: {{ authority.get_classification_system_display }}
+                        <br>
+                        Explore Dataset: {{ authority.belongs_to.name|default:""}}
+                        <br>
                         {% if authority.type_controlled == "PE" %}
                             Last name: {{ authority.personal_last_name }}<br>
                             First name: {{ authority.personal_first_name }}<br>

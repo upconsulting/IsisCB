@@ -82,6 +82,7 @@ def view_imported_dataset(request, dataset_id):
 
             if dataset.task:
                 dataset.task.delete()
+                dataset.refresh_from_db()
             
             citations_file = request.FILES['citations_file']
             authorities_file = request.FILES['authorities_file']
@@ -92,6 +93,10 @@ def view_imported_dataset(request, dataset_id):
     # otherwise, show details about the dataset and the authorities/citations that were imported as part of it
     tenant = cutil.get_tenant(request.user)
     dataset = ImportedDataset.objects.filter(pk=dataset_id, owning_tenant=tenant).first()
+    # let's make sure we have the latest task status
+    dataset.task.refresh_from_db() if dataset.task else None
+    dataset.import_task.refresh_from_db() if dataset.import_task else None
+    
     authorities = ImportedAuthority.objects.filter(dataset=dataset).order_by('name')
     citations = ImportedCitation.objects.filter(dataset=dataset).order_by('title')
 
@@ -125,7 +130,8 @@ def view_imported_dataset(request, dataset_id):
         'failed_citation_imports': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=True),
         'failed_authority_imports': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=True),
         'imported': Authority.objects.filter(json_import_dataset=dataset).exists() or Citation.objects.filter(json_import_dataset=dataset).exists(),
-        'results_download_path': dataset.s3_results_file_path if dataset.s3_results_file_path else None
+        'results_download_path': dataset.s3_results_file_path if dataset.s3_results_file_path else None,
+        'processing_results_download_path': dataset.s3_processing_results_file_path if dataset.s3_processing_results_file_path else None
     
     }
 

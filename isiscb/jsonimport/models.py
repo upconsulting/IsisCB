@@ -34,11 +34,12 @@ class ImportedDataset(models.Model):
         null=True
     )
 
-    authority_file_name = models.CharField(max_length=255, blank=True, null=True)
-    citation_file_name = models.CharField(max_length=255, blank=True, null=True)
-    s3_authority_file_path = models.CharField(max_length=255, blank=True, null=True)
-    s3_citation_file_path = models.CharField(max_length=255, blank=True, null=True)
-    s3_results_file_path = models.CharField(max_length=255, blank=True, null=True)
+    authority_file_name = models.CharField(max_length=1024, blank=True, null=True)
+    citation_file_name = models.CharField(max_length=1024, blank=True, null=True)
+    s3_authority_file_path = models.CharField(max_length=1024, blank=True, null=True)
+    s3_citation_file_path = models.CharField(max_length=1024, blank=True, null=True)
+    s3_processing_results_file_path = models.CharField(max_length=1024, blank=True, null=True)
+    s3_results_file_path = models.CharField(max_length=1024, blank=True, null=True)
 
     dataset_imported = models.BooleanField(default=False)
     import_task = models.ForeignKey('isisdata.AsyncTask', related_name='imported_dataset', blank=True, null=True, on_delete=models.SET_NULL)
@@ -51,6 +52,8 @@ class ImportedRecord(models.Model):
 
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
+
+    belongs_to = models.ForeignKey('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
 
     dataset = models.ForeignKey(ImportedDataset, blank=True, null=True, on_delete=models.CASCADE)
     local_dataset_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   
@@ -126,6 +129,10 @@ class ImportedAuthority(ImportedRecord):
     def import_warnings(self):
         return self.importedauthoritystatus_set.filter(status=ImportedAuthorityStatus.Status.WARNING)
 
+    @property
+    def import_infos(self):
+        return self.importedauthoritystatus_set.filter(status=ImportedAuthorityStatus.Status.INFO)
+
     def get_attributes(self):
         return ImportedAttribute.objects.filter(value_authority=self)
 
@@ -196,12 +203,33 @@ class ImportedCitation(ImportedRecord):
         return self.importedcitationstatus_set.filter(status=ImportedCitationStatus.Status.WARNING)
 
     @property
+    def import_infos(self):
+        return self.importedcitationstatus_set.filter(status=ImportedCitationStatus.Status.INFO)
+
+    @property
     def ccrelations(self):
         """
         Provides access to related :class:`.CCRelation` instances.
         """
-        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        query = Q(subject=self) | Q(object=self)
         return ImportedCCRelation.objects.filter(query)
+    
+    @property
+    def ccrelations_subjects(self):
+        """
+        Provides access to related :class:`.CCRelation` instances.
+        """
+        query = Q(object=self)
+        return ImportedCCRelation.objects.filter(query)
+    
+    @property
+    def ccrelations_objects(self):
+        """
+        Provides access to related :class:`.CCRelation` instances.
+        """
+        query = Q(subject=self)
+        return ImportedCCRelation.objects.filter(query)
+    
     
     @property
     def acrelations(self):
@@ -214,6 +242,14 @@ class ImportedCitation(ImportedRecord):
     def all_ccrelations(self):
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return ImportedCCRelation.objects.filter(query)
+
+    @property
+    def get_ccrelations_existing_citations(self):
+        return ImportedCCRelation.objects.filter(Q(subject=self, existing_object__isnull=False) | Q(object=self, existing_subject__isnull=False))
+
+    @property
+    def get_ccrelations_new_citations(self):
+        return ImportedCCRelation.objects.filter(Q(subject=self, object__isnull=False) | Q(object=self, subject__isnull=False))
 
     @property
     def get_new_authorities(self):
@@ -420,6 +456,7 @@ class ImportedLinkedData(models.Model):
 class ImportedRecordStatus(models.Model):
     class Status(models.TextChoices):
         SUCCESS = 'SUCCESS', 'Success'
+        INFO = 'INFO', 'Info'
         WARNING = 'WARNING', 'Warning'
         ERROR = 'ERROR', 'Error'
 

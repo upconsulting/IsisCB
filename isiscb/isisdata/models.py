@@ -2350,6 +2350,8 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
     INCLUDES_CITATION_OBJECT = 'ICO'
+    # we are not using REVIEW_OF any longer
+    # instead use REVIEWED_BY
     REVIEW_OF = 'RO'
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
