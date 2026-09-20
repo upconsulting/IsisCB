@@ -18,7 +18,7 @@ from jsonimport.models import (
 )
 
 from isisdata.models import (
-    AsyncTask, ContentType, Attribute, AttributeType, CitationSubtype, ClassificationSystem, LinkedData, 
+    AsyncTask, ContentType, Attribute, AttributeType, CitationSubtype, ClassificationSystem, LinkedData, PartDetails, 
     Tenant, Authority, Person, Citation, CuratedMixin, ACRelation, CCRelation,
     LinkedDataType
 )
@@ -134,6 +134,15 @@ def _create_citation(dataset, tenant, user, authority_mapping, citation_mapping,
     citation_mapping[imported_citation.id] = citation
 
     citation.language.add(*imported_citation.language.all())
+
+    citation.part_details = PartDetails.objects.create(
+        volume=imported_citation.details.volume,
+        pages_free_text=imported_citation.details.pages_free_text,
+        issue_free_text=imported_citation.details.issue_free_text,
+        extent=imported_citation.details.extent,
+        extent_note=imported_citation.details.extent_note,
+    )
+
     citation.save()
     
     _add_record_history_note(citation, imported_citation.local_dataset_id, Citation)
@@ -160,7 +169,9 @@ def _create_citation(dataset, tenant, user, authority_mapping, citation_mapping,
                             data_display_order=acrelation.data_display_order,
                             name_for_display_in_citation=acrelation.name_for_display_in_citation
                         )
-        
+
+    _create_linked_data(imported_citation, citation, Citation)
+    
     results.append((imported_citation.local_dataset_id, citation.id, 'Citation', citation.title, 'Created successfully'))   
 
 def _create_authority(dataset, tenant, user, authority_mapping, imported_authority, results):
@@ -191,21 +202,22 @@ def _create_authority(dataset, tenant, user, authority_mapping, imported_authori
     
     authority_mapping[imported_authority.id] = authority
 
+    _create_linked_data(imported_authority, authority, Authority)
+
+    results.append((imported_authority.local_dataset_id, authority.id, 'Authority', authority.name, 'Created successfully'))
+
+def _create_linked_data(imported_object, record, model):
     # get source content type (authority in this case)
-    ctype = ContentType.objects.get_for_model(Authority)
-    for attribute in imported_authority.get_attributes():
-        _create_attribute(attribute, ctype, authority.id)
-        
-    for linked_data in imported_authority.linkeddata_entries.all():
+    ctype = ContentType.objects.get_for_model(model)
+         
+    for linked_data in imported_object.linkeddata_entries.all():
         linked_data_obj = LinkedData(
                         type_controlled=linked_data.type_controlled,
                         subject_content_type=ctype,
-                        subject_instance_id=authority.id,
+                        subject_instance_id=record.id,
                         universal_resource_name=linked_data.universal_resource_name
                     )
         linked_data_obj.save()
-
-    results.append((imported_authority.local_dataset_id, authority.id, 'Authority', authority.name, 'Created successfully'))
 
             
 def _create_attribute(attribute, ctype, source_id):

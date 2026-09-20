@@ -627,8 +627,8 @@ def _create_cc_relation(results, citations_by_id, data, citation):
                     return results.append(('ERROR', 'CCRelation', citation.local_dataset_id, f'Could not find citation for CCRelation with local_citation_id reference: {related_citation_id}'))    
             
             subject, existing_subject, object, existing_object = _get_ccrel_subject_object(citation, related_citation, existing_related_citation, data.get('relationship_type'), results)
-            
             type_controlled = _get_ccrelation_type(data.get('relationship_type'))  # validate relationship type
+                             
             if not type_controlled:
                 _create_imported_citation_status(citation.dataset, ImportedCitationStatus.Status.ERROR, f'Missing or invalid relationship type for CCRelation for citation {citation.title} with local id {citation.local_dataset_id}: {data.get("relationship_type")}. CCRelation could not be created.', results, citation)
                 return results.append(('ERROR', 'CCRelation', citation.local_dataset_id, f'Missing or invalid relationship type for CCRelation: {data.get("relationship_type")}'))
@@ -694,8 +694,8 @@ def _get_ccrel_subject_object(created_citation, related_citation, existing_relat
     elif relationship_type in ["review of", "is_review_of"]:
         # instead of review of, we only use review by, so subject and object will be reversed
         return related_citation, existing_related_citation, created_citation, None
-    elif relationship_type in ["reviewed by", "has_review"]:
-        return related_citation, existing_related_citation, created_citation, None
+    elif relationship_type in ["reviewed by", "has_review"]: 
+        return created_citation, None, related_citation, existing_related_citation
     elif relationship_type in ["responds to"]:
         return created_citation, None, related_citation, existing_related_citation
     elif relationship_type in ["associated with"]:

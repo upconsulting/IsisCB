@@ -367,15 +367,15 @@
                     <div x-show="open" style="background-color: white;">
                         <ul>
                         {% for cc_relation in citation.get_ccrelations_existing_citations %}
-                        {% if cc_relation.object == citation %}
-                            <li>
-                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
-                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
-                            </li>
-                        {% endif %}
                         {% if cc_relation.subject == citation %}
                             <li>
-                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.title_for_display }}</a> (ID: {{ cc_relation.existing_object.pk }}) {% endif %} 
+                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
+                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} {{ cc_relation.existing_object.title_for_display }} (ID: <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.pk }}</a>) {% endif %}
+                            </li>
+                        {% endif %}
+                        {% if cc_relation.object == citation %}
+                            <li>
+                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
                                 <span class="cc-label">{{ cc_relation.get_type_controlled_display }}</span> this citation
                                 
                             </li>
@@ -391,15 +391,15 @@
                     <div x-show="open" style="background-color: white;">
                         <ul>
                         {% for cc_relation in citation.get_ccrelations_new_citations %}
-                        {% if cc_relation.object == citation %}
-                            <li>
-                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
-                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
-                            </li>
-                        {% endif %}
                         {% if cc_relation.subject == citation %}
                             <li>
-                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.title_for_display }}</a> (ID: {{ cc_relation.existing_object.pk }}) {% endif %}
+                                This citation <span class="cc-label">{{ cc_relation.get_type_controlled_display }} </span>
+                                {% if cc_relation.object %}{{ cc_relation.object.title }} (ID: {{ cc_relation.object.pk }}) {% else %} {{ cc_relation.existing_object.title_for_display }} (ID: <a href="{{ cc_relation.existing_object.get_absolute_url }}">{{ cc_relation.existing_object.pk }}</a>) {% endif %}
+                            </li>
+                        {% endif %}
+                        {% if cc_relation.object == citation %}
+                            <li>
+                                {% if cc_relation.subject %}{{ cc_relation.subject.title }} (ID: {{ cc_relation.subject.pk }}) {% else %} {{ cc_relation.existing_subject.title_for_display }} (ID: <a href="{{ cc_relation.existing_subject.get_absolute_url }}">{{ cc_relation.existing_subject.pk }}</a>) {% endif %}
                                 <span class="cc-label">{{ cc_relation.get_type_controlled_display }}</span> this citation
                                 
                             </li>

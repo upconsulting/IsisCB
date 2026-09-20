@@ -285,7 +285,7 @@ class ImportedCitation(ImportedRecord):
         return self.acrelations.filter(type_controlled=ACRelation.PERIODICAL).first()
 
     @property
-    def part_detail(self):
+    def details(self):
         return ImportedPartDetails.objects.filter(citation_id=self.pk).first()
 
     def get_attributes(self):
