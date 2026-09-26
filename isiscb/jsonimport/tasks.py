@@ -174,6 +174,8 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
 
     if task:
         task.state = SUCCESS
+        dataset.dataset_status = "RECORDS_IMPORTED"
+        dataset.save()
         task.save()
 
 def _create_imported_citation(user, task, results, dataset, cit_map, citation_data):

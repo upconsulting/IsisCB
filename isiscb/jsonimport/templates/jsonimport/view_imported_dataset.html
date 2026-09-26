@@ -77,7 +77,28 @@
         <td>{{ dataset.description|default:"" }}</td>
     </tr>
     <tr>
-        <td>Status</td>
+        <td>Dataset Status</td>
+        <td>
+            {% if dataset.dataset_status == 'PENDING' %}
+                <span class="label label-warning">{{ dataset.dataset_status }}</span>
+            {% elif dataset.dataset_status == 'ERROR' %}
+                <span class="label label-danger">{{ dataset.dataset_status }}</span>
+            {% elif dataset.dataset_status == 'RECORDS_IMPORTED' %}
+                <span class="label label-warning">RECORDS UPLOADED</span>
+            {% elif dataset.dataset_status == 'IMPORTED' %}
+                <span class="label label-warning">IMPORTED</span>
+                <form method="post" action="{% url 'curation:clear_imported_dataset' dataset.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger btn-xs" style="float: right" type="submit">Complete Import</button>
+                </form>
+            {% else %}
+                <span class="label label-primary">{{ dataset.dataset_status }}</span>
+                
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Upload Status</td>
         <td>
             {% if dataset.task.state == 'SUCCESS' %}
                 <span class="label label-success">{{ dataset.task.state }}</span>

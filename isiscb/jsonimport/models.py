@@ -45,6 +45,8 @@ class ImportedDataset(models.Model):
     import_task = models.ForeignKey('isisdata.AsyncTask', related_name='imported_dataset', blank=True, null=True, on_delete=models.SET_NULL)
     dataset_import_errors = models.TextField(blank=True, null=True)
 
+    dataset_status = models.CharField(max_length=255, blank=True, null=True, default='PENDING', db_index=True)  
+
     
 class ImportedRecord(models.Model):
     class Meta(object):

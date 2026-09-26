@@ -209,3 +209,28 @@ def start_record_creation(request, dataset_id):
     transaction.on_commit(lambda: import_cb_records.delay(task.pk, dataset_id, s3_results_path))
 
     return redirect('curation:view_imported_dataset', dataset_id=dataset_id)
+
+@require_POST
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def clear_imported_dataset(request, dataset_id):
+    dataset = get_object_or_404(ImportedDataset, pk=dataset_id)
+    tenant = cutil.get_tenant(request.user)
+
+    if dataset.owning_tenant != tenant:
+        return redirect('curation:view_imported_dataset', dataset_id=dataset_id)
+
+    # delete all imported authorities and citations
+    ImportedAuthority.objects.filter(dataset=dataset).delete()
+    ImportedCitation.objects.filter(dataset=dataset).delete()
+    ImportedAuthorityStatus.objects.filter(dataset=dataset).delete()
+    ImportedCitationStatus.objects.filter(dataset=dataset).delete()
+
+    # delete the task if it exists
+    if dataset.task:
+        dataset.task.delete()
+        dataset.refresh_from_db()
+
+    dataset.dataset_status = "COMPLETE"
+    dataset.save()
+            
+    return redirect('curation:view_imported_dataset', dataset_id=dataset_id)

@@ -106,6 +106,7 @@ def import_cb_records(task_id, dataset_id, results_path):
         task.save()
 
         dataset.dataset_imported = True
+        dataset.dataset_status = "IMPORTED"
         dataset.save()
 
         _save_results(results_path, results, ('Local ID', 'CB Id', 'Type', 'Name/Title', 'Message'))
