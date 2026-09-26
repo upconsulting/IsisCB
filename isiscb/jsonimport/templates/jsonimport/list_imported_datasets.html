@@ -16,7 +16,7 @@
             <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.created_on }}</a></td>
             <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.name }}</a></td>
             <td>{{ dataset.description }}</td>
-            <td>{{ dataset.task.state }}</td>
+            <td>{{ dataset.dataset_status }}</td>
         </tr>
     {% endfor %}
     <th></th>

@@ -87,10 +87,6 @@
                 <span class="label label-warning">RECORDS UPLOADED</span>
             {% elif dataset.dataset_status == 'IMPORTED' %}
                 <span class="label label-warning">IMPORTED</span>
-                <form method="post" action="{% url 'curation:clear_imported_dataset' dataset.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-danger btn-xs" style="float: right" type="submit">Complete Import</button>
-                </form>
             {% else %}
                 <span class="label label-primary">{{ dataset.dataset_status }}</span>
                 
@@ -129,28 +125,42 @@
     </tr>
 </table>
 
-<div class="alert alert-info">
-    
-<div style="padding-bottom: 10px;"><b>Step 1: Upload Files</b></div>
-{% if not dataset.import_task or dataset.import_task.state == 'FAILED' %}
-<form method="post" enctype="multipart/form-data">
+{% if dataset.dataset_status == 'IMPORTED' %}
+<form method="post" action="{% url 'curation:clear_imported_dataset' dataset.id %}">
     {% csrf_token %}
-    Citations: <input required type="file" name="citations_file" id="file" class="btn inputfile" />
-    Authorities: <input required type="file" name="authorities_file" id="file" class="btn inputfile" />
-    {{ form.file.errors }}
-    <br>
-    <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
-    {% if processing_results_download_path %}
-    &nbsp;&nbsp;
-    <small><a href="{{ processing_results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a></small>
-{% endif %}
+    <p>Complete the import process by cleaning up temporary records:</p>
+    <p>
+    <button class="btn btn-danger btn-xs" type="submit" title="Delete intermediate records created during import. This action will not affect the final imported records.">Clean up Import</button>
+    </p> 
+    <small> 
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> This will delete intermediate records created during import. 
+        <br><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> After cleaning up the import, you will no longer be able to see the uploaded data and error messages below.
+        <br><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> You will continue to be able to download processing and upload results. 
+        <br><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> This action will not affect the final imported Explore records.</small>
 </form>
-{% else %}
-    <i class="fas fa-check-double"></i> Files have been imported into Explore. Please create a new dataset to import more records. <br>
 {% endif %}
+
+<div class="alert alert-info">
+    <div style="padding-bottom: 10px;"><b>Step 1: Upload Files</b></div>
+    {% if not dataset.import_task or dataset.import_task.state == 'FAILED' %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        Citations: <input required type="file" name="citations_file" id="file" class="btn inputfile" />
+        Authorities: <input required type="file" name="authorities_file" id="file" class="btn inputfile" />
+        {{ form.file.errors }}
+        <br>
+        <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
+        {% if processing_results_download_path %}
+        &nbsp;&nbsp;
+        <small><a href="{{ processing_results_download_path }}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a></small>
+    {% endif %}
+    </form>
+    {% else %}
+        <i class="fas fa-check-double"></i> Files have been imported into Explore. Please create a new dataset to import more records. <br>
+    {% endif %}
 </div>
 
-
+{% if dataset.dataset_status != 'COMPLETE' %}
 <div>
     <div class="panel panel-info small">
         <div class="panel-heading">
@@ -160,6 +170,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% if failed_citation_imports.count > 0 %}
 <div x-data="{ open: false }" class="panel panel-danger small">
     <div x-on:click="open = ! open" class="panel-heading">
@@ -282,6 +293,7 @@
     </div>
 </div>
 
+{% if dataset.dataset_status != 'COMPLETE' %}
 <div class="panel panel-default small" x-data="{
     paramName: 'status', // The name of your URL parameter
     
@@ -550,6 +562,6 @@
     </th>
     <tr></tr>
 </table>
-
+{% endif %}
 
 {% endblock %}

@@ -225,11 +225,6 @@ def clear_imported_dataset(request, dataset_id):
     ImportedAuthorityStatus.objects.filter(dataset=dataset).delete()
     ImportedCitationStatus.objects.filter(dataset=dataset).delete()
 
-    # delete the task if it exists
-    if dataset.task:
-        dataset.task.delete()
-        dataset.refresh_from_db()
-
     dataset.dataset_status = "COMPLETE"
     dataset.save()
             
