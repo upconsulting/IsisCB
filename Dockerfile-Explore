@@ -3,6 +3,13 @@ FROM python:3.12
 RUN apt-get update
 RUN apt-get install -y redis-server
 
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    libffi-dev \
+    python3-dev
+
 ENV DJANGO_SETTINGS_MODULE=isiscb.docker_settings
 ENV UPLOAD_BULK_CHANGE_PATH="/app/exports/"
 ENV BULK_CHANGE_ERROR_PATH="/app/exports/"

@@ -6,6 +6,7 @@ from django.db.models import Q
 from django import forms
 
 from curation import curation_util as c_util
+from jsonimport.models import ImportedDataset
 from isisdata.models import *
 from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
@@ -90,6 +91,8 @@ class CitationFilter(django_filters.FilterSet):
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
+    json_import_dataset = django_filters.CharFilter(widget=forms.HiddenInput())
+    
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
 
     READY_FOR_PRINT_CLASS = 'RFPC'
@@ -158,6 +161,10 @@ class CitationFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
+        if self.data.get('json_import_dataset', None):
+            self.json_import_dataset_name = ImportedDataset.objects.get(pk=self.data.get('json_import_dataset', None)).name
+            self.json_import_dataset_id = self.data.get('json_import_dataset', None)
+                
     class Meta(object):
         model = Citation
         fields = [
@@ -165,14 +172,9 @@ class CitationFilter(django_filters.FilterSet):
             'publication_date_from', 'publication_date_to',
             'author_or_editor', 'periodical', 'record_status',
             'belongs_to', 'zotero_accession', 'in_collections',
-            'tracking_state'
+            'tracking_state', 'json_import_dataset'
         ]
-        # order_by = [
-        #     ('publication_date', 'Publication date (ascending)'),
-        #     ('-publication_date', 'Publication date (descending)'),
-        #     ('title_for_sort', 'Title (ascending)'),
-        #     ('-title_for_sort', 'Title (descending)')
-        # ]
+        
     o = filters.OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -400,6 +402,8 @@ class AuthorityFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
+    json_import_dataset = django_filters.CharFilter(widget=forms.HiddenInput())
+    
     tracking_state = django_filters.ChoiceFilter(choices=[('all', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
     created_on_from = django_filters.CharFilter(method='filter_created_on_from')
@@ -409,7 +413,6 @@ class AuthorityFilter(django_filters.FilterSet):
     modified_on_to = django_filters.CharFilter(method='filter_modified_on_to')
     created_by_stored = django_filters.CharFilter(widget=forms.HiddenInput())
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
-
 
     class Meta(object):
         model = Authority
@@ -491,6 +494,11 @@ class AuthorityFilter(django_filters.FilterSet):
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in permissions_util.get_accessible_dataset_objects_in_tenant(self.request.user, tenant)]
         else:
             self.filters['belongs_to'].extra['choices'] = [(ds.id, ds.name) for ds in Dataset.objects.all()]
+
+        if self.data.get('json_import_dataset', None):
+            self.json_import_dataset_name = ImportedDataset.objects.get(pk=self.data.get('json_import_dataset', None)).name
+            self.json_import_dataset_id = self.data.get('json_import_dataset', None)
+        
 
     def filter_id(self, queryset, name, value):
         if not value:

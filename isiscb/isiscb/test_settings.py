@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'curation',
     'tenants',
     'rules.apps.AutodiscoverRulesConfig',
+    'jsonimport',
     #'dj_pagination',
     #'debug_toolbar',
 )
@@ -198,8 +199,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'test_isiscb',
         'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'PASSWORD': 'postgres',
+        'HOST': os.environ.get('DATABASE_HOST', 'db'),
         'PORT': '5432',
     }
 }
@@ -211,7 +212,7 @@ HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch7_backend.IsisCBElasticsearch7SearchEngine',
-        'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
+        'URL': os.environ.get('ELASTIC_HOST', 'http://search:9200/'),
         'INDEX_NAME': 'haystack-test',
     },
 }

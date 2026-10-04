@@ -124,6 +124,13 @@
                   <li><a href="{% url "curation:timeline_tasks" %}">Timelines</a></li>
                 </ul>
               </li>
+              <li{% if curation_section == "bulk" %} class="active"{% endif %}>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Import <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{% url "curation:create_imported_dataset" %}">Create New Dataset</a></li>
+                  <li><a href="{% url "curation:list_import_tasks" %}">Imports</a></li>
+                </ul>
+              </li>
               {% if tenant_access == 'update' or user.is_superuser %}
               <li{% if curation_section == "tenants" %} class="active"{% endif %}>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenant <span class="caret"></span></a>

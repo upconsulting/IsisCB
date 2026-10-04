@@ -666,13 +666,12 @@ class AuthorityForm(forms.ModelForm):
         model = Authority
         fields = '__all__'
 
-
 class AuthorityAdmin(SimpleHistoryAdmin,
                      AttributeInlineMixin,
                      LinkedDataInlineMixin,
                      UberInlineMixin,
                      AdvancedSearchMixin):
-    list_display = ('name', 'type_controlled', 'id',)
+    list_display = ('name', 'type_controlled', 'id', 'modified_on')
     # list_filter = ('type_controlled', 'record_status')
     search_fields = ('name', )
 

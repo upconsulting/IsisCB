@@ -263,6 +263,12 @@ $('body').ready(function() {
                 {{ objects.form.classification_hierarchy|addcss:"form-control" }}
               </div>
           </div>
+          {{ objects.form.json_import_dataset }}
+          {% if objects.json_import_dataset_id %}
+           <div class="form-group form-group-xs clearable">
+                <label class="control-label">Selected Dataset: <span class="text-info"><a href="{% url 'curation:view_imported_dataset' objects.json_import_dataset_id %}">{{ objects.json_import_dataset_name }}</a></span> <a id="remove-json-import" href="#"><i class="fas fa-times-circle"></i></a></label>
+            </div>
+          {% endif %}
         </div>
         <div class="col-sm-3">
             {% for error in objects.form.id.errors %}
@@ -437,8 +443,8 @@ $('body').ready(function() {
               </div>
           </div>
         </div>
+        
     </div>
-
 </form>
 <script>
 $(document).ready(function() {
@@ -457,6 +463,12 @@ $(document).ready(function() {
         $(this).css('color', '#888');
       }
 
+    });
+
+    $('#remove-json-import').on('click', function(event) {
+        event.preventDefault();
+        $('#id_json_import_dataset').val('');
+        $("#filter_form").submit();
     });
 
     $('#clear-filters').on('click', function() {

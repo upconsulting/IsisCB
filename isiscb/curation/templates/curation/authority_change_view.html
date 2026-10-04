@@ -147,6 +147,13 @@
         <div class="form-group">
             <label>{{ form.record_history.label }}</label>
             {{ form.record_history|addcss:"form-control input-sm"}}
+            {% if form.instance.json_import_dataset %}
+            <div style="margin-top: 10px">
+            <small>
+            Imported from dataset: <i class="fas fa-shapes"></i> <a href={% url "curation:view_imported_dataset" form.instance.json_import_dataset.id %}>{{ form.instance.json_import_dataset.dataset_name }}</a>  
+            </small>
+            </div>
+            {% endif %}
         </div>
 
         <div class="form-group">

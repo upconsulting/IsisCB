@@ -1,0 +1,26 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Import Records from JSON</h2>
+<small></small>
+
+<script>
+ 
+</script>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" id="file" class="inputfile" />
+    {{ form.file.errors }}
+    <button type="submit">Upload</button>
+</form>
+
+
+<table>
+    <th></th>
+    <tr></tr>
+</table>
+
+{% endblock %}

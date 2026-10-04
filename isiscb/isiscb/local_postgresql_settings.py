@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'curation',
     'tenants',
     'rules.apps.AutodiscoverRulesConfig',
+    'jsonimport',
     #'dj_pagination',
     #'debug_toolbar',
 )

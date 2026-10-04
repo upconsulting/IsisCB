@@ -10,6 +10,7 @@ from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
 from curation.other_views import user_views
 from curation.tenant_views import settings_views
+from jsonimport import views as import_views
 
 from django.urls import re_path
 
@@ -172,4 +173,9 @@ urlpatterns = [
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/image/(?P<image_id>[0-9]+?)/save$', settings_views.tenant_add_save_image, name='tenant_add_save_image'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/content$', settings_views.tenant_content_page, name='tenant_content_page'),
     
+    re_path(r'^import/dataset/create', import_views.create_imported_dataset, name='create_imported_dataset'),
+    re_path(r'^import/datasets$', import_views.list_imported_datasets , name='list_import_tasks'),
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)$', import_views.view_imported_dataset , name='view_imported_dataset'), 
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/import$', import_views.start_record_creation , name='start_record_creation'),
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/clear$', import_views.clear_imported_dataset , name='clear_imported_dataset')
 ]
