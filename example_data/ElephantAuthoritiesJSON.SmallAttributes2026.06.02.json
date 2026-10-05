@@ -1,0 +1,99 @@
+{
+   "format": "isiscb_import",
+   "version": "1.0",
+   "dataset": 
+     {
+       "dataset_id":          "Test1",
+       "dataset_name":        "Elephants Test",
+       "dataset_creator":     "History of Science, Technology, and Medicine, University of Oklahoma",
+       "dataset_date":        "2026.04.26",
+       "dataset_description": "Staging Records for Test using citations with Elephant in Title."
+     },
+   "file_type":               "Authorities",
+   "record_count":            491,
+   "records": 
+    [
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000001276",
+        "local_authority_id": null,
+        "name":               "Alexander the Great",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "356-323 BCE"},{"type": "FlourishedDates", "value": "386-310 BCE"},{"type": "HairColor", "value": "Brown"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118501828/about/html"},{"type": "WIKIPEDIA", "value": "https://en.wikipedia.org/wiki/Alexander_the_Great"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000003076",
+        "local_authority_id": null,
+        "name":               "Aristotle",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "384-322 BCE"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118650130/about/html"},{"type": "WIKIPEDIA", "value": "https://en.wikipedia.org/wiki/Aristotle"},{"type": "SEP", "value": "https://plato.stanford.edu/entries/aristotle/"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000158299-B",
+        "name":               "Saha, Jonathan",
+		"last_name":		  "Saha",
+		"first_name":         "Jonathan",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114441-B",
+        "name":               "Atomic, nuclear, and particle physics",
+        "description":        "Subtopic under physics dealing with small particles.",
+        "classification_system":         "A New Classification System",
+        "classification_code":        "ANCS-0001"
+      },
+      {
+        "authority_type":     "place",
+        "action":             "add new record",
+        "cba_id":             "",
+        "local_authority_id": "CBA000113718-x",
+        "name":               "Africa",
+        "description":        "",
+        "attributes":         [{"type": "country_code", "value": "AO,BF,BI,BJ"},{"type": "geographic_entity_type", "value": "continent"}],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/6255146"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122637-B",
+        "name":               "History and Philosophy of the Life Sciences",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0391-9714"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122671-B",
+        "name":               "History Today",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0018-2753"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA990122650",
+        "local_authority_id": null,
+        "name":               "Head, William P.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      }
+  ]
+}

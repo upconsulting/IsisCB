@@ -1,0 +1,4927 @@
+{
+   "format": "isiscb_import",
+   "version": "1.0",
+   "dataset": 
+     {
+       "dataset_id":          "Test1",
+       "dataset_name":        "Elephants Test",
+       "dataset_creator":     "History of Science, Technology, and Medicine, University of Oklahoma",
+       "dataset_date":        "2026.04.26",
+       "dataset_description": "Staging Records for Test using citations with Elephant in Title."
+     },
+   "file_type":               "Authorities",
+   "record_count":            491,
+   "records": 
+    [
+       {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000000160",
+        "local_authority_id": null,
+        "name":               "Abir-Am, Pnina Geraldine",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000000336",
+        "local_authority_id": null,
+        "name":               "Åckerberg, Sofia",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000001028",
+        "local_authority_id": null,
+        "name":               "Alberti, Samuel J. M. M.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000001276",
+        "local_authority_id": null,
+        "name":               "Alexander the Great",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "356-323 BCE"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118501828/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000002170",
+        "local_authority_id": null,
+        "name":               "Andersen, Håkon With",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000003076",
+        "local_authority_id": null,
+        "name":               "Aristotle",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "384-322 BCE"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118650130/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000003660",
+        "local_authority_id": null,
+        "name":               "Atkinson, James W.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000003755-B",
+        "name":               "Audubon, John James",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1785-1851"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/11865098X/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000005523-B",
+        "name":               "Barnum, Phineas Taylor",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1810-1891"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118652621/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000006897-B",
+        "name":               "Bedini, Silvio A.",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1917-2007"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/132097699/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000007317-B",
+        "name":               "Bellet, Laura Garnick",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000009125-B",
+        "name":               "Bigwood, J. M.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000010077-B",
+        "name":               "Bluma, Lars",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000010471-B",
+        "name":               "Bohr, Niels Henrik David",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1885-1962"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118661051/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000013092",
+        "local_authority_id": null,
+        "name":               "Broman, Thomas H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000016203-B",
+        "name":               "Cardano, Girolamo",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1501-1576"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/11863822X/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000020763-B",
+        "name":               "Cook, Alexandra",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000020790",
+        "local_authority_id": null,
+        "name":               "Cook, Harold John",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/120433465"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000021155-B",
+        "name":               "Cormack, Allan Macleod",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1924-1998"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/136746772/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000021694",
+        "local_authority_id": null,
+        "name":               "Cowie, Helen",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000021971-B",
+        "name":               "Creager, Angela N. H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000022524",
+        "local_authority_id": null,
+        "name":               "Cummings, Brian",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000023172",
+        "local_authority_id": null,
+        "name":               "Daly, Michael",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000023199-B",
+        "name":               "Damerow, Peter",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000023481-B",
+        "name":               "Darwin, Charles Robert",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1809-1882"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118523813/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000024536",
+        "local_authority_id": null,
+        "name":               "Delcourt, Thierry",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000026059-B",
+        "name":               "Dittrich, Lothar",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000026832",
+        "local_authority_id": null,
+        "name":               "Douthwaite, Julia V.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000029451-B",
+        "name":               "Engelhardt, Dietrich von",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000030577-B",
+        "name":               "Fan, Fa-ti",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000030665-B",
+        "name":               "Farber, Paul Lawrence",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000032953-B",
+        "name":               "Ford, Peter A.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000033373-B",
+        "name":               "Fracastoro, Girolamo",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1478-1553"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118810987/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000034541-B",
+        "name":               "Fudge, Erica",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000034805-B",
+        "name":               "Gabor, Dennis",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1900-"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/122903137/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000035008",
+        "local_authority_id": null,
+        "name":               "Galen",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "129-c. 200"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118537202/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000035036",
+        "local_authority_id": null,
+        "name":               "Galilei, Galileo",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1564-1642"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118537229/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000038372",
+        "local_authority_id": null,
+        "name":               "Gómez López, Susana",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000039063-B",
+        "name":               "Gouzévitch, Irina",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000039242",
+        "local_authority_id": null,
+        "name":               "Graham, Peter W.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000043162",
+        "local_authority_id": null,
+        "name":               "Hart-Davis, Duff",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000044928",
+        "local_authority_id": null,
+        "name":               "Herman, Frank",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000046772",
+        "local_authority_id": null,
+        "name":               "Holmqvist, Bosse",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000047562",
+        "local_authority_id": null,
+        "name":               "Howell, Michael",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000050103-B",
+        "name":               "Jasanoff, Sheila",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000050881-B",
+        "name":               "Johnston, Sean F.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000050968",
+        "local_authority_id": null,
+        "name":               "Jones, Christine Kenyon",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000051005-B",
+        "name":               "Jones, Frederic Wood",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1879-1954"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/138893845/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000051120",
+        "local_authority_id": null,
+        "name":               "Jones, Ross L.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000051246",
+        "local_authority_id": null,
+        "name":               "Jordan-Gschwend, Annemarie",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000051765-B",
+        "name":               "Kaiser, David Isaac",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/69153695"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000054695-B",
+        "name":               "Knight, Leah",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000058655-B",
+        "name":               "Leaback, David H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000059006",
+        "local_authority_id": null,
+        "name":               "Lee, Paula",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000059488",
+        "local_authority_id": null,
+        "name":               "Lemire, Michel",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000059722",
+        "local_authority_id": null,
+        "name":               "Leo X, Pope",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1475-1521"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118640437/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000061063-B",
+        "name":               "Linnaeus, Carolus",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1707-1778"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118573349/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000062321-B",
+        "name":               "Low, Susanne M.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000063388",
+        "local_authority_id": null,
+        "name":               "Mackintosh, Allan R.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000065994",
+        "local_authority_id": null,
+        "name":               "Mastrorosa, Ida",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000066918",
+        "local_authority_id": null,
+        "name":               "McClellan, Andrew",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000067769-B",
+        "name":               "McVicker, Donald",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000068577-B",
+        "name":               "Merrick, Joseph Carey",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "c. 1862-1890"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/119161001/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000072323-B",
+        "name":               "Müller-Wille, Staffan",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/22466438"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000074002",
+        "local_authority_id": null,
+        "name":               "Nicholson, Edward Chambers",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1827-1890"}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000075322",
+        "local_authority_id": null,
+        "name":               "Oehlschlager, Fritz H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000075543-B",
+        "name":               "Olch, Peter D.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000075753-B",
+        "name":               "Olson, Storrs L.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000076056",
+        "local_authority_id": null,
+        "name":               "Orsi, Laura",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000077692",
+        "local_authority_id": null,
+        "name":               "Pastore, Alessandro",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000078234",
+        "local_authority_id": null,
+        "name":               "Peck, Robert M.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000079022",
+        "local_authority_id": null,
+        "name":               "Peruzzi, Enrico",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000079916",
+        "local_authority_id": null,
+        "name":               "Pieters, Florence F. J. M.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000080588",
+        "local_authority_id": null,
+        "name":               "Plumb, Christopher",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000081187-B",
+        "name":               "Porter, R.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000081896",
+        "local_authority_id": null,
+        "name":               "Prince, Sue Ann",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000084199-B",
+        "name":               "Rieke-Müller, Annelore",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000084452",
+        "local_authority_id": null,
+        "name":               "Renn, Jürgen",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000085225-B",
+        "name":               "Rieger, Simone",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000085711-B",
+        "name":               "Robbins, Louise E.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000086028",
+        "local_authority_id": null,
+        "name":               "Robinson, Jeanne",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000086743-B",
+        "name":               "Romm, James S.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000086819-B",
+        "name":               "Rookmaaker, Kees",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000087502",
+        "local_authority_id": null,
+        "name":               "Rothfels, Nigel T.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000088481-B",
+        "name":               "Rutherford, Ernest, 1st Baron",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1871-1937"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118750488/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000088485-B",
+        "name":               "Rutherford, Mike",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000088682",
+        "local_authority_id": null,
+        "name":               "Saban, Roger",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000089544",
+        "local_authority_id": null,
+        "name":               "Sandoz, Claude",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000090276",
+        "local_authority_id": null,
+        "name":               "Scarborough, John",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000092332",
+        "local_authority_id": null,
+        "name":               "Scigliano, Eric",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000092489-B",
+        "name":               "Scullard, H. H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000093703-B",
+        "name":               "Shayt, David H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000095168",
+        "local_authority_id": null,
+        "name":               "Sivasundaram, Sujit",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000099820",
+        "local_authority_id": null,
+        "name":               "Sutcliffe, Richard",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000101385-B",
+        "name":               "Tesnière, Marie-Hélène",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000101894",
+        "local_authority_id": null,
+        "name":               "Thompson, Charis",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000103148",
+        "local_authority_id": null,
+        "name":               "Trautmann, Thomas R.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000103290",
+        "local_authority_id": null,
+        "name":               "Treves, Frederick",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1853-1923"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118899279/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000105141-B",
+        "name":               "Vaughan, Christopher L.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000108996",
+        "local_authority_id": null,
+        "name":               "Westinghouse, George",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1846-1914"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/117574252/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000110838",
+        "local_authority_id": null,
+        "name":               "Witteveen, Joeri",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000111843-B",
+        "name":               "Wynne, Brian",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113706",
+        "local_authority_id": null,
+        "name":               "16th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113707-B",
+        "name":               "17th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113708",
+        "local_authority_id": null,
+        "name":               "18th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113709-B",
+        "name":               "19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113710",
+        "local_authority_id": null,
+        "name":               "20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113711-B",
+        "name":               "20th century, early",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113712",
+        "local_authority_id": null,
+        "name":               "20th century, late",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113713-B",
+        "name":               "21st century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113718",
+        "local_authority_id": null,
+        "name":               "Africa",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/6255146"}]
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113728",
+        "local_authority_id": null,
+        "name":               "Ancient",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113735-B",
+        "name":               "Artificial intelligence",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113747-B",
+        "name":               "Nobel Prizes",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113755-B",
+        "name":               "Biogeography",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113768",
+        "local_authority_id": null,
+        "name":               "Great Britain",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2648147"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113794",
+        "local_authority_id": null,
+        "name":               "Collectors and collecting",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113795-B",
+        "name":               "Colonialism",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113835-B",
+        "name":               "Earth sciences",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113844",
+        "local_authority_id": null,
+        "name":               "Elephants",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113852",
+        "local_authority_id": null,
+        "name":               "Error",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113861-B",
+        "name":               "Travel; exploration",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113869-B",
+        "name":               "Paris (France)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2988507"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113884",
+        "local_authority_id": null,
+        "name":               "Gold",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113897-B",
+        "name":               "Postmodernism",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113908",
+        "local_authority_id": null,
+        "name":               "Human-animal relationships",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113915-B",
+        "name":               "India",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/1269750"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113957-B",
+        "name":               "Mammoths",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113967-B",
+        "name":               "Geometry",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000113973-B",
+        "name":               "Physicians; doctors",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113976",
+        "local_authority_id": null,
+        "name":               "Epidemiology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000113986",
+        "local_authority_id": null,
+        "name":               "Medieval",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114007-B",
+        "name":               "Natural history",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114013-B",
+        "name":               "Optics",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114027-B",
+        "name":               "Philosophy of science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114032",
+        "local_authority_id": null,
+        "name":               "Quantum mechanics",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114043-B",
+        "name":               "Population",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114045-B",
+        "name":               "Pragmatism; instrumentalism",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "time period",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114056",
+        "local_authority_id": null,
+        "name":               "Renaissance",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114061-B",
+        "name":               "Rome (Italy)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/3169070"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114071-B",
+        "name":               "Science and literature",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114073-B",
+        "name":               "Science and politics",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114076",
+        "local_authority_id": null,
+        "name":               "Popular culture",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114079-B",
+        "name":               "Science and religion",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114083-B",
+        "name":               "Science and war; science and the military",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114084",
+        "local_authority_id": null,
+        "name":               "Science education and teaching",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114087-B",
+        "name":               "Science, general histories",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114089-B",
+        "name":               "Controversies and disputes",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114091-B",
+        "name":               "Discovery in science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114092",
+        "local_authority_id": null,
+        "name":               "Societies; institutions; academies",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114098",
+        "local_authority_id": null,
+        "name":               "Deceptions; hoaxes; frauds",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114099-B",
+        "name":               "Experiments and experimentation",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114101-B",
+        "name":               "Senegal",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2245662"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114106",
+        "local_authority_id": null,
+        "name":               "Social sciences",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114135-B",
+        "name":               "Telecommunications",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114136",
+        "local_authority_id": null,
+        "name":               "Telegraphs; telephones",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114165-B",
+        "name":               "Universities and colleges",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114173-B",
+        "name":               "Veterinary medicine",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114186",
+        "local_authority_id": null,
+        "name":               "Women in science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114233-B",
+        "name":               "Neurological diseases",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114257-B",
+        "name":               "Popularization",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114264",
+        "local_authority_id": null,
+        "name":               "Artifacts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114273-B",
+        "name":               "Cosmography",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114302",
+        "local_authority_id": null,
+        "name":               "Biographies",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114311-B",
+        "name":               "Museum and exhibit catalogs",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114322",
+        "local_authority_id": null,
+        "name":               "Manuscripts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114329-B",
+        "name":               "Court sponsored science; patronage",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114337-B",
+        "name":               "Social aspects of education",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114338",
+        "local_authority_id": null,
+        "name":               "Teleology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114346",
+        "local_authority_id": null,
+        "name":               "Zoos",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114350",
+        "local_authority_id": null,
+        "name":               "Animal husbandry",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114353-B",
+        "name":               "Archaeology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114360",
+        "local_authority_id": null,
+        "name":               "Biology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114374",
+        "local_authority_id": null,
+        "name":               "Cosmology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114383-B",
+        "name":               "Dissection",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114385-B",
+        "name":               "Electrical engineering",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114421-B",
+        "name":               "Mammalogy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114427-B",
+        "name":               "Medicine",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114449-B",
+        "name":               "Ornithology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114464",
+        "local_authority_id": null,
+        "name":               "Physics",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114495-B",
+        "name":               "Zoology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114501-B",
+        "name":               "Australia",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2077456"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114509-B",
+        "name":               "China",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/1814991"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114516",
+        "local_authority_id": null,
+        "name":               "Europe",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/6255148"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114518",
+        "local_authority_id": null,
+        "name":               "France",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/3017382"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114519-B",
+        "name":               "Germany",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2921044"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114524",
+        "local_authority_id": null,
+        "name":               "Italy",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/3175395"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114534",
+        "local_authority_id": null,
+        "name":               "Norway",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/3144096"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114539-B",
+        "name":               "Portugal",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2264397"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000114541-B",
+        "name":               "Russia",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2017370"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114550",
+        "local_authority_id": null,
+        "name":               "Netherlands",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2750405"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114552",
+        "local_authority_id": null,
+        "name":               "United States",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/6252001"}]
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000114622",
+        "local_authority_id": null,
+        "name":               "American Philosophical Society",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115126",
+        "local_authority_id": null,
+        "name":               "Massachusetts Institute of Technology, MIT",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115251-B",
+        "name":               "Princeton University",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115278",
+        "local_authority_id": null,
+        "name":               "Rockefeller Foundation",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115583-B",
+        "name":               "illustrations; iconography",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115611-B",
+        "name":               "explanation; hypotheses; theories",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115634",
+        "local_authority_id": null,
+        "name":               "terminology; nomenclature",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115652",
+        "local_authority_id": null,
+        "name":               "court sponsored",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115719-B",
+        "name":               "North America: United States; Canada",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115730",
+        "local_authority_id": null,
+        "name":               "Russia; Baltic States; Finland",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115761-B",
+        "name":               "Science",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115802",
+        "local_authority_id": null,
+        "name":               "Quantum mechanics",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115816",
+        "local_authority_id": null,
+        "name":               "Electromagnetism; Electrodynamics",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115925-B",
+        "name":               "Biology",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000115960",
+        "local_authority_id": null,
+        "name":               "Zoology",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000115979-B",
+        "name":               "Mammalogy",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116010",
+        "local_authority_id": null,
+        "name":               "Medicine",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116035-B",
+        "name":               "Dissection",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116047-B",
+        "name":               "Neurological diseases",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116280",
+        "local_authority_id": null,
+        "name":               "Dyes; Painting; Bleaching",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116343-B",
+        "name":               "Models and modeling in science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116345-B",
+        "name":               "Explanation; hypotheses; theories",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116360",
+        "local_authority_id": null,
+        "name":               "Platonism",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116370",
+        "local_authority_id": null,
+        "name":               "Population ecology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116379-B",
+        "name":               "Electricity; magnetism",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116385-B",
+        "name":               "Nature and its relationship to culture; human-nature relationships",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116389-B",
+        "name":               "Science and government",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116391-B",
+        "name":               "Environmental protection",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116398",
+        "local_authority_id": null,
+        "name":               "Animal experimentation",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116409-B",
+        "name":               "Science and law",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116415-B",
+        "name":               "Human anatomy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116422",
+        "local_authority_id": null,
+        "name":               "Publishers and publishing",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116435-B",
+        "name":               "Cross-cultural interaction; cultural influence",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116454",
+        "local_authority_id": null,
+        "name":               "International cooperation",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116480",
+        "local_authority_id": null,
+        "name":               "Animal behavior",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116491-B",
+        "name":               "Labor and laborers",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116562",
+        "local_authority_id": null,
+        "name":               "Science and society",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        [{"type": "ISSN", "value": "0162-2439"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116564",
+        "local_authority_id": null,
+        "name":               "Sociology of knowledge",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116566",
+        "local_authority_id": null,
+        "name":               "Ecology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116567-B",
+        "name":               "Science and art",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116611-B",
+        "name":               "Privately sponsored science; philanthropy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116622",
+        "local_authority_id": null,
+        "name":               "Disease and diseases",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116631-B",
+        "name":               "Philosophy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116705-B",
+        "name":               "Kings and rulers; monarchs and monarchy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116722",
+        "local_authority_id": null,
+        "name":               "Primates",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116732",
+        "local_authority_id": null,
+        "name":               "Technological innovation",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116744",
+        "local_authority_id": null,
+        "name":               "Conference proceedings",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116748",
+        "local_authority_id": null,
+        "name":               "Herbals and bestiaries",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116768",
+        "local_authority_id": null,
+        "name":               "Science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116769-B",
+        "name":               "Natural philosophy",
+        "description":        "Term used during the period 2002-present. Used by Wellcome.  To be used for works specifically designated as dealing with natural philosophy.  Should be a historical term.  Often used for general works on natural science, esp. physical science, in early modern period and before.",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116773-B",
+        "name":               "Motion (physical)",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116808",
+        "local_authority_id": null,
+        "name":               "Classification in biology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116810",
+        "local_authority_id": null,
+        "name":               "Anatomy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116854",
+        "local_authority_id": null,
+        "name":               "Fossils",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116883-B",
+        "name":               "Automata; robotics; cyborgs",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116905-B",
+        "name":               "Sudan; South Sudan",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/366755"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000116946",
+        "local_authority_id": null,
+        "name":               "Medical technology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000116963-B",
+        "name":               "Museums",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117009-B",
+        "name":               "Electric power industry",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117063-B",
+        "name":               "West Africa",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/7729885"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117076",
+        "local_authority_id": null,
+        "name":               "Vietnam War",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117100",
+        "local_authority_id": null,
+        "name":               "Courts and courtiers",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117143-B",
+        "name":               "Extinction (biology)",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117146",
+        "local_authority_id": null,
+        "name":               "Imaging technology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117320",
+        "local_authority_id": null,
+        "name":               "Entertainment industry",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117368",
+        "local_authority_id": null,
+        "name":               "Convention on International Trade in Endangered Species of Fauna and Flora",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117472",
+        "local_authority_id": null,
+        "name":               "Science and culture",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117501-B",
+        "name":               "Holography",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117513-B",
+        "name":               "Technology and culture",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        [{"type": "ISSN", "value": "1097-3729"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117585-B",
+        "name":               "Animal welfare",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117597-B",
+        "name":               "Industrial archaeology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117629-B",
+        "name":               "Animals",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117704",
+        "local_authority_id": null,
+        "name":               "Connecticut (U.S.)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/4831725"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117727-B",
+        "name":               "Galapagos Islands",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/3658931"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117799-B",
+        "name":               "Taxidermy",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117805-B",
+        "name":               "Education, engineering",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000117857-B",
+        "name":               "Myanmar (Burma)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/1327865"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117884",
+        "local_authority_id": null,
+        "name":               "Classification",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000117962",
+        "local_authority_id": null,
+        "name":               "Trade",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000118074",
+        "local_authority_id": null,
+        "name":               "Dyes; painting; bleaching",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000118157-B",
+        "name":               "Cable, submarine",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000118417-B",
+        "name":               "Davenport Academy of Natural Sciences (Iowa, U.S.)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000118450",
+        "local_authority_id": null,
+        "name":               "Pianos",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000118470",
+        "local_authority_id": null,
+        "name":               "Historiography",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000118537-B",
+        "name":               "Computed tomography imaging",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000118585-B",
+        "name":               "The profession; the person in the subject",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000118587-B",
+        "name":               "Greek and Roman antiquity",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000119843-B",
+        "name":               "Cambridge University Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000119849-B",
+        "name":               "Bureau of American Ethnology (Smithsonian Institution)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000120035-B",
+        "name":               "Endangered species",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000120110",
+        "local_authority_id": null,
+        "name":               "Guinea",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "GeoNames", "value": "https://www.geonames.org/2420477"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000120372",
+        "local_authority_id": null,
+        "name":               "Baroque",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000120584",
+        "local_authority_id": null,
+        "name":               "Dark matter",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000120756",
+        "local_authority_id": null,
+        "name":               "Introduced organisms; exotic species",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000120807-B",
+        "name":               "Biomimetics",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000120821-B",
+        "name":               "Tufts University",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000120975-B",
+        "name":               "University College, London. Department of Anatomy",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121172",
+        "local_authority_id": null,
+        "name":               "Decolonization",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121182",
+        "local_authority_id": null,
+        "name":               "Traditional knowledge",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121303-B",
+        "name":               "Air Power History",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1044-016X"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121333-B",
+        "name":               "American Historical Review",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0002-8762"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121348",
+        "local_authority_id": null,
+        "name":               "American Journal of Philology",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1086-3168"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121379-B",
+        "name":               "American Zoologist",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121443-B",
+        "name":               "Annals of Science: The History of Science and Technology",
+        "description":        "Annals of Science , launched in 1936, publishes work on the history of science, technology and medicine, covering developments from classical antiquity to the late 20th century. The Journal has a global reach, both in terms of the work that it publishes, and also in terms of its readership. The editors particularly welcome submissions from authors in Asia, Africa and South America.\n\nEach issue contains research articles, and a comprehensive book reviews section, including essay reviews on a group of books on a broader level. Articles are published in both English and French, and the Journal welcomes proposals for special issues on relevant topics.\n\nThe Editors and Publisher are committed to supporting early career researchers, and award an annual prize to the best submission from current doctoral students, or those awarded a doctorate in the past four years.",
+        "attributes":         [{"type": "Birth date", "value": "1936"}],
+        "linked_data":        [{"type": "ISSN", "value": "0003-3790"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121484",
+        "local_authority_id": null,
+        "name":               "Anthropozoologica",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0761-3032"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121558",
+        "local_authority_id": null,
+        "name":               "Archives of Natural History",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0260-9541"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121657-B",
+        "name":               "Australian Historical Studies",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121773-B",
+        "name":               "British Journal for the History of Science",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1474-001X"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000121861-B",
+        "name":               "Bulletin of the History of Archaeology",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "2047-6930"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121862",
+        "local_authority_id": null,
+        "name":               "Bulletin of the History of Medicine",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1086-3176"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000121986",
+        "local_authority_id": null,
+        "name":               "Chemistry in Britain",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122030",
+        "local_authority_id": null,
+        "name":               "Classical Review",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122057-B",
+        "name":               "Comparative Studies in Society and History",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122071-B",
+        "name":               "Configurations: A Journal of Literature, Science, and Technology",
+        "description":        "Configurations explores the relations of literature and the arts to the sciences and technology. Founded in 1993, the journal continues to set the stage for transdisciplinary research concerning the interplay between science, technology, and the arts. Configurations is the official publication of the Society for Literature, Science, and the Arts (SLSA).\n\nEarlier Title: Publication of the Society for Literature and Science; 0886-1102; (DLC) 93660661; (OCoLC)12868745\n\nFrequency: Quarterly, 2016-; Past: Three times a year, 1993-2015\n\nDescription: Vol. 1, no. 1 (winter 1993)\n\nLanguage:\tEnglish",
+        "attributes":         [],
+        "linked_data":        [{"type": "ISSN", "value": "1080-6520"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122191-B",
+        "name":               "Dissertation Abstracts International. A",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122222",
+        "local_authority_id": null,
+        "name":               "Early Science and Medicine: A Journal for the Study of Science, Technology and Medicine in the Pre-modern Period",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1573-3823"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122229-B",
+        "name":               "East Asian Science, Technology and Society: An International Journal",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1875-2152"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122278",
+        "local_authority_id": null,
+        "name":               "Endeavour: Review of the Progress of Science",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0160-9327"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122284",
+        "local_authority_id": null,
+        "name":               "Engineering Studies",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1937-8629"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122306",
+        "local_authority_id": null,
+        "name":               "Environmental History",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1084-5453"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122517-B",
+        "name":               "Gesnerus",
+        "description":        "Name changed to European Journal for the History of Medicine and Health as of 2021",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0016-9161"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122608",
+        "local_authority_id": null,
+        "name":               "Historian: Journal of History",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122622",
+        "local_authority_id": null,
+        "name":               "Historical Studies in the Physical and Biological Sciences",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122637-B",
+        "name":               "History and Philosophy of the Life Sciences",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0391-9714"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122671-B",
+        "name":               "History Today",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0018-2753"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122724",
+        "local_authority_id": null,
+        "name":               "Icon: Journal of the International Committee for the History of Technology",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1361-8113"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000122756",
+        "local_authority_id": null,
+        "name":               "Indian Journal of History of Science",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "2454-9991"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122847-B",
+        "name":               "Isis: International Review Devoted to the History of Science and Its Cultural Influences",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0021-1753"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000122977-B",
+        "name":               "Journal for Eighteenth-Century Studies",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1754-0208"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123095-B",
+        "name":               "Journal of Literature and Science",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1754646X"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123195-B",
+        "name":               "Journal of the History of Biology",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0022-5010"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000123196",
+        "local_authority_id": null,
+        "name":               "Journal of the History of Collections",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123289-B",
+        "name":               "Koroth: A Quarterly Journal Devoted to the History of Medicine and Science",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123323-B",
+        "name":               "Latomus: Revue d'Études Latines",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000123366",
+        "local_authority_id": null,
+        "name":               "Literature and Medicine",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123389-B",
+        "name":               "Lychnos",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0076-1648"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123713-B",
+        "name":               "Notes and Records: The Royal Society Journal of the History of Science",
+        "description":        "Up to 2014, the name of this journal was Notes and Records of the Royal Society.",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1743-0178"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000123725-B",
+        "name":               "Nuncius: Annali di Storia della Scienza",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "1825-3911"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000123894",
+        "local_authority_id": null,
+        "name":               "Physics Today",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000124027-B",
+        "name":               "Public Understanding of Science",
+        "description":        "Public Understanding of Science is a fully peer-reviewed international journal covering all aspects of the inter-relationships between science (including technology and medicine) and the public.",
+        "attributes":         [{"type": "Birth date", "value": "1992"}],
+        "linked_data":        [{"type": "ISSN", "value": "0963-6625"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000124395-B",
+        "name":               "Social History of Medicine",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0951-631X"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000124555-B",
+        "name":               "Studies in History and Philosophy of Science",
+        "description":        "Studies in History and Philosophy of Science is devoted to the integrated study of the history, philosophy and sociology of the sciences. The editors encourage contributions both in the long-established areas of the history of the sciences and the philosophy of the sciences and in the topical areas of historiography of the sciences, the sciences in relation to gender, culture and society and the sciences in relation to arts. The Journal is international in scope and content and publishes papers from a wide range of countries and cultural traditions.",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "0039-3681"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000124643-B",
+        "name":               "The Catholic Historical Review",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000124726",
+        "local_authority_id": null,
+        "name":               "TLS: Times Literary Supplement",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000124764",
+        "local_authority_id": null,
+        "name":               "Transfers",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": ""}],
+        "linked_data":        [{"type": "ISSN", "value": "2045-4813"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000126564",
+        "local_authority_id": null,
+        "name":               "Aviation, Military",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000126730",
+        "local_authority_id": null,
+        "name":               "Buildings, Industrial",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000126911-B",
+        "name":               "Communications Equipment",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000127273-B",
+        "name":               "Factory System",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000127641-B",
+        "name":               "Ivory",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000128633-B",
+        "name":               "Social Engineering",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000128805-B",
+        "name":               "Telephones",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000129986",
+        "local_authority_id": null,
+        "name":               "Mobility",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130079-B",
+        "name":               "Social Relations of Science",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130099-B",
+        "name":               "Zoology",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130122",
+        "local_authority_id": null,
+        "name":               "Classical Antiquity",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130125-B",
+        "name":               "Natural history -- Classical Antiquity",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130151-B",
+        "name":               "Biological sciences -- Renaissance and Reformation, 1450-1660",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130169-B",
+        "name":               "General works; philosophy -- Eighteenth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130173-B",
+        "name":               "Biological sciences -- Eighteenth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130184",
+        "local_authority_id": null,
+        "name":               "Biological sciences -- Nineteenth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130186",
+        "local_authority_id": null,
+        "name":               "Medicine -- Nineteenth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130187-B",
+        "name":               "Technology -- Nineteenth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130191-B",
+        "name":               "General works; philosophy -- Twentieth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130193-B",
+        "name":               "Physical sciences -- Twentieth Century",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130213-B",
+        "name":               "Classical antiquity",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130240",
+        "local_authority_id": null,
+        "name":               "Renaissance",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130242",
+        "local_authority_id": null,
+        "name":               "Eighteenth century",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130243-B",
+        "name":               "Nineteenth century",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130244",
+        "local_authority_id": null,
+        "name":               "Twentieth century",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130280",
+        "local_authority_id": null,
+        "name":               "comments on specific subjects",
+        "description":        "Term used untill 1999",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130289-B",
+        "name":               "Sociological and psychological analysis of science",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130299-B",
+        "name":               "Scientific institutions",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130301-B",
+        "name":               "Scientific education; educational institutions",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130314",
+        "local_authority_id": null,
+        "name":               "Natural history",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130319-B",
+        "name":               "Zoology; anatomy and physiology",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130336",
+        "local_authority_id": null,
+        "name":               "Technology, general works",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130554",
+        "local_authority_id": null,
+        "name":               "Zoology; anatomy and physiology -- Asian cultural contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130613-B",
+        "name":               "Zoology; anatomy and physiology -- Indian cultural contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000130619-B",
+        "name":               "Social sciences, general works -- Indian cultural contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000130904",
+        "local_authority_id": null,
+        "name":               "Environmental sciences -- Ancient Near Eastern contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131026",
+        "local_authority_id": null,
+        "name":               "Zoology; anatomy and physiology -- Medieval Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131048",
+        "local_authority_id": null,
+        "name":               "History of science, general works -- Renaissance Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131070",
+        "local_authority_id": null,
+        "name":               "History of philosophy -- Renaissance Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131080",
+        "local_authority_id": null,
+        "name":               "Natural history -- Renaissance Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131083-B",
+        "name":               "Biological sciences, general works -- Renaissance Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131098",
+        "local_authority_id": null,
+        "name":               "Medicine, general works -- Renaissance Western European contexts",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131107-B",
+        "name":               "History of science, general works -- 17th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131119-B",
+        "name":               "Science and culture: literature and the arts -- 17th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131134",
+        "local_authority_id": null,
+        "name":               "Physics; physical sciences, general works -- 17th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131139-B",
+        "name":               "Natural history -- 17th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131175-B",
+        "name":               "Science and society, general works -- 18th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131198",
+        "local_authority_id": null,
+        "name":               "Natural history -- 18th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131201-B",
+        "name":               "Biological sciences, general works -- 18th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131234",
+        "local_authority_id": null,
+        "name":               "Science and society, general works -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131256",
+        "local_authority_id": null,
+        "name":               "Geography; cartography; exploration -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131257-B",
+        "name":               "Natural history -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131260",
+        "local_authority_id": null,
+        "name":               "Biological sciences, general works -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131262",
+        "local_authority_id": null,
+        "name":               "Zoology; anatomy and physiology -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131273-B",
+        "name":               "Archaeology -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131275-B",
+        "name":               "Medicine, general works -- 19th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131303-B",
+        "name":               "Scientific education; educational institutions -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131311-B",
+        "name":               "Physics; physical sciences, general works -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131324",
+        "local_authority_id": null,
+        "name":               "Physical anthropology; human anatomy and physiology -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131327-B",
+        "name":               "Social sciences, general works -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131334",
+        "local_authority_id": null,
+        "name":               "Medicine, general works -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131338",
+        "local_authority_id": null,
+        "name":               "Technology, general works -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131339-B",
+        "name":               "Communication and computer technology -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000131341-B",
+        "name":               "Air and space technology -- 20th century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "classification term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131376",
+        "local_authority_id": null,
+        "name":               "Environmental sciences -- 20th century, late, and 21st century",
+        "description":        "Term used during the period 2002-present",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131472",
+        "local_authority_id": null,
+        "name":               "A. J. Gschwend",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000131492",
+        "local_authority_id": null,
+        "name":               "Abbeville Press, American Museum of Natural History",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000132041-B",
+        "name":               "Atlantic Monthly Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000132217-B",
+        "name":               "Belknap Press of Harvard University Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000132673-B",
+        "name":               "Carcanet",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000133041-B",
+        "name":               "Comité des Travaux Historiques et Scientifiques",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000133698",
+        "local_authority_id": null,
+        "name":               "Éditions des Archives Contemporaines",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000134745-B",
+        "name":               "Henry Holt",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000134866",
+        "local_authority_id": null,
+        "name":               "Houghton Mifflin",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000134973-B",
+        "name":               "Imperial College Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000135401-B",
+        "name":               "Johns Hopkins University Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000135756",
+        "local_authority_id": null,
+        "name":               "Leo S. Olschki",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000136005-B",
+        "name":               "Manchester University Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000136281-B",
+        "name":               "MIT Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000136845-B",
+        "name":               "Oxford University Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000136974",
+        "local_authority_id": null,
+        "name":               "Penguin",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000137509-B",
+        "name":               "Routledge",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000138026",
+        "local_authority_id": null,
+        "name":               "Somogy",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000138342",
+        "local_authority_id": null,
+        "name":               "Thames & Hudson",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000138978",
+        "local_authority_id": null,
+        "name":               "University of Chicago Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000139015-B",
+        "name":               "University of Illinois Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000139208",
+        "local_authority_id": null,
+        "name":               "University of Virginia Press",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000139369-B",
+        "name":               "Verlag für Wissenschaft und Bildung",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000139857-B",
+        "name":               "Edison, Thomas Alva",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1847-1931"}],
+        "linked_data":        [{"type": "DNB", "value": "http://d-nb.info/gnd/118528912/about/html"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000149698",
+        "local_authority_id": null,
+        "name":               "Giglioni, Guido",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000150156",
+        "local_authority_id": null,
+        "name":               "Green, P.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000150885-B",
+        "name":               "Haynes, A.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000151292",
+        "local_authority_id": null,
+        "name":               "Hodne, Bjarne",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000152466",
+        "local_authority_id": null,
+        "name":               "Kerrane, K.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000153356",
+        "local_authority_id": null,
+        "name":               "Leblan, Vincent",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000154588",
+        "local_authority_id": null,
+        "name":               "Maxwell-Stuart, P. G.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000156843-B",
+        "name":               "Philoon, T. E.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000156880",
+        "local_authority_id": null,
+        "name":               "Piggott, Joan R",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000158128",
+        "local_authority_id": null,
+        "name":               "Rowland, I. D.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000158299-B",
+        "name":               "Saha, Jonathan",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000159151-B",
+        "name":               "Silbey, Susan S.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000161869-B",
+        "name":               "Woods, Rebecca J. H.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000162546",
+        "local_authority_id": null,
+        "name":               "University of Wisconsin at Madison",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA000164079-B",
+        "name":               "Sociology",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000165738",
+        "local_authority_id": null,
+        "name":               "Tamborini, Marco",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA000166136",
+        "local_authority_id": null,
+        "name":               "Gillan, Caroline",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA006969568",
+        "local_authority_id": null,
+        "name":               "Bipul Ch. Saikia",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA056190624",
+        "local_authority_id": null,
+        "name":               "Capital",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/subjects/sh85019929"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA077080851-B",
+        "name":               "Nance, Susan",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/70868618"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA081181283-B",
+        "name":               "Michelfelder, Diane P.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA106719850",
+        "local_authority_id": null,
+        "name":               "Charles A. Kollmer",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "ORCiD", "value": "https://orcid.org/0000-0001-9014-331X"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA108962630",
+        "local_authority_id": null,
+        "name":               "Cherry Leonardi",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA134548509-B",
+        "name":               "Rajkhowa, Rasna",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "https://www.researchgate.net/profile/Rasna-Rajkhowa"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA145544406",
+        "local_authority_id": null,
+        "name":               "Harlan, Richard",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/27850056"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "",
+        "local_authority_id": "CBA160498744-2",
+        "name":               "Botkin, Sergei",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": ""}],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/794464"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA168558639-B",
+        "name":               "Friedrich, Susanne",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/65118917"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA175447301-B",
+        "name":               "Brierley, Sam",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA188577833-B",
+        "name":               "Agency (philosophy)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "https://en.wikipedia.org/wiki/Agency_(philosophy)"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA191500475-B",
+        "name":               "Podani, János",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA194721455-B",
+        "name":               "Animal studies",
+        "description":        "From Wikipedia (2019): Animal studies is a recently recognized field in which animals are studied in a variety of cross-disciplinary ways. Scholars who engage in animal studies may be formally trained in a number of diverse fields, including geography, art history, anthropology, biology, film studies, geography, history, psychology, literary studies, museology, philosophy, communication, and sociology. They may engage with questions about literal animals, or about notions of \"animality\" or \"brutality,\" employing various theoretical perspectives, including feminism, Marxist theory, and queer theory. Using these perspectives, those who engage in animal studies seek to understand both human-animal relations now and in the past, and to understand animals as beings-in-themselves, separate from our knowledge of them. Because the field is still developing, scholars and others have some freedom to define their own criteria about what issues may structure the field.",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "https://en.wikipedia.org/wiki/Animal_studies"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA204272940",
+        "local_authority_id": null,
+        "name":               "Circus and carnivals",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "Wikipedia", "value": "https://en.wikipedia.org/wiki/Circus"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA205689757-B",
+        "name":               "Tigers",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "Wikipedia", "value": "https://en.wikipedia.org/wiki/Tiger"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA214074587-B",
+        "name":               "Wildlife conservation",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "http://id.loc.gov/authorities/subjects/sh85146731"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "modify existing record",
+        "cba_id":             "CBA220888174",
+        "local_authority_id": null,
+        "name":               "Laos",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/names/n80128712"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA294052235-B",
+        "name":               "Loeb, Avi",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA296635897-B",
+        "name":               "Governance",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA330334586",
+        "local_authority_id": null,
+        "name":               "Expertise",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/subjects/sh88000079"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA381005210",
+        "local_authority_id": null,
+        "name":               "Schilling, Govert",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA447266678",
+        "local_authority_id": null,
+        "name":               "Life sciences",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/subjects/sh85076841"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA454718370",
+        "local_authority_id": null,
+        "name":               "J. R. Humphrey",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA465894292",
+        "local_authority_id": null,
+        "name":               "Sopo, Elina",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA471701051-B",
+        "name":               "Tusks",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "http://id.loc.gov/authorities/subjects/sh85138983"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA584017054",
+        "local_authority_id": null,
+        "name":               "IA. The Journal of the Society for Industrial Archeology",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "https://www.sia-web.org/publications/ia-journal/"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA595823343-B",
+        "name":               "Burton, Saheli Datta",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA691353126",
+        "local_authority_id": null,
+        "name":               "Commodification",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/subjects/sh2011003138"}]
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA734251444",
+        "local_authority_id": null,
+        "name":               "Culture",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URI", "value": "http://id.loc.gov/authorities/subjects/sh85034755"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA744762293-B",
+        "name":               "Alison Mark",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA754795751-B",
+        "name":               "Shibani Bose",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/37653986"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "modify existing record",
+        "cba_id":             "CBA756255678",
+        "local_authority_id": null,
+        "name":               "BJHS Themes",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA788530862",
+        "local_authority_id": null,
+        "name":               "Vouet, Simon",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1590-1649"}],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/56618279"}]
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA789638395-B",
+        "name":               "Program for kulturstudier, Norges forskningsråd",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "http://viaf.org/viaf/291149106029968490850"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA813162731-B",
+        "name":               "Paul G. Keil",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "VIAF", "value": "https://scholar.google.com/citations?user=RZGmGMYAAAAJ&hl=en"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA846448052",
+        "local_authority_id": null,
+        "name":               "Zhang, Joy Y.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA848039956",
+        "local_authority_id": null,
+        "name":               "Pets",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "http://id.loc.gov/authorities/subjects/sh85100482"}]
+      },
+      {
+        "authority_type":     "geographic term",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA850822829-B",
+        "name":               "British Empire",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "Wikipedia", "value": "https://en.wikipedia.org/wiki/British_Empire"}]
+      },
+      {
+        "authority_type":     "serial publication",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA864771713-B",
+        "name":               "Human Ecology: An Interdisciplinary Journal",
+        "description":        "",
+        "attributes":         [{"type": "JournalAbbr", "value": "Hum. Ecol."}],
+        "linked_data":        [{"type": "ISSN", "value": "0300-7839"}]
+      },
+      {
+        "authority_type":     "institution",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA873205827-B",
+        "name":               "Accreditation Board for Engineering and Technology (ABET)",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA913781019-B",
+        "name":               "Ivory industry",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "http://id.loc.gov/authorities/subjects/sh87002521"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA918866726",
+        "local_authority_id": null,
+        "name":               "Ádám Kun",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA956117716",
+        "local_authority_id": null,
+        "name":               "Rhinoceros",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "https://en.wikipedia.org/wiki/Rhinoceros"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA957366374",
+        "local_authority_id": null,
+        "name":               "Tröschel, Hans",
+        "description":        "",
+        "attributes":         [{"type": "BirthToDeathDates", "value": "1585-1628"}],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "person",
+        "action":             "add new record",
+        "cba_id":             null,
+        "local_authority_id": "CBA959793349-B",
+        "name":               "Szilágyi, András",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      },
+      {
+        "authority_type":     "concept",
+        "action":             "modify existing record",
+        "cba_id":             "CBA968339438",
+        "local_authority_id": null,
+        "name":               "Cross-Cultural studies",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        [{"type": "URL", "value": "http://id.loc.gov/authorities/subjects/sh85034273"}]
+      },
+      {
+        "authority_type":     "person",
+        "action":             "modify existing record",
+        "cba_id":             "CBA990122650",
+        "local_authority_id": null,
+        "name":               "Head, William P.",
+        "description":        "",
+        "attributes":         [],
+        "linked_data":        []
+      }
+  ]
+}
