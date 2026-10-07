@@ -142,7 +142,7 @@ def view_imported_dataset(request, dataset_id):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def get_upload_results(request, dataset_id):
     dataset = get_object_or_404(ImportedDataset, id=dataset_id)
-    s3_path = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, dataset.s3_processing_results_file_path) if dataset.s3_processing_results_file_path else None
+    s3_path = settings.UPLOAD_BULK_CHANGE_PATH + dataset.s3_processing_results_file_path
     if not s3_path:
         return JsonResponse({'error': 'No file found'}, status=404)
 
@@ -156,7 +156,7 @@ def get_upload_results(request, dataset_id):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def get_creation_results(request, dataset_id):
     dataset = get_object_or_404(ImportedDataset, id=dataset_id)
-    s3_path = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, dataset.s3_results_file_path) if dataset.s3_results_file_path else None
+    s3_path = settings.UPLOAD_BULK_CHANGE_PATH + dataset.s3_results_file_path
     if not s3_path:
         return JsonResponse({'error': 'No file found'}, status=404)
 
