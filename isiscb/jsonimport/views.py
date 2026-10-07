@@ -175,14 +175,16 @@ def _process_files(citations_file, authorities_file, dataset, user):
     _authorities_file_name = '%s--%s' % (_datestamp, authorities_file.name)
     authorities_s3_path = settings.UPLOAD_BULK_CHANGE_PATH + _authorities_file_name
 
+    _results_name = '%s--%s' % (_datestamp, 'import_results.csv')
+
     dataset.citation_file_name = citations_file.name
     dataset.authority_file_name = authorities_file.name
     dataset.s3_citation_file_path = citations_s3_path
     dataset.s3_authority_file_path = authorities_s3_path
+    dataset.s3_results_file_path = _results_name
     dataset.save()
 
-    _results_name = '%s--%s' % (_datestamp, 'import_results.csv')
-    s3_error_path = _results_name
+    s3_error_path = settings.UPLOAD_BULK_CHANGE_PATH +_results_name
 
     try:
         with smart_open.smart_open(citations_s3_path, 'wb') as f:

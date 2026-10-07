@@ -45,9 +45,7 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
     task.save()
 
     dataset = ImportedDataset.objects.filter(pk=dataset_id).first()
-    dataset.s3_processing_results_file_path = error_path
-    dataset.save()
-
+    
     results = []
   
     tenant = cutil.get_tenant(User.objects.filter(pk=user_id).first())
