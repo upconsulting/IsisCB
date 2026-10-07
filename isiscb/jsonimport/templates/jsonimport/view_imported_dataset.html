@@ -150,7 +150,7 @@
         {{ form.file.errors }}
         <br>
         <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
-        {% if dataset.s3_processing_results_file_path and dataset.import_task.state != 'PENDING' %}
+        {% if dataset.import_task.state != 'PENDING' %}
         &nbsp;&nbsp;
         <small><a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a></small>
         {% endif %}
