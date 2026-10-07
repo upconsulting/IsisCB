@@ -113,7 +113,7 @@ def view_imported_dataset(request, dataset_id):
     authority_page_number = request.GET.get('authority_page')
     authorities_page = authority_paginator.get_page(authority_page_number)
     total_authorities = authorities.count()
-
+     
     context = {
         'curation_section': 'import',
         'dataset': dataset,
@@ -130,9 +130,9 @@ def view_imported_dataset(request, dataset_id):
         'failed_citation_imports': ImportedCitationStatus.objects.filter(dataset=dataset, status=ImportedCitationStatus.Status.ERROR, citation__isnull=True),
         'failed_authority_imports': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=True),
         'imported': Authority.objects.filter(json_import_dataset=dataset).exists() or Citation.objects.filter(json_import_dataset=dataset).exists(),
-        'results_download_path': dataset.s3_results_file_path if dataset.s3_results_file_path else None,
-        'processing_results_download_path': dataset.s3_processing_results_file_path if dataset.s3_processing_results_file_path else None
-    
+        'results_download_path': 'https://%s.s3.amazonaws.com/%s' % (settings.BULK_CHANGE_ERROR_PATH, dataset.s3_results_file_path) if dataset.s3_results_file_path else None,
+        'processing_results_download_path': 'https://%s.s3.amazonaws.com/%s' % (settings.BULK_CHANGE_ERROR_PATH, dataset.s3_processing_results_file_path) if dataset.s3_processing_results_file_path else None
+
     }
 
     template = 'jsonimport/view_imported_dataset.html'
@@ -154,7 +154,7 @@ def _process_files(citations_file, authorities_file, dataset, user):
     dataset.save()
 
     _results_name = '%s--%s' % (_datestamp, 'import_results.csv')
-    s3_error_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
+    s3_error_path = _results_name
 
     try:
         with smart_open.smart_open(citations_s3_path, 'wb') as f:
@@ -202,7 +202,7 @@ def start_record_creation(request, dataset_id):
     _results_name = '%s--%s-%s' % (_datestamp, dataset.id, '_record_creation_results.csv')
     s3_results_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
 
-    dataset.s3_results_file_path = s3_results_path
+    dataset.s3_results_file_path = _results_name
     dataset.save()
 
 
