@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import FileResponse, JsonResponse
 
 import smart_open, tempfile, os, datetime
 import logging
@@ -148,7 +148,7 @@ def get_upload_results(request, dataset_id):
 
     try:
         with smart_open.smart_open(s3_path, 'rb') as f:
-            return f.read().decode('utf-8')
+            return FileResponse(f, as_attachment=True, filename=dataset.s3_processing_results_file_path)
     except Exception as e:
         logger.error("Error retrieving upload results file from S3: %s" % e)
         return JsonResponse({'error': 'Error retrieving file'}, status=404)
@@ -162,7 +162,7 @@ def get_creation_results(request, dataset_id):
 
     try:
         with smart_open.smart_open(s3_path, 'rb') as f:
-            return f.read().decode('utf-8') 
+            return FileResponse(f, as_attachment=True, filename=dataset.s3_results_file_path)
     except Exception as e:
         logger.error("Error retrieving creation results file from S3: %s" % e)
         return JsonResponse({'error': 'Error retrieving file'}, status=500)
