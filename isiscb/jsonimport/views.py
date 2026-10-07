@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
 from django.db import transaction
+from django.http import JsonResponse
 
 import smart_open, tempfile, os, datetime
 import logging
@@ -138,6 +139,33 @@ def view_imported_dataset(request, dataset_id):
     template = 'jsonimport/view_imported_dataset.html'
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_upload_results(request, dataset_id):
+    dataset = get_object_or_404(ImportedDataset, id=dataset_id)
+    s3_path = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, dataset.s3_processing_results_file_path) if dataset.s3_processing_results_file_path else None
+    if not s3_path:
+        return JsonResponse({'error': 'No file found'}, status=404)
+
+    try:
+        with smart_open.smart_open(s3_path, 'rb') as f:
+            return f.read().decode('utf-8')
+    except Exception as e:
+        logger.error("Error retrieving upload results file from S3: %s" % e)
+        return JsonResponse({'error': 'Error retrieving file'}, status=404)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_creation_results(request, dataset_id):
+    dataset = get_object_or_404(ImportedDataset, id=dataset_id)
+    s3_path = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, dataset.s3_results_file_path) if dataset.s3_results_file_path else None
+    if not s3_path:
+        return JsonResponse({'error': 'No file found'}, status=404)
+
+    try:
+        with smart_open.smart_open(s3_path, 'rb') as f:
+            return f.read().decode('utf-8') 
+    except Exception as e:
+        logger.error("Error retrieving creation results file from S3: %s" % e)
+        return JsonResponse({'error': 'Error retrieving file'}, status=500)
 
 def _process_files(citations_file, authorities_file, dataset, user):
     # store file in s3 so we can download when it's being processed

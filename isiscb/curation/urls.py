@@ -177,5 +177,7 @@ urlpatterns = [
     re_path(r'^import/datasets$', import_views.list_imported_datasets , name='list_import_tasks'),
     re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)$', import_views.view_imported_dataset , name='view_imported_dataset'), 
     re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/import$', import_views.start_record_creation , name='start_record_creation'),
-    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/clear$', import_views.clear_imported_dataset , name='clear_imported_dataset')
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/clear$', import_views.clear_imported_dataset , name='clear_imported_dataset'),
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/upload/results$', import_views.get_upload_results , name='get_upload_results_file'),
+    re_path(r'^import/dataset/(?P<dataset_id>[0-9]+)/creation/results$', import_views.get_creation_results , name='get_creation_results_file'),
 ]
