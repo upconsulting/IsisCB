@@ -61,7 +61,7 @@ def list_imported_datasets(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def view_imported_dataset(request, dataset_id):
     if request.method == "POST":
-        form = UploadJsonDataForm(request.POST, request.FILES)
+        form = UploadJsonDataForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             dataset = get_object_or_404(ImportedDataset, pk=dataset_id)
             
@@ -87,7 +87,16 @@ def view_imported_dataset(request, dataset_id):
             
             citations_file = request.FILES['citations_file']
             authorities_file = request.FILES['authorities_file']
-            _process_files(citations_file, authorities_file, dataset, request.user)
+            citations_dataset = form.cleaned_data['citations_dataset']
+            authorities_dataset = form.cleaned_data['authorities_dataset']
+            _process_files(
+                citations_file,
+                authorities_file,
+                dataset,
+                request.user,
+                citations_dataset.id if citations_dataset else None,
+                authorities_dataset.id if authorities_dataset else None,
+            )
 
         return redirect('curation:view_imported_dataset', dataset_id=dataset.pk)
     
@@ -101,27 +110,43 @@ def view_imported_dataset(request, dataset_id):
     authorities = ImportedAuthority.objects.filter(dataset=dataset).order_by('name')
     citations = ImportedCitation.objects.filter(dataset=dataset).order_by('title')
 
+    total_authorities = authorities.count()
+    total_citations = citations.count()
+    authority_error_count = authorities.filter(
+        importedauthoritystatus__status=ImportedAuthorityStatus.Status.ERROR
+    ).distinct().count()
+    citation_error_count = citations.filter(
+        importedcitationstatus__status=ImportedCitationStatus.Status.ERROR
+    ).distinct().count()
+
     if request.GET.get("status") == "error":
         authorities = authorities.filter(importedauthoritystatus__status=ImportedAuthorityStatus.Status.ERROR)
         citations = citations.filter(importedcitationstatus__status=ImportedCitationStatus.Status.ERROR)
+    elif request.GET.get("status") == "no_errors":
+        authorities = authorities.exclude(importedauthoritystatus__status=ImportedAuthorityStatus.Status.ERROR).distinct()
+        citations = citations.exclude(importedcitationstatus__status=ImportedCitationStatus.Status.ERROR).distinct()
 
     citation_paginator = Paginator(citations, 25)
     citation_page_number = request.GET.get('citation_page')
     citations_page = citation_paginator.get_page(citation_page_number)
-    total_citations = citations.count()
     
     authority_paginator = Paginator(authorities, 25)
     authority_page_number = request.GET.get('authority_page')
     authorities_page = authority_paginator.get_page(authority_page_number)
-    total_authorities = authorities.count()
      
     context = {
         'curation_section': 'import',
+        'form': UploadJsonDataForm(user=request.user),
         'dataset': dataset,
         'authorities': authorities_page,
         'citations': citations_page,
+        'status_filter': request.GET.get('status', ''),
         'total_citations': total_citations,
         'total_authorities': total_authorities,
+        'citation_ok_count': total_citations - citation_error_count,
+        'citation_error_count': citation_error_count,
+        'authority_ok_count': total_authorities - authority_error_count,
+        'authority_error_count': authority_error_count,
         'authority_import_status_success_count': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.SUCCESS).count(),
         'authority_import_status_error': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.ERROR, authority__isnull=False),
         'authority_import_status_warnings': ImportedAuthorityStatus.objects.filter(dataset=dataset, status=ImportedAuthorityStatus.Status.WARNING, authority__isnull=False),
@@ -167,7 +192,7 @@ def get_creation_results(request, dataset_id):
         logger.error("Error retrieving creation results file from S3: %s" % e)
         return JsonResponse({'error': 'Error retrieving file'}, status=500)
 
-def _process_files(citations_file, authorities_file, dataset, user):
+def _process_files(citations_file, authorities_file, dataset, user, citations_dataset_id=None, authorities_dataset_id=None):
     # store file in s3 so we can download when it's being processed
     _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     _citations_file_name = '%s--%s' % (_datestamp, citations_file.name)
@@ -211,7 +236,16 @@ def _process_files(citations_file, authorities_file, dataset, user):
     dataset.save()
 
     logger.error("Authorities file: %s, Citations file: %s" % (authorities_s3_path, citations_s3_path))
-    import_records.delay(authorities_s3_path, citations_s3_path, s3_error_path, dataset.id, task.pk, user.id)
+    import_records.delay(
+        authorities_s3_path,
+        citations_s3_path,
+        s3_error_path,
+        dataset.id,
+        task.pk,
+        user.id,
+        authorities_dataset_id,
+        citations_dataset_id,
+    )
 
 @require_POST
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

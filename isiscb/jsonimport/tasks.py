@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 NEW_RECORD_ACTION = "add new record"
 
 @shared_task
-def import_records(authorities_file_path, citations_file_path, error_path, dataset_id, task_id, user_id):
+def import_records(authorities_file_path, citations_file_path, error_path, dataset_id, task_id, user_id, authority_default_dataset_id=None, citation_default_dataset_id=None):
    
     logging.info('Importing JSON records from %s and %s.' % (citations_file_path, authorities_file_path))
 
@@ -129,14 +129,30 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
     for authority_info in authority_items:
         # we only add new records for now
         if authority_info.get("action") == NEW_RECORD_ACTION:
-            _create_imported_authority(user, task, results, dataset, auth_map, authority_info)
+            _create_imported_authority(
+                user,
+                task,
+                results,
+                dataset,
+                auth_map,
+                authority_info,
+                authority_default_dataset_id,
+            )
         
     
     # create citations
     for citation_data in citation_items:
         # we only create new records for now
         if citation_data.get("action") == NEW_RECORD_ACTION:
-            citation = _create_imported_citation(user, task, results, dataset, citations_by_id, citation_data)
+            citation = _create_imported_citation(
+                user,
+                task,
+                results,
+                dataset,
+                citations_by_id,
+                citation_data,
+                citation_default_dataset_id,
+            )
             if citation:
                 for ac_data in citation_data.get('author') or []:
                     _create_ac_relation(ac_data, auth_map, citation, results, type_controlled=ACRelation.AUTHOR)
@@ -176,7 +192,7 @@ def import_records(authorities_file_path, citations_file_path, error_path, datas
         dataset.save()
         task.save()
 
-def _create_imported_citation(user, task, results, dataset, cit_map, citation_data):
+def _create_imported_citation(user, task, results, dataset, cit_map, citation_data, default_dataset_id=None):
     try:
         title = citation_data.get('title') or ''
         local_id = citation_data.get('local_citation_id')
@@ -213,7 +229,9 @@ def _create_imported_citation(user, task, results, dataset, cit_map, citation_da
             physical_details=citation_data.get('physical_details') or '',
         )
 
-        cit.belongs_to = _get_belongs_to(citation_data.get('belongs_to'), dataset, user, cit, results)
+        cit.belongs_to = _get_belongs_to(
+            citation_data.get('belongs_to'), dataset, user, cit, results, default_dataset_id
+        )
 
         if create_subtype_warning:
             _create_imported_citation_status(dataset, ImportedCitationStatus.Status.WARNING, subtype_warning_message, results, cit)
@@ -280,7 +298,7 @@ def _get_citation_type(cit_type):
     }
     return resource_types.get(cit_type.lower(), "")
 
-def _create_imported_authority(user, task, results, dataset, auth_map, authority_data):
+def _create_imported_authority(user, task, results, dataset, auth_map, authority_data, default_dataset_id=None):
     try:
         name = authority_data.get('name', '')
         type_controlled = _get_authority_type(authority_data.get('authority_type'))
@@ -309,13 +327,15 @@ def _create_imported_authority(user, task, results, dataset, auth_map, authority
                 classification_system_object=class_system,
                 classification_code=authority_data.get('classification_code') or '',
                 record_status=_get_authority_record_status(authority_data.get('record_status', "inactive")),
-                personal_name_last=authority_data.get('personal_name_last') or '',
-                personal_name_first=authority_data.get('personal_name_first') or '',
-                personal_name_suffix=authority_data.get('personal_name_suffix') or '',
-                personal_name_preferred=authority_data.get('personal_name_preferred') or ''
+                personal_name_last=authority_data.get('last_name') or '',
+                personal_name_first=authority_data.get('first_name') or '',
+                personal_name_suffix=authority_data.get('name_suffix') or '',
+                personal_name_preferred=authority_data.get('name_preferred') or ''
             )
 
-        auth.belongs_to = _get_belongs_to(authority_data.get('belongs_to'), dataset, user, auth, results)
+        auth.belongs_to = _get_belongs_to(
+            authority_data.get('belongs_to'), dataset, user, auth, results, default_dataset_id
+        )
         for attr in authority_data.get('attributes') or []:
             _create_authority_attribute(attr.get('type'), attr.get('value'), auth, dataset, results)
 
@@ -401,7 +421,10 @@ def _get_default_classification_system(user, authority_type):
     class_system = ClassificationSystem.objects.filter(default_for__contains=[authority_type])
     return class_system.first() if class_system.exists() else None
 
-def _get_belongs_to(dataset_name, dataset, user, record, results):
+def _get_belongs_to(dataset_name, dataset, user, record, results, default_dataset_id=None):
+    if isinstance(dataset_name, str):
+        dataset_name = dataset_name.strip() or None
+
     # get datasets user has access to
     accessible_datasets = permissions_util.get_writable_datasets(user)
 
@@ -421,11 +444,20 @@ def _get_belongs_to(dataset_name, dataset, user, record, results):
     if dataset_name is not None and ds_queryset.filter(name=dataset_name).exists():
         return ds_queryset.filter(name=dataset_name).first()
 
+    if dataset_name is None and default_dataset_id is not None:
+        default_dataset = ds_queryset.filter(pk=default_dataset_id).first()
+        if default_dataset:
+            if isinstance(record, ImportedAuthority):
+                _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.INFO, f'No dataset specified for authority {record.name} with local id {record.local_dataset_id}. Used selected default dataset: {default_dataset.name}.', results, record)
+            else:
+                _create_imported_citation_status(dataset, ImportedCitationStatus.Status.INFO, f'No dataset specified for citation {record.title} with local id {record.local_dataset_id}. Used selected default dataset: {default_dataset.name}.', results, record)
+            return default_dataset
+
     if dataset_name is not None:
         if isinstance(record, ImportedAuthority):
-            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.WARNING, f'Could not find dataset with name {dataset_name} for authority {record.name} with local id {record.local_dataset_id}. Used first available dataset: {ds_queryset.first().name}.', results, record)
+            _create_imported_authority_status(dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not find dataset with name {dataset_name} for authority {record.name} with local id {record.local_dataset_id}. Used first available dataset: {ds_queryset.first().name}.', results, record)
         else:
-            _create_imported_citation_status(dataset, ImportedCitationStatus.Status.WARNING, f'Could not find dataset with name {dataset_name} for citation {record.title} with local id {record.local_dataset_id}. Used first available dataset: {ds_queryset.first().name}.', results, record)
+            _create_imported_citation_status(dataset, ImportedCitationStatus.Status.ERROR, f'Could not find dataset with name {dataset_name} for citation {record.title} with local id {record.local_dataset_id}. Used first available dataset: {ds_queryset.first().name}.', results, record)
         
         return ds_queryset.first()
 

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from jsonimport.forms import UploadJsonDataForm
 from jsonimport.models import (
     ImportedACRelation,
     ImportedAttribute,
@@ -19,14 +20,15 @@ from jsonimport.tasks import (
     _create_linkeddata,
     _get_authority_record_status,
     _get_authority_type,
+    _get_belongs_to,
     _get_citation_type,
 )
-from isisdata.models import ACRelation, AttributeType, Authority, CharValue, Citation, LinkedDataType, Tenant
+from isisdata.models import ACRelation, AttributeType, Authority, CharValue, Citation, Dataset, LinkedDataType, Tenant
 
 
 class JsonImportTasksTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='import-tester', password='testpass')
+        self.user = User.objects.create_superuser(username='import-tester', password='testpass')
         self.tenant = Tenant.objects.create(
             name='Test Tenant',
             title='Test Tenant',
@@ -35,6 +37,11 @@ class JsonImportTasksTests(TestCase):
         self.dataset = ImportedDataset.objects.create(
             name='Test dataset',
             created_by=self.user,
+            owning_tenant=self.tenant,
+        )
+        self.explore_dataset = Dataset.objects.create(
+            name='Explore Dataset',
+            description='Dataset used for import defaults',
             owning_tenant=self.tenant,
         )
         self.char_type = AttributeType.objects.create(
@@ -166,3 +173,73 @@ class JsonImportTasksTests(TestCase):
         self.assertEqual(relation.existing_authority, authority)
         self.assertEqual(relation.type_controlled, ACRelation.AUTHOR)
         self.assertEqual(results[0][0], 'SUCCESS')
+
+    def test_upload_form_lists_user_writable_datasets(self):
+        form = UploadJsonDataForm(user=self.user)
+
+        self.assertIn(self.explore_dataset, form.fields['citations_dataset'].queryset)
+        self.assertIn(self.explore_dataset, form.fields['authorities_dataset'].queryset)
+
+    def test_selected_default_dataset_is_used_when_record_has_no_dataset(self):
+        authority = ImportedAuthority.objects.create(
+            name='Default Dataset Authority',
+            dataset=self.dataset,
+            local_dataset_id='AUTH-DEFAULT',
+            type_controlled=Authority.PERSON,
+        )
+        results = []
+
+        belongs_to = _get_belongs_to(
+            None,
+            self.dataset,
+            self.user,
+            authority,
+            results,
+            self.explore_dataset.pk,
+        )
+
+        self.assertEqual(belongs_to, self.explore_dataset)
+        self.assertIn('selected default dataset', results[0][3])
+
+    def test_selected_default_dataset_is_used_for_blank_record_dataset(self):
+        authority = ImportedAuthority.objects.create(
+            name='Blank Dataset Authority',
+            dataset=self.dataset,
+            local_dataset_id='AUTH-BLANK',
+            type_controlled=Authority.PERSON,
+        )
+
+        belongs_to = _get_belongs_to(
+            '  ',
+            self.dataset,
+            self.user,
+            authority,
+            [],
+            self.explore_dataset.pk,
+        )
+
+        self.assertEqual(belongs_to, self.explore_dataset)
+
+    def test_record_dataset_overrides_selected_default(self):
+        record_dataset = Dataset.objects.create(
+            name='Record Dataset',
+            description='Dataset specified on the record',
+            owning_tenant=self.tenant,
+        )
+        authority = ImportedAuthority.objects.create(
+            name='Explicit Dataset Authority',
+            dataset=self.dataset,
+            local_dataset_id='AUTH-EXPLICIT',
+            type_controlled=Authority.PERSON,
+        )
+
+        belongs_to = _get_belongs_to(
+            record_dataset.name,
+            self.dataset,
+            self.user,
+            authority,
+            [],
+            self.explore_dataset.pk,
+        )
+
+        self.assertEqual(belongs_to, record_dataset)

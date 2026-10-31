@@ -145,8 +145,32 @@
     {% if not dataset.import_task or dataset.import_task.state == 'FAILED' %}
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        Citations: <input required type="file" name="citations_file" id="file" class="btn inputfile" />
-        Authorities: <input required type="file" name="authorities_file" id="file" class="btn inputfile" />
+        <div class="row">
+            <div class="col-sm-6 form-group">
+                <p>
+                <label style="font-weight: bold;" for="id_citations_file">Citations file</label>
+                {{ form.citations_file }}
+                {{ form.citations_file.errors }}
+                </p>
+                <p>
+                <label style="font-weight: bold;" for="id_citations_dataset">Default dataset for citations without a dataset</label>
+                {{ form.citations_dataset }}
+                {{ form.citations_dataset.errors }}
+                </p>
+            </div>
+            <div class="col-sm-6 form-group">
+                <p>
+                <label style="font-weight: bold;" for="id_authorities_file">Authorities file</label>
+                {{ form.authorities_file }}
+                {{ form.authorities_file.errors }}
+                </p>
+                <p>
+                <label style="font-weight: bold;" for="id_authorities_dataset">Default dataset for authorities without a dataset</label>
+                {{ form.authorities_dataset }}
+                {{ form.authorities_dataset.errors }}
+                </p>
+            </div>
+        </div>
         {{ form.file.errors }}
         <br>
         <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
@@ -297,14 +321,14 @@
 <div class="panel panel-default small" x-data="{
     paramName: 'status', // The name of your URL parameter
     
-    handleReload(event) {
+    handleReload(event, status) {
         // 1. Get the current URL
         let url = new URL(window.location.href);
         
         // 2. Add or remove the parameter based on the checkbox state
         if (event.target.checked) {
-            url.searchParams.set(this.paramName, 'error');
-        } else {
+            url.searchParams.set(this.paramName, status);
+        } else if (url.searchParams.get(this.paramName) === status) {
             url.searchParams.delete(this.paramName);
         }
         
@@ -315,14 +339,25 @@
     <div class="panel-heading">
         <label>
             <input type="checkbox" 
-                :checked="new URLSearchParams(window.location.search).has(paramName)"
-                @change="handleReload($event)">
+                :checked="new URLSearchParams(window.location.search).get(paramName) === 'error'"
+                @change="handleReload($event, 'error')">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
             Show only records with errors
+        </label>
+        <label style="margin-left: 15px;">
+            <input type="checkbox"
+                :checked="new URLSearchParams(window.location.search).get(paramName) === 'no_errors'"
+                @change="handleReload($event, 'no_errors')">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            Show only records with no errors
         </label>
     </div>
 </div>
 
 <h3>Citations</h3>
+<p class="small text-muted">
+    {{ citation_ok_count }} OK, {{ citation_error_count }} with errors out of {{ total_citations }} citations.
+</p>
 <table class="table table-striped small">
     {% for citation in citations %}
         <tr>
@@ -474,8 +509,8 @@
         <div class="pagination">
             <span class="step-links">
                 {% if citations.has_previous %}
-                    <a href="?authority_page={{ authorities.number }}&citation_page=1">&laquo; first</a>
-                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.previous_page_number }}">previous</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; first</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">previous</a>
                 {% endif %}
 
                 <span class="current">
@@ -483,8 +518,8 @@
                 </span>
 
                 {% if citations.has_next %}
-                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.next_page_number }}">next</a>
-                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.paginator.num_pages }}">last &raquo;</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">next</a>
+                    <a href="?authority_page={{ authorities.number }}&citation_page={{ citations.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">last &raquo;</a>
                 {% endif %}
             </span>
         </div>
@@ -493,6 +528,9 @@
 </table>
 
 <h3>Authorities</h3>
+<p class="small text-muted">
+    {{ authority_ok_count }} OK, {{ authority_error_count }} with errors out of {{ total_authorities }} authorities.
+</p>
 <table class="table table-striped small">
     {% for authority in authorities %}
         <tr>
@@ -515,8 +553,8 @@
                         Explore Dataset: {{ authority.belongs_to.name|default:""}}
                         <br>
                         {% if authority.type_controlled == "PE" %}
-                            Last name: {{ authority.personal_last_name }}<br>
-                            First name: {{ authority.personal_first_name }}<br>
+                            Last name: {{ authority.personal_name_last }}<br>
+                            First name: {{ authority.personal_name_first }}<br>
                         {% endif %}
                         {% for attribute in authority.get_attributes %}
                             {{ attribute.attribute_type.name }}: {{ attribute.value }}<br>
@@ -547,8 +585,8 @@
         <div class="pagination">
             <span class="step-links">
                 {% if authorities.has_previous %}
-                    <a href="?citation_page={{ citations.number }}&authority_page=1">&laquo; first</a>
-                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.previous_page_number }}">previous</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; first</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">previous</a>
                 {% endif %}
 
                 <span class="current">
@@ -556,8 +594,8 @@
                 </span>
 
                 {% if authorities.has_next %}
-                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.next_page_number }}">next</a>
-                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.paginator.num_pages }}">last &raquo;</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">next</a>
+                    <a href="?citation_page={{ citations.number }}&authority_page={{ authorities.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">last &raquo;</a>
                 {% endif %}
             </span>
         </div>

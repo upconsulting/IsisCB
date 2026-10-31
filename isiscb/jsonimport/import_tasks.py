@@ -200,7 +200,11 @@ def _create_authority(dataset, tenant, user, authority_mapping, imported_authori
                     )
     
     _add_record_history_note(authority, imported_authority.local_dataset_id, Authority)
-    
+
+    ctype = ContentType.objects.get_for_model(Authority)
+    for attribute in imported_authority.get_attributes():
+        _create_attribute(attribute, ctype, authority.id)
+
     authority_mapping[imported_authority.id] = authority
 
     _create_linked_data(imported_authority, authority, Authority)
