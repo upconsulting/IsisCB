@@ -173,7 +173,7 @@ def _create_citation(dataset, tenant, user, authority_mapping, citation_mapping,
 
     _create_linked_data(imported_citation, citation, Citation)
     
-    results.append((imported_citation.local_dataset_id, citation.id, 'Citation', citation.title, 'Created successfully'))   
+    results.append((imported_citation.local_dataset_id, citation.id, 'Citation', f'"{citation.title}"', 'Created successfully'))   
 
 def _create_authority(dataset, tenant, user, authority_mapping, imported_authority, results):
     if imported_authority.type_controlled == Authority.PERSON:
@@ -209,7 +209,7 @@ def _create_authority(dataset, tenant, user, authority_mapping, imported_authori
 
     _create_linked_data(imported_authority, authority, Authority)
 
-    results.append((imported_authority.local_dataset_id, authority.id, 'Authority', authority.name, 'Created successfully'))
+    results.append((imported_authority.local_dataset_id, authority.id, 'Authority', f'"{authority.name}"', 'Created successfully'))
 
 def _create_linked_data(imported_object, record, model):
     # get source content type (authority in this case)
