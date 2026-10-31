@@ -58,10 +58,10 @@
 </div>
 {% endif %}
 
-<h2>Imported Dataset: {{ dataset.name }}</h2>
+<h2>Import Set: {{ dataset.name }}</h2>
 <table class="table table-striped small">
     <tr>
-        <td>Name:</td>
+        <td>Imported Dataset Name:</td>
         <td>{{ dataset.dataset_name|default:"" }}</td>
     </tr>
     <tr>
@@ -509,6 +509,8 @@
                 
                     <div x-show="open" style="background-color: white;">
                         Classification system: {{ authority.get_classification_system_display }}
+                        <br>
+                        Classification code: {{ authority.classification_code }}
                         <br>
                         Explore Dataset: {{ authority.belongs_to.name|default:""}}
                         <br>
