@@ -41,6 +41,104 @@
         background-color: #def3e3;
         border-radius: 3px;
         }
+
+    .import-upload-panel {
+        padding: 18px 20px;
+        border-color: #cbd9df;
+        background-color: #f5f8fa;
+    }
+
+    .import-upload-heading {
+        margin: 0 0 16px;
+        color: #243b45;
+        font-size: 17px;
+    }
+
+    .import-file-group {
+        padding: 10px 12px 6px;
+        border: 1px solid #d5dfe3;
+        background: #fff;
+    }
+
+    .import-file-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #344c55;
+        font-weight: 600;
+    }
+
+    .import-file-group input[type="file"] {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .import-file-group select {
+        max-width: 100%;
+        margin-bottom: 2px;
+    }
+
+    .import-file-hint {
+        display: block;
+        margin: -2px 0 7px;
+        color: #63747b;
+    }
+
+    .import-upload-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 16px;
+    }
+
+    .import-create-panel {
+        border-color: #cbd9df;
+    }
+
+    .import-create-panel > .panel-heading {
+        padding: 12px 15px;
+        border-color: #cbd9df;
+        background-color: #edf2f2;
+        color: #243b45;
+    }
+
+    .import-create-heading {
+        margin: 0;
+        font-size: 17px;
+    }
+
+    .import-create-panel > .panel-body {
+        padding: 16px;
+        background-color: #fff;
+    }
+
+    .import-create-links a {
+        display: inline-block;
+        margin: 0 16px 8px 0;
+    }
+
+    .import-create-error {
+        margin: 8px 0 12px;
+        padding: 10px 12px;
+        border-left: 3px solid #a94442;
+        background-color: #f9eeee;
+    }
+
+    @media (max-width: 767px) {
+        .import-upload-panel {
+            padding: 14px;
+        }
+
+        .import-file-group {
+            margin-bottom: 12px;
+        }
+
+        .import-upload-actions {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -140,44 +238,42 @@
 </form>
 {% endif %}
 
-<div class="alert alert-info">
-    <div style="padding-bottom: 10px;"><b>Step 1: Upload Files</b></div>
+<div class="alert alert-info import-upload-panel">
+    <h3 class="import-upload-heading"><i class="fas fa-upload" aria-hidden="true"></i> Step 1: Upload Files</h3>
     {% if not dataset.import_task or dataset.import_task.state == 'FAILED' %}
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row">
             <div class="col-sm-6 form-group">
-                <p>
-                <label style="font-weight: bold;" for="id_citations_file">Citations file</label>
+                <div class="import-file-group">
+                <label for="id_citations_file">Citations file</label>
                 {{ form.citations_file }}
                 {{ form.citations_file.errors }}
-                </p>
-                <p>
-                <label style="font-weight: bold;" for="id_citations_dataset">Default dataset for citations without a dataset</label>
+                <label for="id_citations_dataset">Default dataset</label>
+                <small class="import-file-hint">Used when a citation has no dataset specified.</small>
                 {{ form.citations_dataset }}
                 {{ form.citations_dataset.errors }}
-                </p>
+                </div>
             </div>
             <div class="col-sm-6 form-group">
-                <p>
-                <label style="font-weight: bold;" for="id_authorities_file">Authorities file</label>
+                <div class="import-file-group">
+                <label for="id_authorities_file">Authorities file</label>
                 {{ form.authorities_file }}
                 {{ form.authorities_file.errors }}
-                </p>
-                <p>
-                <label style="font-weight: bold;" for="id_authorities_dataset">Default dataset for authorities without a dataset</label>
+                <label for="id_authorities_dataset">Default dataset</label>
+                <small class="import-file-hint">Used when an authority has no dataset specified.</small>
                 {{ form.authorities_dataset }}
                 {{ form.authorities_dataset.errors }}
-                </p>
+                </div>
             </div>
         </div>
         {{ form.file.errors }}
-        <br>
-        <button class="btn btn-xs btn-primary" type="submit">Upload Files</button>
+        <div class="import-upload-actions">
+        <button class="btn btn-primary" type="submit"><i class="fas fa-upload" aria-hidden="true"></i> Upload Files</button>
         {% if dataset.import_task.state != 'PENDING' %}
-        &nbsp;&nbsp;
         <small><a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a></small>
         {% endif %}
+        </div>
     </form>
     {% else %}
         <i class="fas fa-check-double"></i> Files have been imported into Explore. Please create a new dataset to import more records. <br>
@@ -282,36 +378,35 @@
 </div>
 {% endif %}
 
-<div class="panel panel-warning">
+<div class="panel panel-default import-create-panel">
     <div class="panel-heading">
-        <div style="padding-bottom: 10px;"><b>Step 2: Create Records</b></div>
+        <h3 class="import-create-heading"><i class="fas fa-database" aria-hidden="true"></i> Step 2: Create Records</h3>
+    </div>
+    <div class="panel-body">
         {% if dataset.import_task and dataset.import_task.state == 'PENDING' %}
-            Records are queued for import into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.
+            <p><i class="fas fa-clock" aria-hidden="true"></i> Records are queued for import into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'PROCESSING' %}
-            Records are being imported into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.
+            <p><i class="fas fa-spinner" aria-hidden="true"></i> Records are being imported into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'COMPLETED' %}
-            <i class="fas fa-exclamation-triangle"></i> Records have been imported for this dataset. <br>
-            <div class="panel-body">
-                <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported authorities.</a><br>
-                <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-paperclip"></i> See the imported citations.</a><br>
-                {% if processing_results_download_path %}<br><a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results.</a><br>{% endif %}
+            <p><i class="fas fa-check-circle" aria-hidden="true"></i> Records have been imported for this import set.</p>
+            <div class="import-create-links">
+                <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-users"></i> See imported authorities</a>
+                <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-book"></i> See imported citations</a>
+                {% if processing_results_download_path %}<a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a>{% endif %}
                 {% if results_download_path %}<a href="{% url 'curation:get_creation_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download import results.</a>{% endif %}
-                
             </div>
 
         {% else %}
             {% if dataset.import_task and dataset.import_task.state == 'FAILED' %}
-            <i class="fas fa-exclamation-circle"></i> There were errors importing this dataset:
-            <div class="small" style="padding-top: 10px; padding-bottom: 10px;">{{ dataset.dataset_import_errors }}</div>
-            <p>Try again?</p>
+            <p><i class="fas fa-exclamation-circle" aria-hidden="true"></i> There were errors importing this import set:</p>
+            <div class="small import-create-error">{{ dataset.dataset_import_errors }}</div>
+            <p>Review the errors, then try again.</p>
             {% else %}
-            <p>
-                All looking good? Click the button below to start creating records in the system based on this imported dataset. 
-            </p>
+            <p>Start creating Explore records from the uploaded citations and authorities.</p>
             {% endif %}
             <form method="post" action="{% url 'curation:start_record_creation' dataset.id %}">
                 {% csrf_token %}
-                <button class="btn btn-success btn-sm" type="submit">Start Importing Records</button>
+                <button class="btn btn-success" type="submit"><i class="fas fa-play" aria-hidden="true"></i> Start Importing Records</button>
             </form>
         {% endif %}
     </div>
