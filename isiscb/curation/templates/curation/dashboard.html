@@ -9,12 +9,47 @@
     <p>
       Use the top menu entry "Datasets" to get to a list of all citations or authorities. You can edit and create records from there. Use the menu entry "Zotero" to add new records to IsisCB using an Zotero RDF export.
     </p>
-    <p>
+    <!-- <p>
       <a class="btn btn-primary" href="{% url 'curation:citation_list' %}">Curate Citations</a>
       <a class="btn btn-primary" href="{% url 'curation:authority_list' %}">Curate Authorities</a>
       <a class="btn btn-primary" href="{% url 'curation:create_imported_dataset' %}">Create New Import Set</a>
       <a class="btn btn-primary" href="{% url 'accessions' %}">Import from Zotero</a>
-    </p>
+    </p> -->
+    <a class="dashboard-action" href="{% url 'curation:citation_list' %}">
+      <span class="dashboard-action-icon" aria-hidden="true"><i class="fa fa-book"></i></span>
+      <span class="dashboard-action-copy">
+        <strong>Curate Citations</strong>
+        <span>Find, create, and edit citation records.</span>
+      </span>
+      <i class="fa fa-angle-right dashboard-action-arrow" aria-hidden="true"></i>
+    </a>
+    <br>
+    <a class="dashboard-action" href="{% url 'curation:authority_list' %}">
+      <span class="dashboard-action-icon" aria-hidden="true"><i class="fa fa-users"></i></span>
+      <span class="dashboard-action-copy">
+        <strong>Curate Authorities</strong>
+        <span>Manage people, organizations, and subjects.</span>
+      </span>
+      <i class="fa fa-angle-right dashboard-action-arrow" aria-hidden="true"></i>
+    </a>
+    <br>
+    <a class="dashboard-action dashboard-action-import" href="{% url 'curation:create_imported_dataset' %}">
+      <span class="dashboard-action-icon" aria-hidden="true"><i class="fa fa-folder-open"></i></span>
+      <span class="dashboard-action-copy">
+        <strong>Create New Import Set</strong>
+        <span>Start a structured data import.</span>
+      </span>
+      <i class="fa fa-angle-right dashboard-action-arrow" aria-hidden="true"></i>
+    </a>
+    <br>
+    <a class="dashboard-action dashboard-action-zotero" href="{% url 'accessions' %}">
+      <span class="dashboard-action-icon" aria-hidden="true"><i class="fa fa-cloud-download"></i></span>
+      <span class="dashboard-action-copy">
+        <strong>Import from Zotero</strong>
+        <span>Bring records in from a Zotero export.</span>
+      </span>
+      <i class="fa fa-angle-right dashboard-action-arrow" aria-hidden="true"></i>
+    </a>
   </div>
 </div>
 
