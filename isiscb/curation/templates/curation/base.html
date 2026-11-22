@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="{% static "curation/css/curation.css" %}" />
         <link rel="stylesheet" href="{% static "curation/css/multi-select.css" %}" />
         <link rel="stylesheet" href="{% static "curation/css/bootcomplete.css" %}" />
-        <script src="https://kit.fontawesome.com/bd50fe44dc.js" crossorigin="anonymous"></script>
+        <!--<script src="https://kit.fontawesome.com/bd50fe44dc.js" crossorigin="anonymous"></script>-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js" crossorigin="anonymous"></script>
 
         <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
@@ -72,6 +72,13 @@
         {% endif %}
         {% block extrahead %}
         {% endblock %}
+
+      <link href="{% static "curation/fontawesome7.3.1/css/fontawesome.css" %}" rel="stylesheet" />
+      <link href="{% static "curation/fontawesome7.3.1/css/brands.css" %}" rel="stylesheet" />
+      <link href="{% static "curation/fontawesome7.3.1/css/solid.css" %}" rel="stylesheet" />
+      <link href="{% static "curation/fontawesome7.3.1/css/sharp-thin.css" %}" rel="stylesheet" />
+      <link href="{% static "curation/fontawesome7.3.1/css/sharp-duotone-thin.css" %}" rel="stylesheet" />
+
     </head>
     <body>
       <nav class="navbar navbar-default navbar-fixed-top" style="position:sticky">

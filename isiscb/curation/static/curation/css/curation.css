@@ -16,6 +16,16 @@ a {
     color: #032544;
 }
 
+.dashboard-action {
+    font-size:1.3em;
+    color: #032544;
+}
+
+.table-import-sets {
+    font-size: 0.9em;
+    padding: 5px;
+}
+
 .phaedra-colors .label {
   color: #444;
   font-weight: normal;
@@ -406,3 +416,4 @@ label {
 .curation-tabs {
     font-size: 9pt;
 }
+
