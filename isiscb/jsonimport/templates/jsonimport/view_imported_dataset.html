@@ -384,9 +384,9 @@
     </div>
     <div class="panel-body">
         {% if dataset.import_task and dataset.import_task.state == 'PENDING' %}
-            <p><i class="fas fa-clock" aria-hidden="true"></i> Records are queued for import into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.</p>
+            <p><i class="fas fa-clock" aria-hidden="true"></i> Records are queued for import into Explore. This may take a few minutes. If this page does not refresh automatically, please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'PROCESSING' %}
-            <p><i class="fas fa-spinner" aria-hidden="true"></i> Records are being imported into Explore. This may take a few minutes. Please refresh the page after a little while to see the results.</p>
+            <p><i class="fas fa-spinner" aria-hidden="true"></i> Records are being imported into Explore. This may take a few minutes. If this page does not refresh automatically, please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'COMPLETED' %}
             <p><i class="fas fa-check-circle" aria-hidden="true"></i> Records have been imported for this import set.</p>
             <div class="import-create-links">
@@ -641,7 +641,7 @@
                     <a x-on:click="open = ! open"><i class="fas fa-caret-down"></i> {{ authority.name }} ({{ authority.local_dataset_id }})</a>
                 
                     <div x-show="open" style="background-color: white;">
-                        Classification system: {{ authority.get_classification_system_display }}
+                        Classification system: {{ authority.classification_system_object.name|default:"" }}
                         <br>
                         Classification code: {{ authority.classification_code }}
                         <br>

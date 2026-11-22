@@ -529,11 +529,22 @@ def _create_linkeddata(data, subject, results):
         elif type(subject) == ImportedCitation:
             _create_imported_citation_status(subject.dataset, ImportedCitationStatus.Status.ERROR, f'Could not create linked data for citation "{subject.title}" with local id {subject.local_dataset_id}. Invalid linked data type specified: {data.get("type")}. Linked data not created.', results, subject)
             return
-    
+
+    if not data.get("value"):
+        if type(subject) == ImportedAuthority:
+            _create_imported_authority_status(subject.dataset, ImportedAuthorityStatus.Status.ERROR, f'Could not create linked data for authority "{subject.name}" with local id {subject.local_dataset_id}. No value specified.', results, subject)
+            return
+        elif type(subject) == ImportedCitation:
+            _create_imported_citation_status(subject.dataset, ImportedCitationStatus.Status.ERROR, f'Could not create linked data for citation "{subject.title}" with local id {subject.local_dataset_id}. No value specified.', results, subject)
+            return
+
     ImportedLinkedData.objects.create(
         subject = subject,
         universal_resource_name = data.get("value"),
-        type_controlled = ldtype
+        type_controlled = ldtype,
+        resource_name = data.get("resource_name") or "",
+        url = data.get("url") or "",
+        description = data.get("description") or ""
     )
 
 def _create_ac_relation(data, authority_map, citation, results, type_controlled=None):
