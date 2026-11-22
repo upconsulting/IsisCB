@@ -812,6 +812,11 @@ class AuthorityValue(Value):
     value = models.ForeignKey('Authority', on_delete=models.CASCADE)
     name = models.TextField(blank=True, null=True)
 
+    def __setattr__(self, name, value):
+        if name == 'value' and isinstance(value, str):
+            value = self.convert(value)
+        super(AuthorityValue, self).__setattr__(name, value)
+
     def __unicode__(self):
         return str(self.value)
 
