@@ -200,7 +200,7 @@ def _process_files(citations_file, authorities_file, dataset, user, citations_da
     _authorities_file_name = '%s--%s' % (_datestamp, authorities_file.name)
     authorities_s3_path = settings.UPLOAD_BULK_CHANGE_PATH + _authorities_file_name
 
-    _results_name = '%s--%s' % (_datestamp, 'import_results.csv')
+    _results_name = '%s--%s' % (_datestamp, 'upload_processing_results.csv')
 
     dataset.citation_file_name = citations_file.name
     dataset.authority_file_name = authorities_file.name
@@ -252,6 +252,10 @@ def _process_files(citations_file, authorities_file, dataset, user, citations_da
 def start_record_creation(request, dataset_id):
 
     dataset = get_object_or_404(ImportedDataset, pk=dataset_id)
+
+    if dataset.import_task:
+        if dataset.import_task.state in [AsyncTask.STATE_PENDING, AsyncTask.STATE_PROCESSING]:
+            return redirect('curation:view_imported_dataset', dataset_id=dataset_id)
             
     task = AsyncTask.objects.create()
     task.value = dataset.name
@@ -263,7 +267,7 @@ def start_record_creation(request, dataset_id):
     dataset.import_task = task
     
     _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    _results_name = '%s--%s-%s' % (_datestamp, dataset.id, '_record_creation_results.csv')
+    _results_name = '%s--%s-%s' % (_datestamp, dataset.id, '_import_into_explore_results.csv')
     s3_results_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
 
     dataset.s3_results_file_path = _results_name

@@ -12,11 +12,13 @@
 {{ datasets.count }} total imports.
 <table class="table table-striped table-import-sets">
     {% for dataset in datasets %}
-        <tr {% if dataset.dataset_status == "COMPLETE" %} class="success"{% endif %}>
+        <tr {% if dataset.dataset_status == "COMPLETE" %} class="success"{% endif %}
+            {% if dataset.dataset_status == "IMPORTED" %} class="warning"{% endif %}>
             <td>
                 {% if dataset.dataset_status == "COMPLETE" %}<i class="fa-solid fa-check-to-slot" title="Records have been imported into Explore and intermediate records have been cleaned up."></i>{% endif %}
-                {% if dataset.dataset_status == "RECORDS_IMPORTED" %}<i class="fa-solid fa-check" title="Records have been imported into Explore, but intermediate records have not yet been cleaned up."></i>{% endif %}
-                {% if dataset.dataset_status == "IMPORTING" %}<i class="fa-solid fa-spinner fa-spin" title="Records are being imported into Explore."></i>{% endif %}
+                {% if dataset.dataset_status == "IMPORTED" %}<i class="fa-solid fa-check" title="Records have been imported into Explore, but intermediate records have not yet been cleaned up."></i>{% endif %}
+                {% if dataset.dataset_status == "RECORDS_IMPORTED" %}<i class="fa-solid fa-list-check" title="Records have been uploaded. They can be imported into Explore after validation."></i>{% endif %}
+                {% if dataset.import_task and dataset.import_task.state == AsyncTask.STATE_PROCESSING %}<i class="fa-solid fa-spinner fa-spin" title="Records are being imported into Explore."></i>{% endif %}
             </td>
             <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.created_on }}</a></td>
             <td><a href="{% url 'curation:view_imported_dataset' dataset.id %}">{{ dataset.name }}</a></td>
@@ -24,8 +26,8 @@
             <td>
                 <small>
                     {% if dataset.dataset_status == "COMPLETE" %}Datasets have been imported into Explore and intermediate records have been cleaned up.{% endif %}
-                    {% if dataset.dataset_status == "RECORDS_IMPORTED" %}Datasets have been imported into Explore, but intermediate records have not yet been cleaned up.{% endif %}
-                    {% if dataset.dataset_status == "IMPORTING" %}Datasets are currently being imported into Explore.{% endif %}
+                    {% if dataset.dataset_status == "IMPORTED" %}Datasets have been imported into Explore, but intermediate records have not yet been cleaned up.{% endif %}
+                    {% if dataset.dataset_status == "RECORDS_IMPORTED" %}Records have been uploaded. They can be imported into Explore after validation.{% endif %}
                     {% if dataset.dataset_status == "PENDING" %}Please upload records for import.{% endif %}
                 </small>
             </td>

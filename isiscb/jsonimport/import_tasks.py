@@ -34,6 +34,10 @@ def import_cb_records(task_id, dataset_id, results_path):
     task = AsyncTask.objects.get(pk=task_id)
     dataset = ImportedDataset.objects.get(pk=dataset_id)
 
+    if task.state not in [AsyncTask.STATE_PENDING, AsyncTask.STATE_PROCESSING]:
+        logger.error(f"Task {task_id} is not in a valid state for processing. Current state: {task.state}")
+        return
+    
     task.state = AsyncTask.STATE_PROCESSING
     task.value = "Creating records from imported data..."
     task.save()

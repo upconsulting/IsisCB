@@ -386,14 +386,14 @@
         {% if dataset.import_task and dataset.import_task.state == 'PENDING' %}
             <p><i class="fas fa-clock" aria-hidden="true"></i> Records are queued for import into Explore. This may take a few minutes. If this page does not refresh automatically, please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'PROCESSING' %}
-            <p><i class="fas fa-spinner" aria-hidden="true"></i> Records are being imported into Explore. This may take a few minutes. If this page does not refresh automatically, please refresh the page after a little while to see the results.</p>
+            <p><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Records are being imported into Explore. This may take a few minutes. If this page does not refresh automatically, please refresh the page after a little while to see the results.</p>
         {% elif dataset.import_task and dataset.import_task.state == 'COMPLETED' %}
             <p><i class="fas fa-check-circle" aria-hidden="true"></i> Records have been imported for this import set.</p>
             <div class="import-create-links">
                 <a href="{% url 'curation:authority_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-users"></i> See imported authorities</a>
                 <a href="{% url 'curation:citation_list' %}?json_import_dataset={{ dataset.id }}"><i class="fas fa-book"></i> See imported citations</a>
-                {% if processing_results_download_path %}<a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download processing results</a>{% endif %}
-                {% if results_download_path %}<a href="{% url 'curation:get_creation_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download import results.</a>{% endif %}
+                {% if processing_results_download_path %}<a href="{% url 'curation:get_upload_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download Step 1 Log (Upload Results)</a>{% endif %}
+                {% if results_download_path %}<a href="{% url 'curation:get_creation_results_file' dataset.id %}" target="_blank" rel="noopener noreferrer"><i class="fas fa-download"></i> Download Step 2 Log (Import into Explore Results)</a>{% endif %}
             </div>
 
         {% else %}
