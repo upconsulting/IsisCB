@@ -1,0 +1,166 @@
+{
+  "format": "isiscb_import",
+  "version": "1.0",
+  "dataset": {
+    "dataset_id": "EXAMPLE-001",
+    "dataset_name": "Example Import Set",
+    "dataset_creator": "Example Creator",
+    "dataset_date": "2026-11-22",
+    "dataset_description": "Demonstrates all citation record fields supported by the JSON import task."
+  },
+  "records": [
+    {
+      "action": "add new record",
+      "local_citation_id": "EXAMPLE-CIT-001",
+      "citation_type": "book",
+      "title": "An Example Book",
+      "subtype_name": "REPLACE WITH AN OPTIONAL SUBTYPE NAME",
+      "full_citation": "Example, Alex. An Example Book. Example Press, 2026.",
+      "description": "Example citation description.",
+      "abstract": "An example abstract.",
+      "edition_details": "Second edition.",
+      "physical_details": "Illustrated; 250 pages.",
+      "belongs_to": "",
+      "volume": "2",
+      "volume_begin": 2,
+      "volume_end": 2,
+      "issue": "3",
+      "issue_begin": 3,
+      "issue_end": 3,
+      "pages": "10-25",
+      "page_begin": 10,
+      "page_end": 25,
+      "extent": 250,
+      "extent_note": "pages",
+      "publication_date": "2026",
+      "attributes": [
+        {
+          "type": "REPLACE WITH A CONFIGURED ATTRIBUTE TYPE",
+          "value": "Example citation attribute value"
+        }
+      ],
+      "linked_data": [
+        {
+          "type": "doi",
+          "value": "10.1234/example.2026",
+          "resource_name": "Example DOI",
+          "url": "https://doi.org/10.1234/example.2026",
+          "description": "Example citation identifier"
+        }
+      ],
+      "author": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-001",
+          "cba_id": null,
+          "relationship_type": "author",
+          "display_name": "A. Example",
+          "name": "Alex Example",
+          "order": 1
+        }
+      ],
+      "editor": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-001",
+          "cba_id": null,
+          "relationship_type": "editor",
+          "display_name": "Alex Example",
+          "name": "Alex Example",
+          "order": 2
+        }
+      ],
+      "advisor": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-001",
+          "cba_id": null,
+          "relationship_type": "advisor",
+          "display_name": "Alex Example",
+          "name": "Alex Example",
+          "order": 3
+        }
+      ],
+      "school": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-002",
+          "cba_id": null,
+          "relationship_type": "school",
+          "display_name": "Example Research Institute",
+          "name": "Example Research Institute",
+          "order": 1
+        }
+      ],
+      "publisher": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-002",
+          "cba_id": null,
+          "relationship_type": "publisher",
+          "display_name": "Example Research Institute",
+          "name": "Example Research Institute",
+          "order": 2
+        }
+      ],
+      "subject": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-002",
+          "cba_id": null,
+          "relationship_type": "subject",
+          "display_name": "Example subject",
+          "name": "Example subject",
+          "order": 1
+        }
+      ],
+      "category": [
+        {
+          "local_authority_id": "EXAMPLE-AUTH-002",
+          "cba_id": null,
+          "relationship_type": "category",
+          "display_name": "Example category",
+          "name": "Example category",
+          "order": 2
+        }
+      ],
+      "citation_reference": [
+        {
+          "cbb_id": null,
+          "local_citation_id": "EXAMPLE-CIT-002",
+          "relationship_type": "includes chapter",
+          "related_citation_role": "object"
+        }
+      ]
+    },
+    {
+      "action": "add new record",
+      "local_citation_id": "EXAMPLE-CIT-002",
+      "citation_type": "chapter",
+      "title": "An Example Chapter",
+      "subtype_name": "",
+      "full_citation": "Example, Alex. An Example Chapter. In An Example Book, 10-25.",
+      "description": "Example chapter description.",
+      "abstract": "An example chapter abstract.",
+      "edition_details": "",
+      "physical_details": "",
+      "belongs_to": "REPLACE WITH AN ACCESSIBLE DATASET NAME",
+      "volume": "",
+      "volume_begin": 0,
+      "volume_end": 0,
+      "issue": "",
+      "issue_begin": 0,
+      "issue_end": 0,
+      "pages": "10-25",
+      "page_begin": 10,
+      "page_end": 25,
+      "extent": 16,
+      "extent_note": "pages",
+      "publication_date": "2026-06-15",
+      "attributes": [],
+      "linked_data": [],
+      "author": [],
+      "editor": [],
+      "advisor": [],
+      "school": [],
+      "publisher": [],
+      "subject": [],
+      "category": [],
+      "citation_reference": []
+    }
+  ]
+}

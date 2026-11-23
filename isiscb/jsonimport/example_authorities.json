@@ -1,0 +1,60 @@
+{
+  "format": "isiscb_import",
+  "version": "1.0",
+  "dataset": {
+    "dataset_id": "EXAMPLE-001",
+    "dataset_name": "Example Import Set",
+    "dataset_creator": "Example Creator",
+    "dataset_date": "2026-11-22",
+    "dataset_description": "Demonstrates all authority record fields supported by the JSON import task."
+  },
+  "records": [
+    {
+      "action": "add new record",
+      "local_authority_id": "EXAMPLE-AUTH-001",
+      "authority_type": "person",
+      "name": "Example, Alex",
+      "description": "Example person authority record.",
+      "classification_system_name": "REPLACE WITH AN ACCESSIBLE CLASSIFICATION SYSTEM NAME",
+      "classification_code": "EX-PER-001",
+      "record_status": "active",
+      "last_name": "Example",
+      "first_name": "Alex",
+      "name_suffix": "Jr.",
+      "name_preferred": "Alex Example",
+      "belongs_to": "",
+      "attributes": [
+        {
+          "type": "REPLACE WITH A CONFIGURED ATTRIBUTE TYPE",
+          "value": "Example attribute value"
+        }
+      ],
+      "linked_data": [
+        {
+          "type": "viaf",
+          "value": "https://viaf.org/viaf/12345678",
+          "resource_name": "VIAF record",
+          "url": "https://viaf.org/viaf/12345678",
+          "description": "Example authority identifier"
+        }
+      ]
+    },
+    {
+      "action": "add new record",
+      "local_authority_id": "EXAMPLE-AUTH-002",
+      "authority_type": "institution",
+      "name": "Example Research Institute",
+      "description": "Example institution authority record.",
+      "classification_system_name": "REPLACE WITH AN ACCESSIBLE CLASSIFICATION SYSTEM NAME",
+      "classification_code": "EX-INS-001",
+      "record_status": "inactive",
+      "last_name": "",
+      "first_name": "",
+      "name_suffix": "",
+      "name_preferred": "",
+      "belongs_to": "REPLACE WITH AN ACCESSIBLE DATASET NAME",
+      "attributes": [],
+      "linked_data": []
+    }
+  ]
+}

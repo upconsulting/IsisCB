@@ -40,9 +40,9 @@
 <p style="margin-top: 35px;">
   <div class="btn-group">
     {% if role.tenant_rules or user.is_superuser %}
-    <a href="{% url 'curation:create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-files-o" aria-hidden="true"></i> Limit records by dataset</a>
+    <a href="{% url 'curation:create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary"><i class="fa-solid fa-file-lines"></i></i> Limit records by dataset</a>
     {% else %}
-    <a disabled class="btn btn-sm btn-default"><i class="fa fa-files-o" aria-hidden="true"></i> Limit records by dataset</a>
+    <a disabled class="btn btn-sm btn-default"><i class="fa-solid fa-file-lines"></i> Limit records by dataset</a>
     {% endif %}
   </div>
   <div class="btn-group">
